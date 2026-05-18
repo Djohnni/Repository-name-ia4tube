@@ -20,34 +20,34 @@
   <meta name="robots" content="index, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="Crie artes esportivas automáticas para seu time em menos de 2 minutos. Resultado do jogo, escalação, contratação, escudo 3D e posts prontos para Instagram.">
+  <meta name="description" content="Crie artes profissionais automáticas para qualquer negócio. A IA entende seu ramo e cria uma arte pronta para postar.">
   <meta name="theme-color" content="#111827">
   <meta property="og:site_name" content="IA4Tube">
-  <meta property="og:title" content="IA4Tube — Artes esportivas automáticas para times de futebol">
-  <meta property="og:description" content="Crie artes profissionais para seu time em poucos minutos. Resultado do jogo, escalação, contratação, próximo jogo, jogador, patrocinador e escudo 3D prontos para Instagram.">
+  <meta property="og:title" content="IA4Tube — Artes profissionais com IA para empresas">
+  <meta property="og:description" content="Crie uma arte profissional para seu negócio. Envie logo, fotos e referências; a IA entende seu ramo e monta uma arte pronta para postar.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://omascote.com.br/">
+  <meta property="og:url" content="https://ia4tube.com/">
   <meta property="og:locale" content="pt_BR">
-  <meta property="og:image" content="https://omascote.com.br/og-image.jpg">
+  <meta property="og:image" content="https://ia4tube.com/og-image.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="IA4Tube — artes esportivas automáticas para times de futebol">
+  <meta property="og:image:alt" content="IA4Tube — artes profissionais automáticas para empresas">
 
-  <link rel="canonical" href="https://omascote.com.br/app.html">
+  <link rel="canonical" href="https://ia4tube.com/app.html">
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="IA4Tube — Artes esportivas automáticas para times de futebol">
-  <meta name="twitter:description" content="Crie artes profissionais para seu time em poucos minutos. Resultado, escalação, contratação, jogador e escudo 3D prontos para Instagram.">
-  <meta name="twitter:image" content="https://omascote.com.br/og-image.jpg">
+  <meta name="twitter:title" content="IA4Tube — Artes profissionais com IA para empresas">
+  <meta name="twitter:description" content="A IA entende seu ramo e cria uma arte pronta para postar com logo, fotos e informações do seu negócio.">
+  <meta name="twitter:image" content="https://ia4tube.com/og-image.jpg">
 
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
     "@type":"Organization",
     "name":"IA4Tube",
-    "url":"https://omascote.com.br/",
-    "logo":"https://omascote.com.br/favicon.ico",
-    "description":"Plataforma de artes automáticas para times de futebol. Resultado do jogo, escalação, contratação, próximo jogo, mascotes e escudo 3D.",
+    "url":"https://ia4tube.com/",
+    "logo":"https://ia4tube.com/favicon.ico",
+    "description":"Plataforma de artes automáticas para empresas e pequenos negócios. A IA entende o ramo do cliente e cria artes prontas para postar.",
     "sameAs":[
       "https://www.instagram.com/ia4tube"
     ]
@@ -58,7 +58,7 @@
 
       <!-- removido: bloco de story solto dentro do head -->
 
-  <title>IA4Tube — Artes automáticas para times de futebol</title>
+  <title>IA4Tube — Artes profissionais com IA para empresas</title>
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="/favicon.ico?v=2" type="image/x-icon">
   <link rel="icon" href="/favicon.ico?v=2" sizes="32x32">
@@ -2031,66 +2031,101 @@
   left:auto;
   transform:none;
   display:none;
-  grid-template-columns:repeat(2, minmax(90px, 1fr));
-  gap:10px;
-  width:min(260px, calc(100vw - 28px));
-  padding:12px;
-  border-radius:18px;
-  background:#ffffff;
-  border:1px solid #e5e7eb;
-  box-shadow:0 18px 40px rgba(15,23,42,.18);
+  grid-template-columns:1fr;
+  gap:14px;
+  width:min(340px, calc(100vw - 28px));
+  max-height:min(76vh, 640px);
+  overflow:auto;
+  padding:14px;
+  border-radius:24px;
+  background:#0f172a;
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 24px 60px rgba(15,23,42,.38);
   z-index:9999;
+  box-sizing:border-box;
+  overflow-x:hidden;
 }
 
 .saldoMenu.open{
   display:grid;
 }
 
-.saldoOpcao{
-  background:#f8fff9;
-  color:#159947;
-  border:1px solid #dcfce7;
-  border-radius:16px;
-  padding:16px 12px;
-  font-size:20px;
+.saldoPacote{
+  display:grid;
+  gap:9px;
+  padding:16px;
+  width:100%;
+  box-sizing:border-box;
+  border-radius:22px;
+  background:
+    radial-gradient(circle at top right, rgba(34,197,94,.24), transparent 42%),
+    linear-gradient(180deg, #111827, #0b1220);
+  border:1px solid rgba(187,247,208,.20);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 16px 36px rgba(0,0,0,.18);
+}
+
+.saldoCardKicker{
+  color:#86efac;
+  font-size:12px;
   font-weight:950;
-  box-shadow:none;
+  text-transform:uppercase;
+  letter-spacing:.02em;
+}
+
+.saldoCardValor{
+  color:#ffffff;
+  font-size:42px;
+  line-height:.95;
+  font-weight:950;
+  letter-spacing:0;
+}
+
+.saldoCardDesc{
+  margin-bottom:4px;
+  color:#cbd5e1;
+  font-size:12px;
+  line-height:1.25;
+  font-weight:800;
+}
+
+.saldoPagamentoBtn{
+  width:100%;
   display:flex;
-  flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:6px;
+  gap:8px;
+  min-height:44px;
+  padding:11px 14px;
+  border:0;
+  border-radius:14px;
+  background:linear-gradient(135deg,#16a34a,#15803d);
+  color:#ffffff;
+  font-size:15px;
+  font-weight:950;
+  box-shadow:0 12px 24px rgba(22,163,74,.26);
+  cursor:pointer;
   text-align:center;
-  min-height:118px;
+  box-sizing:border-box;
 }
 
-.saldoValor{
-  font-size:34px;
+.saldoPagamentoBtn:hover{
+  filter:brightness(1.04);
+}
+
+.saldoPagamentoBtn:disabled{
+  cursor:wait;
+  opacity:.82;
+}
+
+.saldoPagamentoIcon{
+  display:inline;
+  width:auto;
+  height:auto;
+  border-radius:0;
+  background:transparent;
+  color:#ffffff;
+  font-size:16px;
   line-height:1;
-  font-weight:950;
-  color:#16a34a;
-}
-
-.saldoTexto{
-  font-size:12px;
-  line-height:1.2;
-  font-weight:900;
-  color:#334155;
-}
-
-.saldoTextoBonus{
-  font-size:12px;
-  line-height:1.2;
-  font-weight:950;
-  color:#16a34a;
-}
-
-.saldoOpcaoPrimeira{
-  background:linear-gradient(180deg,#ffffff,#f8fafc);
-}
-
-.saldoOpcao:hover{
-  background:#ecfdf3;
 }
 
 /* ===== IA4TUBE UI SIMPLES - TESTE VISUAL ===== */
@@ -2217,6 +2252,24 @@ body{
   line-height:1 !important;
 }
 
+.logoutTopBar.logoutOnlyTop{
+  justify-content:flex-end;
+}
+
+.trustFooter{
+  margin:28px auto 0;
+  padding:16px 14px;
+  border-top:1px solid #e5e7eb;
+  justify-content:center;
+}
+
+.trustFooter .ia4TrustTop{
+  flex:0 1 auto;
+  justify-content:center;
+  flex-wrap:wrap;
+  overflow:visible;
+}
+
 .topbar{
   background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%) !important;
   padding:18px 32px !important;
@@ -2244,6 +2297,22 @@ body{
   border:none !important;
   box-shadow:none !important;
 }
+
+.topbar .ia4Brand{
+  width:auto !important;
+  flex:0 0 auto !important;
+  justify-content:flex-start !important;
+}
+
+.logoTopoText{
+  min-width:118px;
+  padding:0 !important;
+}
+
+.logoTopoText .c1{color:#1e88ff}
+.logoTopoText .c2{color:#e53935}
+.logoTopoText .c3{color:#f4b400}
+.logoTopoText .c4{color:#34a853}
 
 .ia4Brand strong{
   display:block;
@@ -2274,7 +2343,7 @@ body{
 }
 
 .ia4TopProducaoBox{
-  display:none;
+  display:none !important;
   align-items:center;
   gap:8px;
   position:fixed;
@@ -2292,7 +2361,7 @@ body{
 }
 
 .ia4TopProducaoBox.show{
-  display:flex;
+   display:none !important;
 }
 
 .ia4TopProducaoBar{
@@ -2409,6 +2478,17 @@ body{
   margin-bottom:14px;
 }
 
+.pedidoHighlight{
+  border-color:#facc15 !important;
+  box-shadow:0 0 0 4px rgba(250,204,21,.25), 0 18px 42px rgba(15,23,42,.20) !important;
+  animation:pedidoHighlightPulse 1.1s ease-in-out 2;
+}
+
+@keyframes pedidoHighlightPulse{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-2px);}
+}
+
 .menuPedidoThumb{
   width:100%;
   height:auto;
@@ -2489,6 +2569,62 @@ body{
   color:#14532d;
   text-align:center;
   box-shadow:0 10px 24px rgba(22,163,74,.10);
+}
+
+.pagamentoPendenteBox{
+  margin-top:12px;
+  padding:14px;
+  border-radius:18px;
+  background:linear-gradient(135deg,#111827,#1f2937);
+  border:1px solid rgba(250,204,21,.45);
+  color:#ffffff;
+  text-align:center;
+  box-shadow:0 18px 38px rgba(15,23,42,.28);
+}
+
+.pagamentoPendenteTitulo{
+  font-size:16px;
+  font-weight:950;
+  line-height:1.25;
+  margin-bottom:6px;
+}
+
+.pagamentoPendenteTexto{
+  font-size:13px;
+  font-weight:850;
+  line-height:1.35;
+  color:#fde68a;
+  margin-bottom:12px;
+}
+
+.pagamentoPendenteBox .menuPedidoBtn{
+  margin-top:8px;
+  background:linear-gradient(135deg,#facc15,#f97316);
+  color:#111827;
+  box-shadow:0 10px 24px rgba(249,115,22,.26);
+}
+
+.pixQrBody{
+  padding:16px;
+  text-align:center;
+  color:#ffffff;
+}
+
+.pixQrImagem{
+  width:min(280px, 78vw);
+  border-radius:18px;
+  background:#ffffff;
+  padding:10px;
+  margin:0 auto 14px;
+  display:block;
+}
+
+.pixQrTexto{
+  font-size:13px;
+  font-weight:850;
+  line-height:1.35;
+  color:#e5e7eb;
+  margin-bottom:12px;
 }
 
 .ajustePedidoBox{
@@ -2647,7 +2783,7 @@ body{
   display:block;
   width:max-content;
   max-width:calc(100% - 28px);
-  margin:4px auto 34px;
+  margin:4px auto 10px;
   padding:10px 16px;
   border-radius:999px;
   background:#ecfdf3;
@@ -2657,6 +2793,23 @@ body{
   font-size:16px;
   font-weight:900;
   box-shadow:0 8px 18px rgba(22,163,74,.10);
+}
+
+.preTempoHeadline{
+  display:none;
+  margin:2px auto 8px;
+  padding:0 14px;
+  color:#0f172a;
+  text-align:center;
+  font-size:clamp(18px, 4.8vw, 24px);
+  line-height:1.15;
+  font-weight:950;
+  letter-spacing:0;
+  max-width:760px;
+}
+
+body.visitanteNaoLogado .preTempoHeadline{
+  display:block;
 }
 
 .seoHomeText{
@@ -2785,6 +2938,11 @@ body{
 #dynamicTitle,
 #dynamicHint,
 .switchModeRow{
+  display:none !important;
+}
+
+body.mode-result #dynamicHint,
+body.mode-flyer #dynamicHint{
   display:none !important;
 }
 
@@ -3175,7 +3333,7 @@ body.mode-result .formGrid{
     font-size:18px !important;
   }
 }
-/* ===== CORREÇÃO RESULTADO DO JOGO ===== */
+/* ===== CORRECAO RESULTADO DO JOGO ===== */
 
 body.mode-result .formGrid{
   display:grid !important;
@@ -3571,7 +3729,7 @@ textarea.campoObrigatorioErro,
 
 /* ===== FIM VISUAL LIMPO CAMPOS IA4TUBE ===== */
 
-/* ===== FIM CORREÇÃO RESULTADO DO JOGO ===== */
+/* ===== FIM CORRECAO RESULTADO DO JOGO ===== */
 
 /* ===== CATEGORIA TIME / JOGADOR ===== */
 
@@ -3785,11 +3943,11 @@ textarea.campoObrigatorioErro,
 }
 
 .productGroupBrinde::before{
-  content:"🎁 Ganhe o mascote do seu time grátis na primeira compra";
+  content:"🎁 Veja antes de pagar";
 }
 
 .clienteComBrindeMascote .productGroupBrinde::before{
-  content:"🎁 Brinde primeira compra";
+  content:"🎁 Sem pagar antes de ver";
 }
 
 .productGroupJogador::before{
@@ -3868,7 +4026,7 @@ textarea.campoObrigatorioErro,
 .ia4WhatsappBtn{
   position:fixed;
   right:18px;
-  bottom:92px;
+  bottom:18px;
   z-index:9997;
   display:flex;
   align-items:center;
@@ -4106,6 +4264,34 @@ textarea.campoObrigatorioErro,
 }
 
 @media (max-width:680px){
+  .saldoMenu{
+    left:50%;
+    right:auto;
+    transform:translateX(-50%);
+    width:calc(100vw - 24px);
+    max-width:420px;
+    margin:0 auto;
+    grid-template-columns:1fr;
+    overflow-x:hidden;
+    box-sizing:border-box;
+    padding:12px;
+  }
+
+  .saldoPacote{
+    width:100%;
+    box-sizing:border-box;
+  }
+
+  .saldoPagamentoBtn{
+    width:100%;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    gap:8px;
+    padding-left:12px;
+    padding-right:12px;
+  }
+
   .ia4SupportBtn{
     right:12px;
     bottom:12px;
@@ -4114,7 +4300,7 @@ textarea.campoObrigatorioErro,
 
   .ia4WhatsappBtn{
     right:12px;
-    bottom:82px;
+    bottom:14px;
     padding:8px 12px 8px 8px;
   }
 
@@ -4299,8 +4485,12 @@ body.visitanteNaoLogado .saldoTopoArea,
 body.visitanteNaoLogado #btnAbrirSaldo,
 body.visitanteNaoLogado #saldoMenu,
 body.visitanteNaoLogado #btnMeusPedidos,
-body.visitanteNaoLogado #menuPedidosTopo,
-body.visitanteNaoLogado .storiesBar{
+body.visitanteNaoLogado #menuPedidosTopo{
+  display:none !important;
+}
+
+#ia4SupportBtn,
+#ia4ChatBox{
   display:none !important;
 }
 
@@ -4313,78 +4503,28 @@ body.visitanteNaoLogado .saldoTopoExtra{
   justify-content:flex-end !important;
 }
 
-body.visitanteNaoLogado .hero .tempoEstimadoBox{
-  display:none !important;
-}
-
-body.visitanteNaoLogado .storiesBar{
-  display:none !important;
-}
-
-body.visitanteNaoLogado .homeExamples,
-body.visitanteNaoLogado .categoryChoiceRow,
-body.visitanteNaoLogado .categoryMiniRow{
-  display:none !important;
-}
-
-body.visitanteNaoLogado .productGroupTime{
-  display:none !important;
-}
-
-body.visitanteNaoLogado .productGroupJogador{
-  display:grid !important;
-  grid-template-columns:1fr !important;
-  max-width:420px !important;
-  margin:0 auto !important;
-}
-
-body.visitanteNaoLogado .productGroupBrinde{
-  display:none !important;
-}
-
-body.visitanteNaoLogado .productGroupJogador .optionBtn:not([data-product="jogador_escudo"]){
-  display:none !important;
-}
-
-body.visitanteNaoLogado .productGroupJogador::before{
-  content:"Poste como jogador profissional";
-  text-align:center !important;
-}
-
 body.visitanteNaoLogado .panel{
   min-height:100vh;
 }
 
-body.visitanteNaoLogado .selectorStage{
-  margin-top:10px !important;
+.visitanteWelcomeCallout{
+  display:none;
 }
 
-body.visitanteNaoLogado .productGroupTime{
-  display:none !important;
+body.visitanteNaoLogado .visitanteWelcomeCallout{
+  display:none;
 }
 
-body.visitanteNaoLogado .productGroupJogador{
-  display:grid !important;
-  grid-template-columns:1fr !important;
-  max-width:270px !important;
-  margin:0 auto !important;
+.visitanteWelcomeLine{
+  font-size:15px;
+  line-height:1.28;
+  font-weight:950;
+  letter-spacing:0;
 }
 
-body.visitanteNaoLogado .productGroupBrinde{
-  display:none !important;
-}
-
-body.visitanteNaoLogado .productGroupJogador .optionBtn:not([data-product="jogador_escudo"]){
-  display:none !important;
-}
-
-body.visitanteNaoLogado .productGroupJogador::before{
-  content:"Poste como jogador profissional";
-  text-align:center !important;
-}
-
-body.visitanteNaoLogado .optLabel span{
-  display:none !important;
+.visitanteWelcomeLine + .visitanteWelcomeLine{
+  margin-top:5px;
+  color:#fde68a;
 }
 
 #tempoEstimadoOnboardingBox{
@@ -4746,17 +4886,19 @@ body.visitanteNaoLogado .optLabel span{
 /* ===== MODELO NOVO: FORMULARIOS REAIS POR PRODUTO ===== */
 .productFormsRoot{
   display:grid;
-  gap:24px;
+  grid-template-columns:1fr;
+  gap:28px;
   width:100%;
-  margin-top:18px;
+  max-width:860px;
+  margin:6px auto 0;
 }
 
 .cleanProductBlock{
   display:grid;
-  grid-template-columns:minmax(230px, 34%) minmax(0, 1fr);
-  gap:22px;
+  grid-template-columns:1fr;
+  gap:18px;
   align-items:start;
-  padding:12px;
+  padding:14px;
   border-radius:26px;
   background:#ffffff;
   border:1px solid #e5e7eb;
@@ -4770,17 +4912,115 @@ body.visitanteNaoLogado .optLabel span{
 
 .cleanProductImage{
   width:100%;
-  aspect-ratio:4 / 5;
+  aspect-ratio:auto !important;
   border-radius:20px;
   overflow:hidden;
   background:#f3f4f6;
+  position:relative;
 }
 
 .cleanProductImage img{
   display:block;
   width:100%;
+  height:auto !important;
+  max-height:none;
+  object-fit:contain;
+  object-position:top center;
+}
+
+.cleanProductImage.is-processing img{
+  filter:brightness(.48) blur(1px);
+}
+
+.cleanProgressOverlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+  background:rgba(15,23,42,.46);
+  color:#ffffff;
+  text-align:center;
+  z-index:2;
+  pointer-events:none;
+}
+
+.cleanProgressContent{
+  width:min(78%, 360px);
+}
+
+.cleanProgressPercent{
+  font-size:clamp(48px, 11vw, 86px);
+  line-height:.95;
+  font-weight:950;
+  letter-spacing:0;
+  text-shadow:0 8px 26px rgba(0,0,0,.42);
+}
+
+.cleanProgressText{
+  margin-top:10px;
+  font-size:14px;
+  font-weight:900;
+}
+
+.cleanProgressCadastro{
+  margin-top:14px;
+  padding:12px;
+  border-radius:16px;
+  background:rgba(255,255,255,.94);
+  color:#111827;
+  box-shadow:0 16px 36px rgba(15,23,42,.28);
+  pointer-events:auto;
+}
+
+.cleanProgressCadastroText{
+  font-size:12px;
+  font-weight:900;
+  line-height:1.3;
+  margin-bottom:8px;
+}
+
+.cleanProgressCadastro input{
+  width:100%;
+  margin-top:6px;
+  padding:9px 10px;
+  border-radius:10px;
+  border:1px solid #d1d5db;
+  background:#ffffff;
+  color:#111827;
+  font-size:13px;
+  font-weight:800;
+}
+
+.cleanProgressCadastro button{
+  width:100%;
+  margin-top:8px;
+  padding:10px 12px;
+  border:0;
+  border-radius:12px;
+  background:#16a34a;
+  color:#ffffff;
+  font-size:13px;
+  font-weight:950;
+  cursor:pointer;
+}
+
+.cleanProgressBar{
+  width:100%;
+  height:9px;
+  margin-top:15px;
+  border-radius:999px;
+  background:rgba(255,255,255,.28);
+  overflow:hidden;
+}
+
+.cleanProgressFill{
+  width:1%;
   height:100%;
-  object-fit:cover;
+  border-radius:999px;
+  background:#22c55e;
+  transition:width .35s ease;
 }
 
 .cleanProductForm{
@@ -4792,8 +5032,26 @@ body.visitanteNaoLogado .optLabel span{
 .cleanProductTitle{
   margin:0;
   color:#111827;
-  font-size:24px;
+  font-size:28px;
   line-height:1.1;
+  font-weight:950;
+}
+
+.cleanProductHeader{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.cleanProductPrice{
+  flex:0 0 auto;
+  padding:8px 12px;
+  border-radius:999px;
+  background:#ecfdf3;
+  border:1px solid #bbf7d0;
+  color:#15803d;
+  font-size:15px;
   font-weight:950;
 }
 
@@ -4804,6 +5062,68 @@ body.visitanteNaoLogado .optLabel span{
   border-radius:20px;
   background:#f8fafc;
   border:1px solid #e5e7eb;
+}
+
+.cleanOptionalDetails{
+  display:grid;
+  gap:14px;
+}
+
+.cleanOptionalDetails summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  list-style:none;
+  cursor:pointer;
+  padding:14px;
+  border-radius:20px;
+  background:#ffffff;
+  border:1px solid #d1d5db;
+  color:#111827;
+  font-size:14px;
+  font-weight:950;
+  text-align:left;
+  box-shadow:0 10px 24px rgba(15,23,42,.08);
+}
+
+.cleanOptionalDetails summary::before{
+  content:"";
+  flex:0 0 16px;
+  width:16px;
+  height:16px;
+  border-radius:6px;
+  background:linear-gradient(135deg,#16a34a,#8bd450);
+  box-shadow:inset 0 0 0 4px rgba(255,255,255,.70);
+}
+
+.cleanOptionalDetails summary::-webkit-details-marker{
+  display:none;
+}
+
+.cleanOptionalDetails summary::after{
+  content:"+";
+  display:grid;
+  place-items:center;
+  flex:0 0 32px;
+  width:32px;
+  height:32px;
+  border-radius:12px;
+  background:#16a34a;
+  color:#ffffff;
+  font-size:22px;
+  line-height:1;
+  font-weight:950;
+  box-shadow:0 8px 18px rgba(22,163,74,.22);
+}
+
+.cleanOptionalDetails[open] summary::after{
+  content:"−";
+}
+
+.cleanOptionalFields{
+  display:grid;
+  gap:14px;
 }
 
 .cleanFieldLabel{
@@ -4929,15 +5249,46 @@ body.visitanteNaoLogado .optLabel span{
   display:none !important;
 }
 
-@media (max-width:900px){
-  .cleanProductBlock{
-    grid-template-columns:1fr;
-  }
+body:not(.modeChosen) .builderArea,
+.builderArea{
+  display:block !important;
+}
 
-  .cleanProductImage{
-    aspect-ratio:16 / 10;
-    max-height:280px;
-  }
+.productFormsRoot{
+  display:grid !important;
+}
+
+.cleanProductBlock{
+  display:grid !important;
+}
+
+.categoryChoiceRow,
+.homeExamples,
+.categoryMiniRow,
+.optionsRow.productGroup,
+.examplesLink,
+.switchModeRow{
+  display:none !important;
+}
+
+body.ia4-empresas .lines,
+body.ia4-empresas .productGroupTime,
+body.ia4-empresas .productGroupJogador,
+body.ia4-empresas .productGroupBrinde,
+body.ia4-empresas .legacyOrderFormArea,
+body.ia4-empresas .crestWrap,
+body.ia4-empresas .cleanEscudo3dBlock,
+body.ia4-empresas #onboardingEscudo3d{
+  display:none !important;
+}
+
+body.ia4-empresas .selectorStage{
+  min-height:140px;
+  margin-bottom:10px;
+}
+
+body.ia4-empresas .centerBtn{
+  cursor:pointer;
 }
 
 @media (max-width:680px){
@@ -4949,6 +5300,10 @@ body.visitanteNaoLogado .optLabel span{
 
   .cleanProductTitle{
     font-size:20px;
+  }
+
+  .cleanProductHeader{
+    flex-direction:column;
   }
 
   .cleanScoreGrid{
@@ -4968,45 +5323,21 @@ body.visitanteNaoLogado .optLabel span{
 </style>
 </head>
 
-<body data-page="home">
+<body data-page="home" class="ia4-empresas">
   <main>
   <div class="wrap">
-    <div class="logoutTopBar">
-      <div class="ia4TrustTop">
-        <div class="ia4TrustItem">
-          <span class="ia4TrustIcon">🛡️</span>
-          <div>
-            <strong>Site seguro</strong>
-            <small>SSL criptografado</small>
-          </div>
-        </div>
-
-        <div class="ia4TrustDivider"></div>
-
-        <div class="ia4TrustItem">
-          <img src="google-g.png" class="ia4GoogleIcon" alt="Google">
-          <div>
-            <strong>Empresa verificada</strong>
-            <small>No Google</small>
-          </div>
-        </div>
-
-        <div class="ia4TrustDivider"></div>
-
-        <div class="ia4TrustItem">
-          <span class="ia4TrustIcon">✔️</span>
-          <div>
-            <strong>Pagamentos protegidos</strong>
-            <small>100% seguros</small>
-          </div>
-        </div>
-      </div>
-
+    <div class="logoutTopBar logoutOnlyTop">
       <button id="btnSair" type="button">Sair</button>
+      <button id="btnCadastroTopo" type="button">Cadastro</button>
     </div>
 
     <div class="topbar">
       <!-- removido: stories da barra superior -->
+
+      <div class="ia4Brand logoTopoText" aria-label="IA4Tube">
+        <strong><span class="c1">i</span><span class="c2">A</span><span class="c3">4</span><span class="c4">Tube</span></strong>
+        <small>ARTES COM IA</small>
+      </div>
 
       <div id="ia4TopProducaoBox" class="ia4TopProducaoBox">
         <span id="ia4TopProducaoTexto">Aguarde</span>
@@ -5027,25 +5358,37 @@ body.visitanteNaoLogado .optLabel span{
               <button class="btnGreen" id="btnAbrirSaldo">Adicionar saldo</button>
 
               <div class="saldoMenu" id="saldoMenu">
-                <button type="button" class="saldoOpcao saldoOpcaoPrimeira" data-pacote="saldo_800">
-                  <span class="saldoValor">R$8</span>
-                  <span class="saldoTexto">Ideal para começar<br>Pix ou cartão</span>
-                </button>
+                <div class="saldoPacote">
+                  <div class="saldoCardKicker">Ideal para começar</div>
+                  <div class="saldoCardValor">R$8</div>
+                  <div class="saldoCardDesc">Crédito rápido para testar o fluxo completo.</div>
+                  <button type="button" class="saldoPagamentoBtn" data-pacote="saldo_800" data-metodo="pix" data-label="Gerar Pix R$8,00"><span class="saldoPagamentoIcon">🟢</span><span>Gerar Pix R$8,00</span></button>
+                  <button type="button" class="saldoPagamentoBtn" data-pacote="saldo_800" data-metodo="cartao" data-label="Cartão R$8,00"><span class="saldoPagamentoIcon">💳</span><span>Cartão R$8,00</span></button>
+                </div>
 
-                <button type="button" class="saldoOpcao" data-pacote="saldo_1800">
-                  <span class="saldoValor">R$18</span>
-                  <span class="saldoTextoBonus">Mais escolhido<br>Pix ou cartão</span>
-                </button>
+                <div class="saldoPacote">
+                  <div class="saldoCardKicker">Mais escolhido</div>
+                  <div class="saldoCardValor">R$18</div>
+                  <div class="saldoCardDesc">Boa opção para criar mais de uma arte.</div>
+                  <button type="button" class="saldoPagamentoBtn" data-pacote="saldo_1800" data-metodo="pix" data-label="Gerar Pix R$18,00"><span class="saldoPagamentoIcon">🟢</span><span>Gerar Pix R$18,00</span></button>
+                  <button type="button" class="saldoPagamentoBtn" data-pacote="saldo_1800" data-metodo="cartao" data-label="Cartão R$18,00"><span class="saldoPagamentoIcon">💳</span><span>Cartão R$18,00</span></button>
+                </div>
 
-                <button type="button" class="saldoOpcao" data-pacote="saldo_2800">
-                  <span class="saldoValor">R$28</span>
-                  <span class="saldoTextoBonus">Para times ativos<br>Pix ou cartão</span>
-                </button>
+                <div class="saldoPacote">
+                  <div class="saldoCardKicker">Para negócios ativos</div>
+                  <div class="saldoCardValor">R$28</div>
+                  <div class="saldoCardDesc">Mais saldo para manter o Instagram em movimento.</div>
+                  <button type="button" class="saldoPagamentoBtn" data-pacote="saldo_2800" data-metodo="pix" data-label="Gerar Pix R$28,00"><span class="saldoPagamentoIcon">🟢</span><span>Gerar Pix R$28,00</span></button>
+                  <button type="button" class="saldoPagamentoBtn" data-pacote="saldo_2800" data-metodo="cartao" data-label="Cartão R$28,00"><span class="saldoPagamentoIcon">💳</span><span>Cartão R$28,00</span></button>
+                </div>
 
-                <button type="button" class="saldoOpcao" data-pacote="saldo_4800">
-                  <span class="saldoValor">R$48</span>
-                  <span class="saldoTextoBonus">Melhor custo-benefício<br>Pix ou cartão</span>
-                </button>
+                <div class="saldoPacote">
+                  <div class="saldoCardKicker">Melhor custo-benefício</div>
+                  <div class="saldoCardValor">R$48</div>
+                  <div class="saldoCardDesc">Pacote premium para criar com frequência.</div>
+                  <button type="button" class="saldoPagamentoBtn" data-pacote="saldo_4800" data-metodo="pix" data-label="Gerar Pix R$48,00"><span class="saldoPagamentoIcon">🟢</span><span>Gerar Pix R$48,00</span></button>
+                  <button type="button" class="saldoPagamentoBtn" data-pacote="saldo_4800" data-metodo="cartao" data-label="Cartão R$48,00"><span class="saldoPagamentoIcon">💳</span><span>Cartão R$48,00</span></button>
+                </div>
               </div>
             </div>
 
@@ -5063,8 +5406,8 @@ body.visitanteNaoLogado .optLabel span{
       <div class="panel">
       <div class="welcomeBox">
         <div class="welcomeLabel">Bem-vindo</div>
-        <h1 id="welcome">Seu time</h1>
-        <div class="sub">Crie sua arte em poucos passos.</div>
+        <h1 id="welcome">Seu negócio</h1>
+        <div class="sub">Crie uma arte profissional em poucos passos.</div>
       </div>
 
       <div class="hero">
@@ -5072,18 +5415,20 @@ body.visitanteNaoLogado .optLabel span{
           <span class="c1">i</span><span class="c2">A</span><span class="c3">4</span><span class="c4">Tube</span>
         </div>
 
-        <h2 class="heroTitle">Crie Posts Profissionais</h2>
+        <h2 class="heroTitle">Crie uma arte profissional para seu negócio</h2>
 
         <div class="heroSub">
-          Sem Designer. Pronto Para Postar.
+          A IA entende seu ramo e cria uma arte pronta para postar
         </div>
 
         <section class="seoHomeText">
-          <h1>IA4Tube</h1>
+          <h1>IA4Tube Empresas</h1>
           <p>
-            Artes automáticas para times de futebol. Resultado do jogo, escalação, contratação, próximo jogo, patrocinador, jogador e escudo 3D.
+            Artes automáticas para empresas, lojas, serviços e pequenos negócios. Informe seu ramo, envie sua logo, fotos e referências, e receba uma arte pronta para postar.
           </p>
         </section>
+
+        <div class="preTempoHeadline">Primeiro você envia as informações do negócio. Depois a IA monta a arte para postagem.</div>
 
         <div id="tempoEstimadoBox" class="tempoEstimadoBox">
           ⏱ Calculando tempo estimado...
@@ -5096,7 +5441,7 @@ body.visitanteNaoLogado .optLabel span{
         <div class="selectorStage">
           <div class="centerWrap">
             <button type="button" class="centerBtn" id="mainCreateBtn">
-              <div class="iconCenter">🔥</div>
+              <div class="iconCenter">IA</div>
               <span>Criar<br>minha arte</span>
             </button>
           </div>
@@ -5131,33 +5476,33 @@ body.visitanteNaoLogado .optLabel span{
           <div class="optionsRow productGroup productGroupTime">
             <button type="button" class="optionBtn" data-product="resultado">
               <img src="produtos/resultado.jpg" class="imgProduto" loading="lazy" decoding="async" alt="Resultado do jogo">
-              <div class="optLabel">Resultado<br>do Jogo<br><span style="color:#1fbf63;font-weight:900;">R$8,00</span></div>
+              <div class="optLabel">Poste o resultado<br>do jogo<br><span style="color:#1fbf63;font-weight:900;">R$8,00</span></div>
             </button>
 
             <button type="button" class="optionBtn" data-product="escalacao">
               <img src="produtos/escalacao.jpg" class="imgProduto" loading="lazy" decoding="async" alt="Escalação">
-              <div class="optLabel">Escalação<br><span style="color:#1fbf63;font-weight:900;">R$8,00</span></div>
+              <div class="optLabel">Poste sua<br>escalação<br><span style="color:#1fbf63;font-weight:900;">R$8,00</span></div>
             </button>
 
             <button type="button" class="optionBtn" data-product="contratacao">
               <img src="produtos/contratacao.jpg" class="imgProduto" loading="lazy" decoding="async" alt="Contratação">
-              <div class="optLabel">Contratação<br><span style="color:#1fbf63;font-weight:900;">R$7,00</span></div>
+              <div class="optLabel">Anuncie sua<br>contratação<br><span style="color:#1fbf63;font-weight:900;">R$7,00</span></div>
             </button>
 
             <button type="button" class="optionBtn" data-product="proximo_jogo">
               <img src="produtos/proximo_jogo.jpg" class="imgProduto" loading="lazy" decoding="async" alt="Próximo jogo">
-              <div class="optLabel">Próximo Jogo<br><span style="color:#1fbf63;font-weight:900;">R$7,00</span></div>
+              <div class="optLabel">Poste o<br>próximo jogo<br><span style="color:#1fbf63;font-weight:900;">R$7,00</span></div>
             </button>
 
             <button type="button" class="optionBtn" data-product="patrocinador">
               <img src="produtos/patrocinador.jpg" class="imgProduto" loading="lazy" decoding="async" alt="Patrocinador">
-              <div class="optLabel">Patrocinador<br>/ Apoio<br><span style="color:#1fbf63;font-weight:900;">R$8,00</span></div>
+              <div class="optLabel">Mostre quem apoia<br>seu time<br><span style="color:#1fbf63;font-weight:900;">R$8,00</span></div>
             </button>
 
             <button type="button" class="optionBtn" data-product="escudo3d">
               <img src="produtos/escudo3d.jpg" class="imgProduto" loading="lazy" decoding="async" alt="Escudo 3D">
               <div class="optLabel">
-                Primeira arte<br>Escudo 3D<br>
+                Faça seu escudo<br>em 3D<br>
                 <span style="font-size:11px;color:#777;text-decoration:line-through;">R$18</span>
                 <span style="color:#1fbf63;font-weight:900;"> R$4</span>
               </div>
@@ -5166,7 +5511,7 @@ body.visitanteNaoLogado .optLabel span{
 
           <div class="optionsRow productGroup productGroupBrinde">
             <button type="button" class="optionBtn" data-product="mascote_uniforme">
-              <div class="optLabel">Mascote<br>do seu Time<br><span style="color:#1fbf63;font-weight:900;">R$18,00</span></div>
+              <div class="optLabel">Faça o mascote<br>do seu time<br><span style="color:#1fbf63;font-weight:900;">R$18,00</span></div>
               <img src="produtos/mascote_uniforme.jpg" class="imgProduto" fetchpriority="high" loading="eager" alt="Mascote com uniforme">
             </button>
           </div>
@@ -5184,7 +5529,7 @@ body.visitanteNaoLogado .optLabel span{
             </button>
 
             <button type="button" class="optionBtn" data-product="jogador_escudo">
-              <div class="optLabel">Jogador<br>+ Escudo<br><span style="color:#1fbf63;font-weight:900;">R$6,00</span></div>
+              <div class="optLabel">Poste como jogador<br>profissional<br><span style="color:#1fbf63;font-weight:900;">R$6,00</span></div>
               <img src="produtos/jogador_escudo.jpg" class="imgProduto" fetchpriority="high" loading="eager" alt="Jogador mais escudo">
             </button>
           </div>
@@ -5209,9 +5554,9 @@ body.visitanteNaoLogado .optLabel span{
             <input id="crestManual" class="fileHidden" type="file" accept="image/*" />
             <label for="crestManual" id="crestAddBtn" style="position:absolute;right:10px;bottom:10px;width:46px;height:46px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:linear-gradient(135deg, rgba(255,255,255,.10), rgba(0,0,0,.18));box-shadow:var(--shadow2);color:#fff;font-weight:950;font-size:24px;line-height:1;display:grid;place-items:center;cursor:pointer;z-index:5;">+</label>
 
-            <img id="crestPreview" class="crestImg" alt="Escudo do time" style="display:none" />
+            <img id="crestPreview" class="crestImg" alt="Logo da empresa" style="display:none" />
             <div id="crestPlaceholder" class="crestPlaceholder">
-              Envie o escudo do seu time<br>para personalizar o visual do app
+              Envie a logo da sua empresa<br>para personalizar o visual do app
             </div>
           </div>
         </div>
@@ -5233,7 +5578,44 @@ body.visitanteNaoLogado .optLabel span{
           <input type="hidden" id="flyerTipo" value="zz1fs">
           <input type="hidden" id="selectedProduct" value="">
 
+          <div class="visitanteWelcomeCallout" aria-hidden="true">
+            <div class="visitanteWelcomeLine">👀 Primeiro você vê como ficou</div>
+            <div class="visitanteWelcomeLine">⚡ Depois desbloqueia pelo preço do produto</div>
+          </div>
+
           <div id="productFormsRoot" class="productFormsRoot"></div>
+
+          <div class="logoutTopBar trustFooter">
+            <div class="ia4TrustTop">
+              <div class="ia4TrustItem">
+                <span class="ia4TrustIcon">🛡️</span>
+                <div>
+                  <strong>Site seguro</strong>
+                  <small>SSL criptografado</small>
+                </div>
+              </div>
+
+              <div class="ia4TrustDivider"></div>
+
+              <div class="ia4TrustItem">
+                <img src="google-g.png" class="ia4GoogleIcon" alt="Google">
+                <div>
+                  <strong>Empresa verificada</strong>
+                  <small>No Google</small>
+                </div>
+              </div>
+
+              <div class="ia4TrustDivider"></div>
+
+              <div class="ia4TrustItem">
+                <span class="ia4TrustIcon">✅</span>
+                <div>
+                  <strong>Pagamentos protegidos</strong>
+                  <small>100% seguros</small>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div class="productBuildLayout legacyOrderFormArea">
             <div class="productPreviewPanel" aria-hidden="true">
@@ -5459,7 +5841,7 @@ body.visitanteNaoLogado .optLabel span{
     <div class="modalCard" role="dialog" aria-modal="true" aria-label="Enviar escudo 3D">
       <div class="modalTop">
         <div class="modalTitle">Escudo 3D</div>
-        <button class="modalClose btnGhost" id="escudo3dCloseBtn" type="button">✕</button>
+        <button class="modalClose btnGhost" id="escudo3dCloseBtn" type="button">×</button>
       </div>
 
       <div class="escudo3dBody">
@@ -5487,7 +5869,7 @@ body.visitanteNaoLogado .optLabel span{
     <div class="modalCard" role="dialog" aria-modal="true" aria-label="Recortar imagem">
       <div class="modalTop">
         <div class="modalTitle">Recortar</div>
-        <button class="modalClose btnGhost" id="cropCloseBtn" type="button">✕</button>
+        <button class="modalClose btnGhost" id="cropCloseBtn" type="button">×</button>
       </div>
 
       <div class="cropWrap">
@@ -5526,7 +5908,7 @@ body.visitanteNaoLogado .optLabel span{
   <div class="modalCard" role="dialog" aria-modal="true" aria-label="Adicionar app à tela inicial">
     <div class="modalTop">
       <div class="modalTitle">Adicionar à tela inicial</div>
-      <button class="modalClose btnGhost" id="instalarAppCloseBtn" type="button">✕</button>
+      <button class="modalClose btnGhost" id="instalarAppCloseBtn" type="button">×</button>
     </div>
 
     <div class="instalarAppModalBody">
@@ -5553,7 +5935,7 @@ body.visitanteNaoLogado .optLabel span{
   <div class="modalCard" role="dialog" aria-modal="true" aria-label="Criar conta">
     <div class="modalTop">
       <div class="modalTitle">Finalizar arte</div>
-      <button class="modalClose btnGhost" id="authVisitanteCloseBtn" type="button">✕</button>
+      <button class="modalClose btnGhost" id="authVisitanteCloseBtn" type="button">×</button>
     </div>
 
     <div class="authVisitanteBody">
@@ -5574,7 +5956,7 @@ body.visitanteNaoLogado .optLabel span{
       <input id="authNomeTime" placeholder="Ex: Los Hermanos" style="display:none;">
 
       <label for="authWhatsapp">Login(Nome ou WhatsApp)</label>
-      <input id="authWhatsapp" inputmode="text" autocomplete="username" placeholder="WhatsApp ou nome do time">
+      <input id="authWhatsapp" inputmode="text" autocomplete="username" placeholder="WhatsApp ou nome do negócio">
 
       <div id="authEscudo3dArea" style="display:none;margin-top:12px;">
         <label for="authEscudo3dFile">Escudo do time</label>
@@ -5604,7 +5986,7 @@ body.visitanteNaoLogado .optLabel span{
 </div>
 
 <button class="btnGreen" id="authCriarContaBtn" type="button" style="width:100%;margin-top:10px;display:none;">
-  Criar meu time e gerar Minha Arte Brinde 🚀
+  Criar minha conta e gerar minha arte
 </button>
 
       <div style="display:flex;align-items:center;gap:10px;margin:16px 0 8px;">
@@ -5633,7 +6015,7 @@ body.visitanteNaoLogado .optLabel span{
   <div class="modalCard" role="dialog" aria-modal="true" aria-label="Pedir ajuste">
     <div class="modalTop">
       <div class="modalTitle">O que ficou errado?</div>
-      <button class="modalClose btnGhost" id="ajustePedidoCloseBtn" type="button">✕</button>
+      <button class="modalClose btnGhost" id="ajustePedidoCloseBtn" type="button">×</button>
     </div>
 
     <div class="ajusteModalBody">
@@ -5653,6 +6035,16 @@ body.visitanteNaoLogado .optLabel span{
 
       <div class="ajusteModalMsg" id="ajustePedidoMsg"></div>
     </div>
+  </div>
+</div>
+
+<div class="modalMask" id="pixQrModal" aria-hidden="true">
+  <div class="modalCard" role="dialog" aria-modal="true" aria-label="QR Code Pix">
+    <div class="modalTop">
+      <div class="modalTitle">Pagamento Pix</div>
+      <button class="modalClose btnGhost" id="pixQrCloseBtn" type="button">×</button>
+    </div>
+    <div class="pixQrBody" id="pixQrBody"></div>
   </div>
 </div>
 
@@ -5695,7 +6087,7 @@ body.visitanteNaoLogado .optLabel span{
     <div class="ia4Msg ia4MsgBot">Olá! Sou o suporte da IA4Tube. Escolha uma opção:</div>
 
     <div class="ia4QuickOptions">
-      <button type="button" class="ia4QuickBtn" onclick="ia4MostrarProdutosSuporte()">📘 Dúvida sobre produto</button>
+      <button type="button" class="ia4QuickBtn" onclick="ia4MostrarProdutosSuporte()">📘 Dúvida sobre arte para empresa</button>
       <button type="button" class="ia4QuickBtn" onclick="ia4MostrarEnvioSuporte()">📤 Não consigo enviar pedido</button>
       <button type="button" class="ia4QuickBtn" onclick="ia4MostrarErroSuporte()">⚠️ Meu pedido deu erro / alteração</button>
       <button type="button" class="ia4QuickBtn" onclick="ia4MostrarPedidoSuporte()">📥 Pedido pronto / download</button>
@@ -6073,7 +6465,7 @@ const ESCALACAO_JOGADORES_KEY = "omascote_escalacao_jogadores";
 const PRODUCTS = {
   resultado: {
     mode: "resultado",
-    title: "Resultado do jogo",
+    title: "Poste o resultado do jogo",
     hint: "Envie a competição, a foto do jogo, os escudos dos dois times, o placar e a frase para montar a arte pós-jogo.",
     flyerTipo: "",
     labels: {
@@ -6097,7 +6489,7 @@ const PRODUCTS = {
 
   escalacao: {
     mode: "flyer",
-    title: "Escalação",
+    title: "Poste sua escalação",
     hint: "Preencha o confronto, data do jogo, jogadores e envie o escudo do time para criar uma escalação profissional.",
     flyerTipo: "zz1fs",
     labels: {
@@ -6126,7 +6518,7 @@ const PRODUCTS = {
 
   contratacao: {
     mode: "flyer",
-    title: "Contratação",
+    title: "Anuncie sua contratação",
     hint: "Preencha só o essencial para anunciar o novo jogador.",
     flyerTipo: "zz1fm",
     labels: {
@@ -6151,7 +6543,7 @@ const PRODUCTS = {
 
   proximo_jogo: {
     mode: "flyer",
-    title: "Próximo jogo",
+    title: "Poste o próximo jogo",
     hint: "Preencha o confronto, a competição e os escudos para criar a arte.",
     flyerTipo: "zz1ft",
     labels: {
@@ -6160,7 +6552,8 @@ const PRODUCTS = {
       hora: "Campeonato / competição",
       arena: "Local (opcional)",
       esc1: "Escudo<br>Time A",
-      esc2: "Escudo<br>Time B"
+      esc2: "Escudo<br>Time B",
+      mascote: "Foto do time ou jogador"
     },
     placeholders: {
       rodada: "Ex: Semifinal • Próximo jogo",
@@ -6173,12 +6566,12 @@ const PRODUCTS = {
       esc2: false
     },
     phraseMenu: false,
-    hiddenFields: ["mascote", "patro"]
+    hiddenFields: ["patro"]
   },
 
   patrocinador: {
     mode: "flyer",
-    title: "Patrocinador / Apoio",
+    title: "Mostre quem apoia seu time",
     hint: "Envie o escudo do time e os patrocinadores de uma vez.",
     flyerTipo: "zz1fj",
     labels: {
@@ -6201,7 +6594,7 @@ const PRODUCTS = {
 
   proximo_jogo_jogador: {
     mode: "flyer",
-    title: "Próximo jogo jogador",
+    title: "Poste o próximo jogo",
     hint: "Crie uma arte focada em um jogador para divulgar o próximo jogo.",
     flyerTipo: "jog_proximo",
     labels: {
@@ -6230,7 +6623,7 @@ const PRODUCTS = {
 
   resultado_jogo_jogador: {
     mode: "resultado",
-    title: "Resultado jogador",
+    title: "Poste o resultado do jogo",
     hint: "Crie uma arte de resultado com foco no jogador.",
     flyerTipo: "jog_resultado",
     labels: {
@@ -6255,7 +6648,7 @@ const PRODUCTS = {
 
   jogador_escudo: {
     mode: "flyer",
-    title: "Jogador + escudo",
+    title: "Poste como jogador profissional",
     hint: "Envie a foto do jogador e o escudo do time para criar uma arte simples e forte.",
     flyerTipo: "jog_escudo",
     labels: {
@@ -6276,7 +6669,7 @@ const PRODUCTS = {
 
   mascote_uniforme: {
     mode: "flyer",
-    title: "Mascote + uniforme",
+    title: "Faça o mascote do seu time",
     hint: "Envie o animal que deseja transformar em mascote, o escudo/brasão do time e a camiseta/uniforme para criar o mascote profissional.",
     flyerTipo: "mascote_uniforme",
     labels: {
@@ -6300,7 +6693,7 @@ const PRODUCTS = {
 const PRODUCT_CONFIG_DETAILS = {
   resultado: {
     id: "resultado",
-    name: "Resultado do jogo",
+    name: "Poste o resultado do jogo",
     price: 8,
     visualCategory: "time",
     image: "produtos/resultado.jpg",
@@ -6330,7 +6723,7 @@ const PRODUCT_CONFIG_DETAILS = {
 
   escalacao: {
     id: "escalacao",
-    name: "Escalacao",
+    name: "Poste sua escalação",
     price: 8,
     visualCategory: "time",
     image: "produtos/escalacao.jpg",
@@ -6362,7 +6755,7 @@ const PRODUCT_CONFIG_DETAILS = {
 
   contratacao: {
     id: "contratacao",
-    name: "Contratacao",
+    name: "Anuncie sua contratação",
     price: 7,
     visualCategory: "time",
     image: "produtos/contratacao.jpg",
@@ -6390,7 +6783,7 @@ const PRODUCT_CONFIG_DETAILS = {
 
   proximo_jogo: {
     id: "proximo_jogo",
-    name: "Proximo jogo",
+    name: "Poste o próximo jogo",
     price: 7,
     visualCategory: "time",
     image: "produtos/proximo_jogo.jpg",
@@ -6400,7 +6793,8 @@ const PRODUCT_CONFIG_DETAILS = {
       hora: { visible: true, required: true },
       arena: { visible: true, required: false },
       esc1: { visible: true, required: true },
-      esc2: { visible: true, required: true }
+      esc2: { visible: true, required: true },
+      mascote: { visible: true, required: false }
     },
     validation: {
       requiredInputs: ["timePrincipal", "timeAdv", "dataJogo", "hora"],
@@ -6409,7 +6803,7 @@ const PRODUCT_CONFIG_DETAILS = {
     uploads: {
       escudo1: { used: true, required: true, formField: "escudo1", outputName: "escudo1.png" },
       escudo2: { used: true, required: true, formField: "escudo2", outputName: "escudo2.png" },
-      mascote: { used: false, required: false, formField: "mascote", outputName: "mascote.png" },
+      mascote: { used: true, required: false, formField: "mascote", outputName: "mascote.png" },
       patrocinadores: { used: false, required: false, formField: "patrocinadores" }
     },
     serializer: "proximo_jogo",
@@ -6419,7 +6813,7 @@ const PRODUCT_CONFIG_DETAILS = {
 
   patrocinador: {
     id: "patrocinador",
-    name: "Patrocinador / Apoio",
+    name: "Mostre quem apoia seu time",
     price: 8,
     visualCategory: "time",
     image: "produtos/patrocinador.jpg",
@@ -6446,7 +6840,7 @@ const PRODUCT_CONFIG_DETAILS = {
 
   escudo3d: {
     id: "escudo3d",
-    name: "Escudo 3D",
+    name: "Faça seu escudo em 3D",
     price: 4,
     visualCategory: "time",
     image: "produtos/escudo3d.jpg",
@@ -6470,7 +6864,7 @@ const PRODUCT_CONFIG_DETAILS = {
 
   proximo_jogo_jogador: {
     id: "proximo_jogo_jogador",
-    name: "Proximo jogo jogador",
+    name: "Poste o próximo jogo",
     price: 7,
     visualCategory: "jogador",
     image: "produtos/proximo_jogo_jogador.jpg",
@@ -6500,7 +6894,7 @@ const PRODUCT_CONFIG_DETAILS = {
 
   resultado_jogo_jogador: {
     id: "resultado_jogo_jogador",
-    name: "Resultado jogador",
+    name: "Poste o resultado do jogo",
     price: 8,
     visualCategory: "jogador",
     image: "produtos/resultado_jogador.jpg",
@@ -6529,7 +6923,7 @@ const PRODUCT_CONFIG_DETAILS = {
 
   jogador_escudo: {
     id: "jogador_escudo",
-    name: "Jogador + escudo",
+    name: "Poste como jogador profissional",
     price: 6,
     visualCategory: "jogador",
     image: "produtos/jogador_escudo.jpg",
@@ -6555,7 +6949,7 @@ const PRODUCT_CONFIG_DETAILS = {
 
   mascote_uniforme: {
     id: "mascote_uniforme",
-    name: "Mascote + uniforme",
+    name: "Faça o mascote do seu time",
     price: 18,
     visualCategory: "time",
     image: "produtos/mascote_uniforme.jpg",
@@ -6577,6 +6971,66 @@ const PRODUCT_CONFIG_DETAILS = {
     serializer: "mascote_uniforme",
     legacy: { endpoint: "/pedidos", flyerTipo: "mascote_uniforme", backendCategoria: "mascote_uniforme" },
     specialRules: { canUseGift: true, usesDataAsMascotName: true, savedEscudo1Fallback: true }
+  },
+
+  arte_empresa: {
+    id: "arte_empresa",
+    name: "Arte para Empresa",
+    title: "Arte para Empresa",
+    hint: "Informe o ramo, a empresa e o objetivo da arte. Envie logo, fotos e referências se quiser deixar o pedido mais completo.",
+    price: 8,
+    mode: "flyer",
+    flyerTipo: "arte_empresa",
+    visualCategory: "empresa",
+    image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 900'%3E%3Crect width='900' height='900' fill='%230f172a'/%3E%3Crect x='90' y='110' width='720' height='520' rx='42' fill='%23ffffff'/%3E%3Crect x='140' y='170' width='300' height='42' rx='12' fill='%231e88ff'/%3E%3Crect x='140' y='250' width='620' height='34' rx='10' fill='%23e5e7eb'/%3E%3Crect x='140' y='314' width='500' height='34' rx='10' fill='%23e5e7eb'/%3E%3Crect x='140' y='410' width='210' height='140' rx='28' fill='%23f4b400'/%3E%3Crect x='390' y='410' width='370' height='140' rx='28' fill='%2334a853'/%3E%3Crect x='180' y='690' width='540' height='74' rx='37' fill='%231fbf63'/%3E%3C/svg%3E",
+    labels: {
+      ramo: "Ramo da empresa",
+      nome_empresa: "Nome da empresa",
+      objetivo: "Objetivo da arte",
+      oferta: "Oferta/promoção",
+      cta: "Chamada/CTA",
+      whatsapp: "WhatsApp",
+      instagram: "Instagram",
+      observacoes: "Observações",
+      logo: "Logo da empresa",
+      fotos: "Fotos da empresa/produto/serviço",
+      referencias: "Referências"
+    },
+    placeholders: {
+      ramo: "Ex: vidraçaria, pet shop, barbearia",
+      nome_empresa: "Ex: Vidros Alfa",
+      objetivo: "Ex: divulgar promoção de box para banheiro",
+      oferta: "Ex: orçamento grátis nesta semana",
+      cta: "Ex: Chame no WhatsApp",
+      whatsapp: "Ex: 15999999999",
+      instagram: "Ex: @suaempresa",
+      observacoes: "Detalhes importantes para a arte"
+    },
+    fields: {
+      ramo: { visible: true, required: true },
+      nome_empresa: { visible: true, required: true },
+      objetivo: { visible: true, required: true },
+      oferta: { visible: true, required: false },
+      cta: { visible: true, required: false },
+      whatsapp: { visible: true, required: false },
+      instagram: { visible: true, required: false },
+      observacoes: { visible: true, required: false },
+      logo: { visible: true, required: false },
+      fotos: { visible: true, required: false },
+      referencias: { visible: true, required: false }
+    },
+    validation: {
+      requiredInputs: ["ramo", "nome_empresa", "objetivo"],
+      requiredUploads: []
+    },
+    uploads: {
+      logo: { used: true, required: false, formField: "logo", outputName: "logo.png" },
+      fotos: { used: true, required: false, formField: "fotos", outputNamePattern: "foto{NN}.png" },
+      referencias: { used: true, required: false, formField: "referencias", outputNamePattern: "referencia{NN}.png" }
+    },
+    serializer: "arte_empresa",
+    legacy: { endpoint: "/pedidos", flyerTipo: "arte_empresa", backendCategoria: "arte_empresa" },
+    specialRules: {}
   }
 };
 
@@ -6713,7 +7167,7 @@ const PRODUCT_SERIALIZERS = {
 
   contratacao(ctx){
     const { fd, product, val, appendTextoAtivo, appendEscudo1, appendEscudo2 } = ctx;
-    const titulo = val("rodada") || product.title || "ContrataÃ§Ã£o";
+    const titulo = val("rodada") || product.title || "Contratação";
     const nomeJogador = val("dataJogo") || titulo;
 
     fd.append("rodada", titulo);
@@ -6732,7 +7186,7 @@ const PRODUCT_SERIALIZERS = {
   },
 
   proximo_jogo(ctx){
-    const { fd, product, val, campoAtivo, appendTextoAtivo, appendEscudo1, appendEscudo2 } = ctx;
+    const { fd, product, val, campoAtivo, appendTextoAtivo, appendArquivoAtivo, appendEscudo1, appendEscudo2 } = ctx;
     const t1 = val("timePrincipal");
     const t2 = val("timeAdv");
 
@@ -6753,6 +7207,7 @@ const PRODUCT_SERIALIZERS = {
 
     appendEscudo1();
     appendEscudo2();
+    appendArquivoAtivo("mascote", "mascote", "mascote");
   },
 
   resultado(ctx){
@@ -6802,7 +7257,7 @@ const PRODUCT_SERIALIZERS = {
 
   escalacao(ctx){
     const { fd, val, appendArquivoAtivo, appendEscudo1, appendEscudo2, coletarJogadores } = ctx;
-    const confronto = val("rodada") || "EscalaÃ§Ã£o";
+    const confronto = val("rodada") || "Escalação";
     const dataHora = val("dataJogo") || "";
     const campeonato = val("hora") || "";
     const localJogo = val("arena") || "";
@@ -6858,31 +7313,34 @@ const CLEAN_PRODUCT_SCHEMA_VERSION = 2;
 const CLEAN_PRODUCT_FORM_SCHEMAS = {
   resultado: {
     endpoint: "/resultado_do_jogo",
+    validationMessage: "Preencha o placar, campeonato/competição e envie o escudo do Time A.",
     fields: [
       { key: "score", type: "score", label: "Placar", required: true },
-      { key: "competition", type: "text", legacyName: "hora", labelKey: "hora", placeholderKey: "hora", required: false },
+      { key: "competition", type: "text", legacyName: "hora", labelKey: "hora", placeholderKey: "hora", required: true },
       { key: "headline", type: "text", legacyName: "data", labelKey: "data", placeholderKey: "data", required: false, defaultValue: "Resultado do jogo" },
       { key: "home_crest", type: "file", legacyName: "escudo1", labelKey: "esc1", required: true, savedFallback: true },
-      { key: "away_crest", type: "file", legacyName: "escudo2", labelKey: "esc2", required: true },
+      { key: "away_crest", type: "file", legacyName: "escudo2", labelKey: "esc2", required: false },
       { key: "match_photo", type: "file", legacyName: "mascote", labelKey: "mascote", required: false },
       { key: "scorers", type: "scorers", label: "Ver artilheiros", required: false }
     ]
   },
   escalacao: {
     endpoint: "/pedidos",
+    validationMessage: "Preencha o confronto e adicione pelo menos 2 jogadores.",
     fields: [
       { key: "matchup", type: "text", legacyName: "rodada", labelKey: "rodada", placeholderKey: "rodada", required: true },
-      { key: "match_datetime", type: "text", legacyName: "data", labelKey: "data", placeholderKey: "data", required: true },
-      { key: "competition", type: "text", legacyName: "hora", labelKey: "hora", placeholderKey: "hora", required: true },
+      { key: "match_datetime", type: "text", legacyName: "data", labelKey: "data", placeholderKey: "data", required: false },
+      { key: "competition", type: "text", legacyName: "hora", labelKey: "hora", placeholderKey: "hora", required: false },
       { key: "venue", type: "text", legacyName: "arena", labelKey: "arena", placeholderKey: "arena", required: false },
-      { key: "players", type: "players", label: "Nome dos jogadores aqui", required: true },
-      { key: "team_crest", type: "file", legacyName: "escudo1", labelKey: "esc1", required: true, savedFallback: true },
+      { key: "players", type: "players", label: "Nome dos jogadores aqui", required: true, minItems: 2 },
+      { key: "team_crest", type: "file", legacyName: "escudo1", labelKey: "esc1", required: false, savedFallback: true },
       { key: "opponent_crest", type: "file", legacyName: "escudo2", labelKey: "esc2", required: false },
       { key: "team_photo", type: "file", legacyName: "mascote", labelKey: "mascote", required: false }
     ]
   },
   contratacao: {
     endpoint: "/pedidos",
+    validationMessage: "Preencha o título da arte, nome do jogador, envie o escudo do time e a foto do jogador.",
     fields: [
       { key: "title", type: "text", legacyName: "rodada", labelKey: "rodada", placeholderKey: "rodada", required: true },
       { key: "player_name", type: "text", legacyName: "data", labelKey: "data", placeholderKey: "data", required: true },
@@ -6893,17 +7351,20 @@ const CLEAN_PRODUCT_FORM_SCHEMAS = {
   },
   proximo_jogo: {
     endpoint: "/pedidos",
+    validationMessage: "Preencha o confronto, data e horário, campeonato/competição e envie o escudo do Time A.",
     fields: [
       { key: "matchup", type: "matchup", label: "Confronto", required: true },
       { key: "match_datetime", type: "text", legacyName: "data", labelKey: "data", placeholderKey: "data", required: true },
       { key: "competition", type: "text", legacyName: "hora", labelKey: "hora", placeholderKey: "hora", required: true },
       { key: "venue", type: "text", legacyName: "arena", labelKey: "arena", placeholderKey: "arena", required: false },
       { key: "home_crest", type: "file", legacyName: "escudo1", labelKey: "esc1", required: true, savedFallback: true },
-      { key: "away_crest", type: "file", legacyName: "escudo2", labelKey: "esc2", required: true }
+      { key: "away_crest", type: "file", legacyName: "escudo2", labelKey: "esc2", required: false },
+      { key: "match_photo", type: "file", legacyName: "mascote", labelKey: "mascote", required: false }
     ]
   },
   patrocinador: {
     endpoint: "/pedidos",
+    validationMessage: "Preencha o título da arte, envie o escudo do time e envie os patrocinadores.",
     fields: [
       { key: "title", type: "text", legacyName: "rodada", labelKey: "rodada", placeholderKey: "rodada", required: true },
       { key: "headline", type: "text", legacyName: "data", labelKey: "data", placeholderKey: "data", required: false },
@@ -6913,6 +7374,7 @@ const CLEAN_PRODUCT_FORM_SCHEMAS = {
   },
   proximo_jogo_jogador: {
     endpoint: "/pedidos",
+    validationMessage: "Preencha o confronto, data e horário, campeonato/competição, envie o escudo do time e a foto do jogador.",
     fields: [
       { key: "matchup", type: "matchup", label: "Confronto", required: true },
       { key: "match_datetime", type: "text", legacyName: "data", labelKey: "data", placeholderKey: "data", required: true },
@@ -6925,6 +7387,7 @@ const CLEAN_PRODUCT_FORM_SCHEMAS = {
   },
   resultado_jogo_jogador: {
     endpoint: "/pedidos",
+    validationMessage: "Preencha o placar, envie os escudos dos times e a foto do jogador.",
     fields: [
       { key: "score", type: "score", label: "Placar", required: true },
       { key: "competition", type: "text", legacyName: "hora", labelKey: "hora", placeholderKey: "hora", required: false },
@@ -6936,6 +7399,7 @@ const CLEAN_PRODUCT_FORM_SCHEMAS = {
   },
   jogador_escudo: {
     endpoint: "/pedidos",
+    validationMessage: "Preencha o nome do jogador, envie o escudo do time e a foto do jogador.",
     fields: [
       { key: "player_name", type: "text", legacyName: "data", labelKey: "data", placeholderKey: "data", required: true },
       { key: "team_crest", type: "file", legacyName: "escudo1", labelKey: "esc1", required: true, savedFallback: true },
@@ -6945,12 +7409,31 @@ const CLEAN_PRODUCT_FORM_SCHEMAS = {
   },
   mascote_uniforme: {
     endpoint: "/pedidos",
+    validationMessage: "Preencha qual animal você quer transformar em mascote e envie o escudo ou brasão do time.",
     fields: [
       { key: "mascot_animal", type: "text", legacyName: "data", labelKey: "data", placeholderKey: "data", required: true },
       { key: "team_crest", type: "file", legacyName: "escudo1", labelKey: "esc1", required: true, savedFallback: true },
-      { key: "uniform_image", type: "file", legacyName: "mascote", labelKey: "mascote", required: true }
+      { key: "uniform_image", type: "file", legacyName: "mascote", labelKey: "mascote", required: false }
     ],
     legacyDefaults: { rodada: "Mascote + uniforme" }
+  },
+  arte_empresa: {
+    endpoint: "/pedidos",
+    validationMessage: "Preencha o ramo da empresa, o nome da empresa e o objetivo da arte.",
+    fields: [
+      { key: "ramo", type: "text", legacyName: "ramo", labelKey: "ramo", placeholderKey: "ramo", required: true },
+      { key: "nome_empresa", type: "text", legacyName: "nome_empresa", labelKey: "nome_empresa", placeholderKey: "nome_empresa", required: true },
+      { key: "objetivo", type: "text", legacyName: "objetivo", labelKey: "objetivo", placeholderKey: "objetivo", required: true },
+      { key: "oferta", type: "text", legacyName: "oferta", labelKey: "oferta", placeholderKey: "oferta", required: false },
+      { key: "cta", type: "text", legacyName: "cta", labelKey: "cta", placeholderKey: "cta", required: false },
+      { key: "whatsapp", type: "text", legacyName: "whatsapp", labelKey: "whatsapp", placeholderKey: "whatsapp", required: false },
+      { key: "instagram", type: "text", legacyName: "instagram", labelKey: "instagram", placeholderKey: "instagram", required: false },
+      { key: "observacoes", type: "textarea", legacyName: "observacoes", labelKey: "observacoes", placeholderKey: "observacoes", required: false },
+      { key: "logo", type: "file", legacyName: "logo", labelKey: "logo", required: false },
+      { key: "fotos", type: "multi-file", legacyName: "fotos", labelKey: "fotos", required: false },
+      { key: "referencias", type: "multi-file", legacyName: "referencias", labelKey: "referencias", required: false }
+    ],
+    legacyDefaults: { rodada: "Arte para Empresa", data: "Arte para Empresa" }
   }
 };
 
@@ -6980,6 +7463,15 @@ function renderCleanTextField(product, field){
     <div class="cleanFieldCard" data-clean-field-card="${htmlEscape(field.key)}">
       <label class="cleanFieldLabel">${getCleanFieldLabel(product, field)}</label>
       <input name="${htmlEscape(field.key)}" data-field="${htmlEscape(field.key)}" placeholder="${htmlEscape(getCleanFieldPlaceholder(product, field))}">
+    </div>
+  `;
+}
+
+function renderCleanTextareaField(product, field){
+  return `
+    <div class="cleanFieldCard" data-clean-field-card="${htmlEscape(field.key)}">
+      <label class="cleanFieldLabel">${getCleanFieldLabel(product, field)}</label>
+      <textarea name="${htmlEscape(field.key)}" data-field="${htmlEscape(field.key)}" placeholder="${htmlEscape(getCleanFieldPlaceholder(product, field))}"></textarea>
     </div>
   `;
 }
@@ -7029,7 +7521,7 @@ function renderCleanMatchupField(field){
 }
 
 function renderCleanPeopleField(field){
-  const scorePlaceholder = field.type === "players" ? "PosiÃ§Ã£o (opcional)" : "Gols";
+  const scorePlaceholder = field.type === "players" ? "Posição (opcional)" : "Gols";
   const scoreType = field.type === "players" ? "text" : "number";
   return `
     <div class="cleanFieldCard" data-clean-field-card="${htmlEscape(field.key)}">
@@ -7047,6 +7539,7 @@ function renderCleanPeopleField(field){
 
 function renderCleanProductField(product, field){
   if(field.type === "text") return renderCleanTextField(product, field);
+  if(field.type === "textarea") return renderCleanTextareaField(product, field);
   if(field.type === "file" || field.type === "multi-file") return renderCleanFileField(product, field);
   if(field.type === "score") return renderCleanScoreField(field);
   if(field.type === "matchup") return renderCleanMatchupField(field);
@@ -7054,14 +7547,61 @@ function renderCleanProductField(product, field){
   return "";
 }
 
+function renderCleanFieldsGrouped(product, schema){
+  const requiredFields = (schema.fields || []).filter(field => field.required);
+  const optionalFields = (schema.fields || []).filter(field => !field.required);
+  const requiredHtml = requiredFields.map(field => renderCleanProductField(product, field)).join("");
+  const optionalHtml = optionalFields.map(field => renderCleanProductField(product, field)).join("");
+
+  if(!optionalFields.length){
+    return requiredHtml;
+  }
+
+  return `
+    ${requiredHtml}
+    <details class="cleanOptionalDetails">
+      <summary>Campos opcionais — clique para deixar mais completo</summary>
+      <div class="cleanOptionalFields">
+        ${optionalHtml}
+      </div>
+    </details>
+  `;
+}
+
+function formatCleanProductPrice(product){
+  const price = Number(product?.price || 0);
+  return price ? `R$${price.toFixed(2).replace(".", ",")}` : "";
+}
+
+const IA4_EMPRESAS_MODE = document.body?.classList.contains("ia4-empresas");
+const CLEAN_PRODUCT_RENDER_ORDER = IA4_EMPRESAS_MODE ? [
+  "arte_empresa"
+] : [
+  "arte_empresa",
+  "jogador_escudo",
+  "mascote_uniforme",
+  "proximo_jogo",
+  "resultado",
+  "escalacao",
+  "patrocinador",
+  "contratacao"
+];
+
+function setEscudo3dCleanFileLabel(text){
+  document.querySelectorAll("[data-escudo3d-clean-file-name]").forEach(el => {
+    el.textContent = text || "Selecionar escudo";
+  });
+}
+
 function renderCleanProductForms(){
   const root = document.getElementById("productFormsRoot");
   if(!root) return;
 
-  const html = Object.keys(CLEAN_PRODUCT_FORM_SCHEMAS).map(productKey => {
+  const formsHtml = CLEAN_PRODUCT_RENDER_ORDER.map(productKey => {
     const product = PRODUCTS[productKey];
     const schema = getCleanProductSchema(productKey);
     if(!product || !schema) return "";
+    const priceLabel = formatCleanProductPrice(product);
 
     return `
       <section class="cleanProductBlock" data-clean-product-block="${htmlEscape(productKey)}">
@@ -7069,9 +7609,12 @@ function renderCleanProductForms(){
           <img src="${htmlEscape(product.image || "")}" alt="">
         </div>
         <form class="cleanProductForm" data-product-form="${htmlEscape(productKey)}" enctype="multipart/form-data" novalidate>
-          <h3 class="cleanProductTitle">${htmlEscape(product.title || product.name || productKey)}</h3>
-          ${schema.fields.map(field => renderCleanProductField(product, field)).join("")}
-          <button class="btnGreen cleanSubmitBtn" type="submit">Criar minha arte ðŸš€</button>
+          <div class="cleanProductHeader">
+            <h3 class="cleanProductTitle">${htmlEscape(product.title || product.name || productKey)}</h3>
+            ${priceLabel ? `<div class="cleanProductPrice">${htmlEscape(priceLabel)}</div>` : ""}
+          </div>
+          ${renderCleanFieldsGrouped(product, schema)}
+          <button class="btnGreen cleanSubmitBtn" type="submit">Criar minha arte 🚀</button>
           <div class="cleanProductMsg" data-clean-msg></div>
           <div class="cleanResultBox" data-clean-result-box>
             <div class="cleanResultStatus" data-clean-result-status>Estamos montando sua imagem...</div>
@@ -7083,7 +7626,32 @@ function renderCleanProductForms(){
     `;
   }).join("");
 
-  root.innerHTML = html;
+  const escudo3dProduct = PRODUCTS.escudo3d;
+  const escudo3dPriceLabel = formatCleanProductPrice(escudo3dProduct);
+  const escudo3dHtml = (!IA4_EMPRESAS_MODE && escudo3dProduct) ? `
+    <section class="cleanProductBlock cleanEscudo3dBlock" data-clean-product-block="escudo3d">
+      <div class="cleanProductImage" aria-hidden="true">
+        <img src="${htmlEscape(escudo3dProduct.image || "")}" alt="">
+      </div>
+      <div class="cleanProductForm">
+        <div class="cleanProductHeader">
+          <h3 class="cleanProductTitle">${htmlEscape(escudo3dProduct.title || escudo3dProduct.name || "Escudo 3D")}</h3>
+          ${escudo3dPriceLabel ? `<div class="cleanProductPrice">${htmlEscape(escudo3dPriceLabel)}</div>` : ""}
+        </div>
+        <div class="cleanFieldCard cleanEscudo3dUploadCard" data-clean-field-card="escudo3d_crest">
+          <label class="cleanFieldLabel">Selecionar escudo</label>
+          <div class="cleanFileBox" data-open-escudo3d-file tabindex="0" role="button" aria-label="Selecionar escudo">
+            <span data-escudo3d-clean-file-name>Selecionar escudo</span>
+            <span class="cleanFilePlus">+</span>
+          </div>
+        </div>
+        <button class="btnGreen cleanSubmitBtn" type="button" data-submit-escudo3d>Criar minha arte 🚀</button>
+        <div class="cleanProductMsg" data-clean-msg></div>
+      </div>
+    </section>
+  ` : "";
+
+  root.innerHTML = escudo3dHtml + formsHtml;
   bindCleanProductForms(root);
 }
 
@@ -7118,14 +7686,14 @@ function collectCleanPeople(form, key, type){
 function validateCleanProductForm(productKey, form){
   const schema = getCleanProductSchema(productKey);
   const product = PRODUCTS[productKey];
-  const errors = [];
+  let hasError = false;
 
-  if(!schema) return ["Produto sem configuracao."];
+  if(!schema) return ["Produto sem configuração."];
 
   form.querySelectorAll(".campoObrigatorioErro").forEach(el => el.classList.remove("campoObrigatorioErro"));
 
-  const markError = (field, message) => {
-    errors.push(message);
+  const markError = (field) => {
+    hasError = true;
     const card = form.querySelector(`[data-clean-field-card="${CSS.escape(field.key)}"]`);
     if(card) card.classList.add("campoObrigatorioErro");
   };
@@ -7133,37 +7701,35 @@ function validateCleanProductForm(productKey, form){
   schema.fields.forEach(field => {
     if(!field.required) return;
 
-    const label = String(getCleanFieldLabel(product, field)).replace(/<br\s*\/?>/gi, " ");
-
-    if(field.type === "text" && !getCleanFieldValue(form, field.key)){
-      markError(field, `${label} e obrigatorio.`);
+    if((field.type === "text" || field.type === "textarea") && !getCleanFieldValue(form, field.key)){
+      markError(field);
     }
 
     if(field.type === "score"){
       const required = ["home_team", "home_score", "away_score", "away_team"];
       const missing = required.some(key => !getCleanFieldValue(form, key));
-      if(missing) markError(field, `${label} e obrigatorio.`);
+      if(missing) markError(field);
     }
 
     if(field.type === "matchup"){
       if(!getCleanFieldValue(form, "home_team") || !getCleanFieldValue(form, "away_team")){
-        markError(field, `${label} e obrigatorio.`);
+        markError(field);
       }
     }
 
     if(field.type === "file" || field.type === "multi-file"){
       const hasFiles = getCleanAssetFiles(form, field.key).length > 0;
       const hasSaved = field.savedFallback && typeof getSavedEscudo1File === "function" && !!getSavedEscudo1File();
-      if(!hasFiles && !hasSaved) markError(field, `${label} e obrigatorio.`);
+      if(!hasFiles && !hasSaved) markError(field);
     }
 
     if(field.type === "players" || field.type === "scorers"){
       const people = collectCleanPeople(form, field.key, field.type);
-      if(!people.length) markError(field, `${label} e obrigatorio.`);
+      if(people.length < Number(field.minItems || 1)) markError(field);
     }
   });
 
-  return errors;
+  return hasError ? [schema.validationMessage || "Preencha os campos obrigatórios."] : [];
 }
 
 function serializeCleanProductForm(productKey, form){
@@ -7172,7 +7738,7 @@ function serializeCleanProductForm(productKey, form){
   const assets = {};
 
   schema.fields.forEach(field => {
-    if(field.type === "text"){
+    if(field.type === "text" || field.type === "textarea"){
       fields[field.key] = getCleanFieldValue(form, field.key);
     }
 
@@ -7251,7 +7817,7 @@ function buildLegacyFormDataFromClean(productKey, cleanOrder){
   Object.keys(defaults).forEach(name => appendCleanTextLegacy(fd, name, defaults[name]));
 
   schema.fields.forEach(field => {
-    if(field.type === "text" && field.legacyName){
+    if((field.type === "text" || field.type === "textarea") && field.legacyName){
       appendCleanTextLegacy(fd, field.legacyName, cleanOrder.fields[field.key] || field.defaultValue || "");
     }
 
@@ -7330,18 +7896,241 @@ function resetCleanFormAfterSend(form){
   form.querySelectorAll(".campoObrigatorioErro").forEach(el => el.classList.remove("campoObrigatorioErro"));
 }
 
+const cleanProductProgressTimers = new WeakMap();
+const cleanProductResultWatchers = new Map();
+const IA4_ACTIVE_ORDERS_KEY = "ia4tube_pedidos_ativos";
+const IA4_ACTIVE_ORDER_MAX_AGE = 48 * 60 * 60 * 1000;
+
+function getCleanProductImageFromForm(form){
+  return form?.closest(".cleanProductBlock")?.querySelector(".cleanProductImage") || null;
+}
+
+function listarPedidosAtivosLocal(){
+  try{
+    const parsed = JSON.parse(localStorage.getItem(IA4_ACTIVE_ORDERS_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed.filter(item => item?.pedido_id && item?.product_id) : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function salvarPedidosAtivosLocal(lista){
+  localStorage.setItem(IA4_ACTIVE_ORDERS_KEY, JSON.stringify(lista || []));
+}
+
+function salvarPedidoAtivoLocal(pedidoId, productId){
+  if(!pedidoId || !productId) return;
+
+  const lista = listarPedidosAtivosLocal().filter(item => item.pedido_id !== pedidoId);
+  lista.push({
+    pedido_id: pedidoId,
+    product_id: productId,
+    criado_em: Date.now()
+  });
+
+  salvarPedidosAtivosLocal(lista);
+}
+
+function removerPedidoAtivoLocal(pedidoId){
+  if(!pedidoId) return;
+  salvarPedidosAtivosLocal(listarPedidosAtivosLocal().filter(item => item.pedido_id !== pedidoId));
+}
+
+function limparPedidosAtivosAntigos(){
+  const agora = Date.now();
+  salvarPedidosAtivosLocal(
+    listarPedidosAtivosLocal().filter(item => {
+      const criadoEm = Number(item.criado_em || 0);
+      return criadoEm && (agora - criadoEm) <= IA4_ACTIVE_ORDER_MAX_AGE;
+    })
+  );
+}
+
+function getCleanProductFormByProductId(productId){
+  if(!productId) return null;
+  return document.querySelector(`[data-product-form="${CSS.escape(productId)}"]`) ||
+    document.querySelector(`[data-clean-product-block="${CSS.escape(productId)}"]`);
+}
+
+function guardarImagemOriginalDoProduto(target){
+  const imageBox = getCleanProductImageFromForm(target);
+  const img = imageBox?.querySelector("img");
+
+  if(img && !imageBox.dataset.originalProductImage){
+    imageBox.dataset.originalProductImage = img.getAttribute("src") || img.currentSrc || "";
+  }
+}
+
+function restaurarImagemOriginalDoProduto(target){
+  const imageBox = getCleanProductImageFromForm(target);
+  const img = imageBox?.querySelector("img");
+  const originalSrc = imageBox?.dataset.originalProductImage || "";
+
+  if(img && originalSrc){
+    img.src = originalSrc;
+  }
+
+  imageBox?.classList.remove("is-processing");
+  imageBox?.classList.remove("is-preview-ready");
+  if(imageBox){
+    delete imageBox.dataset.previewUrl;
+    delete imageBox.dataset.previewPedidoId;
+    imageBox.style.cursor = "";
+    imageBox.onclick = null;
+  }
+  if(img){
+    img.removeAttribute("data-preview-url");
+    img.style.cursor = "";
+    img.onclick = null;
+  }
+}
+
+function renderCleanProgressOverlay(imageBox, percent, text){
+  if(!imageBox) return null;
+
+  let overlay = imageBox.querySelector(".cleanProgressOverlay");
+  const cadastroHtml = ia4ContaAutoPendente() ? `
+        <div class="cleanProgressCadastro">
+          <div class="cleanProgressCadastroText">Aproveite enquanto sua arte está sendo criada e salve seu cadastro para receber sua imagem.</div>
+          <input data-progress-login placeholder="Crie seu login">
+          <input data-progress-senha type="password" placeholder="Crie sua senha">
+          <button type="button" onclick="finalizarCadastroDuranteProgresso(event)">Salvar cadastro</button>
+        </div>
+  ` : "";
+
+  if(!overlay){
+    overlay = document.createElement("div");
+    overlay.className = "cleanProgressOverlay";
+    overlay.innerHTML = `
+      <div class="cleanProgressContent">
+        <div class="cleanProgressPercent" data-clean-progress-percent>1%</div>
+        <div class="cleanProgressBar">
+          <div class="cleanProgressFill" data-clean-progress-fill></div>
+        </div>
+        <div class="cleanProgressText" data-clean-progress-text>Criando sua arte...</div>
+        <div data-clean-progress-cadastro>${cadastroHtml}</div>
+      </div>
+    `;
+    imageBox.appendChild(overlay);
+  } else {
+    const cadastroEl = overlay.querySelector("[data-clean-progress-cadastro]");
+    if(cadastroEl && !cadastroEl.querySelector("input:focus")){
+      cadastroEl.innerHTML = cadastroHtml;
+    }
+  }
+
+  const safePercent = Math.max(1, Math.min(100, Number(percent || 1)));
+  const percentEl = overlay.querySelector("[data-clean-progress-percent]");
+  const fillEl = overlay.querySelector("[data-clean-progress-fill]");
+  const textEl = overlay.querySelector("[data-clean-progress-text]");
+
+  if(percentEl) percentEl.textContent = `${safePercent}%`;
+  if(fillEl) fillEl.style.width = `${safePercent}%`;
+  if(textEl) textEl.textContent = text || "Criando sua arte...";
+
+  imageBox.classList.add("is-processing");
+  return overlay;
+}
+
+function calcularPercentualProgressoProduto(startedAt){
+  const elapsed = Math.max(0, Date.now() - Number(startedAt || Date.now()));
+  const timeTo50 = 35000;
+  const timeFrom51To90 = 45000;
+  const timeTo90 = timeTo50 + timeFrom51To90;
+  const timePerPercentAfter90 = 5000;
+
+  if(elapsed <= timeTo50){
+    return Math.min(50, 1 + Math.floor((elapsed / timeTo50) * 49));
+  }
+
+  if(elapsed <= timeTo90){
+    return Math.min(90, 51 + Math.floor(((elapsed - timeTo50) / timeFrom51To90) * 39));
+  }
+
+  return Math.min(99, 91 + Math.floor((elapsed - timeTo90) / timePerPercentAfter90));
+}
+
+function iniciarProgressoNoProduto(form, pedidoId, startedAt){
+  cancelarProgressoNoProduto(form);
+
+  const imageBox = getCleanProductImageFromForm(form);
+  if(!imageBox) return;
+
+  guardarImagemOriginalDoProduto(form);
+
+  const progressStartedAt = Number(startedAt || Date.now());
+  renderCleanProgressOverlay(imageBox, calcularPercentualProgressoProduto(progressStartedAt), "Criando sua arte...");
+
+  const timer = setInterval(() => {
+    renderCleanProgressOverlay(imageBox, calcularPercentualProgressoProduto(progressStartedAt), "Criando sua arte...");
+  }, 1000);
+
+  cleanProductProgressTimers.set(form, { timer, pedidoId });
+}
+
+function finalizarProgressoNoProduto(form, pedidoId){
+  const state = cleanProductProgressTimers.get(form);
+  if(state?.timer) clearInterval(state.timer);
+  cleanProductProgressTimers.delete(form);
+
+  const imageBox = getCleanProductImageFromForm(form);
+  if(!imageBox) return;
+
+  const img = imageBox.querySelector("img");
+  const previewUrl = pedidoId ? `${API_BASE}/pedidos/${pedidoId}/preview?ts=${Date.now()}` : "";
+  if(img && pedidoId){
+    img.src = previewUrl;
+    img.setAttribute("data-preview-url", previewUrl);
+    img.style.cursor = "pointer";
+    img.onclick = () => abrirPedidoDireto(pedidoId);
+  }
+
+  if(previewUrl){
+    imageBox.dataset.previewUrl = previewUrl;
+    imageBox.dataset.previewPedidoId = pedidoId;
+    imageBox.style.cursor = "pointer";
+    imageBox.onclick = (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      console.log("[preview-card-click]", { pedidoId, target: ev.target });
+      abrirPedidoDireto(pedidoId);
+    };
+    imageBox.classList.add("is-preview-ready");
+  }
+
+  renderCleanProgressOverlay(imageBox, 100, "Arte pronta!");
+  imageBox.classList.remove("is-processing");
+
+  setTimeout(() => {
+    const overlay = imageBox.querySelector(".cleanProgressOverlay");
+    overlay?.remove();
+  }, 1800);
+}
+
+function cancelarProgressoNoProduto(form){
+  const state = cleanProductProgressTimers.get(form);
+  if(state?.timer) clearInterval(state.timer);
+  cleanProductProgressTimers.delete(form);
+
+  const imageBox = getCleanProductImageFromForm(form);
+  if(!imageBox) return;
+
+  imageBox.querySelector(".cleanProgressOverlay")?.remove();
+  restaurarImagemOriginalDoProduto(form);
+}
+
 async function acompanharResultadoClean(pedidoId, form){
+  if(pedidoId && cleanProductResultWatchers.has(pedidoId)) return;
+
   const boxEl = form.querySelector("[data-clean-result-box]");
   const statusElLocal = form.querySelector("[data-clean-result-status]");
   const imgEl = form.querySelector("[data-clean-result-preview]");
   const downloadEl = form.querySelector("[data-clean-result-download]");
 
-  if(!boxEl || !statusElLocal || !imgEl || !downloadEl) return;
-
-  boxEl.style.display = "block";
-  statusElLocal.textContent = "Estamos montando sua imagem...";
-  imgEl.style.display = "none";
-  downloadEl.style.display = "none";
+  if(boxEl) boxEl.style.display = "block";
+  if(statusElLocal) statusElLocal.textContent = "Estamos montando sua imagem...";
+  if(imgEl) imgEl.style.display = "none";
+  if(downloadEl) downloadEl.style.display = "none";
 
   const timer = setInterval(async () => {
     try{
@@ -7352,25 +8141,85 @@ async function acompanharResultadoClean(pedidoId, form){
 
       if(data.ok && data.imagem_pronta){
         clearInterval(timer);
+        cleanProductResultWatchers.delete(pedidoId);
+        finalizarProgressoNoProduto(form, pedidoId);
         const previewUrl = `${API_BASE}/pedidos/${pedidoId}/preview?ts=${Date.now()}`;
-        statusElLocal.textContent = "Confira sua arte antes de baixar";
-        imgEl.src = previewUrl;
-        imgEl.classList.add("previewProtegida");
-        imgEl.style.display = "block";
-        downloadEl.removeAttribute("href");
-        downloadEl.textContent = "âœ… EstÃ¡ boa, baixar imagem";
-        downloadEl.onclick = (ev)=>{
-          ev.preventDefault();
-          aprovarPedido(pedidoId);
-        };
-        downloadEl.style.display = "inline-block";
+        if(statusElLocal) statusElLocal.textContent = "Confira sua arte antes de baixar";
+        if(imgEl){
+          imgEl.src = previewUrl;
+          imgEl.classList.add("previewProtegida");
+          imgEl.style.display = "block";
+        }
+        if(downloadEl){
+          downloadEl.removeAttribute("href");
+          downloadEl.textContent = "✅ Está boa, baixar imagem";
+          downloadEl.onclick = async (ev)=>{
+            ev.preventDefault();
+            await aprovarPedido(pedidoId);
+            restaurarImagemOriginalDoProduto(form);
+          };
+          downloadEl.style.display = "inline-block";
+        }
       }else{
-        statusElLocal.textContent = "Estamos montando sua imagem...";
+        if(statusElLocal) statusElLocal.textContent = "Estamos montando sua imagem...";
       }
     }catch{
-      statusElLocal.textContent = "Erro ao consultar status da imagem.";
+      if(statusElLocal) statusElLocal.textContent = "Erro ao consultar status da imagem.";
     }
   }, 5000);
+
+  if(pedidoId) cleanProductResultWatchers.set(pedidoId, timer);
+}
+
+function restaurarPedidosAtivos(pedidos){
+  limparPedidosAtivosAntigos();
+
+  const listaPedidos = Array.isArray(pedidos) ? pedidos : [];
+  const pedidosPorId = new Map(listaPedidos.map(p => [String(p.id || ""), p]));
+  const ativos = listarPedidosAtivosLocal()
+    .sort((a, b) => Number(b.criado_em || 0) - Number(a.criado_em || 0));
+  const produtosRestaurados = new Set();
+
+  for(const ativo of ativos){
+    const pedido = pedidosPorId.get(String(ativo.pedido_id || ""));
+
+    if(!pedido){
+      removerPedidoAtivoLocal(ativo.pedido_id);
+      continue;
+    }
+
+    if(pedido.aprovado_cliente === true && pedido.pagamento_pendente !== true){
+      removerPedidoAtivoLocal(pedido.id);
+      continue;
+    }
+
+    if(getPedidosBaixados().includes(pedido.id)){
+      removerPedidoAtivoLocal(pedido.id);
+      continue;
+    }
+
+    if(produtosRestaurados.has(ativo.product_id)) continue;
+
+    const form = getCleanProductFormByProductId(ativo.product_id);
+    if(!form) continue;
+
+    produtosRestaurados.add(ativo.product_id);
+
+    if(pedido.imagem_pronta === true){
+      const imageBox = getCleanProductImageFromForm(form);
+      if(imageBox?.dataset.previewPedidoId !== pedido.id){
+        finalizarProgressoNoProduto(form, pedido.id);
+      }
+      continue;
+    }
+
+    const state = cleanProductProgressTimers.get(form);
+    if(state?.pedidoId !== pedido.id){
+      iniciarProgressoNoProduto(form, pedido.id, ativo.criado_em);
+    }
+
+    acompanharResultadoClean(pedido.id, form);
+  }
 }
 
 async function submitCleanProductForm(e){
@@ -7394,6 +8243,7 @@ async function submitCleanProductForm(e){
 
   const errors = validateCleanProductForm(productKey, form);
   if(errors.length){
+    cancelarProgressoNoProduto(form);
     setCleanProductMsg(form, errors[0], true);
     ia4RegistrarAcao("erro_validacao_pedido", {
       produto: productKey,
@@ -7424,7 +8274,11 @@ async function submitCleanProductForm(e){
 
     if(out.ok){
       setCleanProductMsg(form, "");
+      if(out.pedido_id){
+        salvarPedidoAtivoLocal(out.pedido_id, productKey);
+      }
       atualizarTopoProducao([{ id: out.pedido_id || "novo", status: "processando" }]);
+      iniciarProgressoNoProduto(form, out.pedido_id || "novo");
       mostrarAvisoPedido();
 
       ia4Track("pedido_concluido", {
@@ -7438,22 +8292,21 @@ async function submitCleanProductForm(e){
       carregarHistorico();
       destacarMeusPedidos();
 
-      if(schema.endpoint === "/resultado_do_jogo"){
+      if(out.pedido_id){
         acompanharResultadoClean(out.pedido_id, form);
-      }else{
-        setTimeout(()=>{
-          window.scrollTo({ top:0, behavior:"smooth" });
-        }, 300);
       }
+      setCleanProductMsg(form, "Pedido enviado. Acompanhe em Meus pedidos.");
     }else{
       ia4Track("erro_envio_pedido", {
         produto: productKey,
         categoria: product.visualCategory || categoriaSelecionada || "",
         erro: out.error || "Erro ao enviar"
       });
+      cancelarProgressoNoProduto(form);
       setCleanProductMsg(form, out.error || "Erro ao enviar", true);
     }
   }catch{
+    cancelarProgressoNoProduto(form);
     setCleanProductMsg(form, "Erro de rede ao enviar.", true);
   }
 }
@@ -7489,7 +8342,7 @@ function bindCleanProductForms(root){
       const rows = btn.closest("[data-product-form]")?.querySelector(`[data-clean-people="${CSS.escape(key)}"]`);
       const type = rows?.dataset.cleanPeopleType || "scorers";
       if(!rows) return;
-      const extraPlaceholder = type === "players" ? "PosiÃ§Ã£o (opcional)" : "Gols";
+      const extraPlaceholder = type === "players" ? "Posição (opcional)" : "Gols";
       const extraType = type === "players" ? "text" : "number";
       rows.insertAdjacentHTML("beforeend", `
         <div class="cleanPlayerRow">
@@ -7502,6 +8355,37 @@ function bindCleanProductForms(root){
 
   root.querySelectorAll("[data-product-form]").forEach(form => {
     form.addEventListener("submit", submitCleanProductForm);
+  });
+
+  root.querySelectorAll("[data-open-escudo3d-file]").forEach(box => {
+    box.addEventListener("click", () => {
+      escudo3dFile?.click();
+    });
+    box.addEventListener("keydown", (e) => {
+      if(e.key === "Enter" || e.key === " "){
+        e.preventDefault();
+        escudo3dFile?.click();
+      }
+    });
+  });
+
+  root.querySelectorAll("[data-submit-escudo3d]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      activateCleanProductBlock("escudo3d");
+      const file = escudo3dFile?.files && escudo3dFile.files[0] ? escudo3dFile.files[0] : null;
+      await enviarPedidoEscudo3dComArquivo(file, btn.closest(".cleanProductBlock"));
+    });
+  });
+
+  root.querySelectorAll("[data-open-escudo3d]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      activateCleanProductBlock("escudo3d");
+      if(!token){
+        abrirCadastroEscudo3dModal();
+        return;
+      }
+      abrirEscudo3dModal();
+    });
   });
 }
 
@@ -7920,11 +8804,14 @@ function applyLocal(){
   const plano = localStorage.getItem("omascote_plano") || "";
   const usados = localStorage.getItem("omascote_usados") || "";
 
-  welcomeEl.textContent = nome || "Seu time";
+  welcomeEl.textContent = nome || "Seu negócio";
   planoEl.textContent = `Plano: ${plano || "—"} pedidos/mês`;
   usadosEl.textContent = `Usados no mês: ${usados || "—"}`;
   if(saldoEl){
     saldoEl.textContent = "Saldo disponível: —";
+  }
+  if(typeof atualizarTopoAuth === "function"){
+    atualizarTopoAuth();
   }
 }
 
@@ -7961,9 +8848,9 @@ const mascotePromo = document.querySelector('[data-product="mascote_uniforme"]')
 if(mascotePromo){
   const label = mascotePromo.querySelector(".optLabel");
 
-  if(label){
-    label.innerHTML = brindeMascoteDisponivel
-      ? `Mascote<br>do seu Time<br><span style="font-size:13px;color:#777;">Brinde primeira compra</span><br><span style="color:#1fbf63;font-weight:900;">R$18 → R$0</span>`
+    if(label){
+      label.innerHTML = brindeMascoteDisponivel
+      ? `Mascote<br>do seu Time<br><span style="font-size:13px;color:#777;">Veja antes de pagar</span><br><span style="color:#1fbf63;font-weight:900;">R$18,00</span>`
       : `Mascote<br>do seu Time<br><span style="color:#1fbf63;font-weight:900;">R$18,00</span>`;
   }
 }
@@ -8028,16 +8915,33 @@ async function carregarTempoEstimado(){
 let acaoDepoisDoCadastro = null;
 let fluxoEscudo3dCadastro = false;
 let escudo3dCadastroFile = null;
+let saldoPixAtual = null;
 
-async function comprarCreditos(pacote){
+const SALDO_PIX_LABELS = {
+  saldo_800: "R$8,00",
+  saldo_1800: "R$18,00",
+  saldo_2800: "R$28,00",
+  saldo_4800: "R$48,00"
+};
+
+async function comprarCreditos(pacote, metodo = "checkout", triggerBtn = null){
   if(!token){
-    acaoDepoisDoCadastro = () => comprarCreditos(pacote);
+    acaoDepoisDoCadastro = () => comprarCreditos(pacote, metodo);
     abrirCadastroVisitanteModal();
     return;
   }
 
+  const originalHtml = triggerBtn?.innerHTML || "";
+  if(triggerBtn){
+    triggerBtn.disabled = true;
+    triggerBtn.innerHTML = metodo === "pix"
+      ? `<span class="saldoPagamentoIcon">⚡</span><span>Gerando Pix instantâneo...</span>`
+      : `<span class="saldoPagamentoIcon">💳</span><span>Abrindo pagamento seguro...</span>`;
+  }
+
   try{
-    const r = await fetch(`${API_BASE}/comprar-creditos`, {
+    const endpoint = metodo === "pix" ? "/comprar-creditos-pix" : "/comprar-creditos";
+    const r = await fetch(`${API_BASE}${endpoint}`, {
       method:"POST",
       headers:{
         "Authorization": "Bearer " + token,
@@ -8048,19 +8952,32 @@ async function comprarCreditos(pacote){
 
     const data = await r.json();
 
-    if(!data.ok || !data.init_point){
-    alert(data.error || "Erro ao iniciar pagamento.");
-    return;
-  }
+    if(!data.ok || (metodo !== "pix" && !data.init_point)){
+      alert(data.error || "Erro ao iniciar pagamento.");
+      return;
+    }
 
-  ia4Track("iniciou_pagamento", {
-    pacote: pacote || "desconhecido"
-  });
+    ia4Track("iniciou_pagamento", {
+      pacote: pacote || "desconhecido",
+      metodo: metodo || "checkout"
+    });
 
-  window.open(data.init_point, "_blank");
+    if(metodo === "pix"){
+      abrirModalPixSaldo(pacote, data);
+      return;
+    }
+
+    window.open(data.init_point, "_blank");
 
   }catch{
     alert("Erro de rede ao iniciar pagamento.");
+  }finally{
+    if(triggerBtn){
+      setTimeout(()=>{
+        triggerBtn.disabled = false;
+        triggerBtn.innerHTML = originalHtml;
+      }, 900);
+    }
   }
 }
 
@@ -8242,7 +9159,7 @@ function abrirCadastroVisitanteModal(){
 
   if(authCriarContaBtn){
     authCriarContaBtn.style.display = "block";
-    authCriarContaBtn.textContent = "Criar conta e receber arte grátis 🚀";
+    authCriarContaBtn.textContent = "Criar conta e continuar 🚀";
     authCriarContaBtn.style.width = "100%";
     authCriarContaBtn.style.marginTop = "14px";
   }
@@ -8271,6 +9188,50 @@ function abrirCadastroVisitanteModal(){
   setTimeout(()=>document.getElementById("authWhatsapp")?.focus(), 120);
 }
 
+function abrirLoginVisitanteModal(){
+  inicializarLoginGoogle();
+  fluxoEscudo3dCadastro = false;
+  escudo3dCadastroFile = null;
+  clearInterval(authProgressTimer);
+
+  if(!authVisitanteModal) return;
+
+  modoCadastro = false;
+  document.querySelector(".authPromoBox h2").textContent = "Entrar na sua conta";
+  document.querySelector(".authPromoBox p").textContent = "Digite seu WhatsApp ou nome do time e senha para acessar seus pedidos.";
+  document.getElementById("authProgressWrap")?.style.setProperty("display", "none", "important");
+  document.getElementById("authProgressText")?.style.setProperty("display", "none", "important");
+  document.getElementById("authSenha")?.setAttribute("placeholder", "Digite sua senha");
+
+  if(labelNomeTime) labelNomeTime.style.display = "none";
+  if(document.getElementById("authNomeTime")) document.getElementById("authNomeTime").style.display = "none";
+  if(labelSenha) labelSenha.style.display = "block";
+  if(document.getElementById("authSenha")) document.getElementById("authSenha").style.display = "block";
+  if(authEscudo3dArea) authEscudo3dArea.style.display = "none";
+  if(authBtnsRow){
+    authBtnsRow.style.display = "flex";
+    authBtnsRow.style.flexDirection = "column";
+    authBtnsRow.style.gap = "10px";
+  }
+  if(authCriarContaBtn) authCriarContaBtn.style.display = "none";
+  if(authEntrarBtn){
+    authEntrarBtn.textContent = "Entrar 🚀";
+    authEntrarBtn.style.width = "100%";
+  }
+  if(authCriarContaToggle){
+    authCriarContaToggle.style.display = "block";
+    authCriarContaToggle.textContent = "Criar conta";
+  }
+  if(authVisitanteMsg){
+    authVisitanteMsg.textContent = "";
+    authVisitanteMsg.className = "authVisitanteMsg";
+  }
+
+  authVisitanteModal.classList.add("open");
+  authVisitanteModal.setAttribute("aria-hidden", "false");
+  setTimeout(()=>document.getElementById("authWhatsapp")?.focus(), 120);
+}
+
 function abrirCadastroEscudo3dModal(){
   inicializarLoginGoogle();
   fluxoEscudo3dCadastro = true;
@@ -8280,7 +9241,7 @@ function abrirCadastroEscudo3dModal(){
   if(!authVisitanteModal) return;
 
   document.querySelector(".authPromoBox h2").textContent = "🔥 Seu escudo está sendo criado";
-  document.querySelector(".authPromoBox p").textContent = "Enquanto a IA prepara sua arte, salve seu time para receber o resultado.";
+  document.querySelector(".authPromoBox p").textContent = "Enquanto a IA prepara sua arte, salve sua conta para receber o resultado.";
   document.getElementById("authSenha")?.setAttribute("placeholder", "Crie uma senha simples");
   document.getElementById("authProgressWrap")?.style.setProperty("display", "block", "important");
   document.getElementById("authProgressText")?.style.setProperty("display", "block", "important");
@@ -8368,7 +9329,7 @@ async function finalizarCadastroVisitante(){
   }
 
   authCriarContaBtn.disabled = true;
-  authCriarContaBtn.textContent = fluxoEscudo3dCadastro ? "Criando seu time..." : "Criando conta...";
+  authCriarContaBtn.textContent = fluxoEscudo3dCadastro ? "Criando conta..." : "Criando conta...";
 
   try{
     let r;
@@ -8600,7 +9561,7 @@ homeAuthEscudo3dContinuarBtn?.addEventListener("click", async ()=>{
   modoCadastro = true;
 
   homeAuthEscudo3dContinuarBtn.disabled = true;
-  homeAuthEscudo3dContinuarBtn.textContent = "Criando seu time...";
+  homeAuthEscudo3dContinuarBtn.textContent = "Criando conta...";
 
   try{
     let r = await fetch(`${API_BASE}/auth/register`, {
@@ -8728,7 +9689,7 @@ authCriarContaToggle?.addEventListener("click", ()=>{
   if(authCriarContaToggle) authCriarContaToggle.style.display = "none";
   if(authCriarContaBtn){
     authCriarContaBtn.style.display = "block";
-    authCriarContaBtn.textContent = "Criar conta e receber arte grátis 🚀";
+    authCriarContaBtn.textContent = "Criar conta e continuar 🚀";
   }
 
   setTimeout(()=>document.getElementById("authNomeTime")?.focus(), 120);
@@ -9161,7 +10122,7 @@ function arrangeFieldSequence(productKey){
     resultado: ["placar", "esc1", "esc2", "optionalDivider", "hora", "artilheiros", "data", "mascote", "submit", "msg"],
     escalacao: ["rodada", "data", "hora", "esc1", "artilheiros", "optionalDivider", "arena", "esc2", "mascote", "submit", "msg"],
     contratacao: ["rodada", "data", "esc1", "esc2", "optionalDivider", "hora", "submit", "msg"],
-    proximo_jogo: ["placar", "esc1", "esc2", "data", "hora", "optionalDivider", "arena", "submit", "msg"],
+    proximo_jogo: ["placar", "esc1", "esc2", "data", "hora", "optionalDivider", "arena", "mascote", "submit", "msg"],
     patrocinador: ["rodada", "esc1", "patro", "optionalDivider", "data", "submit", "msg"],
     proximo_jogo_jogador: ["placar", "esc1", "esc2", "mascote", "data", "hora", "optionalDivider", "arena", "submit", "msg"],
     resultado_jogo_jogador: ["placar", "esc1", "esc2", "mascote", "optionalDivider", "hora", "data", "submit", "msg"],
@@ -9336,19 +10297,16 @@ function selectProduct(productKey){
     selectorStage.classList.add("open");
   }
 
-  setTimeout(()=>{
-    if(getCleanProductSchema(productKey)){
-      scrollToCleanProductBlock(productKey);
-    }else{
-      scrollToBuilder();
-    }
-  }, 120);
+  if(!getCleanProductSchema(productKey)){
+    setTimeout(scrollToBuilder, 120);
+  }
 }
 
 function abrirEscudo3dModal(){
   if(!escudo3dModal) return;
   escudo3dMsg.textContent = "";
   escudo3dFileName.textContent = "Selecionar escudo";
+  setEscudo3dCleanFileLabel("Selecionar escudo");
   escudo3dFile.value = "";
   escudo3dModal.classList.add("open");
   escudo3dModal.setAttribute("aria-hidden","false");
@@ -9392,22 +10350,40 @@ if(escudo3dUploadBtn && escudo3dFile){
   });
 
   escudo3dFile.addEventListener("change", ()=>{
-    escudo3dFileName.textContent = escudo3dFile.files && escudo3dFile.files[0]
+    const selectedEscudo3dFileName = escudo3dFile.files && escudo3dFile.files[0]
       ? escudo3dFile.files[0].name
       : "Selecionar escudo";
+    escudo3dFileName.textContent = selectedEscudo3dFileName;
+    setEscudo3dCleanFileLabel(selectedEscudo3dFileName);
   });
 }
 
-async function enviarPedidoEscudo3dComArquivo(file){
+async function enviarPedidoEscudo3dComArquivo(file, progressTarget = null){
   if(!token){
-    escudo3dCadastroFile = file || null;
-    abrirCadastroEscudo3dModal();
-    return;
+    const okAuto = await criarContaAutomaticaAntesPedido();
+    if(!okAuto) return;
   }
 
   if(!file){
+    if(progressTarget){
+      progressTarget.querySelector(".cleanEscudo3dUploadCard")?.classList.add("campoObrigatorioErro");
+      const msg = progressTarget.querySelector("[data-clean-msg]");
+      if(msg){
+        msg.textContent = "Selecione o escudo do seu time.";
+        msg.style.color = "#dc2626";
+      }
+    }
     if(escudo3dMsg) escudo3dMsg.textContent = "Selecione o escudo primeiro.";
     return;
+  }
+
+  if(progressTarget){
+    progressTarget.querySelector(".cleanEscudo3dUploadCard")?.classList.remove("campoObrigatorioErro");
+    const msg = progressTarget.querySelector("[data-clean-msg]");
+    if(msg){
+      msg.textContent = "";
+      msg.style.color = "#4b5563";
+    }
   }
 
   if(escudo3dEnviarBtn) escudo3dEnviarBtn.disabled = true;
@@ -9437,6 +10413,13 @@ async function enviarPedidoEscudo3dComArquivo(file){
       }
 
       if(escudo3dMsg) escudo3dMsg.textContent = `✅ Pedido enviado! ID: ${out.pedido_id}`;
+      if(out.pedido_id){
+        salvarPedidoAtivoLocal(out.pedido_id, "escudo3d");
+      }
+      if(progressTarget){
+        iniciarProgressoNoProduto(progressTarget, out.pedido_id || "novo");
+        if(out.pedido_id) acompanharResultadoClean(out.pedido_id, progressTarget);
+      }
 
       ia4Track("pedido_concluido", {
         produto: "escudo3d",
@@ -9456,9 +10439,11 @@ async function enviarPedidoEscudo3dComArquivo(file){
       carregarHistorico();
       destacarMeusPedidos();
 
-      setTimeout(()=>{
-        window.scrollTo({ top:0, behavior:"smooth" });
-      }, 300);
+      if(!progressTarget){
+        setTimeout(()=>{
+          window.scrollTo({ top:0, behavior:"smooth" });
+        }, 300);
+      }
 
       setTimeout(fecharEscudo3dModal, 900);
     }else{
@@ -9468,6 +10453,7 @@ async function enviarPedidoEscudo3dComArquivo(file){
       });
 
       if(escudo3dMsg) escudo3dMsg.textContent = out.error || "Erro ao enviar.";
+      if(progressTarget) cancelarProgressoNoProduto(progressTarget);
       alert(out.error || "Erro ao enviar.");
     }
   }catch{
@@ -9477,6 +10463,7 @@ async function enviarPedidoEscudo3dComArquivo(file){
     });
 
     if(escudo3dMsg) escudo3dMsg.textContent = "Erro de rede.";
+    if(progressTarget) cancelarProgressoNoProduto(progressTarget);
     alert("Erro de rede.");
   }
 
@@ -9490,6 +10477,12 @@ if(escudo3dEnviarBtn){
 }
 
 mainCreateBtn.addEventListener("click", ()=>{
+  if(IA4_EMPRESAS_MODE){
+    activateCleanProductBlock("arte_empresa");
+    scrollToCleanProductBlock("arte_empresa");
+    return;
+  }
+
   const current = selectedProductInput.value;
 
   if(current){
@@ -10623,18 +11616,19 @@ function atualizarTopoProducao(pedidos){
   }
 
   if(temPronto){
-    texto.textContent = "Finalizado";
+    texto.textContent = "";
     fill.style.width = "100%";
     box.classList.add("show");
 
     setTimeout(()=>{
       const aindaTexto = document.getElementById("ia4TopProducaoTexto");
       const aindaBox = document.getElementById("ia4TopProducaoBox");
+      const aindaFill = document.querySelector(".ia4TopProducaoFill");
 
-      if(aindaTexto && aindaTexto.textContent === "Finalizado"){
+      if(aindaTexto && !aindaTexto.textContent && aindaFill?.style.width === "100%"){
         aindaBox?.classList.remove("show");
       }
-    }, 8000);
+    }, 3000);
 
     return;
   }
@@ -10685,25 +11679,25 @@ else if(pct < 20){
   texto = "📲 Sua arte já vai com descrição pronta para copiar e postar no Instagram.";
 }
 else if(pct < 30){
-  texto = "⚽ Agora qualquer time pode postar como os grandes clubes — sem designer e sem complicação.";
+  texto = "Agora qualquer negócio pode postar com aparência profissional sem depender de designer.";
 }
 else if(pct < 40){
-  texto = "😓 Muitos times não conseguem postar porque dependem de alguém para criar as artes.";
+  texto = "Muitos negócios deixam de postar porque dependem de alguém para criar as artes.";
 }
 else if(pct < 50){
-  texto = "🔥 Quando um time para de postar, ele some da cabeça da torcida.";
+  texto = "Quando o negócio para de postar, ele perde presença na lembrança do cliente.";
 }
 else if(pct < 60){
-  texto = "📉 Instagram parado reduz engajamento, alcance e até interesse de patrocinadores.";
+  texto = "Instagram parado reduz engajamento, alcance e oportunidades de venda.";
 }
 else if(pct < 70){
-  texto = "🏆 Times profissionais postam constantemente para manter torcida e jogadores conectados.";
+  texto = "Negócios consistentes postam com frequência para manter clientes conectados.";
 }
 else if(pct < 80){
-  texto = "⚡ Times que postam frequentemente passam mais organização e profissionalismo.";
+  texto = "Empresas que postam frequentemente passam mais organização e profissionalismo.";
 }
 else if(pct < 90){
-  texto = "🎨 Sua arte está quase pronta para fortalecer o Instagram do seu time.";
+  texto = "Sua arte está quase pronta para fortalecer a comunicação do seu negócio.";
 }
 else{
   texto = "💎 Em instantes sua arte profissional estará pronta para baixar e postar 🚀";
@@ -10739,8 +11733,9 @@ function ia4ContaAutoPendente(){
   return localStorage.getItem("ia4tube_conta_auto_pendente") === "1";
 }
 
-function ia4FinalizarContaBox(id){
+function ia4FinalizarContaBox(p){
   if(!ia4ContaAutoPendente()) return "";
+  const id = typeof p === "object" ? p.id : p;
 
   return `
     <div style="margin-top:12px;padding:14px;border-radius:16px;background:#ecfdf3;border:1px solid #bbf7d0;color:#14532d;text-align:left;">
@@ -10760,6 +11755,240 @@ function ia4FinalizarContaBox(id){
       </button>
     </div>
   `;
+}
+
+function cardPagamentoPendente(p) {
+  const valorNumero = Number(p.valor_pendente || 0);
+  const valor = Number.isInteger(valorNumero)
+    ? String(valorNumero)
+    : valorNumero.toFixed(2).replace(".", ",");
+  const titulo = "Sua prévia está pronta ✅";
+  const texto = `Gostou da arte? Oferta do dia: pague R$${valor} e receba R$${valor} de bônus para criar a próxima arte. ⚽`;
+  return `
+    <div class="pagamentoPendenteBox">
+      <div class="pagamentoPendenteTitulo">${titulo}</div>
+      <div class="pagamentoPendenteTexto">${texto}</div>
+      <button type="button" class="menuPedidoBtn" onclick="copiarPixPedido('${p.id}')">
+        Copiar Pix R$${valor}
+      </button>
+      <button type="button" class="menuPedidoBtn" onclick="verQrCodePedido('${p.id}')">
+        Ver QR Code
+      </button>
+      <button type="button" class="menuPedidoBtn" onclick="usarSaldoPedido('${p.id}')">
+        Usar saldo IA4Tube
+      </button>
+    </div>
+  `;
+}
+
+async function gerarPixPedido(id) {
+  if(!token){
+    alert("Faça login para pagar com Pix.");
+    return null;
+  }
+
+  const r = await fetch(`${API_BASE}/pedidos/${id}/gerar-pix`, {
+    method:"POST",
+    headers:{
+      "Authorization":"Bearer " + token
+    }
+  });
+
+  const data = await r.json().catch(()=>({}));
+
+  if(!r.ok || !data.ok){
+    throw new Error(data.error || "Não foi possível gerar Pix.");
+  }
+
+  return data;
+}
+
+async function copiarTextoPix(texto) {
+  if(navigator.clipboard?.writeText){
+    await navigator.clipboard.writeText(texto);
+    return;
+  }
+
+  const input = document.createElement("textarea");
+  input.value = texto;
+  input.style.position = "fixed";
+  input.style.opacity = "0";
+  document.body.appendChild(input);
+  input.focus();
+  input.select();
+  document.execCommand("copy");
+  input.remove();
+}
+
+async function copiarPixPedido(id) {
+  try{
+    const data = await gerarPixPedido(id);
+    if(!data?.pix_copia_cola){
+      alert("Pix ainda não disponível para este pedido.");
+      return;
+    }
+
+    await copiarTextoPix(data.pix_copia_cola);
+    alert("Pix copiado. Após o pagamento, a imagem será liberada automaticamente.");
+    carregarHistorico();
+  }catch(e){
+    alert(e.message || "Erro ao copiar Pix.");
+  }
+}
+
+async function verQrCodePedido(id) {
+  try{
+    const data = await gerarPixPedido(id);
+
+    if(!data?.qr_code_base64){
+      alert("QR Code ainda não disponível. Use Copiar Pix.");
+      return;
+    }
+
+    abrirModalPixQr(id, data);
+    carregarHistorico();
+  }catch(e){
+    alert(e.message || "Erro ao abrir QR Code.");
+  }
+}
+
+async function usarSaldoPedido(id) {
+  if(!token){
+    alert("Faça login para usar seu saldo IA4Tube.");
+    return;
+  }
+
+  try{
+    const r = await fetch(`${API_BASE}/pedidos/${id}/pagar-com-saldo`, {
+      method:"POST",
+      headers:{
+        "Authorization":"Bearer " + token
+      }
+    });
+
+    const data = await r.json().catch(()=>({}));
+
+    if(!r.ok || !data.ok){
+      alert(data.error || "Não foi possível desbloquear com saldo.");
+      return;
+    }
+
+    alert("Imagem desbloqueada com saldo IA4Tube.");
+    await refreshMe();
+    await carregarHistorico();
+  }catch(e){
+    alert("Erro de rede ao usar saldo IA4Tube.");
+  }
+}
+
+function abrirModalPixQr(id, data) {
+  const modal = document.getElementById("pixQrModal");
+  const body = document.getElementById("pixQrBody");
+
+  if(!modal || !body) return;
+
+  const src = `data:image/png;base64,${data.qr_code_base64}`;
+
+  body.innerHTML = `
+    <img class="pixQrImagem" src="${src}" alt="QR Code Pix">
+    <div class="pixQrTexto">
+      Escaneie o QR Code ou copie o Pix. Após o pagamento, a imagem será liberada automaticamente.
+    </div>
+    <button type="button" class="menuPedidoBtn" onclick="copiarPixPedido('${id}')">
+      Copiar Pix
+    </button>
+  `;
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function abrirModalPixSaldo(pacote, data) {
+  const modal = document.getElementById("pixQrModal");
+  const body = document.getElementById("pixQrBody");
+
+  if(!modal || !body) return;
+
+  const valor = SALDO_PIX_LABELS[pacote] || `R$${Number(data.valor_pago || 0).toFixed(2).replace(".", ",")}`;
+  saldoPixAtual = {
+    pix: data.pix_copia_cola || "",
+    pacote,
+    valor
+  };
+
+  const src = data.qr_code_base64 ? `data:image/png;base64,${data.qr_code_base64}` : "";
+
+  body.innerHTML = `
+    ${src ? `<img class="pixQrImagem" src="${src}" alt="QR Code Pix">` : ``}
+    <div class="pixQrTexto">
+      Após o pagamento, o saldo é liberado automaticamente.
+    </div>
+    <button type="button" class="menuPedidoBtn" onclick="copiarPixSaldoAtual()">
+      Copiar Pix ${valor}
+    </button>
+  `;
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+async function copiarPixSaldoAtual() {
+  if(!saldoPixAtual?.pix){
+    alert("Pix ainda não disponível.");
+    return;
+  }
+
+  try{
+    await copiarTextoPix(saldoPixAtual.pix);
+    alert("Pix copiado. Após o pagamento, o saldo é liberado automaticamente.");
+  }catch(e){
+    alert("Não foi possível copiar o Pix.");
+  }
+}
+
+function fecharModalPixQr() {
+  const modal = document.getElementById("pixQrModal");
+  if(!modal) return;
+
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+async function abrirPedidoDireto(pedidoId) {
+  if(!pedidoId) return;
+
+  const menu = document.getElementById("menuPedidosTopo");
+  if(menu){
+    menu.classList.add("open");
+    menu.style.transform = "";
+  }
+
+  if(typeof historicoAssinaturaAtual !== "undefined"){
+    historicoAssinaturaAtual = "";
+  }
+
+  await carregarHistorico();
+
+  setTimeout(() => {
+    const pedidoEl =
+      menu?.querySelector(`[data-pedido-id="${pedidoId}"]`) ||
+      document.querySelector(`[data-historico-pedido-id="${pedidoId}"]`);
+
+    console.log("[abrirPedidoDireto]", {
+      pedidoId,
+      menuAberto: menu?.classList.contains("open"),
+      pedidoEl
+    });
+
+    if(!pedidoEl) return;
+
+    pedidoEl.scrollIntoView({ behavior:"smooth", block:"center" });
+    pedidoEl.classList.add("pedidoHighlight");
+
+    setTimeout(() => {
+      pedidoEl.classList.remove("pedidoHighlight");
+    }, 3200);
+  }, 120);
 }
 
 async function ia4FinalizarContaAuto(id){
@@ -10816,6 +12045,64 @@ async function ia4FinalizarContaAuto(id){
   }
 }
 
+async function finalizarCadastroDuranteProgresso(ev){
+  ev?.preventDefault?.();
+  ev?.stopPropagation?.();
+
+  const box = ev?.target?.closest?.(".cleanProgressCadastro");
+  const login = box?.querySelector("[data-progress-login]")?.value?.trim() || "";
+  const senha = box?.querySelector("[data-progress-senha]")?.value || "";
+
+  if(login.length < 3){
+    alert("Digite um login com pelo menos 3 caracteres.");
+    return;
+  }
+
+  if(senha.length < 3){
+    alert("Digite uma senha com pelo menos 3 caracteres.");
+    return;
+  }
+
+  try{
+    const r = await fetch(`${API_BASE}/auth/finalizar-conta-auto`, {
+      method:"POST",
+      headers:{
+        "Authorization":"Bearer " + token,
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({ login, senha })
+    });
+
+    const data = await r.json().catch(()=>({}));
+
+    if(!r.ok || !data.ok || !data.token){
+      if(String(data.error || "").includes("já foi finalizada")){
+        localStorage.removeItem("ia4tube_conta_auto_pendente");
+        box?.remove();
+        await refreshMe();
+        await carregarHistorico();
+        return;
+      }
+
+      alert(data.error || "Não foi possível salvar seu cadastro.");
+      return;
+    }
+
+    token = data.token;
+    localStorage.setItem("omascote_token", data.token);
+    localStorage.setItem("omascote_nome_time", data.nome_time || login);
+    localStorage.removeItem("ia4tube_conta_auto_pendente");
+    document.body.classList.remove("visitanteNaoLogado");
+    box?.remove();
+    applyLocal();
+    await refreshMe();
+    await carregarHistorico();
+    alert("Cadastro salvo. Seu pedido continua em produção.");
+  }catch(e){
+    alert("Erro de rede ao salvar cadastro.");
+  }
+}
+
 function atualizarMenuPedidosTopo(pedidos){
   const menu = document.getElementById("menuPedidosTopo");
   if(!menu) return;
@@ -10831,19 +12118,23 @@ function atualizarMenuPedidosTopo(pedidos){
     const statusPedido = String(p.status || "").toLowerCase();
     const ajustePendente = statusPedido === "ajuste_pendente";
     const aprovado = p.aprovado_cliente === true;
+    const pagamentoPendente = p.pagamento_pendente === true;
+    const mostrarPagamentoPendente = pagamentoPendente && !!p.imagem_url;
     const usouAjuste = p.ajuste_automatico_usado === true;
 
     return `
-    <div class="menuPedidoItem">
+    <div class="menuPedidoItem" data-pedido-id="${p.id}">
       ${p.imagem_url ? `
         <div>
           <img class="menuPedidoThumb" src="${p.imagem_url}" alt="Arte pronta" oncontextmenu="return false;" draggable="false">
-          ${ia4FinalizarContaBox(p.id)}
+          ${ia4FinalizarContaBox(p)}
+          ${mostrarPagamentoPendente ? `` : `
           <div class="previewAviso">
             👇 Esta é apenas a prévia da imagem abaixo.<br>
             Você pode baixar a imagem final<br>
             ou pedir 1 edição gratuita antes de baixar 🚀
           </div>
+          `}
         </div>
       ` : `
         <div class="menuPedidoThumb" style="display:flex;align-items:center;justify-content:center;padding:18px;text-align:center;color:#ffffff;font-size:16px;font-weight:950;line-height:1.35;background:#0f172a;">
@@ -10855,6 +12146,7 @@ function atualizarMenuPedidosTopo(pedidos){
       <div class="menuPedidoInfo">
         <div class="menuPedidoTipo">${p.tipo || "Arte"}</div>
         <div class="menuPedidoStatus">${ajustePendente ? "⏳ Ajustando sua arte..." : textoStatusPedido(p.status)}</div>
+        ${mostrarPagamentoPendente ? cardPagamentoPendente(p) : pagamentoPendente ? `<div class="ajustePedidoBox">Sua arte está sendo criada. Assim que a prévia ficar pronta, o pagamento Pix aparecerá aqui.</div>` : ``}
         ${p.status === "pronto" ? `<div class="descLabelInstagram">Sugestão de descrição para Instagram</div>` : ``}
         ${barraProducaoPedido(p)}
         ${p.status === "pronto" ? `
@@ -10864,7 +12156,8 @@ function atualizarMenuPedidosTopo(pedidos){
   <button class="btnCopiar" onclick="copiarDescricaoTopo('${p.id}')">📋</button>
 </div>
 
-${ia4ContaAutoPendente() ? `
+${pagamentoPendente ? `
+` : ia4ContaAutoPendente() ? `
 ` : aprovado ? `
 <button type="button" class="menuPedidoBtn" onclick="baixarPedido('${p.id}')">Baixar novamente</button>
 ` : `
@@ -10935,6 +12228,7 @@ async function carregarHistorico(){
 
     atualizarBadgePedidos(pedidos);
     atualizarTopoProducao(pedidos);
+    restaurarPedidosAtivos(pedidos);
 
     const novaAssinatura = JSON.stringify(pedidos.map(p => ({
       id: p.id,
@@ -10943,6 +12237,9 @@ async function carregarHistorico(){
       imagem_url: p.imagem_url,
       descricao_instagram: p.descricao_instagram,
       aprovado_cliente: p.aprovado_cliente,
+      pagamento_pendente: p.pagamento_pendente,
+      valor_pendente: p.valor_pendente,
+      motivo_pagamento_pendente: p.motivo_pagamento_pendente,
       ajuste_automatico_usado: p.ajuste_automatico_usado,
       motivo_ajuste: p.motivo_ajuste
     })));
@@ -10982,24 +12279,27 @@ async function carregarHistorico(){
       const statusPedido = String(p.status || "").toLowerCase();
       const ajustePendente = statusPedido === "ajuste_pendente";
       const aprovado = p.aprovado_cliente === true;
+      const pagamentoPendente = p.pagamento_pendente === true;
+      const mostrarPagamentoPendente = pagamentoPendente && !!p.imagem_url;
       const usouAjuste = p.ajuste_automatico_usado === true;
 
       return `
-      <div style="background:#fff;color:#000;padding:10px;border-radius:10px;border:1px solid #e5e7eb;">
+      <div data-pedido-id="${p.id}" data-historico-pedido-id="${p.id}" style="background:#fff;color:#000;padding:10px;border-radius:10px;border:1px solid #e5e7eb;">
         <b>${p.tipo}</b><br>
         ID: ${p.id}<br>
         Status: ${ajustePendente ? "⏳ Ajustando sua arte..." : textoStatusPedido(p.status)}<br>
+        ${mostrarPagamentoPendente ? cardPagamentoPendente(p) : pagamentoPendente ? `<div class="ajustePedidoBox">Sua arte está sendo criada. Assim que a prévia ficar pronta, o pagamento Pix aparecerá aqui.</div>` : ``}
         ${p.status === "pronto" ? `<div class="descLabelInstagram">Sugestão de descrição para Instagram</div>` : ``}
         ${barraProducaoPedido(p)}
 
         ${p.imagem_url ? `
           <div style="margin-top:10px;text-align:center;">
             <img src="${p.imagem_url}" class="previewProtegida" alt="Prévia da arte" oncontextmenu="return false;" draggable="false">
-            <div class="previewAviso">
+            ${mostrarPagamentoPendente ? `` : `<div class="previewAviso">
   👇 Esta é apenas a prévia da sua arte.<br>
   Você pode baixar a imagem final em alta qualidade<br>
   ou pedir 1 edição gratuita antes de baixar 🚀
-</div>
+</div>`}
           </div>
         ` : `
           <div style="margin-top:10px;text-align:center;">
@@ -11017,8 +12317,9 @@ ${p.status === "pronto" ? `
   <button class="btnCopiar" onclick="copiarDescricao('${p.id}')">📋</button>
 </div>
 
-${ia4ContaAutoPendente() ? `
-${ia4FinalizarContaBox(p.id)}
+${pagamentoPendente ? `
+` : ia4ContaAutoPendente() ? `
+${ia4FinalizarContaBox(p)}
 ` : aprovado ? `
         <button onclick="baixarPedido('${p.id}')" style="margin-top:8px;padding:8px 12px;border-radius:10px;border:none;background:#2ecc71;color:#fff;font-weight:900;cursor:pointer;width:100%;">
           Baixar novamente
@@ -11224,6 +12525,12 @@ document.getElementById("ajustePedidoModal")?.addEventListener("click", (e)=>{
     fecharModalAjuste();
   }
 });
+document.getElementById("pixQrCloseBtn")?.addEventListener("click", fecharModalPixQr);
+document.getElementById("pixQrModal")?.addEventListener("click", (e)=>{
+  if(e.target && e.target.id === "pixQrModal"){
+    fecharModalPixQr();
+  }
+});
 
 async function acompanharResultado(pedidoId){
   const boxEl = document.getElementById("resultadoBox");
@@ -11361,7 +12668,11 @@ if(!token){
   selectorStage?.classList.add("open");
 
   setTimeout(()=>{
-    selectProduct("jogador_escudo");
+    if(IA4_EMPRESAS_MODE){
+      activateCleanProductBlock("arte_empresa");
+    }else{
+      selectProduct("jogador_escudo");
+    }
 
     document.querySelector(".categoryChoiceRow")?.style.setProperty("display", "none", "important");
     document.querySelector(".categoryMiniRow")?.style.setProperty("display", "none", "important");
@@ -11384,6 +12695,12 @@ const bannerJogadorEscudoLink = document.getElementById("bannerJogadorEscudoLink
 
 bannerJogadorEscudoLink?.addEventListener("click", (e)=>{
   e.preventDefault();
+
+  if(IA4_EMPRESAS_MODE){
+    activateCleanProductBlock("arte_empresa");
+    scrollToCleanProductBlock("arte_empresa");
+    return;
+  }
 
   showProductCategory("jogador");
 
@@ -11415,27 +12732,41 @@ function destacarMeusPedidos(){
 }
 
 const btnSairEl = document.getElementById("btnSair");
+const btnCadastroTopoEl = document.getElementById("btnCadastroTopo");
 
-if(!token){
-  if(btnSairEl){
-    btnSairEl.textContent = "Entrar";
-    btnSairEl.style.background = "#ffffff";
+function atualizarTopoAuth(){
+  const btnEntrarTopo = document.getElementById("btnSair");
+  const btnCadastroTopo = document.getElementById("btnCadastroTopo");
+
+  if(btnEntrarTopo){
+    btnEntrarTopo.textContent = token ? "Sair" : "Entrar";
+    btnEntrarTopo.style.background = "#ffffff";
   }
-}else{
-  if(btnSairEl){
-    btnSairEl.textContent = "Sair";
-    btnSairEl.style.background = "#ffffff";
+
+  if(btnCadastroTopo){
+    const nomeTopo = localStorage.getItem("omascote_nome_time") || "Minha conta";
+    btnCadastroTopo.textContent = token ? nomeTopo : "Cadastro";
+    btnCadastroTopo.style.background = "#ffffff";
+    btnCadastroTopo.style.cursor = token ? "default" : "pointer";
   }
 }
 
+atualizarTopoAuth();
+
 document.getElementById("btnSair")?.addEventListener("click", ()=>{
   if(!token){
-    abrirCadastroVisitanteModal();
+    abrirLoginVisitanteModal();
     return;
   }
 
   localStorage.removeItem("omascote_token");
   window.location.href = "app.html";
+});
+
+btnCadastroTopoEl?.addEventListener("click", ()=>{
+  if(!token){
+    abrirCadastroVisitanteModal();
+  }
 });
 
 document.getElementById("btnAtualizar")?.addEventListener("click", refreshMe);
@@ -11459,10 +12790,9 @@ btnAbrirSaldo?.addEventListener("click", (e)=>{
   saldoMenu?.classList.toggle("open");
 });
 
-document.querySelectorAll(".saldoOpcao").forEach((btn)=>{
+document.querySelectorAll(".saldoPagamentoBtn").forEach((btn)=>{
   btn.addEventListener("click", ()=>{
-    saldoMenu?.classList.remove("open");
-    comprarCreditos(btn.dataset.pacote);
+    comprarCreditos(btn.dataset.pacote, btn.dataset.metodo || "checkout", btn);
   });
 });
 
@@ -11520,17 +12850,11 @@ function ia4MostrarOpcoes(titulo, html){
 }
 
 function ia4MostrarProdutosSuporte(){
-  ia4MostrarOpcoes("Qual produto você quer entender?", `
-    <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Quero entender Resultado do jogo')">1) Resultado do jogo</button>
-    <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Quero entender Escalação')">2) Escalação</button>
-    <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Quero entender Contratação')">3) Contratação</button>
-    <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Quero entender Próximo jogo')">4) Próximo jogo</button>
-    <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Quero entender Patrocinador')">5) Patrocinador</button>
-    <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Quero entender Escudo 3D')">6) Escudo 3D</button>
-
-    <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Quero entender Próximo jogo jogador')">7) Próximo jogo jogador</button>
-    <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Quero entender Resultado jogador')">8) Resultado jogador</button>
-    <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Quero entender Jogador + escudo')">9) Jogador + escudo</button>
+  ia4MostrarOpcoes("Sobre a arte para empresa:", `
+    <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Quero entender a arte para empresa')">Como funciona?</button>
+    <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Quais imagens devo enviar para a arte da empresa')">Quais imagens devo enviar?</button>
+    <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Quero ajuda para preencher ramo nome e objetivo')">Ajuda para preencher os campos</button>
+    <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Quero entender como a IA usa meu ramo')">Como a IA usa meu ramo?</button>
   `);
 }
 
@@ -11540,14 +12864,14 @@ function ia4MostrarEnvioSuporte(){
     <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Não consigo enviar imagem')">Não consigo enviar imagem</button>
     <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Botão criar minha arte não funciona')">Botão criar minha arte não funciona</button>
     <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Apareceu erro ao enviar pedido')">Apareceu erro ao enviar pedido</button>
-    <button type="button" class="ia4QuickBtn" onclick="ia4MostrarProdutosSuporte()">Quero ver campos obrigatórios por produto</button>
+    <button type="button" class="ia4QuickBtn" onclick="ia4MostrarProdutosSuporte()">Quero ver os campos obrigatórios</button>
   `);
 }
 
 function ia4MostrarErroSuporte(){
   ia4MostrarOpcoes("Qual problema aconteceu?", `
     <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Minha imagem saiu com nome errado')">Nome/texto saiu errado</button>
-    <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('O escudo saiu errado')">Escudo saiu errado</button>
+    <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('A logo saiu errada')">Logo saiu errada</button>
     <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('A imagem ficou estranha')">Imagem ficou estranha</button>
     <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Quero pedir alteração no pedido')">Quero pedir alteração</button>
     <button type="button" class="ia4QuickBtn" onclick="ia4EnviarTextoSuporte('Meu pedido não chegou')">Meu pedido não chegou</button>
