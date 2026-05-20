@@ -5146,6 +5146,165 @@ body.visitanteNaoLogado .visitanteWelcomeCallout{
   box-shadow:inset 0 0 0 4px rgba(255,255,255,.70);
 }
 
+.cleanNicheAutocomplete{
+  position:relative;
+  display:grid;
+  gap:8px;
+}
+
+.cleanNicheList{
+  display:none;
+  max-height:280px;
+  overflow:auto;
+  border-radius:16px;
+  border:1px solid #d1d5db;
+  background:#ffffff;
+  box-shadow:0 18px 38px rgba(15,23,42,.16);
+  padding:6px;
+  z-index:5;
+}
+
+.cleanNicheAutocomplete.is-open .cleanNicheList{
+  display:grid;
+  gap:4px;
+}
+
+.cleanNicheOption{
+  width:100%;
+  border:0;
+  border-radius:12px;
+  padding:11px 12px;
+  background:#ffffff;
+  color:#111827;
+  font-size:14px;
+  font-weight:850;
+  text-align:left;
+  cursor:pointer;
+}
+
+.cleanNicheOption:hover,
+.cleanNicheOption:focus{
+  background:#ecfdf3;
+  outline:2px solid rgba(22,163,74,.22);
+}
+
+.cleanNicheOptionManual{
+  margin-top:4px;
+  border:1px solid #bbf7d0;
+  background:#f0fdf4;
+  color:#15803d;
+}
+
+.cleanNicheManual{
+  display:none;
+  gap:6px;
+  padding-top:4px;
+}
+
+.cleanNicheAutocomplete.is-manual .cleanNicheManual{
+  display:grid;
+}
+
+.cleanNicheHelp{
+  color:#64748b;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.35;
+}
+
+.cleanObjectiveToggle{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  width:100%;
+  min-height:54px;
+  padding:12px 14px;
+  border:1px solid #d1d5db;
+  border-radius:16px;
+  background:#ffffff;
+  color:#111827;
+  font-size:14px;
+  font-weight:850;
+  text-align:left;
+  cursor:pointer;
+}
+
+.cleanObjectiveToggle:hover,
+.cleanObjectiveToggle:focus{
+  border-color:#16a34a;
+  background:#f0fdf4;
+  outline:2px solid rgba(22,163,74,.18);
+}
+
+.cleanObjectiveArrow{
+  flex:0 0 auto;
+  color:#15803d;
+  font-size:18px;
+  font-weight:950;
+  line-height:1;
+}
+
+.cleanDynamicFields{
+  display:grid;
+  gap:10px;
+}
+
+.cleanDynamicField{
+  display:grid;
+  gap:6px;
+}
+
+.cleanDynamicField label{
+  color:#243041;
+  font-size:13px;
+  font-weight:900;
+}
+
+.cleanVisualStyleGrid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+.cleanVisualStyleOption{
+  display:grid;
+  gap:6px;
+  min-height:118px;
+  padding:13px;
+  border:1px solid #d1d5db;
+  border-radius:16px;
+  background:#ffffff;
+  color:#111827;
+  text-align:left;
+  cursor:pointer;
+}
+
+.cleanVisualStyleOption:hover,
+.cleanVisualStyleOption:focus{
+  border-color:#16a34a;
+  background:#f0fdf4;
+  outline:2px solid rgba(22,163,74,.18);
+}
+
+.cleanVisualStyleOption.is-selected{
+  border-color:#16a34a;
+  background:#ecfdf3;
+  box-shadow:0 10px 24px rgba(22,163,74,.12);
+}
+
+.cleanVisualStyleTitle{
+  font-size:14px;
+  font-weight:950;
+}
+
+.cleanVisualStyleDesc{
+  color:#64748b;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.35;
+}
+
 .cleanScoreGrid{
   display:grid;
   grid-template-columns:1fr 78px 28px 78px 1fr;
@@ -6103,7 +6262,7 @@ body.ia4-empresas .centerBtn{
 </div>
 
 <script>
-const API_BASE = "https://api.omascote.com.br";
+const API_BASE = ["localhost", "127.0.0.1"].includes(location.hostname) ? "http://localhost:3000" : "https://api.omascote.com.br";
 
 let token = localStorage.getItem("omascote_token");
 
@@ -7015,16 +7174,16 @@ const PRODUCT_CONFIG_DETAILS = {
       whatsapp: { visible: true, required: false },
       instagram: { visible: true, required: false },
       observacoes: { visible: true, required: false },
-      logo: { visible: true, required: false },
+      logo: { visible: true, required: true },
       fotos: { visible: true, required: false },
       referencias: { visible: true, required: false }
     },
     validation: {
       requiredInputs: ["ramo", "nome_empresa", "objetivo"],
-      requiredUploads: []
+      requiredUploads: ["logo"]
     },
     uploads: {
-      logo: { used: true, required: false, formField: "logo", outputName: "logo.png" },
+      logo: { used: true, required: true, formField: "logo", outputName: "logo.png" },
       fotos: { used: true, required: false, formField: "fotos", outputNamePattern: "foto{NN}.png" },
       referencias: { used: true, required: false, formField: "referencias", outputNamePattern: "referencia{NN}.png" }
     },
@@ -7310,6 +7469,973 @@ function getProductSerializer(productKey){
 
 const CLEAN_PRODUCT_SCHEMA_VERSION = 2;
 
+const IA4_EMPRESA_RAMOS = [
+  "Açaí",
+  "Academia",
+  "Academia de artes marciais",
+  "Academia de dança",
+  "Academia de ginástica",
+  "Academia de musculação",
+  "Academia de natação",
+  "Acessórios automotivos",
+  "Acessórios femininos",
+  "Acessórios para celular",
+  "Açougue",
+  "Acupuntura",
+  "Adega",
+  "Administradora de condomínios",
+  "Advocacia",
+  "Agência de empregos",
+  "Agência de marketing",
+  "Agência de publicidade",
+  "Agência de turismo",
+  "Agência digital",
+  "Agropecuária",
+  "Alinhamento e balanceamento",
+  "Aluguel de andaimes",
+  "Aluguel de brinquedos",
+  "Aluguel de carros",
+  "Aluguel de equipamentos",
+  "Aluguel de ferramentas",
+  "Aluguel de máquinas",
+  "Aluguel de roupas",
+  "Aluguel de som e iluminação",
+  "Amolador",
+  "Antiguidades",
+  "Aplicação de insulfilm",
+  "Ar-condicionado",
+  "Armarinho",
+  "Aromaterapia",
+  "Arquitetura",
+  "Artesanato",
+  "Assistência técnica",
+  "Assistência técnica de celulares",
+  "Assistência técnica de computadores",
+  "Assistência técnica de eletrodomésticos",
+  "Atacadista",
+  "Ateliê",
+  "Auto elétrica",
+  "Auto escola",
+  "Auto peças",
+  "Auto som",
+  "Automação residencial",
+  "Avicultura",
+  "Bar",
+  "Barbearia",
+  "Bazar",
+  "Bebedouros",
+  "Bebidas",
+  "Bijuterias",
+  "Bicicletaria",
+  "Borracharia",
+  "Boutique",
+  "Brechó",
+  "Brindes personalizados",
+  "Bronzeamento",
+  "Buffet",
+  "Cafeteria",
+  "Calhas",
+  "Cama, mesa e banho",
+  "Câmeras de segurança",
+  "Camping e pesca",
+  "Canil",
+  "Capotaria",
+  "Carimbos",
+  "Carpintaria",
+  "Casa de carnes",
+  "Casa de festas",
+  "Casa de ração",
+  "Casa lotérica",
+  "Casas pré-fabricadas",
+  "Celulares",
+  "Centro automotivo",
+  "Centro de estética",
+  "Centro de treinamento",
+  "Cerimonial",
+  "Cestas de café da manhã",
+  "Chaveiro",
+  "Choperia",
+  "Churrascaria",
+  "Clínica capilar",
+  "Clínica de emagrecimento",
+  "Clínica de estética",
+  "Clínica de exames",
+  "Clínica de fisioterapia",
+  "Clínica de olhos",
+  "Clínica de ortopedia",
+  "Clínica de psicologia",
+  "Clínica médica",
+  "Clínica odontológica",
+  "Clínica odontopediátrica",
+  "Clínica veterinária",
+  "Clube de assinatura",
+  "Colchões",
+  "Colégio",
+  "Comércio de gás",
+  "Comunicação visual",
+  "Concessionária",
+  "Confecção",
+  "Confeitaria",
+  "Conserto de bicicletas",
+  "Conserto de celulares",
+  "Conserto de computadores",
+  "Conserto de eletrodomésticos",
+  "Conserto de máquinas",
+  "Conserto de motos",
+  "Conserto de roupas",
+  "Construtora",
+  "Consultoria empresarial",
+  "Consultoria financeira",
+  "Consultoria de imagem",
+  "Contabilidade",
+  "Corretora de imóveis",
+  "Corretora de seguros",
+  "Corte a laser",
+  "Cosméticos",
+  "Costura",
+  "Coworking",
+  "Creche",
+  "Curso de beleza",
+  "Curso de informática",
+  "Curso de idiomas",
+  "Curso profissionalizante",
+  "Decoração",
+  "Dedetizadora",
+  "Delivery",
+  "Dentista",
+  "Depilação",
+  "Depósito de bebidas",
+  "Depósito de construção",
+  "Despachante",
+  "Designer de interiores",
+  "Designer gráfico",
+  "Distribuidora",
+  "Doceria",
+  "Doces personalizados",
+  "Drogaria",
+  "Elétrica",
+  "Eletricista",
+  "Eletrônicos",
+  "Embalagens",
+  "Empório",
+  "Encanador",
+  "Energia solar",
+  "Engenharia",
+  "Equipamentos de proteção",
+  "Ervanário",
+  "Escola",
+  "Escola de música",
+  "Escola de natação",
+  "Escola infantil",
+  "Escritório de advocacia",
+  "Escritório virtual",
+  "Espaço de eventos",
+  "Espaço kids",
+  "Espetaria",
+  "Estacionamento",
+  "Estamparia",
+  "Estética automotiva",
+  "Eventos corporativos",
+  "Faculdade",
+  "Farmácia",
+  "Ferragem",
+  "Ferramentaria",
+  "Financeira",
+  "Fisioterapia",
+  "Floricultura",
+  "Food truck",
+  "Fotografia",
+  "Fretes e mudanças",
+  "Funerária",
+  "Galeteria",
+  "Gráfica",
+  "Guincho",
+  "Hamburgueria",
+  "Hidráulica",
+  "Hortifruti",
+  "Hospital veterinário",
+  "Hotel",
+  "Imobiliária",
+  "Informática",
+  "Instalação elétrica",
+  "Instalação hidráulica",
+  "Jardinagem",
+  "Joalheria",
+  "Lanchonete",
+  "Lan house",
+  "Lavagem de estofados",
+  "Lavanderia",
+  "Lava-jato",
+  "Limpeza de pele",
+  "Limpeza pós-obra",
+  "Limpeza residencial",
+  "Locadora",
+  "Loja agropecuária",
+  "Loja de acessórios",
+  "Loja de artigos religiosos",
+  "Loja de artigos esportivos",
+  "Loja de bebê",
+  "Loja de brinquedos",
+  "Loja de calçados",
+  "Loja de celular",
+  "Loja de conveniência",
+  "Loja de cosméticos",
+  "Loja de eletrônicos",
+  "Loja de embalagens",
+  "Loja de ferramentas",
+  "Loja de festas",
+  "Loja de informática",
+  "Loja de materiais elétricos",
+  "Loja de móveis",
+  "Loja de piscinas",
+  "Loja de presentes",
+  "Loja de roupas",
+  "Loja de suplementos",
+  "Loja geek",
+  "Madeireira",
+  "Manicure",
+  "Manutenção de piscinas",
+  "Manutenção predial",
+  "Marmoraria",
+  "Marcenaria",
+  "Marmitaria",
+  "Marketing visual para empresas",
+  "Massoterapia",
+  "Materiais de construção",
+  "Mecânica automotiva",
+  "Mercado",
+  "Mercearia",
+  "Moda feminina",
+  "Moda fitness",
+  "Moda infantil",
+  "Moda masculina",
+  "Motel",
+  "Móveis planejados",
+  "Nutricionista",
+  "Oficina",
+  "Oficina de motos",
+  "Ortopedia",
+  "Ótica",
+  "Padaria",
+  "Paisagismo",
+  "Papelaria",
+  "Pastelaria",
+  "Perfumaria",
+  "Personal trainer",
+  "Pet shop",
+  "Pilates",
+  "Pintura automotiva",
+  "Pizzaria",
+  "Podologia",
+  "Posto de combustível",
+  "Pousada",
+  "Praia e moda fitness",
+  "Produtos de limpeza",
+  "Produtos naturais",
+  "Psicologia",
+  "Quiosque",
+  "Refrigeração",
+  "Restaurante",
+  "Restaurante japonês",
+  "Revenda de carros",
+  "Rotisseria",
+  "Saúde ocupacional",
+  "Salgaderia",
+  "Salão de beleza",
+  "Segurança eletrônica",
+  "Seguros",
+  "Semijoias",
+  "Serviços contábeis",
+  "Serviços gerais",
+  "Serralheria",
+  "Sex shop",
+  "Sorveteria",
+  "Studio de beleza",
+  "Studio de sobrancelhas",
+  "Supermercado",
+  "Suplementos",
+  "Sushi",
+  "Tapeçaria",
+  "Tatuagem",
+  "Tecnologia",
+  "Telecom",
+  "Temakeria",
+  "Terraplanagem",
+  "Toldos",
+  "Transportadora",
+  "Treinamento empresarial",
+  "Uniformes",
+  "Veterinária",
+  "Vidraçaria",
+  "Yoga",
+  "Acessórios para pets",
+  "Adestramento de cães",
+  "Aerografia",
+  "Alfaiataria",
+  "Alimentos congelados",
+  "Alimentos funcionais",
+  "Alimentos saudáveis",
+  "Alongamento de cílios",
+  "Animação de festas",
+  "Aparelhos auditivos",
+  "Aquecedores",
+  "Artes gráficas",
+  "Assessoria contábil",
+  "Assessoria esportiva",
+  "Assessoria jurídica",
+  "Assessoria para casamentos",
+  "Auditoria",
+  "Aulas particulares",
+  "Balanças comerciais",
+  "Balões personalizados",
+  "Banca de jornal",
+  "Banho e tosa",
+  "Barbearia premium",
+  "Barraquinha de festa",
+  "Baterias automotivas",
+  "Berçário",
+  "Bolos caseiros",
+  "Bolos decorados",
+  "Bomboniere",
+  "Bordados",
+  "Boteco",
+  "Brinquedoteca",
+  "Cabeleireiro",
+  "Cafeteria colonial",
+  "Calçados femininos",
+  "Calçados infantis",
+  "Calçados masculinos",
+  "Capas para celular",
+  "Capelania",
+  "Car lavagem",
+  "Carretos",
+  "Cartório",
+  "Casas de repouso",
+  "Cervejaria",
+  "Churrasquinho",
+  "Climatização",
+  "Clínica de vacinas",
+  "Clínica geriátrica",
+  "Clínica popular",
+  "Coach",
+  "Cobrança empresarial",
+  "Coffee break",
+  "Colônia de férias",
+  "Comida caseira",
+  "Comida fitness",
+  "Comida japonesa",
+  "Comida mexicana",
+  "Comida mineira",
+  "Comida nordestina",
+  "Comida saudável",
+  "Compressor e ferramentas",
+  "Condomínios",
+  "Conserto de ar-condicionado",
+  "Conserto de geladeira",
+  "Conserto de impressoras",
+  "Conserto de televisão",
+  "Consórcio",
+  "Contêineres",
+  "Controle de pragas",
+  "Cozinha industrial",
+  "Criação de sites",
+  "Cristais e presentes",
+  "Cuidadores de idosos",
+  "Cupcakes",
+  "Cursos online",
+  "Day care pet",
+  "Delivery de bebidas",
+  "Delivery de comida",
+  "Desentupidora",
+  "Desenvolvimento de software",
+  "Desmanche legalizado",
+  "Despensa e mercearia",
+  "Diagnóstico por imagem",
+  "Distribuidora de alimentos",
+  "Distribuidora de gás",
+  "Distribuidora de higiene",
+  "Distribuidora de pneus",
+  "Distribuidora de produtos hospitalares",
+  "Distribuidora de água",
+  "Doces finos",
+  "Drones",
+  "Educação infantil",
+  "Emagrecimento",
+  "Enfermagem domiciliar",
+  "Envelopamento automotivo",
+  "Equipamentos agrícolas",
+  "Equipamentos médicos",
+  "Ervas medicinais",
+  "Escapamentos",
+  "Escola de costura",
+  "Escola de futebol",
+  "Escola de robótica",
+  "Escola técnica",
+  "Esfiharia",
+  "Esoterismo",
+  "Esquadrias de alumínio",
+  "Estética facial",
+  "Estética masculina",
+  "Estética pet",
+  "Estúdio de fotografia",
+  "Estúdio de gravação",
+  "Estúdio de pilates",
+  "Estúdio de tatuagem",
+  "Extintores",
+  "Fábrica de gelo",
+  "Fábrica de móveis",
+  "Fábrica de salgados",
+  "Festas infantis",
+  "Fibra óptica",
+  "Fitness boutique",
+  "Fonoaudiologia",
+  "Forneria",
+  "Franquia",
+  "Funilaria",
+  "Funilaria e pintura",
+  "Fábrica de uniformes",
+  "Gestão de tráfego",
+  "Ginástica laboral",
+  "Harmonização facial",
+  "Home care",
+  "Hospedagem de sites",
+  "Hostel",
+  "Iluminação",
+  "Impermeabilização",
+  "Importados",
+  "Impressão 3D",
+  "Impressão digital",
+  "Indústria alimentícia",
+  "Indústria têxtil",
+  "Influenciador digital",
+  "Injeção eletrônica",
+  "Instituto de beleza",
+  "Internet fibra",
+  "Isolamento acústico",
+  "Itens personalizados",
+  "Jóias",
+  "Karaokê",
+  "Kits festa",
+  "Laboratório de análises",
+  "Laboratório óptico",
+  "Lareiras",
+  "Lavagem a seco",
+  "Lavagem de tapetes",
+  "Lingerie",
+  "Locação de caçambas",
+  "Locação de equipamentos",
+  "Locação de imóveis",
+  "Loja country",
+  "Loja de aquários",
+  "Loja de artigos para festas",
+  "Loja de bolsas",
+  "Loja de decoração",
+  "Loja de eletrodomésticos",
+  "Loja de enxovais",
+  "Loja de games",
+  "Loja de iluminação",
+  "Loja de instrumentos musicais",
+  "Loja de lingerie",
+  "Loja de maquiagem",
+  "Loja de materiais hidráulicos",
+  "Loja de motos",
+  "Loja de pneus",
+  "Loja de utilidades",
+  "Loja infantil",
+  "Lotérica",
+  "Lubrificantes",
+  "Luthier",
+  "Maquiagem profissional",
+  "Máquinas agrícolas",
+  "Máquinas de cartão",
+  "Máquinas de costura",
+  "Máquinas industriais",
+  "Marketing político",
+  "Mecânica diesel",
+  "Mecânica pesada",
+  "Medicina do trabalho",
+  "Medicina estética",
+  "Mei e microempresa",
+  "Metalúrgica",
+  "Minimercado",
+  "Moda evangélica",
+  "Moda praia",
+  "Montagem de móveis",
+  "Móveis rústicos",
+  "Oficina de bicicletas",
+  "Oficina mecânica",
+  "Operadora de internet",
+  "Organização de festas",
+  "Organização residencial",
+  "Padaria artesanal",
+  "Pamonharia",
+  "Panificadora",
+  "Papel de parede",
+  "Parafusos e ferramentas",
+  "Pastifício",
+  "Peixaria",
+  "Perícia técnica",
+  "Personalizados",
+  "Pescados",
+  "Petiscaria",
+  "Pintura predial",
+  "Pintura residencial",
+  "Pisos e revestimentos",
+  "Pizzaria delivery",
+  "Planejados",
+  "Plano de saúde",
+  "Polimento automotivo",
+  "Portões automáticos",
+  "Prótese dentária",
+  "Psicopedagogia",
+  "Quiropraxia",
+  "Reabilitação física",
+  "Recarga de cartuchos",
+  "Recarga de extintores",
+  "Reciclagem",
+  "Refeições coletivas",
+  "Reforço escolar",
+  "Relojoaria",
+  "Retífica",
+  "Retífica de motores",
+  "Roupas profissionais",
+  "Salão infantil",
+  "Sapataria",
+  "Segurança do trabalho",
+  "Seguro auto",
+  "Seguro residencial",
+  "Serviço de guincho",
+  "Serviço de instalação",
+  "Serviço de pintura",
+  "Serviço de portaria",
+  "Serviço de reforma",
+  "Serviço de solda",
+  "Serviços administrativos",
+  "Serviços de limpeza",
+  "Silkscreen",
+  "Som automotivo",
+  "Spa",
+  "Supermercado de bairro",
+  "Tabacaria",
+  "Tapeçaria automotiva",
+  "Terapia holística",
+  "Terapia ocupacional",
+  "Tintas",
+  "Topografia",
+  "Transportes executivos",
+  "Trattoria",
+  "Turismo rural",
+  "Uniformes escolares",
+  "Uniformes profissionais",
+  "Utensílios domésticos",
+  "Venda de motos",
+  "Venda de pneus",
+  "Venda de veículos",
+  "Vistoria veicular",
+  "Visual merchandising",
+  "Vitrines",
+  "Web design",
+  "Xerox e cópias",
+  "Zeladoria"
+];
+
+const IA4_OBJETIVOS_GERAIS = [
+  { id: "divulgar_trabalho", label: "Quero divulgar meu trabalho", fields: "servico" },
+  { id: "parecer_profissional", label: "Quero parecer mais profissional", fields: "profissional" },
+  { id: "chamar_atencao_instagram", label: "Quero chamar atenção no Instagram", fields: "instagram" },
+  { id: "divulgar_promocao", label: "Quero divulgar uma promoção", fields: "promocao" },
+  { id: "mostrar_produtos", label: "Quero mostrar meus produtos", fields: "produto" },
+  { id: "transmitir_confianca", label: "Quero transmitir confiança", fields: "confianca" },
+  { id: "atrair_clientes", label: "Quero atrair mais clientes", fields: "clientes" },
+  { id: "receber_mensagens", label: "Quero receber mais mensagens", fields: "mensagens" },
+  { id: "destacar_empresa", label: "Quero destacar minha empresa", fields: "empresa" }
+];
+
+const IA4_ESTILOS_VISUAIS_CLIENTE = [
+  {
+    value: "foto_detalhes",
+    title: "Só embelezar a foto",
+    description: "Apenas melhora a foto enviada pelo cliente, mantendo a imagem original como foco principal, com acabamento profissional e poucos elementos."
+  },
+  {
+    value: "leve",
+    title: "Visual leve",
+    description: "Visual clean e elegante, com poucas informações, poucos elementos e aparência mais leve e organizada."
+  },
+  {
+    value: "normal",
+    title: "Normal IA4Tube",
+    description: "Visual profissional equilibrado, com identidade forte, informações principais e aparência comercial."
+  },
+  {
+    value: "agressivo",
+    title: "Visual agressivo",
+    description: "Visual mais chamativo e promocional, com contraste forte, destaque visual e aparência de anúncio."
+  }
+];
+
+const IA4_RAMO_CATEGORIAS = {
+  hamburgueria: "alimentacao",
+  pizzaria: "alimentacao",
+  lanchonete: "alimentacao",
+  restaurante: "alimentacao",
+  confeitaria: "alimentacao",
+  doceria: "alimentacao",
+  marmitaria: "alimentacao",
+  vidracaria: "casa_servicos",
+  marcenaria: "casa_servicos",
+  serralheria: "casa_servicos",
+  marmoraria: "casa_servicos",
+  construtora: "casa_servicos",
+  barbearia: "beleza",
+  "salao_de_beleza": "beleza",
+  manicure: "beleza",
+  "clinica_de_estetica": "beleza",
+  odontologia: "saude",
+  dentista: "saude",
+  "clinica_odontologica": "saude",
+  "clinica_medica": "saude",
+  fisioterapia: "saude",
+  "pet_shop": "pet",
+  "clinica_veterinaria": "pet",
+  "banho_e_tosa": "pet",
+  academia: "fitness",
+  pilates: "fitness",
+  "personal_trainer": "fitness",
+  "loja_de_roupas": "varejo",
+  "loja_de_calcados": "varejo",
+  "loja_de_acessorios": "varejo",
+  mercado: "varejo",
+  supermercado: "varejo",
+  oficina: "automotivo",
+  "mecanica_automotiva": "automotivo",
+  "lava_jato": "automotivo",
+  borracharia: "automotivo",
+  imobiliaria: "servicos_profissionais",
+  advocacia: "servicos_profissionais",
+  contabilidade: "servicos_profissionais",
+  "marketing_visual_para_empresas": "servicos_profissionais",
+  escola: "educacao",
+  creche: "educacao",
+  "curso_de_idiomas": "educacao"
+};
+
+const IA4_CATEGORIA_KEYWORDS = {
+  alimentacao: [
+    "acai", "acougue", "adega", "alimento", "assado", "bebida", "biscoito", "bolo", "bomboniere",
+    "bar", "boteco", "buffet", "cafe", "cafeteria", "carnes", "casa_de_festas", "cervejaria", "chapa", "chocolate", "choperia",
+    "churrascaria", "churrasquinho", "comida", "confeitaria", "cozinha", "cupcake", "delivery",
+    "doceria", "doce", "emporio", "esfiharia", "espetaria", "food_truck", "forneria", "frango",
+    "frutaria", "galeteria", "hamburgueria", "hortifruti", "japones", "lanchonete", "lanche",
+    "marmitaria", "mercado", "mercearia", "mexicana", "mineira", "nordestina", "padaria",
+    "pamonharia", "panificadora", "pastelaria", "peixaria", "pescados", "petiscaria", "pizza",
+    "pizzaria", "produtos_naturais", "queijaria", "refeicoes", "restaurante", "rodizio",
+    "rotisseria", "salgaderia", "salgado", "saudavel", "sorveteria", "sorvete", "sushi",
+    "temakeria", "trattoria", "varejo_alimentar", "coffee_break", "fabrica_de_gelo", "festas_infantis", "industria_alimenticia", "karaoke", "pastificio", "quiosque"
+  ],
+  automotivo: [
+    "alinhamento", "auto", "automotivo", "balanceamento", "bateria", "bicicletaria", "bicicletas", "borracharia", "car_lavagem",
+    "carros", "capotaria", "centro_automotivo", "concessionaria", "desmanche", "diesel", "escapamento",
+    "estetica_automotiva", "funilaria", "garagem", "guincho", "injecao", "insulfilm", "lava_jato",
+    "lavagem_ecologica", "lubrificantes", "mecanica", "motos", "oficina", "pintura_automotiva",
+    "pneus", "polimento", "posto_de_combustivel", "retifica", "som_automotivo", "veicular",
+    "veiculos", "vistoria"
+  ],
+  beleza: [
+    "alongamento_de_cilios", "barbearia", "beleza", "bronzeamento", "cabeleireiro", "capilar",
+    "cilios", "clinica_de_estetica", "cosmeticos", "depilacao", "design_de_sobrancelhas",
+    "drenagem", "estetica", "harmonizacao", "instituto_de_beleza", "limpeza_de_pele", "manicure",
+    "maquiagem", "micropigmentacao", "perfumaria", "salao", "sobrancelhas", "spa", "studio_de_beleza",
+    "tatuagem"
+  ],
+  casa_servicos: [
+    "aluguel_de_andaimes", "aquecedores", "ar_condicionado", "arquitetura", "automacao_residencial",
+    "banquetas", "blocos", "bobinagem", "calhas", "calculista", "cameras_de_seguranca", "casa_de_racao", "casas_pre_fabricadas",
+    "amolador", "aerografia", "carpintaria", "chaveiro", "climatizacao", "comercio_de_gas", "concretagem", "conserto_de_eletrodomesticos", "conserto_de_geladeira", "conserto_de_televisao", "construcao", "construtora", "conteineres", "controle_de_pragas", "corte_a_laser", "cortinas", "decoracao", "dedetizadora", "deposito_de_construcao",
+    "desentupidora", "designer_de_interiores", "drywall", "eletrica", "eletricista", "encanador", "energia_solar",
+    "engenharia", "esquadrias", "ferragem", "ferragens", "ferramentas", "gesso", "hidraulica",
+    "impermeabilizacao", "instalacao", "janelas", "jardinagem", "lavagem_a_seco", "lavagem_de_estofados", "lavanderia", "limpeza", "limpeza_pos_obra", "madeireira",
+    "manutencao", "maquetes", "marmoraria", "marcenaria", "materiais_de_construcao", "moveis",
+    "móveis", "paisagismo", "papel_de_parede", "pintura_predial", "pintura_residencial", "piscinas",
+    "pisos", "planejados", "portoes", "projetos_arquitetonicos", "projetos_eletricos", "reforma",
+    "extintores", "ferramentaria", "iluminacao", "isolamento_acustico", "lareiras", "locacao_de_cacambas", "metalurgica", "pintura", "recarga_de_extintores", "refrigeracao", "seguranca_eletronica", "serralheria", "solda", "tapecaria", "tapetes", "terraplanagem", "tintas", "zeladoria",
+    "toldos", "topografia", "usinagem", "vidracaria", "vitrines"
+  ],
+  educacao: [
+    "acompanhamento_escolar", "aulas", "bercario", "brinquedoteca", "colegio", "colonia_de_ferias", "creche",
+    "curso", "cursos", "educacao", "escola", "faculdade", "infantil", "instituto_de_idiomas",
+    "ingles", "matriculas", "preparatoria", "reforco_escolar", "robótica", "tecnica", "treinamento"
+  ],
+  fitness: [
+    "academia", "assessoria_esportiva", "danca", "fitness", "funcional", "ginastica", "musculacao",
+    "natacao", "personal_trainer", "pilates", "praia_e_moda_fitness", "suplementos", "yoga"
+  ],
+  pet: [
+    "adestramento", "alimentos_para_pets", "avicultura", "banho_e_tosa", "canil", "clinica_para_pets",
+    "clinica_veterinaria", "hospital_veterinario", "hotelaria_pet", "pet", "pet_shop",
+    "racao", "veterinaria", "veterinario"
+  ],
+  saude: [
+    "acupuntura", "analises_clinicas", "aparelhos_auditivos", "atendimento_domiciliar", "casas_de_repouso",
+    "centro_de_diagnostico", "clinica", "cuidador", "dentista", "diagnostico", "emagrecimento",
+    "enfermagem", "exames", "farmacia", "fisioterapia", "fonoaudiologia", "geriatrica", "home_care",
+    "drogaria", "ervanario", "laboratorio", "medicina", "medico", "nutricionista", "odontologia", "odontologica", "ortopedia",
+    "otica", "podologia", "protese_dentaria", "psicologia", "psicopedagogia", "quiropraxia", "reabilitacao",
+    "saude", "terapia", "vacinas"
+  ],
+  servicos_profissionais: [
+    "administradora", "advocacia", "advogado", "agencia", "aluguel_de_som", "animacao_de_festas", "arquitetura", "assessoria", "auditoria",
+    "balancas", "capelania", "carretos", "cartorio", "cerimonial", "clube_de_assinatura", "coach", "cobranca", "comunicacao_visual", "condominios", "conserto_de_computadores", "conserto_de_impressoras", "consignado", "consorcio", "consultoria", "contabilidade",
+    "contabeis", "corretora", "coworking", "criacao_de_sites", "credito", "despachante", "designer_grafico", "distribuidora", "drones", "e_commerce",
+    "emprestimos", "escritorio_virtual", "estacionamento", "estudio_de_gravacao", "eventos", "financeira", "fotografia", "franquia", "funeraria", "gestao", "grafica", "hospedagem_de_sites", "hostel", "hotel", "imobiliaria", "influenciador", "internet_fibra", "lan_house", "locadora", "marketing", "mei", "motel", "operadora_de_internet", "organizacao", "pousada", "publicidade", "reciclagem", "rh",
+    "fibra_optica", "seguranca_do_trabalho", "seguros", "seguro_residencial", "servico_de_portaria", "servicos_administrativos", "servicos_gerais", "software", "tecnologia", "telecom", "transportadora", "transportes_executivos", "visual_merchandising",
+    "turismo", "web_design"
+  ],
+  varejo: [
+    "acessorios", "agropecuaria", "antiguidades", "armarinho", "artesanato", "artigos", "atacadista", "atelie", "bazar",
+    "baloes", "banca_de_jornal", "bebedouros", "bijuterias", "bordados", "boutique", "brecho", "brindes", "brinquedos", "calcados", "cama_mesa", "camping", "carimbos", "celular",
+    "colchoes", "confeccao", "conveniencia", "cosmeticos", "costura", "country", "eletronicos", "embalagens", "enxovais", "estamparia",
+    "equipamentos", "ferramentas", "floricultura", "games", "geek", "informatica", "instrumentos",
+    "alfaiataria", "importados", "impressao", "industria_textil", "itens_personalizados", "joalheria", "joias", "kits_festa", "lingerie", "livraria", "loja", "lotérica", "luthier", "maquinas", "moda", "papelaria", "personalizados", "recarga_de_cartuchos", "relojoaria", "sapataria", "silkscreen", "utensilios_domesticos", "xerox",
+    "perfumaria", "presentes", "produtos_de_limpeza", "religiosos", "roupas", "semijoias",
+    "sex_shop", "suplementos", "tabacaria", "uniformes", "utilidades", "vendas_online"
+  ]
+};
+
+const IA4_RAMO_ALIASES = {
+  "Marketing visual para empresas": [
+    "ia4tube",
+    "design",
+    "post",
+    "posts",
+    "instagram",
+    "omascote",
+    "o mascote",
+    "mascote",
+    "futebol",
+    "arte esportiva",
+    "arte automatica",
+    "artes automaticas",
+    "criacao de artes",
+    "marketing visual"
+  ]
+};
+
+const IA4_OBJETIVOS_POR_CATEGORIA = {
+  alimentacao: [
+    { id: "divulgar_delivery", label: "Quero divulgar delivery", fields: "delivery" },
+    { id: "divulgar_combo", label: "Quero divulgar combo", fields: "combo" },
+    { id: "mostrar_cardapio", label: "Quero mostrar meu cardápio", fields: "cardapio" }
+  ],
+  casa_servicos: [
+    { id: "mostrar_projetos", label: "Quero mostrar meus projetos", fields: "projeto" },
+    { id: "divulgar_orcamento", label: "Quero divulgar orçamento", fields: "orcamento" },
+    { id: "destacar_acabamento", label: "Quero destacar acabamento", fields: "acabamento" }
+  ],
+  beleza: [
+    { id: "divulgar_servicos_beleza", label: "Quero divulgar meus serviços", fields: "servico" },
+    { id: "destacar_espaco", label: "Quero destacar meu espaço", fields: "espaco" },
+    { id: "mostrar_antes_depois", label: "Quero mostrar antes e depois", fields: "antes_depois" }
+  ],
+  saude: [
+    { id: "transmitir_confianca_saude", label: "Quero transmitir confiança", fields: "confianca" },
+    { id: "apresentar_atendimento", label: "Quero apresentar meu atendimento", fields: "atendimento" },
+    { id: "divulgar_especialidade", label: "Quero divulgar uma especialidade", fields: "especialidade" }
+  ],
+  pet: [
+    { id: "divulgar_banho_tosa", label: "Quero divulgar banho e tosa", fields: "pet_servico" },
+    { id: "mostrar_cuidado_pet", label: "Quero mostrar cuidado com os pets", fields: "confianca" }
+  ],
+  fitness: [
+    { id: "divulgar_aulas", label: "Quero divulgar aulas", fields: "aulas" },
+    { id: "mostrar_estrutura", label: "Quero mostrar minha estrutura", fields: "espaco" }
+  ],
+  varejo: [
+    { id: "mostrar_novidades", label: "Quero mostrar novidades", fields: "produto" },
+    { id: "divulgar_colecao", label: "Quero divulgar uma coleção", fields: "colecao" }
+  ],
+  automotivo: [
+    { id: "divulgar_servico_auto", label: "Quero divulgar um serviço", fields: "servico_auto" },
+    { id: "mostrar_resultado_auto", label: "Quero mostrar resultado do serviço", fields: "antes_depois" }
+  ],
+  servicos_profissionais: [
+    { id: "apresentar_servico", label: "Quero apresentar meu serviço", fields: "servico" },
+    { id: "transmitir_autoridade", label: "Quero transmitir autoridade", fields: "profissional" }
+  ],
+  educacao: [
+    { id: "divulgar_matriculas", label: "Quero divulgar matrículas", fields: "matriculas" },
+    { id: "apresentar_curso", label: "Quero apresentar um curso", fields: "curso" }
+  ]
+};
+
+const IA4_OBJETIVOS_POR_NICHO = {
+  hamburgueria: [
+    { id: "divulgar_lanche", label: "Quero divulgar meu lanche", fields: "lanche", photoLabel: "Foto do lanche" },
+    { id: "divulgar_combo_hamburgueria", label: "Quero divulgar combo", fields: "combo", photoLabel: "Foto do combo" }
+  ],
+  pizzaria: [
+    { id: "divulgar_pizza", label: "Quero divulgar minha pizza", fields: "pizza", photoLabel: "Foto da pizza" },
+    { id: "divulgar_rodizio", label: "Quero divulgar rodízio", fields: "rodizio" }
+  ],
+  vidracaria: [
+    { id: "divulgar_box_banheiro", label: "Quero divulgar box de banheiro", fields: "vidro_box", photoLabel: "Foto do projeto ou referência" },
+    { id: "mostrar_projetos_vidracaria", label: "Quero mostrar meus projetos", fields: "vidro_projeto", photoLabel: "Foto do projeto" }
+  ],
+  barbearia: [
+    { id: "divulgar_cortes", label: "Quero divulgar cortes", fields: "corte", photoLabel: "Foto do corte ou espaço" },
+    { id: "destacar_espaco_barbearia", label: "Quero destacar meu espaço", fields: "espaco" }
+  ],
+  pet_shop: [
+    { id: "divulgar_banho_tosa_pet", label: "Quero divulgar banho e tosa", fields: "pet_servico", photoLabel: "Fotos dos pets ou do espaço" }
+  ],
+  marketing_visual_para_empresas: [
+    { id: "divulgar_servicos_marketing_visual", label: "Quero divulgar meus serviços", fields: "marketing_visual" },
+    { id: "mostrar_funcionamento_ia4tube", label: "Quero mostrar como funciona o IA4Tube", fields: "marketing_visual" },
+    { id: "explicar_beneficio_ia", label: "Quero explicar o benefício da IA", fields: "marketing_visual" },
+    { id: "atrair_empresas_locais", label: "Quero atrair empresas locais", fields: "marketing_visual" },
+    { id: "parecer_profissional_marketing_visual", label: "Quero parecer mais profissional", fields: "marketing_visual" },
+    { id: "mostrar_antes_depois_marketing_visual", label: "Quero mostrar antes e depois", fields: "marketing_visual" },
+    { id: "divulgar_artes_automaticas", label: "Quero divulgar criação de artes automáticas", fields: "marketing_visual" },
+    { id: "fortalecer_marca_marketing_visual", label: "Quero fortalecer minha marca", fields: "marketing_visual" },
+    { id: "gerar_interesse_instagram", label: "Quero gerar interesse no Instagram", fields: "marketing_visual" },
+    { id: "receber_whatsapp_marketing_visual", label: "Quero receber mensagens no WhatsApp", fields: "marketing_visual" }
+  ]
+};
+
+const IA4_CAMPOS_DINAMICOS_POR_OBJETIVO = {
+  servico: [
+    { key: "servico_principal", label: "Serviço principal", type: "text", placeholder: "Ex: instalação, atendimento, manutenção" },
+    { key: "diferencial", label: "Diferencial", type: "text", placeholder: "Ex: atendimento rápido, garantia, experiência" }
+  ],
+  corte: [
+    { key: "tipo_corte", label: "Tipo de corte", type: "text", placeholder: "Ex: degradê, social, navalhado" },
+    { key: "combo_barbearia", label: "Combo ou serviço adicional", type: "text", placeholder: "Ex: corte + barba, sobrancelha, acabamento" },
+    { key: "preco", label: "Preço", type: "text", placeholder: "Opcional" }
+  ],
+  profissional: [
+    { key: "tempo_mercado", label: "Tempo de mercado", type: "text", placeholder: "Ex: 10 anos de experiência" },
+    { key: "credenciais", label: "Credenciais ou diferenciais", type: "textarea", placeholder: "Ex: equipe especializada, certificações, estrutura" }
+  ],
+  instagram: [
+    { key: "mensagem_principal", label: "Mensagem principal", type: "text", placeholder: "Ex: conheça nossos serviços" },
+    { key: "tom_visual", label: "Tom visual desejado", type: "text", placeholder: "Ex: moderno, elegante, divertido" }
+  ],
+  promocao: [
+    { key: "promocao", label: "Promoção", type: "text", placeholder: "Ex: 20% de desconto nesta semana" },
+    { key: "validade", label: "Validade", type: "text", placeholder: "Ex: até sábado" }
+  ],
+  produto: [
+    { key: "produto_principal", label: "Produto principal", type: "text", placeholder: "Ex: vestido, suplemento, acessório" },
+    { key: "beneficios", label: "Benefícios ou características", type: "textarea", placeholder: "Ex: confortável, resistente, pronta entrega" }
+  ],
+  confianca: [
+    { key: "prova_confianca", label: "O que transmite confiança?", type: "textarea", placeholder: "Ex: equipe qualificada, garantia, avaliações, ambiente seguro" }
+  ],
+  clientes: [
+    { key: "publico_desejado", label: "Público que deseja alcançar", type: "text", placeholder: "Ex: famílias, empresas, moradores da região" }
+  ],
+  mensagens: [
+    { key: "motivo_contato", label: "Motivo para chamar no WhatsApp", type: "text", placeholder: "Ex: pedir orçamento, agendar, tirar dúvidas" }
+  ],
+  marketing_visual: [
+    { key: "servico_principal", label: "Serviço principal", type: "text", placeholder: "Ex: criação automática de artes para empresas" },
+    { key: "publico_alvo", label: "Público-alvo", type: "text", placeholder: "Ex: pequenos negócios, comércios locais, prestadores de serviço" },
+    { key: "beneficio_principal", label: "Benefício principal", type: "textarea", placeholder: "Ex: receber uma arte profissional pronta para postar" },
+    { key: "frase_impacto", label: "Frase de impacto", type: "text", placeholder: "Ex: sua empresa com cara profissional nas redes" },
+    { key: "chamada_whatsapp", label: "Chamada para WhatsApp", type: "text", placeholder: "Ex: chame no WhatsApp e peça sua arte" },
+    { key: "prova_resultado", label: "Prova/resultado/exemplo", type: "textarea", placeholder: "Ex: antes e depois, exemplo de nicho, arte pronta" },
+    { key: "observacao_arte", label: "Observação da arte", type: "textarea", placeholder: "Detalhe visual ou mensagem que precisa aparecer" }
+  ],
+  empresa: [
+    { key: "destaque_empresa", label: "Principal destaque da empresa", type: "textarea", placeholder: "Ex: tradição, localização, equipe, atendimento" }
+  ],
+  delivery: [
+    { key: "area_entrega", label: "Área de entrega", type: "text", placeholder: "Ex: entregamos no centro e bairros próximos" },
+    { key: "pedido_minimo", label: "Pedido mínimo ou condição", type: "text", placeholder: "Opcional" }
+  ],
+  combo: [
+    { key: "nome_combo", label: "Nome do combo", type: "text", placeholder: "Ex: Combo casal" },
+    { key: "itens_combo", label: "Itens do combo", type: "textarea", placeholder: "Ex: 2 lanches, batata e refrigerante" },
+    { key: "preco", label: "Preço", type: "text", placeholder: "Ex: R$ 49,90" }
+  ],
+  cardapio: [
+    { key: "itens_destaque", label: "Itens em destaque", type: "textarea", placeholder: "Ex: pratos, sabores, bebidas" }
+  ],
+  lanche: [
+    { key: "nome_lanche", label: "Nome do lanche", type: "text", placeholder: "Ex: X-Bacon especial" },
+    { key: "preco", label: "Preço", type: "text", placeholder: "Ex: R$ 29,90" },
+    { key: "ingredientes", label: "Ingredientes", type: "textarea", placeholder: "Ex: pão brioche, burger, cheddar, bacon" },
+    { key: "delivery", label: "Tem delivery?", type: "text", placeholder: "Ex: sim, pelo WhatsApp" }
+  ],
+  pizza: [
+    { key: "sabor_pizza", label: "Sabor da pizza", type: "text", placeholder: "Ex: calabresa, frango com catupiry" },
+    { key: "preco", label: "Preço", type: "text", placeholder: "Ex: R$ 39,90" },
+    { key: "tamanho", label: "Tamanho", type: "text", placeholder: "Ex: grande, família" }
+  ],
+  rodizio: [
+    { key: "dias_horarios", label: "Dias e horários", type: "text", placeholder: "Ex: terça a quinta, das 19h às 23h" },
+    { key: "valor", label: "Valor", type: "text", placeholder: "Ex: R$ 59,90 por pessoa" }
+  ],
+  projeto: [
+    { key: "tipo_projeto", label: "Tipo de projeto", type: "text", placeholder: "Ex: banheiro, varanda, fachada" },
+    { key: "descricao_projeto", label: "Descrição do projeto", type: "textarea", placeholder: "Conte o que aparece na foto ou referência" }
+  ],
+  vidro_box: [
+    { key: "tipo_vidro", label: "Tipo do vidro", type: "text", placeholder: "Ex: temperado, fumê, jateado" },
+    { key: "acabamento", label: "Acabamento", type: "text", placeholder: "Ex: inox, roldanas aparentes, perfil preto" },
+    { key: "medida_ou_condicao", label: "Medida ou condição", type: "text", placeholder: "Ex: sob medida, orçamento grátis" }
+  ],
+  vidro_projeto: [
+    { key: "tipo_vidro", label: "Tipo do vidro", type: "text", placeholder: "Ex: temperado, laminado, espelho" },
+    { key: "acabamento", label: "Acabamento", type: "text", placeholder: "Ex: alumínio, inox, preto fosco" },
+    { key: "descricao_projeto", label: "Descrição do projeto", type: "textarea", placeholder: "Ex: fechamento de sacada, box, espelho" }
+  ],
+  acabamento: [
+    { key: "material", label: "Material ou acabamento", type: "text", placeholder: "Ex: vidro temperado, madeira, aço" },
+    { key: "detalhes_acabamento", label: "Detalhes do acabamento", type: "textarea", placeholder: "Ex: cor, textura, brilho, instalação" }
+  ],
+  espaco: [
+    { key: "ambiente", label: "Ambiente que quer destacar", type: "text", placeholder: "Ex: recepção, área de atendimento, salão" },
+    { key: "sensacao", label: "Sensação desejada", type: "text", placeholder: "Ex: conforto, confiança, modernidade" }
+  ],
+  antes_depois: [
+    { key: "o_que_mudou", label: "O que mudou?", type: "textarea", placeholder: "Descreva o antes e depois" }
+  ],
+  atendimento: [
+    { key: "tipo_atendimento", label: "Tipo de atendimento", type: "text", placeholder: "Ex: consulta, avaliação, atendimento personalizado" }
+  ],
+  especialidade: [
+    { key: "especialidade", label: "Especialidade", type: "text", placeholder: "Ex: ortodontia, estética facial, fisioterapia" }
+  ],
+  pet_servico: [
+    { key: "servico_pet", label: "Serviço para pet", type: "text", placeholder: "Ex: banho, tosa, hidratação" },
+    { key: "porte_pet", label: "Porte ou tipo de pet", type: "text", placeholder: "Ex: cães pequenos, gatos, todos os portes" }
+  ],
+  aulas: [
+    { key: "tipo_aula", label: "Tipo de aula", type: "text", placeholder: "Ex: funcional, musculação, dança" },
+    { key: "horarios", label: "Horários", type: "text", placeholder: "Opcional" }
+  ],
+  colecao: [
+    { key: "nome_colecao", label: "Nome da coleção", type: "text", placeholder: "Ex: coleção verão" },
+    { key: "pecas_destaque", label: "Peças em destaque", type: "textarea", placeholder: "Ex: vestidos, conjuntos, acessórios" }
+  ],
+  servico_auto: [
+    { key: "servico_auto", label: "Serviço automotivo", type: "text", placeholder: "Ex: troca de óleo, alinhamento, lavagem" },
+    { key: "condicao", label: "Condição ou benefício", type: "text", placeholder: "Ex: agendamento rápido, garantia, promoção" }
+  ],
+  matriculas: [
+    { key: "curso_turma", label: "Curso ou turma", type: "text", placeholder: "Ex: infantil, inglês, técnico" },
+    { key: "periodo", label: "Período", type: "text", placeholder: "Ex: matrículas abertas para 2026" }
+  ],
+  curso: [
+    { key: "nome_curso", label: "Nome do curso", type: "text", placeholder: "Ex: inglês básico, informática, profissionalizante" },
+    { key: "duracao", label: "Duração", type: "text", placeholder: "Opcional" }
+  ],
+  orcamento: [
+    { key: "tipo_orcamento", label: "Tipo de orçamento", type: "text", placeholder: "Ex: orçamento grátis, visita técnica, sob medida" }
+  ]
+};
+
 const CLEAN_PRODUCT_FORM_SCHEMAS = {
   resultado: {
     endpoint: "/resultado_do_jogo",
@@ -7421,15 +8547,18 @@ const CLEAN_PRODUCT_FORM_SCHEMAS = {
     endpoint: "/pedidos",
     validationMessage: "Preencha o ramo da empresa, o nome da empresa e o objetivo da arte.",
     fields: [
-      { key: "ramo", type: "text", legacyName: "ramo", labelKey: "ramo", placeholderKey: "ramo", required: true },
+      { key: "ramo", type: "niche-autocomplete", legacyName: "ramo", labelKey: "ramo", placeholderKey: "ramo", required: true },
+      { key: "ramo_origem", type: "hidden", legacyName: "ramo_origem", required: false },
       { key: "nome_empresa", type: "text", legacyName: "nome_empresa", labelKey: "nome_empresa", placeholderKey: "nome_empresa", required: true },
-      { key: "objetivo", type: "text", legacyName: "objetivo", labelKey: "objetivo", placeholderKey: "objetivo", required: true },
+      { key: "objetivo", type: "objective-picker", legacyName: "objetivo", labelKey: "objetivo", placeholderKey: "objetivo", required: true },
+      { key: "objetivo_origem", type: "hidden", legacyName: "objetivo_origem", required: false },
+      { key: "estilo_visual_cliente", type: "visual-style", legacyName: "estilo_visual_cliente", required: true, defaultValue: "normal" },
+      { key: "logo", type: "file", legacyName: "logo", labelKey: "logo", required: true },
       { key: "oferta", type: "text", legacyName: "oferta", labelKey: "oferta", placeholderKey: "oferta", required: false },
       { key: "cta", type: "text", legacyName: "cta", labelKey: "cta", placeholderKey: "cta", required: false },
       { key: "whatsapp", type: "text", legacyName: "whatsapp", labelKey: "whatsapp", placeholderKey: "whatsapp", required: false },
       { key: "instagram", type: "text", legacyName: "instagram", labelKey: "instagram", placeholderKey: "instagram", required: false },
       { key: "observacoes", type: "textarea", legacyName: "observacoes", labelKey: "observacoes", placeholderKey: "observacoes", required: false },
-      { key: "logo", type: "file", legacyName: "logo", labelKey: "logo", required: false },
       { key: "fotos", type: "multi-file", legacyName: "fotos", labelKey: "fotos", required: false },
       { key: "referencias", type: "multi-file", legacyName: "referencias", labelKey: "referencias", required: false }
     ],
@@ -7463,6 +8592,70 @@ function renderCleanTextField(product, field){
     <div class="cleanFieldCard" data-clean-field-card="${htmlEscape(field.key)}">
       <label class="cleanFieldLabel">${getCleanFieldLabel(product, field)}</label>
       <input name="${htmlEscape(field.key)}" data-field="${htmlEscape(field.key)}" placeholder="${htmlEscape(getCleanFieldPlaceholder(product, field))}">
+    </div>
+  `;
+}
+
+function renderCleanNicheAutocompleteField(product, field){
+  const key = htmlEscape(field.key);
+  const placeholder = htmlEscape(getCleanFieldPlaceholder(product, field));
+  return `
+    <div class="cleanFieldCard" data-clean-field-card="${key}">
+      <label class="cleanFieldLabel">${getCleanFieldLabel(product, field)}</label>
+      <div class="cleanNicheAutocomplete" data-niche-autocomplete>
+        <input type="hidden" name="${key}" data-field="${key}" data-niche-value>
+        <input type="hidden" name="ramo_origem" data-field="ramo_origem" data-niche-origin>
+        <input data-niche-search placeholder="${placeholder}" autocomplete="off" aria-autocomplete="list">
+        <div class="cleanNicheList" data-niche-list></div>
+        <div class="cleanNicheManual" data-niche-manual-wrap>
+          <div class="cleanNicheHelp">Escreva o ramo exatamente como você quer que a IA entenda.</div>
+          <input data-niche-manual placeholder="Digite seu ramo">
+        </div>
+        <div class="cleanNicheHelp">Selecione uma opção da lista. Texto digitado sem clique não é confirmado.</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderCleanObjectivePickerField(product, field){
+  const key = htmlEscape(field.key);
+  return `
+    <div class="cleanFieldCard" data-clean-field-card="${key}">
+      <label class="cleanFieldLabel">${getCleanFieldLabel(product, field)}</label>
+      <div class="cleanNicheAutocomplete cleanObjectivePicker" data-objective-picker>
+        <input type="hidden" name="${key}" data-field="${key}" data-objective-value>
+        <input type="hidden" name="objetivo_origem" data-field="objetivo_origem" data-objective-origin>
+        <button type="button" class="cleanObjectiveToggle" data-objective-toggle>
+          <span data-objective-selected-label>Selecionar objetivo</span>
+          <span class="cleanObjectiveArrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="cleanNicheList" data-objective-list></div>
+        <div class="cleanNicheManual" data-objective-manual-wrap>
+          <div class="cleanNicheHelp">Escreva o objetivo de forma simples e realista.</div>
+          <input data-objective-manual placeholder="Digite outro objetivo">
+        </div>
+        <div class="cleanNicheHelp">Escolha um objetivo. As perguntas abaixo mudam conforme sua escolha.</div>
+        <div class="cleanDynamicFields" data-dynamic-fields></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderCleanVisualStyleField(product, field){
+  const key = htmlEscape(field.key);
+  const defaultValue = htmlEscape(field.defaultValue || "normal");
+  return `
+    <div class="cleanFieldCard" data-clean-field-card="${key}">
+      <label class="cleanFieldLabel">Estilo visual</label>
+      <input type="hidden" name="${key}" data-field="${key}" value="${defaultValue}" data-visual-style-value>
+      <div class="cleanVisualStyleGrid" data-visual-style-picker>
+        ${IA4_ESTILOS_VISUAIS_CLIENTE.map((option) => `
+          <button type="button" class="cleanVisualStyleOption${option.value === (field.defaultValue || "normal") ? " is-selected" : ""}" data-visual-style-option="${htmlEscape(option.value)}">
+            <span class="cleanVisualStyleTitle">${htmlEscape(option.title)}</span>
+            <span class="cleanVisualStyleDesc">${htmlEscape(option.description)}</span>
+          </button>
+        `).join("")}
+      </div>
     </div>
   `;
 }
@@ -7538,6 +8731,10 @@ function renderCleanPeopleField(field){
 }
 
 function renderCleanProductField(product, field){
+  if(field.type === "hidden") return "";
+  if(field.type === "niche-autocomplete") return renderCleanNicheAutocompleteField(product, field);
+  if(field.type === "objective-picker") return renderCleanObjectivePickerField(product, field);
+  if(field.type === "visual-style") return renderCleanVisualStyleField(product, field);
   if(field.type === "text") return renderCleanTextField(product, field);
   if(field.type === "textarea") return renderCleanTextareaField(product, field);
   if(field.type === "file" || field.type === "multi-file") return renderCleanFileField(product, field);
@@ -7602,12 +8799,15 @@ function renderCleanProductForms(){
     const schema = getCleanProductSchema(productKey);
     if(!product || !schema) return "";
     const priceLabel = formatCleanProductPrice(product);
+    const imageHtml = `
+        <div class="cleanProductImage" aria-hidden="true">
+          <img src="${htmlEscape(product.image || "")}" alt="">
+        </div>`;
+    const imageBeforeForm = productKey !== "arte_empresa";
 
     return `
       <section class="cleanProductBlock" data-clean-product-block="${htmlEscape(productKey)}">
-        <div class="cleanProductImage" aria-hidden="true">
-          <img src="${htmlEscape(product.image || "")}" alt="">
-        </div>
+        ${imageBeforeForm ? imageHtml : ""}
         <form class="cleanProductForm" data-product-form="${htmlEscape(productKey)}" enctype="multipart/form-data" novalidate>
           <div class="cleanProductHeader">
             <h3 class="cleanProductTitle">${htmlEscape(product.title || product.name || productKey)}</h3>
@@ -7622,6 +8822,7 @@ function renderCleanProductForms(){
             <a href="#" class="cleanResultDownload" data-clean-result-download>Baixar imagem</a>
           </div>
         </form>
+        ${imageBeforeForm ? "" : imageHtml}
       </section>
     `;
   }).join("");
@@ -7667,6 +8868,370 @@ function getCleanFieldValue(form, key){
   return getCleanFormField(form, key)?.value?.trim() || "";
 }
 
+const IA4_EMPRESA_PROFILE_KEY = "ia4tube_empresa_perfil";
+
+function salvarPerfilEmpresaLocal(fields = {}){
+  if(!fields.nome_empresa && !fields.ramo) return;
+  try{
+    localStorage.setItem(IA4_EMPRESA_PROFILE_KEY, JSON.stringify({
+      nome_empresa: fields.nome_empresa || "",
+      ramo: fields.ramo || ""
+    }));
+  }catch(e){}
+}
+
+function carregarPerfilEmpresaLocal(){
+  try{
+    const data = JSON.parse(localStorage.getItem(IA4_EMPRESA_PROFILE_KEY) || "{}");
+    return data && typeof data === "object" ? data : {};
+  }catch(e){
+    return {};
+  }
+}
+
+function preencherPerfilEmpresaLocal(form){
+  if(!form || form.dataset.productForm !== "arte_empresa") return;
+  const perfil = carregarPerfilEmpresaLocal();
+
+  if(perfil.nome_empresa){
+    const nomeInput = getCleanFormField(form, "nome_empresa");
+    if(nomeInput && !nomeInput.value) nomeInput.value = perfil.nome_empresa;
+  }
+
+  if(perfil.ramo){
+    const ramoBox = form.querySelector("[data-niche-autocomplete]");
+    const ramoSearch = ramoBox?.querySelector("[data-niche-search]");
+    const ramoHidden = ramoBox?.querySelector("[data-niche-value]");
+    const ramoOrigin = ramoBox?.querySelector("[data-niche-origin]");
+    if(ramoSearch && !ramoSearch.value) ramoSearch.value = perfil.ramo;
+    if(ramoHidden && !ramoHidden.value) ramoHidden.value = perfil.ramo;
+    if(ramoOrigin && !ramoOrigin.value) ramoOrigin.value = "cache";
+    if(ramoBox && perfil.ramo) ramoBox.dataset.nicheSelected = "cache";
+  }
+}
+
+function normalizeIa4Key(value){
+  return normalizeNicheSearchText(value).replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+}
+
+function normalizeNicheSearchText(value){
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function uniqObjectives(items = []){
+  const seen = new Set();
+  return items.filter((item) => {
+    const labelKey = normalizeNicheSearchText(item?.label || "");
+    if(!item?.id || !labelKey || seen.has(labelKey)) return false;
+    seen.add(labelKey);
+    return true;
+  });
+}
+
+function getRamoCategory(ramo){
+  const ramoKey = normalizeIa4Key(ramo);
+  const explicitCategory = IA4_RAMO_CATEGORIAS[ramoKey];
+  if(explicitCategory) return explicitCategory;
+
+  for(const [category, keywords] of Object.entries(IA4_CATEGORIA_KEYWORDS)){
+    if((keywords || []).some((keyword) => ramoKey.includes(normalizeIa4Key(keyword)))){
+      return category;
+    }
+  }
+
+  return "";
+}
+
+function getObjectivesForRamo(ramo){
+  const ramoKey = normalizeIa4Key(ramo);
+  const category = getRamoCategory(ramo);
+  return uniqObjectives([
+    ...(IA4_OBJETIVOS_POR_NICHO[ramoKey] || []),
+    ...(IA4_OBJETIVOS_POR_CATEGORIA[category] || []),
+    ...IA4_OBJETIVOS_GERAIS
+  ]);
+}
+
+function renderObjectiveOptions(box, shouldOpen = false){
+  const form = box.closest("[data-product-form]");
+  const ramo = getCleanFieldValue(form, "ramo");
+  const list = box.querySelector("[data-objective-list]");
+  if(!list) return;
+
+  const options = getObjectivesForRamo(ramo).map((objective) => `
+    <button type="button" class="cleanNicheOption" data-objective-option="${htmlEscape(objective.id)}">${htmlEscape(objective.label)}</button>
+  `);
+
+  options.push(`
+    <button type="button" class="cleanNicheOption cleanNicheOptionManual" data-objective-manual-trigger>Outro objetivo</button>
+  `);
+
+  list.innerHTML = options.join("");
+  if(shouldOpen) box.classList.add("is-open");
+}
+
+function findObjectiveById(ramo, objectiveId){
+  return getObjectivesForRamo(ramo).find((objective) => objective.id === objectiveId) || null;
+}
+
+function getDynamicFieldSet(objective = null){
+  return IA4_CAMPOS_DINAMICOS_POR_OBJETIVO[objective?.fields] || [];
+}
+
+function renderDynamicObjectiveFields(box, objective = null){
+  const wrap = box.querySelector("[data-dynamic-fields]");
+  if(!wrap) return;
+
+  const fields = getDynamicFieldSet(objective);
+  if(!fields.length){
+    wrap.innerHTML = "";
+    updateFotosLabelForObjective(box, objective);
+    return;
+  }
+
+  wrap.innerHTML = `
+    <div class="cleanNicheHelp">Campos opcionais para deixar a arte mais certeira.</div>
+    ${fields.map((field) => `
+      <div class="cleanDynamicField">
+        <label>${htmlEscape(field.label)}</label>
+        ${field.type === "textarea"
+          ? `<textarea data-dynamic-field="${htmlEscape(field.key)}" placeholder="${htmlEscape(field.placeholder || "")}"></textarea>`
+          : `<input data-dynamic-field="${htmlEscape(field.key)}" placeholder="${htmlEscape(field.placeholder || "")}">`}
+      </div>
+    `).join("")}
+  `;
+
+  updateFotosLabelForObjective(box, objective);
+}
+
+function updateFotosLabelForObjective(box, objective = null){
+  const form = box.closest("[data-product-form]");
+  const fotosLabel = form?.querySelector('[data-clean-field-card="fotos"] .cleanFieldLabel');
+  if(!fotosLabel) return;
+  fotosLabel.textContent = objective?.photoLabel || "Fotos da empresa/produto/serviço";
+}
+
+function resetObjectivePickerForForm(form){
+  const box = form?.querySelector("[data-objective-picker]");
+  if(!box) return;
+  const hidden = box.querySelector("[data-objective-value]");
+  const origin = box.querySelector("[data-objective-origin]");
+  const manual = box.querySelector("[data-objective-manual]");
+  const selectedLabel = box.querySelector("[data-objective-selected-label]");
+  if(hidden) hidden.value = "";
+  if(origin) origin.value = "";
+  if(manual) manual.value = "";
+  if(selectedLabel) selectedLabel.textContent = "Selecionar objetivo";
+  box.dataset.objectiveSelected = "";
+  box.classList.remove("is-open", "is-manual");
+  renderDynamicObjectiveFields(box, null);
+  renderObjectiveOptions(box);
+}
+
+function collectDynamicObjectiveFields(form){
+  const data = {};
+  form.querySelectorAll("[data-dynamic-field]").forEach(input => {
+    const key = input.dataset.dynamicField;
+    const value = input.value?.trim() || "";
+    if(key && value) data[key] = value;
+  });
+  return data;
+}
+
+function getNicheSuggestions(query){
+  const normalizedQuery = normalizeNicheSearchText(query);
+  const list = IA4_EMPRESA_RAMOS
+    .filter((ramo, index, arr) => arr.indexOf(ramo) === index)
+    .filter((ramo) => {
+      if(!normalizedQuery) return true;
+      const aliases = IA4_RAMO_ALIASES[ramo] || [];
+      return normalizeNicheSearchText(ramo).includes(normalizedQuery) ||
+        aliases.some((alias) => normalizeNicheSearchText(alias).includes(normalizedQuery));
+    })
+    .slice(0, 18);
+
+  return list;
+}
+
+function renderNicheOptions(box, query = ""){
+  const list = box.querySelector("[data-niche-list]");
+  if(!list) return;
+
+  const options = getNicheSuggestions(query).map((ramo) => `
+    <button type="button" class="cleanNicheOption" data-niche-option="${htmlEscape(ramo)}">${htmlEscape(ramo)}</button>
+  `);
+
+  options.push(`
+    <button type="button" class="cleanNicheOption cleanNicheOptionManual" data-niche-manual-trigger>Não achei meu ramo</button>
+  `);
+
+  list.innerHTML = options.join("");
+  box.classList.add("is-open");
+}
+
+function bindNicheAutocomplete(root){
+  root.querySelectorAll("[data-niche-autocomplete]").forEach(box => {
+    const search = box.querySelector("[data-niche-search]");
+    const hidden = box.querySelector("[data-niche-value]");
+    const origin = box.querySelector("[data-niche-origin]");
+    const list = box.querySelector("[data-niche-list]");
+    const manualWrap = box.querySelector("[data-niche-manual-wrap]");
+    const manual = box.querySelector("[data-niche-manual]");
+
+    if(!search || !hidden || !list || !manualWrap || !manual) return;
+
+    const clearConfirmedValue = () => {
+      hidden.value = "";
+      if(origin) origin.value = "";
+      box.dataset.nicheSelected = "";
+    };
+
+    search.addEventListener("focus", () => {
+      renderNicheOptions(box, search.value);
+    });
+
+    search.addEventListener("input", () => {
+      box.classList.remove("is-manual");
+      manual.value = "";
+      clearConfirmedValue();
+      renderNicheOptions(box, search.value);
+    });
+
+    search.addEventListener("keydown", (e) => {
+      if(e.key === "Enter"){
+        e.preventDefault();
+        e.stopPropagation();
+        renderNicheOptions(box, search.value);
+      }
+    });
+
+    manual.addEventListener("input", () => {
+      hidden.value = manual.value.trim();
+      if(origin) origin.value = hidden.value ? "manual" : "";
+      box.dataset.nicheSelected = hidden.value ? "manual" : "";
+      resetObjectivePickerForForm(box.closest("[data-product-form]"));
+    });
+
+    list.addEventListener("click", (e) => {
+      const option = e.target.closest("[data-niche-option]");
+      const manualTrigger = e.target.closest("[data-niche-manual-trigger]");
+
+      if(option){
+        const ramo = option.dataset.nicheOption || "";
+        search.value = ramo;
+        hidden.value = ramo;
+        if(origin) origin.value = "lista";
+        box.dataset.nicheSelected = "list";
+        box.classList.remove("is-open", "is-manual");
+        manual.value = "";
+        resetObjectivePickerForForm(box.closest("[data-product-form]"));
+        return;
+      }
+
+      if(manualTrigger){
+        clearConfirmedValue();
+        if(origin) origin.value = "manual";
+        box.classList.add("is-manual");
+        box.classList.remove("is-open");
+        manual.focus();
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      if(!box.contains(e.target)) box.classList.remove("is-open");
+    });
+  });
+}
+
+function bindObjectivePicker(root){
+  root.querySelectorAll("[data-objective-picker]").forEach(box => {
+    const hidden = box.querySelector("[data-objective-value]");
+    const origin = box.querySelector("[data-objective-origin]");
+    const list = box.querySelector("[data-objective-list]");
+    const manual = box.querySelector("[data-objective-manual]");
+    const toggle = box.querySelector("[data-objective-toggle]");
+    const selectedLabel = box.querySelector("[data-objective-selected-label]");
+
+    if(!hidden || !origin || !list || !manual || !toggle || !selectedLabel) return;
+
+    renderObjectiveOptions(box);
+
+    list.addEventListener("click", (e) => {
+      const option = e.target.closest("[data-objective-option]");
+      const manualTrigger = e.target.closest("[data-objective-manual-trigger]");
+      const form = box.closest("[data-product-form]");
+      const ramo = getCleanFieldValue(form, "ramo");
+
+      if(option){
+        const objective = findObjectiveById(ramo, option.dataset.objectiveOption || "");
+        if(!objective) return;
+        hidden.value = objective.label;
+        origin.value = "lista";
+        selectedLabel.textContent = objective.label;
+        box.dataset.objectiveSelected = objective.id;
+        box.classList.remove("is-open", "is-manual");
+        manual.value = "";
+        renderDynamicObjectiveFields(box, objective);
+        return;
+      }
+
+      if(manualTrigger){
+        hidden.value = "";
+        origin.value = "manual";
+        selectedLabel.textContent = "Outro objetivo";
+        box.dataset.objectiveSelected = "manual";
+        box.classList.add("is-manual");
+        box.classList.remove("is-open");
+        renderDynamicObjectiveFields(box, null);
+        manual.focus();
+      }
+    });
+
+    manual.addEventListener("input", () => {
+      hidden.value = manual.value.trim();
+      origin.value = hidden.value ? "manual" : "";
+      selectedLabel.textContent = hidden.value || "Outro objetivo";
+      box.dataset.objectiveSelected = hidden.value ? "manual" : "";
+    });
+
+    manual.addEventListener("keydown", (e) => {
+      if(e.key === "Enter"){
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+
+    toggle.addEventListener("click", () => {
+      renderObjectiveOptions(box, true);
+    });
+
+    document.addEventListener("click", (e) => {
+      if(!box.contains(e.target)) box.classList.remove("is-open");
+    });
+  });
+}
+
+function bindVisualStylePicker(root){
+  root.querySelectorAll("[data-visual-style-picker]").forEach(picker => {
+    const card = picker.closest("[data-clean-field-card]");
+    const hidden = card?.querySelector("[data-visual-style-value]");
+    if(!hidden) return;
+
+    picker.querySelectorAll("[data-visual-style-option]").forEach(option => {
+      option.addEventListener("click", () => {
+        hidden.value = option.dataset.visualStyleOption || "normal";
+        picker.querySelectorAll("[data-visual-style-option]").forEach(item => {
+          item.classList.toggle("is-selected", item === option);
+        });
+      });
+    });
+  });
+}
+
 function getCleanAssetFiles(form, key){
   return Array.from(getCleanFormAsset(form, key)?.files || []);
 }
@@ -7692,8 +9257,11 @@ function validateCleanProductForm(productKey, form){
 
   form.querySelectorAll(".campoObrigatorioErro").forEach(el => el.classList.remove("campoObrigatorioErro"));
 
-  const markError = (field) => {
+  let errorMessage = "";
+
+  const markError = (field, message = "") => {
     hasError = true;
+    if(message && !errorMessage) errorMessage = message;
     const card = form.querySelector(`[data-clean-field-card="${CSS.escape(field.key)}"]`);
     if(card) card.classList.add("campoObrigatorioErro");
   };
@@ -7703,6 +9271,14 @@ function validateCleanProductForm(productKey, form){
 
     if((field.type === "text" || field.type === "textarea") && !getCleanFieldValue(form, field.key)){
       markError(field);
+    }
+
+    if(field.type === "niche-autocomplete" && !getCleanFieldValue(form, field.key)){
+      markError(field, "Selecione um ramo da lista ou clique em Não achei meu ramo.");
+    }
+
+    if(field.type === "objective-picker" && !getCleanFieldValue(form, field.key)){
+      markError(field, "Escolha um objetivo ou clique em Outro objetivo.");
     }
 
     if(field.type === "score"){
@@ -7720,7 +9296,11 @@ function validateCleanProductForm(productKey, form){
     if(field.type === "file" || field.type === "multi-file"){
       const hasFiles = getCleanAssetFiles(form, field.key).length > 0;
       const hasSaved = field.savedFallback && typeof getSavedEscudo1File === "function" && !!getSavedEscudo1File();
-      if(!hasFiles && !hasSaved) markError(field);
+      if(!hasFiles && !hasSaved){
+        markError(field, productKey === "arte_empresa" && field.key === "logo"
+          ? "Envie o logo da empresa para criar a arte."
+          : "");
+      }
     }
 
     if(field.type === "players" || field.type === "scorers"){
@@ -7729,7 +9309,7 @@ function validateCleanProductForm(productKey, form){
     }
   });
 
-  return hasError ? [schema.validationMessage || "Preencha os campos obrigatórios."] : [];
+  return hasError ? [errorMessage || schema.validationMessage || "Preencha os campos obrigatórios."] : [];
 }
 
 function serializeCleanProductForm(productKey, form){
@@ -7738,7 +9318,7 @@ function serializeCleanProductForm(productKey, form){
   const assets = {};
 
   schema.fields.forEach(field => {
-    if(field.type === "text" || field.type === "textarea"){
+    if(field.type === "text" || field.type === "textarea" || field.type === "niche-autocomplete" || field.type === "objective-picker" || field.type === "visual-style" || field.type === "hidden"){
       fields[field.key] = getCleanFieldValue(form, field.key);
     }
 
@@ -7770,6 +9350,11 @@ function serializeCleanProductForm(productKey, form){
       };
     }
   });
+
+  const camposDinamicos = collectDynamicObjectiveFields(form);
+  if(Object.keys(camposDinamicos).length){
+    fields.campos_dinamicos = camposDinamicos;
+  }
 
   return {
     schema_version: CLEAN_PRODUCT_SCHEMA_VERSION,
@@ -7817,7 +9402,7 @@ function buildLegacyFormDataFromClean(productKey, cleanOrder){
   Object.keys(defaults).forEach(name => appendCleanTextLegacy(fd, name, defaults[name]));
 
   schema.fields.forEach(field => {
-    if((field.type === "text" || field.type === "textarea") && field.legacyName){
+    if((field.type === "text" || field.type === "textarea" || field.type === "niche-autocomplete" || field.type === "objective-picker" || field.type === "visual-style" || field.type === "hidden") && field.legacyName){
       appendCleanTextLegacy(fd, field.legacyName, cleanOrder.fields[field.key] || field.defaultValue || "");
     }
 
@@ -7892,6 +9477,23 @@ function resetCleanFormAfterSend(form){
   form.reset();
   form.querySelectorAll("[data-clean-file-name]").forEach(el => {
     el.textContent = "Nenhum arquivo";
+  });
+  form.querySelectorAll("[data-dynamic-fields]").forEach(el => {
+    el.innerHTML = "";
+  });
+  form.querySelectorAll("[data-objective-picker]").forEach(box => {
+    box.dataset.objectiveSelected = "";
+    box.classList.remove("is-open", "is-manual");
+    updateFotosLabelForObjective(box, null);
+    renderObjectiveOptions(box);
+  });
+  form.querySelectorAll("[data-visual-style-value]").forEach(input => {
+    input.value = "normal";
+  });
+  form.querySelectorAll("[data-visual-style-picker]").forEach(picker => {
+    picker.querySelectorAll("[data-visual-style-option]").forEach(option => {
+      option.classList.toggle("is-selected", option.dataset.visualStyleOption === "normal");
+    });
   });
   form.querySelectorAll(".campoObrigatorioErro").forEach(el => el.classList.remove("campoObrigatorioErro"));
 }
@@ -8229,6 +9831,15 @@ async function submitCleanProductForm(e){
   const productKey = form.dataset.productForm || "";
   const product = PRODUCTS[productKey];
   const schema = getCleanProductSchema(productKey);
+  const debugLocal = ["localhost", "127.0.0.1"].includes(location.hostname);
+
+  if(debugLocal){
+    console.log("[IA4Tube Empresas] submitCleanProductForm entrou", {
+      productKey,
+      API_BASE,
+      endpoint: schema?.endpoint || ""
+    });
+  }
 
   if(!product || !schema) return;
 
@@ -8262,6 +9873,10 @@ async function submitCleanProductForm(e){
 
   const cleanOrder = serializeCleanProductForm(productKey, form);
   const fd = buildLegacyFormDataFromClean(productKey, cleanOrder);
+  if(productKey === "arte_empresa"){
+    fd.set("product_id", "arte_empresa");
+    fd.set("flyer_tipo", "arte_empresa");
+  }
 
   try{
     const r = await fetch(`${API_BASE}${schema.endpoint}`, {
@@ -8270,10 +9885,27 @@ async function submitCleanProductForm(e){
       body:fd
     });
 
+    if(debugLocal){
+      console.log("[IA4Tube Empresas] resposta POST", {
+        productKey,
+        API_BASE,
+        endpoint: schema.endpoint,
+        status: r.status,
+        ok: r.ok
+      });
+    }
+
     const out = await r.json();
+
+    if(debugLocal){
+      console.log("[IA4Tube Empresas] JSON resposta", out);
+    }
 
     if(out.ok){
       setCleanProductMsg(form, "");
+      if(productKey === "arte_empresa"){
+        salvarPerfilEmpresaLocal(cleanOrder.fields || {});
+      }
       if(out.pedido_id){
         salvarPedidoAtivoLocal(out.pedido_id, productKey);
       }
@@ -8312,6 +9944,10 @@ async function submitCleanProductForm(e){
 }
 
 function bindCleanProductForms(root){
+  bindNicheAutocomplete(root);
+  bindObjectivePicker(root);
+  bindVisualStylePicker(root);
+
   root.querySelectorAll("[data-clean-file-for]").forEach(box => {
     box.addEventListener("click", () => {
       const form = box.closest("[data-product-form]");
@@ -8354,6 +9990,7 @@ function bindCleanProductForms(root){
   });
 
   root.querySelectorAll("[data-product-form]").forEach(form => {
+    preencherPerfilEmpresaLocal(form);
     form.addEventListener("submit", submitCleanProductForm);
   });
 
