@@ -9140,6 +9140,22 @@ const CLEAN_PRODUCT_RENDER_ORDER = IA4_EMPRESAS_MODE ? [
   "contratacao"
 ];
 
+function removerProdutosFutebolNoModoEmpresas(){
+  if(!IA4_EMPRESAS_MODE) return;
+
+  [
+    ".productGroupTime",
+    ".productGroupJogador",
+    ".productGroupBrinde",
+    ".categoryChoiceRow",
+    ".categoryMiniRow",
+    ".homeExamples",
+    ".optionsRow.productGroup"
+  ].forEach((selector) => {
+    document.querySelectorAll(selector).forEach((el) => el.remove());
+  });
+}
+
 function setEscudo3dCleanFileLabel(text){
   document.querySelectorAll("[data-escudo3d-clean-file-name]").forEach(el => {
     el.textContent = text || "Selecionar escudo";
@@ -9149,6 +9165,8 @@ function setEscudo3dCleanFileLabel(text){
 function renderCleanProductForms(){
   const root = document.getElementById("productFormsRoot");
   if(!root) return;
+
+  removerProdutosFutebolNoModoEmpresas();
 
   const formsHtml = CLEAN_PRODUCT_RENDER_ORDER.map(productKey => {
     const product = PRODUCTS[productKey];
