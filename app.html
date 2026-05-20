@@ -10179,7 +10179,10 @@ function restaurarPedidosAtivos(pedidos){
 
     if(produtosRestaurados.has(ativo.product_id)) continue;
 
-    const form = getCleanProductFormByProductId(ativo.product_id);
+    let form = getCleanProductFormByProductId(ativo.product_id);
+    if(!form && IA4_EMPRESAS_MODE){
+      form = getCleanProductFormByProductId("arte_empresa");
+    }
     if(!form) continue;
 
     produtosRestaurados.add(ativo.product_id);
