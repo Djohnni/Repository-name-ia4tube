@@ -5450,6 +5450,272 @@ body.ia4-empresas .centerBtn{
   cursor:pointer;
 }
 
+[data-clean-product-block="arte_empresa"]{
+  gap:12px;
+  padding:12px;
+  border-radius:24px;
+  background:#ffffff;
+  border-color:#e8f0ea;
+  box-shadow:0 18px 44px rgba(15,23,42,.08);
+}
+
+[data-clean-product-block="arte_empresa"].is-active{
+  border-color:#bbf7d0;
+  box-shadow:0 20px 46px rgba(15,23,42,.10);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanProductForm{
+  gap:12px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanProductHeader{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 116px;
+  align-items:center;
+  gap:14px;
+  padding:4px 2px 8px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanProductHeaderText{
+  display:grid;
+  gap:6px;
+  min-width:0;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanProductTitle{
+  font-size:clamp(24px, 6vw, 34px);
+  line-height:1;
+  letter-spacing:0;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanProductPrice{
+  justify-self:start;
+  width:max-content;
+  padding:6px 10px;
+  font-size:13px;
+  background:#f0fdf4;
+  border-color:#bbf7d0;
+  color:#147a36;
+  box-shadow:0 8px 18px rgba(22,163,74,.10);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanProductHeader .cleanProductImage{
+  width:116px;
+  height:96px;
+  justify-self:end;
+  border-radius:22px;
+  background:linear-gradient(180deg,#f0fdf4,#ffffff);
+  border:1px solid #dcfce7;
+  box-shadow:0 14px 30px rgba(22,163,74,.12);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanProductHeader .cleanProductImage img{
+  width:100%;
+  height:100% !important;
+  object-fit:contain;
+  padding:8px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanFieldCard{
+  gap:8px;
+  padding:12px;
+  border-radius:20px;
+  background:#ffffff;
+  border:1px solid #e6eee9;
+  box-shadow:0 12px 26px rgba(15,23,42,.06);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="ramo"],
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="nome_empresa"],
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="objetivo"],
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="estilo_visual_cliente"]{
+  position:relative;
+  grid-template-columns:38px minmax(0,1fr);
+  column-gap:10px;
+  align-items:start;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="ramo"]::before,
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="nome_empresa"]::before,
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="objetivo"]::before,
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="estilo_visual_cliente"]::before{
+  display:grid;
+  place-items:center;
+  width:34px;
+  height:34px;
+  border-radius:999px;
+  background:linear-gradient(145deg,#16a34a,#22c55e);
+  color:#ffffff;
+  font-size:16px;
+  font-weight:950;
+  box-shadow:0 10px 20px rgba(22,163,74,.22), inset 0 0 0 4px rgba(255,255,255,.16);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="ramo"]::before{ content:"1"; }
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="nome_empresa"]::before{ content:"2"; }
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="objetivo"]::before{ content:"3"; }
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="estilo_visual_cliente"]::before{ content:"4"; }
+
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="ramo"] > *,
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="nome_empresa"] > *,
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="objetivo"] > *,
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="estilo_visual_cliente"] > *{
+  grid-column:2;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanFieldLabel{
+  gap:0;
+  color:#102017;
+  font-size:14px;
+  line-height:1.15;
+  font-weight:950;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanFieldLabel::before{
+  display:none;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanInputWrap{
+  position:relative;
+  display:block;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanInputIcon{
+  position:absolute;
+  left:14px;
+  top:50%;
+  z-index:1;
+  width:20px;
+  height:20px;
+  transform:translateY(-50%);
+  color:#22c55e;
+  opacity:.72;
+  pointer-events:none;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanInputIcon svg{
+  display:block;
+  width:20px;
+  height:20px;
+}
+
+[data-clean-product-block="arte_empresa"] input:not(.fileHidden):not([type="hidden"]),
+[data-clean-product-block="arte_empresa"] textarea,
+[data-clean-product-block="arte_empresa"] .cleanObjectiveToggle{
+  min-height:56px;
+  padding:15px 16px;
+  border-radius:18px;
+  border:1px solid #dfeae3 !important;
+  background:#ffffff !important;
+  color:#0f172a !important;
+  box-shadow:0 12px 26px rgba(15,23,42,.07) !important;
+  font-size:14px;
+  font-weight:850 !important;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanInputWrap input:not(.fileHidden):not([type="hidden"]),
+[data-clean-product-block="arte_empresa"] .cleanInputWrap textarea,
+[data-clean-product-block="arte_empresa"] .cleanObjectiveToggle{
+  padding-left:46px;
+}
+
+[data-clean-product-block="arte_empresa"] textarea{
+  min-height:82px;
+  resize:vertical;
+}
+
+[data-clean-product-block="arte_empresa"] input:not(.fileHidden):not([type="hidden"])::placeholder,
+[data-clean-product-block="arte_empresa"] textarea::placeholder{
+  color:#6b7a70 !important;
+  font-weight:800 !important;
+  opacity:.9 !important;
+}
+
+[data-clean-product-block="arte_empresa"] input:not(.fileHidden):not([type="hidden"]):focus,
+[data-clean-product-block="arte_empresa"] textarea:focus,
+[data-clean-product-block="arte_empresa"] .cleanObjectiveToggle:focus{
+  border-color:#86efac !important;
+  box-shadow:0 0 0 4px rgba(34,197,94,.13), 0 14px 28px rgba(15,23,42,.08) !important;
+  transform:none !important;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanObjectiveToggle{
+  position:relative;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanObjectiveToggle .cleanInputIcon{
+  left:14px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanNicheAutocomplete{
+  gap:8px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanNicheList{
+  border-color:#dfeae3;
+  box-shadow:0 18px 38px rgba(15,23,42,.14);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanNicheManual{
+  padding-top:0;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanVisualStyleGrid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanVisualStyleOption{
+  min-height:92px;
+  padding:11px;
+  border-radius:18px;
+  border-color:#dfeae3;
+  box-shadow:0 10px 20px rgba(15,23,42,.05);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanVisualStyleTitle{
+  font-size:13px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanVisualStyleDesc{
+  font-size:11.5px;
+  line-height:1.28;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanFileBox{
+  min-height:56px;
+  border-radius:18px;
+  border-color:#dfeae3;
+  background:#ffffff;
+  box-shadow:0 12px 26px rgba(15,23,42,.06);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanFilePlus{
+  background:#16a34a;
+  box-shadow:0 8px 16px rgba(22,163,74,.20);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanOptionalDetails{
+  gap:10px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanOptionalDetails summary{
+  padding:12px;
+  border-radius:18px;
+  border-color:#e6eee9;
+  box-shadow:0 10px 22px rgba(15,23,42,.06);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanOptionalFields{
+  gap:10px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanSubmitBtn{
+  min-height:62px;
+  border-radius:18px;
+  font-size:18px;
+}
+
 @media (max-width:680px){
   .cleanProductBlock{
     gap:14px;
@@ -5463,6 +5729,77 @@ body.ia4-empresas .centerBtn{
 
   .cleanProductHeader{
     flex-direction:column;
+  }
+
+  [data-clean-product-block="arte_empresa"]{
+    padding:10px;
+    border-radius:22px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanProductHeader{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 98px;
+    align-items:center;
+    gap:10px;
+    padding-bottom:6px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanProductHeader .cleanProductImage{
+    width:98px;
+    height:82px;
+    border-radius:20px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanProductTitle{
+    font-size:24px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanProductPrice{
+    font-size:12px;
+    padding:5px 9px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard{
+    padding:11px;
+    border-radius:18px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="ramo"],
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="nome_empresa"],
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="objetivo"],
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="estilo_visual_cliente"]{
+    grid-template-columns:36px minmax(0,1fr);
+    column-gap:9px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="ramo"]::before,
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="nome_empresa"]::before,
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="objetivo"]::before,
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="estilo_visual_cliente"]::before{
+    width:32px;
+    height:32px;
+    font-size:15px;
+  }
+
+  [data-clean-product-block="arte_empresa"] input:not(.fileHidden):not([type="hidden"]),
+  [data-clean-product-block="arte_empresa"] textarea,
+  [data-clean-product-block="arte_empresa"] .cleanObjectiveToggle{
+    min-height:54px;
+    padding:14px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanInputWrap input:not(.fileHidden):not([type="hidden"]),
+  [data-clean-product-block="arte_empresa"] .cleanInputWrap textarea,
+  [data-clean-product-block="arte_empresa"] .cleanObjectiveToggle{
+    padding-left:44px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanVisualStyleGrid{
+    grid-template-columns:1fr;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanVisualStyleOption{
+    min-height:0;
   }
 
   .cleanScoreGrid{
@@ -7141,7 +7478,7 @@ const PRODUCT_CONFIG_DETAILS = {
     mode: "flyer",
     flyerTipo: "arte_empresa",
     visualCategory: "empresa",
-    image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 900'%3E%3Crect width='900' height='900' fill='%230f172a'/%3E%3Crect x='90' y='110' width='720' height='520' rx='42' fill='%23ffffff'/%3E%3Crect x='140' y='170' width='300' height='42' rx='12' fill='%231e88ff'/%3E%3Crect x='140' y='250' width='620' height='34' rx='10' fill='%23e5e7eb'/%3E%3Crect x='140' y='314' width='500' height='34' rx='10' fill='%23e5e7eb'/%3E%3Crect x='140' y='410' width='210' height='140' rx='28' fill='%23f4b400'/%3E%3Crect x='390' y='410' width='370' height='140' rx='28' fill='%2334a853'/%3E%3Crect x='180' y='690' width='540' height='74' rx='37' fill='%231fbf63'/%3E%3C/svg%3E",
+    image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 520 420'%3E%3Crect width='520' height='420' rx='46' fill='%23f0fdf4'/%3E%3Cellipse cx='260' cy='358' rx='170' ry='28' fill='%23bbf7d0' opacity='.75'/%3E%3Crect x='110' y='172' width='300' height='168' rx='22' fill='%23ffffff' stroke='%2386efac' stroke-width='8'/%3E%3Cpath d='M138 108h244l44 76H94z' fill='%2316a34a'/%3E%3Cpath d='M94 184h332v18c0 22-18 40-40 40s-40-18-40-40c0 22-18 40-40 40s-40-18-40-40c0 22-18 40-40 40s-40-18-40-40c0 22-18 40-40 40s-52-18-52-40z' fill='%2322c55e'/%3E%3Crect x='148' y='252' width='82' height='88' rx='14' fill='%23dcfce7'/%3E%3Crect x='258' y='252' width='108' height='48' rx='14' fill='%23bbf7d0'/%3E%3Ccircle cx='382' cy='116' r='40' fill='%23ffffff' stroke='%2386efac' stroke-width='8'/%3E%3Cpath d='M365 116l13 13 24-28' fill='none' stroke='%2316a34a' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E",
     labels: {
       ramo: "Ramo da empresa",
       nome_empresa: "Nome da empresa",
@@ -8587,11 +8924,31 @@ function getCleanFieldPlaceholder(product, field){
   return field.placeholder || product?.placeholders?.[field.placeholderKey] || "";
 }
 
+function getCleanFieldIcon(product, field){
+  if(product?.id !== "arte_empresa") return "";
+  const icons = {
+    ramo: "M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z",
+    nome_empresa: "M5 21V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v15M9 8h1M14 8h1M9 12h1M14 12h1M9 16h1M14 16h1",
+    objetivo: "M12 21s7-4.4 7-11a7 7 0 1 0-14 0c0 6.6 7 11 7 11zM12 7v4l3 2",
+    oferta: "M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7M4 12h16M12 21V8M7.5 8A2.5 2.5 0 1 1 12 6.5A2.5 2.5 0 1 1 16.5 8",
+    cta: "M5 12h14M13 6l6 6-6 6",
+    whatsapp: "M5 19l1.2-3.5A7.5 7.5 0 1 1 9 18.2z",
+    instagram: "M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4zM9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0zM17.5 6.5h.01",
+    observacoes: "M4 5h16M4 12h16M4 19h10",
+    objetivo_btn: "M12 3l2.4 5 5.6.8-4 3.9.9 5.5L12 15.7 7.1 18.2l.9-5.5-4-3.9 5.6-.8z",
+    manual: "M4 20h4l10.5-10.5a2.8 2.8 0 0 0-4-4L4 16z"
+  };
+  const path = icons[field.key] || icons.manual;
+  return `<span class="cleanInputIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="${path}"/></svg></span>`;
+}
+
 function renderCleanTextField(product, field){
+  const icon = getCleanFieldIcon(product, field);
+  const inputHtml = `<input name="${htmlEscape(field.key)}" data-field="${htmlEscape(field.key)}" placeholder="${htmlEscape(getCleanFieldPlaceholder(product, field))}">`;
   return `
     <div class="cleanFieldCard" data-clean-field-card="${htmlEscape(field.key)}">
       <label class="cleanFieldLabel">${getCleanFieldLabel(product, field)}</label>
-      <input name="${htmlEscape(field.key)}" data-field="${htmlEscape(field.key)}" placeholder="${htmlEscape(getCleanFieldPlaceholder(product, field))}">
+      ${icon ? `<div class="cleanInputWrap">${icon}${inputHtml}</div>` : inputHtml}
     </div>
   `;
 }
@@ -8605,13 +8962,11 @@ function renderCleanNicheAutocompleteField(product, field){
       <div class="cleanNicheAutocomplete" data-niche-autocomplete>
         <input type="hidden" name="${key}" data-field="${key}" data-niche-value>
         <input type="hidden" name="ramo_origem" data-field="ramo_origem" data-niche-origin>
-        <input data-niche-search placeholder="${placeholder}" autocomplete="off" aria-autocomplete="list">
+        <div class="cleanInputWrap">${getCleanFieldIcon(product, field)}<input data-niche-search placeholder="${placeholder}" autocomplete="off" aria-autocomplete="list"></div>
         <div class="cleanNicheList" data-niche-list></div>
         <div class="cleanNicheManual" data-niche-manual-wrap>
-          <div class="cleanNicheHelp">Escreva o ramo exatamente como você quer que a IA entenda.</div>
-          <input data-niche-manual placeholder="Digite seu ramo">
+          <div class="cleanInputWrap">${getCleanFieldIcon(product, { key: "manual" })}<input data-niche-manual placeholder="Digite seu ramo"></div>
         </div>
-        <div class="cleanNicheHelp">Selecione uma opção da lista. Texto digitado sem clique não é confirmado.</div>
       </div>
     </div>
   `;
@@ -8626,15 +8981,14 @@ function renderCleanObjectivePickerField(product, field){
         <input type="hidden" name="${key}" data-field="${key}" data-objective-value>
         <input type="hidden" name="objetivo_origem" data-field="objetivo_origem" data-objective-origin>
         <button type="button" class="cleanObjectiveToggle" data-objective-toggle>
+          ${getCleanFieldIcon(product, { key: "objetivo_btn" })}
           <span data-objective-selected-label>Selecionar objetivo</span>
           <span class="cleanObjectiveArrow" aria-hidden="true">▼</span>
         </button>
         <div class="cleanNicheList" data-objective-list></div>
         <div class="cleanNicheManual" data-objective-manual-wrap>
-          <div class="cleanNicheHelp">Escreva o objetivo de forma simples e realista.</div>
-          <input data-objective-manual placeholder="Digite outro objetivo">
+          <div class="cleanInputWrap">${getCleanFieldIcon(product, { key: "manual" })}<input data-objective-manual placeholder="Digite outro objetivo"></div>
         </div>
-        <div class="cleanNicheHelp">Escolha um objetivo. As perguntas abaixo mudam conforme sua escolha.</div>
         <div class="cleanDynamicFields" data-dynamic-fields></div>
       </div>
     </div>
@@ -8661,10 +9015,12 @@ function renderCleanVisualStyleField(product, field){
 }
 
 function renderCleanTextareaField(product, field){
+  const icon = getCleanFieldIcon(product, field);
+  const textareaHtml = `<textarea name="${htmlEscape(field.key)}" data-field="${htmlEscape(field.key)}" placeholder="${htmlEscape(getCleanFieldPlaceholder(product, field))}"></textarea>`;
   return `
     <div class="cleanFieldCard" data-clean-field-card="${htmlEscape(field.key)}">
       <label class="cleanFieldLabel">${getCleanFieldLabel(product, field)}</label>
-      <textarea name="${htmlEscape(field.key)}" data-field="${htmlEscape(field.key)}" placeholder="${htmlEscape(getCleanFieldPlaceholder(product, field))}"></textarea>
+      ${icon ? `<div class="cleanInputWrap">${icon}${textareaHtml}</div>` : textareaHtml}
     </div>
   `;
 }
@@ -8757,7 +9113,7 @@ function renderCleanFieldsGrouped(product, schema){
   return `
     ${requiredHtml}
     <details class="cleanOptionalDetails">
-      <summary>Campos opcionais — clique para deixar mais completo</summary>
+      <summary>Campos opcionais</summary>
       <div class="cleanOptionalFields">
         ${optionalHtml}
       </div>
@@ -8804,14 +9160,18 @@ function renderCleanProductForms(){
           <img src="${htmlEscape(product.image || "")}" alt="">
         </div>`;
     const imageBeforeForm = productKey !== "arte_empresa";
+    const headerImageHtml = productKey === "arte_empresa" ? imageHtml : "";
 
     return `
       <section class="cleanProductBlock" data-clean-product-block="${htmlEscape(productKey)}">
         ${imageBeforeForm ? imageHtml : ""}
         <form class="cleanProductForm" data-product-form="${htmlEscape(productKey)}" enctype="multipart/form-data" novalidate>
           <div class="cleanProductHeader">
-            <h3 class="cleanProductTitle">${htmlEscape(product.title || product.name || productKey)}</h3>
-            ${priceLabel ? `<div class="cleanProductPrice">${htmlEscape(priceLabel)}</div>` : ""}
+            <div class="cleanProductHeaderText">
+              <h3 class="cleanProductTitle">${htmlEscape(product.title || product.name || productKey)}</h3>
+              ${priceLabel ? `<div class="cleanProductPrice">${htmlEscape(priceLabel)}</div>` : ""}
+            </div>
+            ${headerImageHtml}
           </div>
           ${renderCleanFieldsGrouped(product, schema)}
           <button class="btnGreen cleanSubmitBtn" type="submit">Criar minha arte 🚀</button>
@@ -8822,7 +9182,7 @@ function renderCleanProductForms(){
             <a href="#" class="cleanResultDownload" data-clean-result-download>Baixar imagem</a>
           </div>
         </form>
-        ${imageBeforeForm ? "" : imageHtml}
+        ${imageBeforeForm ? "" : ""}
       </section>
     `;
   }).join("");
@@ -8994,7 +9354,6 @@ function renderDynamicObjectiveFields(box, objective = null){
   }
 
   wrap.innerHTML = `
-    <div class="cleanNicheHelp">Campos opcionais para deixar a arte mais certeira.</div>
     ${fields.map((field) => `
       <div class="cleanDynamicField">
         <label>${htmlEscape(field.label)}</label>
