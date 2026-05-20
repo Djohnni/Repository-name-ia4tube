@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-13T05:03:19.750Z",
+    "cliente_id": "google_103977056453523930916",
+    "nome_time": "Heberton ninho",
+    "whatsapp": "google_103977056453523930916",
+    "sessao": "sess_1778648181975_2ae96e87e622c8",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260513_050311",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "authWhatsapp",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 2258,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260513_050311",
+      "campo_atual": "authWhatsapp",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 2258
+    }
+  }
+]

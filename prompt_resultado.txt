@@ -1,0 +1,43 @@
+ESCREVA TODO O TEXTO EM PORTUGUÊS (BRASIL)
+
+Crie uma imagem de RESULTADO FINAL de futebol com estilo épico e cinematográfico.
+
+O cenário deve parecer pós-jogo, com iluminação de estádio, atmosfera dramática e energia de vitória.
+
+ELEMENTOS:
+- Escudos dos times grandes e bem posicionados
+- Fundo de estádio com luzes e leve fumaça
+
+TEXTO (OBRIGATÓRIO NA IMAGEM):
+- Placar completo (times + resultado) → ELEMENTO PRINCIPAL E MAIOR DA IMAGEM
+- Nome dos times
+- Frase do jogo
+- Lista de artilheiros (se houver)
+
+REGRAS:
+- O texto deve estar visível, legível e em destaque
+- NÃO omitir nenhum texto enviado
+- NÃO inventar informações
+- NÃO alterar nomes
+- Se tiver foto do jogo ou de jogador coloque de fundo
+
+IMPORTANTE:
+O texto é parte principal da imagem e deve aparecer claramente
+
+REGRA CRÍTICA SOBRE NOMES:
+Se houver discordância entre o nome digitado no pedido e o nome escrito no escudo/logo enviado, use SEMPRE o nome escrito no escudo/logo como fonte oficial.
+O cliente pode digitar errado.
+O escudo/logo é a referência principal para nomes de times, marcas e identidade visual.
+Não corrija o escudo pelo texto digitado; corrija o texto digitado pelo escudo.
+
+NUNCA INVENTAR QUALQUER INFORMAÇÃO. USAR APENAS OS DADOS FORNECIDOS NO PEDIDO. SE ALGUM DADO NÃO FOR ENVIADO (EX: ARTILHEIROS, JOGADORES, TEXTOS), NÃO EXIBIR NA IMAGEM.
+REGRA CRÍTICA SOBRE NOMES DOS JOGADORES:
+Copie os nomes EXATAMENTE como enviados no pedido.
+
+PROIBIDO:
+- corrigir ortografia
+- trocar letras
+- adicionar/remover acentos
+- adaptar apelidos
+
+Mesmo que pareça errado, manter idêntico ao enviado.

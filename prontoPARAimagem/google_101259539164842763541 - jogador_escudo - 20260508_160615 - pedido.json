@@ -1,0 +1,29 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [
+    {
+      "nome": "Fabrício",
+      "posicao": ""
+    }
+  ],
+  "jogadores_texto": "Fabrício",
+  "escudo_principal": "escudo1.png",
+  "escudo_adversario": "",
+  "foto_jogo": "mascote.png",
+  "categoria": "jogador_escudo",
+  "id": "20260508_160615",
+  "whatsapp": "google_101259539164842763541",
+  "mes": "2026-05",
+  "rodada": "Jogador + escudo",
+  "data": "Fabrício",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "criado_em": "2026-05-08T16:06:15.070Z"
+}

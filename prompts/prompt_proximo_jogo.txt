@@ -1,0 +1,27 @@
+Faça um flyer de confronto de futebol com aparência épica e cinematográfica.
+Os dois escudos são o foco principal. Devem aparecer gigantes, ocupando boa parte da imagem, valorizados e com iluminação dramática de estádio, o escudo nao deve repetir.
+faça os dois escudos apoiados no chao com o chao meio trincado devido ao peso dos escudos.
+Respeite 100% todas as cores, formas, letras, símbolos e proporções originais dos escudos.
+Não redesenhar, não estilizar, não modificar. O escudo deve permanecer idêntico ao enviado e em 3d.
+Coloque um X discreto e moderno entre os escudos.
+O cenário deve ser um estádio de futebol, com iluminação forte de estádio, atmosfera de jogo importante e fundo combinando com as cores dos uniformes.
+Respeitar 100% o design do patrocinador.
+Se não houver patrocinador, não colocar nada.
+Centralize os patrocinadores; se houver apenas um, mantenha somente ele.
+Deixe em branco qualquer informação que não esteja presente na imagem.
+Use PNL de aceitação, dominância e superioridade para dar força visual ao confronto.
+Enfatize os logos.
+A palavra "extra info" não pode aparecer.
+A categoria não pode aparecer.
+O escudo nunca repete, e o escudo do primeiro time enviado deve ficar à esquerda.
+
+LEMBRANDO O DESTAQUE TEM QUE SER Para os DOIS ESCUDOS. os dois escudos tem que ser a frente e o patrocinador se tiver deve ser menor tem que ser detalhe
+
+se tiver logo adicional verifique o que é e colqoue no lugar
+
+IMPORTANTE:
+- NÃO escrever nenhum texto na imagem
+- NÃO gerar letras, números, palavras, datas, horários, títulos ou qualquer escrita
+- NÃO colocar nome de times, rodada, arena, patrocinador, placar ou qualquer informação textual
+- TODO o texto será adicionado depois por outro sistema
+- A imagem deve sair somente com os elementos visuais

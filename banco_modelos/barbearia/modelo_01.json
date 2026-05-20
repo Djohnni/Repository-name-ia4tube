@@ -1,0 +1,17 @@
+{
+  "id": "barbearia_modelo_01",
+  "ramo": "Barbearia",
+  "ramo_slug": "barbearia",
+  "objetivo": "divulgar corte, barba, combo ou agendamento",
+  "tipo_post": "promocional",
+  "estilo": "urbano, masculino, elegante, com contraste forte",
+  "cores": ["preto", "branco", "dourado"],
+  "layout": "foto do serviço ou profissional em destaque, preço/combo em selo e CTA direto",
+  "texto_principal": "Corte + barba com horário marcado",
+  "cta": "Agende pelo WhatsApp",
+  "elementos": ["barba", "cabelo", "navalha", "cadeira de barbeiro", "acabamento"],
+  "imagem_exemplo": "modelo_01.png",
+  "criado_em": "2026-05-18T00:00:00.000Z",
+  "atualizado_em": "2026-05-18T00:00:00.000Z",
+  "usos": 0
+}

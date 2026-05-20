@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-14T03:01:41.275Z",
+    "cliente_id": "auto_bokita_1778727692833",
+    "nome_time": "Bokita",
+    "whatsapp": "auto_bokita_1778727692833",
+    "sessao": "sess_1778727596024_3d1c655c3575b",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260514_030134",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 2523,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260514_030134",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 2523
+    }
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-08T16:06:17.038Z",
+    "cliente_id": "google_101259539164842763541",
+    "nome_time": "Fabrício Mota Almeida",
+    "whatsapp": "google_101259539164842763541",
+    "sessao": "sess_1778256121689_68c2e6220efb2",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260508_160615",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 1975,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260508_160615",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 1975
+    }
+  }
+]

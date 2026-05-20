@@ -1,0 +1,27 @@
+{
+  "pedido_id": "20260519_234218",
+  "modelo": "gpt-image-2",
+  "size": "1024x1536",
+  "quality": "medium",
+  "input_fidelity": "high",
+  "output_format_api": "jpeg",
+  "resultado_final": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\dados\\pedidos\\15991120599\\2026-05\\20260519_234218\\resultado_final.png",
+  "resultado_copia": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\resultados_prontos\\resultado_20260519_234218.png",
+  "prompt_file": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\prompt_arte_empresa.txt",
+  "texto_referencia": "",
+  "linhas_texto": [
+    "Ramo: Supermercado",
+    "Nome da empresa: Tauste",
+    "Objetivo da arte: Quero mostrar novidades",
+    "Oferta/promocao: R$8,00",
+    "Instagram: @taustesupermercados",
+    "Produto principal: Arroz dalfovo",
+    "Beneficios: saudavel e nutritico"
+  ],
+  "referencias": [
+    "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\dados\\pedidos\\15991120599\\2026-05\\20260519_234218\\logo.png",
+    "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\dados\\pedidos\\15991120599\\2026-05\\20260519_234218\\foto01.png",
+    "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\dados\\pedidos\\15991120599\\2026-05\\20260519_234218\\preview_ia4tube.jpg"
+  ],
+  "gerado_em": "2026-05-19T23:47:16"
+}

@@ -1,0 +1,29 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [
+    {
+      "nome": "julio",
+      "posicao": ""
+    }
+  ],
+  "jogadores_texto": "julio",
+  "escudo_principal": "escudo1.png",
+  "escudo_adversario": "",
+  "foto_jogo": "mascote.png",
+  "categoria": "jogador_escudo",
+  "id": "20260507_220928",
+  "whatsapp": "15991120599",
+  "mes": "2026-05",
+  "rodada": "Jogador + escudo",
+  "data": "julio",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "criado_em": "2026-05-07T22:09:28.112Z"
+}

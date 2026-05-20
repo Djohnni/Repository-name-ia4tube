@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-19T11:48:22.678Z",
+    "cliente_id": "gahc1000yahoo.com.br",
+    "nome_time": "gahc1000yahoo.com.br",
+    "whatsapp": "gahc1000yahoo.com.br",
+    "sessao": "sess_1779187910295_a9a3cb941f1c7",
+    "evento": "pedido_concluido",
+    "produto": "arte_empresa",
+    "categoria": "",
+    "pedido_id": "20260519_084815",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnGreen cleanSubmitBtn",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 28,
+    "payload": {
+      "produto": "arte_empresa",
+      "categoria": "empresa",
+      "pedido_id": "20260519_084815",
+      "campo_atual": "btnGreen cleanSubmitBtn",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 28
+    }
+  }
+]

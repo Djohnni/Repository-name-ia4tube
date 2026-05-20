@@ -1,0 +1,170 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [],
+  "jogadores_texto": "",
+  "escudo_principal": "",
+  "escudo_adversario": "",
+  "foto_jogo": "",
+  "categoria": "arte_empresa",
+  "id": "20260519_144345",
+  "whatsapp": "15991120599",
+  "mes": "2026-05",
+  "rodada": "Quero parecer mais profissional",
+  "data": "AlumiOhata",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "aprovado_cliente": false,
+  "baixado_cliente": false,
+  "ajuste_automatico_usado": false,
+  "motivo_ajuste": "",
+  "criado_em": "2026-05-19T17:43:45.683Z",
+  "ramo": "Serralheria",
+  "nome_empresa": "AlumiOhata",
+  "objetivo": "Quero parecer mais profissional",
+  "oferta": "",
+  "cta": "whats",
+  "whatsapp_contato": "15991120599",
+  "instagram": "@alumiohata",
+  "observacoes": "",
+  "niche_id": "serralheria",
+  "niche_dna": {
+    "estilo_visual": "moderno e industrial",
+    "publico_alvo": [
+      "pequenos e médios empresários",
+      "construtores",
+      "reformadores residenciais",
+      "donos de imóveis comerciais"
+    ],
+    "cores_sugeridas": [
+      "cinza metálico",
+      "azul escuro",
+      "preto",
+      "branco"
+    ],
+    "tipo_layout": [
+      "post quadrado para feed",
+      "stories verticais",
+      "banner para WhatsApp"
+    ],
+    "ofertas_comuns": [
+      "orçamento gratuito",
+      "desconto para reforma completa",
+      "instalação rápida",
+      "assistência técnica especializada"
+    ],
+    "chamadas": [
+      "Transforme seu espaço com segurança e qualidade",
+      "Serralheria profissional para sua obra",
+      "Resistência e acabamento que duram",
+      "Projeto e instalação com garantia"
+    ],
+    "ctas": [
+      "Chame no WhatsApp",
+      "Peça seu orçamento",
+      "Fale conosco agora",
+      "Consulte condições"
+    ],
+    "elementos_visuais": [
+      "texturas metálicas",
+      "linhas retas e ângulos retos",
+      "ícones de ferramentas e solda",
+      "foto de produtos acabados",
+      "logotipo limpo e legível"
+    ],
+    "tipos_de_post": [
+      "demonstração de produtos prontos",
+      "antes e depois de obras",
+      "depoimentos de clientes",
+      "dicas de manutenção",
+      "promoções e ofertas"
+    ]
+  },
+  "niche_dna_status": "gerado",
+  "niche_dna_origem": "ia",
+  "niche_dna_gerado_em": "2026-05-19T17:43:52.069Z",
+  "niche_dna_erro": "",
+  "modelo_referencia": null,
+  "modelo_status": "pendente",
+  "modelo_erro": "Nenhum modelo parecido encontrado",
+  "modelo_usado_em": "",
+  "modelo_score": 20,
+  "modelo_score_detalhes": [
+    "estilo:+15",
+    "usos:+5"
+  ],
+  "company_assets": {
+    "logo": "logo.png",
+    "fotos": [
+      "foto01.png"
+    ],
+    "referencias": []
+  },
+  "product_id": "arte_empresa",
+  "schema_version": 2,
+  "fields": {
+    "ramo": "Serralheria",
+    "ramo_origem": "lista",
+    "nome_empresa": "AlumiOhata",
+    "objetivo": "Quero parecer mais profissional",
+    "objetivo_origem": "lista",
+    "oferta": "",
+    "cta": "whats",
+    "whatsapp": "15991120599",
+    "instagram": "@alumiohata",
+    "observacoes": "",
+    "campos_dinamicos": {
+      "tempo_mercado": "10 anos de experiencia"
+    }
+  },
+  "assets": {
+    "logo": "logo.png",
+    "fotos": [
+      "foto01.png"
+    ],
+    "referencias": []
+  },
+  "legacy": {
+    "time_principal": "",
+    "gols_time_principal": 0,
+    "gols_adversario": 0,
+    "time_adversario": "",
+    "artilheiros": [],
+    "jogadores": [],
+    "jogadores_texto": "",
+    "escudo_principal": "",
+    "escudo_adversario": "",
+    "foto_jogo": "",
+    "categoria": "arte_empresa",
+    "rodada": "Quero parecer mais profissional",
+    "data": "AlumiOhata",
+    "hora": "",
+    "arena": "",
+    "mascote_tipo": "",
+    "patrocinadores_qtd": 0,
+    "ramo": "Serralheria",
+    "nome_empresa": "AlumiOhata",
+    "objetivo": "Quero parecer mais profissional",
+    "oferta": "",
+    "cta": "whats",
+    "whatsapp_contato": "15991120599",
+    "instagram": "@alumiohata",
+    "observacoes": "",
+    "niche_id": "serralheria",
+    "niche_dna_status": "gerado",
+    "niche_dna_origem": "ia",
+    "modelo_status": "pendente",
+    "modelo_score": 20,
+    "descricao_instagram": "PATROCINADOR\nAlumiOhata — serralheria com visual mais profissional.\nFale pelo WhatsApp: 15991120599\nSiga: @alumiohata\n#serralheria #alumiohata #profissional\n#ia4tube"
+  },
+  "pagamento_pendente": true,
+  "valor_pendente": 8,
+  "motivo_pagamento_pendente": "saldo_insuficiente",
+  "descricao_instagram": "PATROCINADOR\nAlumiOhata — serralheria com visual mais profissional.\nFale pelo WhatsApp: 15991120599\nSiga: @alumiohata\n#serralheria #alumiohata #profissional\n#ia4tube"
+}

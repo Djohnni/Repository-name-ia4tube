@@ -1,0 +1,27 @@
+{
+  "id": "vidracaria_modelo_01",
+  "ramo": "Vidraçaria",
+  "ramo_slug": "vidracaria",
+  "objetivo": "divulgar promoção de box, espelhos ou fechamento de vidro",
+  "tipo_post": "promocional",
+  "estilo": "moderno, limpo, premium, com destaque para brilho e acabamento",
+  "cores": [
+    "azul",
+    "branco",
+    "cinza"
+  ],
+  "layout": "produto em destaque ao centro, faixa de oferta forte e CTA no rodapé",
+  "texto_principal": "Box para banheiro sob medida",
+  "cta": "Chame no WhatsApp",
+  "elementos": [
+    "vidro",
+    "banheiro",
+    "reflexo",
+    "acabamento",
+    "medida sob encomenda"
+  ],
+  "imagem_exemplo": "modelo_01.png",
+  "criado_em": "2026-05-18T00:00:00.000Z",
+  "atualizado_em": "2026-05-19T11:48:15.510Z",
+  "usos": 5
+}

@@ -1,0 +1,172 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [],
+  "jogadores_texto": "",
+  "escudo_principal": "",
+  "escudo_adversario": "",
+  "foto_jogo": "",
+  "categoria": "arte_empresa",
+  "id": "20260519_225343",
+  "whatsapp": "15991120599",
+  "mes": "2026-05",
+  "rodada": "Quero divulgar meu lanche",
+  "data": "lanchonete ascurra",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "aprovado_cliente": false,
+  "baixado_cliente": false,
+  "ajuste_automatico_usado": false,
+  "motivo_ajuste": "",
+  "criado_em": "2026-05-20T01:53:43.925Z",
+  "ramo": "Hamburgueria",
+  "nome_empresa": "lanchonete ascurra",
+  "objetivo": "Quero divulgar meu lanche",
+  "oferta": "",
+  "cta": "",
+  "whatsapp_contato": "",
+  "instagram": "",
+  "observacoes": "",
+  "niche_id": "hamburgueria",
+  "niche_dna": {
+    "estilo_visual": "moderno e acolhedor com foco em apelo gastronômico",
+    "publico_alvo": [
+      "jovens adultos",
+      "famílias",
+      "estudantes",
+      "profissionais que estudam ou trabalham tarde"
+    ],
+    "cores_sugeridas": [
+      "vermelho",
+      "amarelo",
+      "marrom",
+      "branco"
+    ],
+    "tipo_layout": [
+      "imagem do lanche em destaque",
+      "texto curto e direto",
+      "logotipo no canto",
+      "informação de horário destacada"
+    ],
+    "ofertas_comuns": [
+      "combo especial lanche + bebida",
+      "desconto para pedidos após 21h",
+      "promoção compre 2 leve 3",
+      "frete grátis para pedidos acima de X valor"
+    ],
+    "chamadas": [
+      "Sabor que não para até meia noite!",
+      "Seu lanche quentinho até tarde",
+      "Venha aproveitar nosso lanche delicioso",
+      "Aberto até meia noite para matar sua fome"
+    ],
+    "ctas": [
+      "Peça já pelo WhatsApp",
+      "Confira nosso cardápio",
+      "Aproveite o combo especial",
+      "Faça seu pedido agora"
+    ],
+    "elementos_visuais": [
+      "foto de hambúrguer suculento",
+      "ícone de relógio indicando horário",
+      "símbolos de ingredientes frescos",
+      "elementos gráficos de chama ou frescor"
+    ],
+    "tipos_de_post": [
+      "divulgação de produto",
+      "promoção/ oferta especial",
+      "post horário de funcionamento",
+      "depoimentos de clientes",
+      "stories interativos com enquete sobre sabores"
+    ]
+  },
+  "niche_dna_status": "gerado",
+  "niche_dna_origem": "ia",
+  "niche_dna_gerado_em": "2026-05-19T17:00:35.780Z",
+  "niche_dna_erro": "",
+  "modelo_referencia": null,
+  "modelo_status": "pendente",
+  "modelo_erro": "Nenhum modelo parecido encontrado",
+  "modelo_usado_em": "",
+  "modelo_score": 34.1,
+  "modelo_score_detalhes": [
+    "objetivo:+10",
+    "estilo:+15",
+    "usos:+5",
+    "qualidade:+4.1"
+  ],
+  "company_assets": {
+    "logo": "logo.png",
+    "fotos": [],
+    "referencias": []
+  },
+  "product_id": "arte_empresa",
+  "schema_version": 2,
+  "fields": {
+    "ramo": "Hamburgueria",
+    "ramo_origem": "lista",
+    "nome_empresa": "lanchonete ascurra",
+    "objetivo": "Quero divulgar meu lanche",
+    "objetivo_origem": "lista",
+    "estilo_visual_cliente": "normal",
+    "oferta": "",
+    "cta": "",
+    "whatsapp": "",
+    "instagram": "",
+    "observacoes": "",
+    "campos_dinamicos": {
+      "nome_lanche": "x bacon",
+      "preco": "39,90",
+      "ingredientes": "pao, ovo e bacon",
+      "delivery": "sim"
+    }
+  },
+  "assets": {
+    "logo": "logo.png",
+    "fotos": [],
+    "referencias": []
+  },
+  "legacy": {
+    "time_principal": "",
+    "gols_time_principal": 0,
+    "gols_adversario": 0,
+    "time_adversario": "",
+    "artilheiros": [],
+    "jogadores": [],
+    "jogadores_texto": "",
+    "escudo_principal": "",
+    "escudo_adversario": "",
+    "foto_jogo": "",
+    "categoria": "arte_empresa",
+    "rodada": "Quero divulgar meu lanche",
+    "data": "lanchonete ascurra",
+    "hora": "",
+    "arena": "",
+    "mascote_tipo": "",
+    "patrocinadores_qtd": 0,
+    "ramo": "Hamburgueria",
+    "nome_empresa": "lanchonete ascurra",
+    "objetivo": "Quero divulgar meu lanche",
+    "oferta": "",
+    "cta": "",
+    "whatsapp_contato": "",
+    "instagram": "",
+    "observacoes": "",
+    "niche_id": "hamburgueria",
+    "niche_dna_status": "gerado",
+    "niche_dna_origem": "ia",
+    "modelo_status": "pendente",
+    "modelo_score": 34.1,
+    "descricao_instagram": "PATROCINADOR\nX Bacon na Lanchonete Ascurra: pão, ovo e bacon por R$39,90.\nDelivery disponível — peça pelo telefone ou app.\n\n#hamburgueria #xbacon #lanchoneteascurra #delivery #comida #ia4tube"
+  },
+  "pagamento_pendente": true,
+  "valor_pendente": 8,
+  "motivo_pagamento_pendente": "saldo_insuficiente",
+  "descricao_instagram": "PATROCINADOR\nX Bacon na Lanchonete Ascurra: pão, ovo e bacon por R$39,90.\nDelivery disponível — peça pelo telefone ou app.\n\n#hamburgueria #xbacon #lanchoneteascurra #delivery #comida #ia4tube"
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-14T09:39:46.081Z",
+    "cliente_id": "auto_bahia_1778751583106",
+    "nome_time": "Bahia",
+    "whatsapp": "auto_bahia_1778751583106",
+    "sessao": "sess_1778751480716_b294a619fc0658",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260514_093945",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 2733,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260514_093945",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 2733
+    }
+  }
+]

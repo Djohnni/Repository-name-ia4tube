@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-14T02:23:11.329Z",
+    "cliente_id": "auto_natan_1778725378921",
+    "nome_time": "Natan",
+    "whatsapp": "auto_natan_1778725378921",
+    "sessao": "sess_1778725135734_d56f128352541",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260514_022300",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 1344,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260514_022300",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 1344
+    }
+  }
+]

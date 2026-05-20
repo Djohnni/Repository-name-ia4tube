@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-14T01:58:02.073Z",
+    "cliente_id": "auto_foja_1778723873181",
+    "nome_time": "Fójá",
+    "whatsapp": "auto_foja_1778723873181",
+    "sessao": "sess_1778723791567_5ce1f04f8e0f28",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260514_015756",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 4197,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260514_015756",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 4197
+    }
+  }
+]

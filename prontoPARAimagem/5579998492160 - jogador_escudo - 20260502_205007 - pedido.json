@@ -1,0 +1,29 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [
+    {
+      "nome": "Adson smith",
+      "posicao": ""
+    }
+  ],
+  "jogadores_texto": "Adson smith",
+  "escudo_principal": "escudo1.png",
+  "escudo_adversario": "",
+  "foto_jogo": "",
+  "categoria": "jogador_escudo",
+  "id": "20260502_205007",
+  "whatsapp": "5579998492160",
+  "mes": "2026-05",
+  "rodada": "Jogador + escudo",
+  "data": "Adson smith",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "criado_em": "2026-05-02T20:50:07.253Z"
+}

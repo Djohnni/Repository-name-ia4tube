@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-11T20:12:57.323Z",
+    "cliente_id": "38999853211",
+    "nome_time": "Morro de Areia",
+    "whatsapp": "38999853211",
+    "sessao": "sess_1778530105425_e67150e691728",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260511_201247",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 3942,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260511_201247",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 3942
+    }
+  }
+]

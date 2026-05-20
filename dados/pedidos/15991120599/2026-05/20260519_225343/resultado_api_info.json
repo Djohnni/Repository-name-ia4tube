@@ -1,0 +1,27 @@
+{
+  "pedido_id": "20260519_225343",
+  "modelo": "gpt-image-2",
+  "size": "1024x1536",
+  "quality": "medium",
+  "input_fidelity": "high",
+  "output_format_api": "jpeg",
+  "resultado_final": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\dados\\pedidos\\15991120599\\2026-05\\20260519_225343\\resultado_final.png",
+  "resultado_copia": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\resultados_prontos\\resultado_20260519_225343.png",
+  "prompt_file": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\prompt_arte_empresa.txt",
+  "texto_referencia": "",
+  "linhas_texto": [
+    "Ramo: Hamburgueria",
+    "Nome da empresa: lanchonete ascurra",
+    "Objetivo da arte: Quero divulgar meu lanche",
+    "Nome do lanche: x bacon",
+    "Preco: 39,90",
+    "Ingredientes: pao, ovo e bacon",
+    "Delivery: sim"
+  ],
+  "referencias": [
+    "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\dados\\pedidos\\15991120599\\2026-05\\20260519_225343\\logo.png",
+    "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\dados\\pedidos\\15991120599\\2026-05\\20260519_225343\\foto01.jpg",
+    "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\dados\\pedidos\\15991120599\\2026-05\\20260519_225343\\preview_ia4tube.jpg"
+  ],
+  "gerado_em": "2026-05-19T23:30:25"
+}

@@ -1,0 +1,66 @@
+Crie um flyer de ESCALAÇÃO de futebol com design profissional, moderno e cinematográfico, no formato vertical (9:16).
+
+ESTRUTURA DO DESIGN:
+- A arte deve ser dividida em duas partes:
+  - LADO ESQUERDO: área escura com a escalação (nomes, números, titulares, reservas e técnico)
+  - LADO DIREITO: foto do jogador ocupando grande parte da imagem, em destaque
+
+JOGADOR (EXTREMAMENTE IMPORTANTE):
+- A foto do jogador enviada deve ser usada EXATAMENTE como está
+- NÃO alterar o rosto
+- NÃO alterar o corpo
+- NÃO estilizar
+- NÃO transformar em desenho ou 3D
+- NÃO modificar expressão, proporções ou identidade
+- O jogador deve permanecer 100% fiel à imagem original (realista e intacto)
+- Apenas ajustar enquadramento, iluminação e integração no layout
+
+ESCUDOS:
+- Os escudos devem aparecer no topo da arte
+- Respeitar 100% cores, formas, proporções e detalhes
+- NÃO redesenhar ou modificar
+
+CORES:
+- Toda a identidade visual da arte deve ser baseada nas cores do escudo principal
+- Usar essas cores no fundo, detalhes, linhas, divisões e destaques
+- Criar contraste elegante (ex: escuro + dourado, escuro + cor do time, etc)
+- As cores devem combinar perfeitamente com o escudo
+
+FUNDO:
+- Estilo esportivo premium
+- Textura moderna (não lisa)
+- Iluminação de estádio ou ambiente esportivo
+- Visual limpo, sem poluição
+
+TIPOGRAFIA:
+- Estilo esportivo profissional
+- Forte, legível e bem alinhada
+- Hierarquia clara (título, jogadores, reservas, técnico)
+
+TEXTOS:
+- ESCREVA TODO O TEXTO EM PORTUGUÊS (BRASIL)
+- Usar ortografia perfeita e acentuação correta
+- Organizar:
+  - Título (ex: ESCALAÇÃO ou nome do campeonato)
+  - Times ou confronto
+  - Lista de jogadores titulares
+  - Suplentes
+  - Técnico
+
+LAYOUT:
+- Alinhamento limpo e bem organizado
+- Espaçamento profissional
+- Elementos bem distribuídos
+- Design semelhante a artes oficiais de clubes profissionais
+
+ESTILO GERAL:
+- Visual de clube profissional (nível Libertadores / Champions)
+- Elegante, forte e moderno
+- Foco em impacto visual e credibilidade
+
+IMPORTANTE:
+- NÃO distorcer o jogador
+- NÃO modificar o escudo
+- NÃO inventar elementos irreais
+- NÃO exagerar efeitos
+- Manter aparência realista e profissional

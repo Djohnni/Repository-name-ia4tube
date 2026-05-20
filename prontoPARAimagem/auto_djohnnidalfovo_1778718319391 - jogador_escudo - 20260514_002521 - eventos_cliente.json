@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-14T00:25:24.375Z",
+    "cliente_id": "auto_djohnnidalfovo_1778718319391",
+    "nome_time": "Djohnni Dalfovo",
+    "whatsapp": "auto_djohnnidalfovo_1778718319391",
+    "sessao": "sess_1778718277385_25917e157c19b8",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260514_002521",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 781,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260514_002521",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 781
+    }
+  }
+]

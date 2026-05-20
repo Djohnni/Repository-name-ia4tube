@@ -1,0 +1,22 @@
+{
+  "pedido_id": "20260519_204519",
+  "modelo": "gpt-image-2",
+  "size": "1024x1536",
+  "quality": "medium",
+  "input_fidelity": "high",
+  "output_format_api": "jpeg",
+  "resultado_final": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\dados\\pedidos\\15991120599\\2026-05\\20260519_204519\\resultado_final.png",
+  "resultado_copia": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\resultados_prontos\\resultado_20260519_204519.png",
+  "prompt_file": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\prompt_arte_empresa.txt",
+  "texto_referencia": "",
+  "linhas_texto": [
+    "Ramo: Marketing visual para empresas",
+    "Nome da empresa: iA4tube",
+    "Objetivo da arte: Quero parecer mais profissional"
+  ],
+  "referencias": [
+    "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\dados\\pedidos\\15991120599\\2026-05\\20260519_204519\\logo.png",
+    "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\dados\\pedidos\\15991120599\\2026-05\\20260519_204519\\foto01.jpg"
+  ],
+  "gerado_em": "2026-05-19T21:02:32"
+}

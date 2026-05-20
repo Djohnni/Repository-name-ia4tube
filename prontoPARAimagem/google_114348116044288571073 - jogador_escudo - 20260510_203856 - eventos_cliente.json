@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-10T20:39:05.741Z",
+    "cliente_id": "google_114348116044288571073",
+    "nome_time": "alessandra ohata",
+    "whatsapp": "google_114348116044288571073",
+    "sessao": "sess_1778445433335_7e034d63cae428",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260510_203856",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 262,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260510_203856",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 262
+    }
+  }
+]

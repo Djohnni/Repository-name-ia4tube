@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-14T10:26:14.844Z",
+    "cliente_id": "auto_diego_1778754362138",
+    "nome_time": "Diego",
+    "whatsapp": "auto_diego_1778754362138",
+    "sessao": "sess_1778754254448_5aa6709f89e7e8",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260514_102603",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "dataJogo",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 302,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260514_102603",
+      "campo_atual": "dataJogo",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 302
+    }
+  }
+]

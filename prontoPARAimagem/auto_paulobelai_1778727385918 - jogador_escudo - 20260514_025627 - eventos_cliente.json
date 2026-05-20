@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-14T02:56:35.837Z",
+    "cliente_id": "auto_paulobelai_1778727385918",
+    "nome_time": "Paulo Belai",
+    "whatsapp": "auto_paulobelai_1778727385918",
+    "sessao": "sess_1778727274534_3651456df9c1c8",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260514_025627",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 2330,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260514_025627",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 2330
+    }
+  }
+]

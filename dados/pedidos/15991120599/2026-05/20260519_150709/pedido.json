@@ -1,0 +1,161 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [],
+  "jogadores_texto": "",
+  "escudo_principal": "",
+  "escudo_adversario": "",
+  "foto_jogo": "",
+  "categoria": "arte_empresa",
+  "id": "20260519_150709",
+  "whatsapp": "15991120599",
+  "mes": "2026-05",
+  "rodada": "Quero divulgar matrículas",
+  "data": "escola de futebol sao paulo",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "aprovado_cliente": false,
+  "baixado_cliente": false,
+  "ajuste_automatico_usado": false,
+  "motivo_ajuste": "",
+  "criado_em": "2026-05-19T18:07:09.630Z",
+  "ramo": "Escola de futebol",
+  "nome_empresa": "escola de futebol sao paulo",
+  "objetivo": "Quero divulgar matrículas",
+  "oferta": "",
+  "cta": "",
+  "whatsapp_contato": "",
+  "instagram": "",
+  "observacoes": "",
+  "niche_id": "escola_de_futebol",
+  "niche_dna": {
+    "estilo_visual": "moderno e vibrante",
+    "publico_alvo": [
+      "pais de crianças e adolescentes",
+      "jovens interessados em atividades esportivas",
+      "comunidade local"
+    ],
+    "cores_sugeridas": [
+      "azul",
+      "laranja",
+      "branco"
+    ],
+    "tipo_layout": [
+      "imagem com texto em destaque",
+      "cartaz com chamada clara",
+      "carrossel educativo e promocional"
+    ],
+    "ofertas_comuns": [
+      "desconto na matrícula",
+      "primeira aula gratuita",
+      "pacotes promocionais para irmãos"
+    ],
+    "chamadas": [
+      "Garanta já a vaga do seu filho!",
+      "Matrículas abertas: vagas limitadas!",
+      "Desenvolvimento e diversão para seu filho aqui!"
+    ],
+    "ctas": [
+      "Inscreva-se agora",
+      "Fale conosco",
+      "Reserve sua vaga"
+    ],
+    "elementos_visuais": [
+      "figuras de crianças em movimento",
+      "ícones de treino e evolução",
+      "fundo dinâmico e colorido"
+    ],
+    "tipos_de_post": [
+      "promoção de matrículas",
+      "testemunhos de pais",
+      "destaques da metodologia",
+      "convite para evento ou aula experimental"
+    ]
+  },
+  "niche_dna_status": "gerado",
+  "niche_dna_origem": "ia",
+  "niche_dna_gerado_em": "2026-05-19T18:07:16.529Z",
+  "niche_dna_erro": "",
+  "modelo_referencia": null,
+  "modelo_status": "pendente",
+  "modelo_erro": "Nenhum modelo parecido encontrado",
+  "modelo_usado_em": "",
+  "modelo_score": 30,
+  "modelo_score_detalhes": [
+    "objetivo:+10",
+    "estilo:+15",
+    "usos:+5"
+  ],
+  "company_assets": {
+    "logo": "",
+    "fotos": [],
+    "referencias": []
+  },
+  "product_id": "arte_empresa",
+  "schema_version": 2,
+  "fields": {
+    "ramo": "Escola de futebol",
+    "ramo_origem": "lista",
+    "nome_empresa": "escola de futebol sao paulo",
+    "objetivo": "Quero divulgar matrículas",
+    "objetivo_origem": "lista",
+    "estilo_visual_cliente": "leve",
+    "oferta": "",
+    "cta": "",
+    "whatsapp": "",
+    "instagram": "",
+    "observacoes": "",
+    "campos_dinamicos": {
+      "curso_turma": "infantil de 5 a 10 anos",
+      "periodo": "matriculas abertas 2026"
+    }
+  },
+  "assets": {
+    "logo": "",
+    "fotos": [],
+    "referencias": []
+  },
+  "legacy": {
+    "time_principal": "",
+    "gols_time_principal": 0,
+    "gols_adversario": 0,
+    "time_adversario": "",
+    "artilheiros": [],
+    "jogadores": [],
+    "jogadores_texto": "",
+    "escudo_principal": "",
+    "escudo_adversario": "",
+    "foto_jogo": "",
+    "categoria": "arte_empresa",
+    "rodada": "Quero divulgar matrículas",
+    "data": "escola de futebol sao paulo",
+    "hora": "",
+    "arena": "",
+    "mascote_tipo": "",
+    "patrocinadores_qtd": 0,
+    "ramo": "Escola de futebol",
+    "nome_empresa": "escola de futebol sao paulo",
+    "objetivo": "Quero divulgar matrículas",
+    "oferta": "",
+    "cta": "",
+    "whatsapp_contato": "",
+    "instagram": "",
+    "observacoes": "",
+    "niche_id": "escola_de_futebol",
+    "niche_dna_status": "gerado",
+    "niche_dna_origem": "ia",
+    "modelo_status": "pendente",
+    "modelo_score": 30,
+    "descricao_instagram": "Matrículas abertas — escola de futebol sao paulo.\nVenha aprender e evoluir no futebol com a nossa equipe.\nMatricule-se e venha treinar com a gente.\n\n#escoladefutebol #matriculasabertas #escoladefutebolsaopaulo #futebol\n#ia4tube"
+  },
+  "pagamento_pendente": true,
+  "valor_pendente": 8,
+  "motivo_pagamento_pendente": "saldo_insuficiente",
+  "descricao_instagram": "Matrículas abertas — escola de futebol sao paulo.\nVenha aprender e evoluir no futebol com a nossa equipe.\nMatricule-se e venha treinar com a gente.\n\n#escoladefutebol #matriculasabertas #escoladefutebolsaopaulo #futebol\n#ia4tube"
+}

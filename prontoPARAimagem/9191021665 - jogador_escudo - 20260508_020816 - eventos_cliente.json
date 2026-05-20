@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-08T02:08:28.507Z",
+    "cliente_id": "9191021665",
+    "nome_time": "Real fc",
+    "whatsapp": "9191021665",
+    "sessao": "sess_1778205822630_0c70841e132f6",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260508_020816",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 164,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260508_020816",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 164
+    }
+  }
+]

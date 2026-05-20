@@ -1,0 +1,185 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [],
+  "jogadores_texto": "",
+  "escudo_principal": "",
+  "escudo_adversario": "",
+  "foto_jogo": "",
+  "categoria": "arte_empresa",
+  "id": "20260519_075340",
+  "whatsapp": "gahc1000yahoo.com.br",
+  "mes": "2026-05",
+  "rodada": "divulgar box sob medida",
+  "data": "Vidros Alfa",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "aprovado_cliente": false,
+  "baixado_cliente": false,
+  "ajuste_automatico_usado": false,
+  "motivo_ajuste": "",
+  "criado_em": "2026-05-19T10:53:40.818Z",
+  "ramo": "vidraçaria",
+  "nome_empresa": "Vidros Alfa",
+  "objetivo": "divulgar box sob medida",
+  "oferta": "",
+  "cta": "",
+  "whatsapp_contato": "",
+  "instagram": "",
+  "observacoes": "",
+  "niche_id": "vidracaria",
+  "niche_dna": {
+    "estilo_visual": "moderno e premium com toque minimalista",
+    "publico_alvo": [
+      "proprietários de imóveis",
+      "construtoras pequenas",
+      "reformadores",
+      "arquitetos locais"
+    ],
+    "cores_sugeridas": [
+      "azul escuro",
+      "cinza metálico",
+      "branco",
+      "toques de dourado"
+    ],
+    "tipo_layout": [
+      "imagem com destaque para produto em ambiente real",
+      "texto claro e direto ao lado ou sobreposição suave",
+      "logo no canto superior ou inferior"
+    ],
+    "ofertas_comuns": [
+      "orçamento grátis",
+      "medição gratuita",
+      "instalação rápida",
+      "desconto para clientes fidelidade"
+    ],
+    "chamadas": [
+      "Box de vidro sob medida para seu ambiente",
+      "Transforme seu espaço com elegância e segurança",
+      "Vidros Alfa: qualidade que protege e valoriza seu imóvel"
+    ],
+    "ctas": [
+      "Chame no WhatsApp",
+      "Solicite seu orçamento grátis",
+      "Converse agora com nossos especialistas"
+    ],
+    "elementos_visuais": [
+      "fotografias de boxes de vidro modernos",
+      "ícones de segurança e resistência",
+      "linhas e formas geométricas leves",
+      "logotipo com símbolo de vidro ou transparência"
+    ],
+    "tipos_de_post": [
+      "promoção de orçamento grátis",
+      "antes e depois da instalação",
+      "destaque de tipos de vidro e funcionalidades",
+      "depoimentos de clientes satisfeitos",
+      "dicas de manutenção e limpeza"
+    ]
+  },
+  "niche_dna_status": "gerado",
+  "niche_dna_origem": "ia",
+  "niche_dna_gerado_em": "2026-05-18T20:39:13.679Z",
+  "niche_dna_erro": "",
+  "modelo_referencia": {
+    "id": "vidracaria_modelo_01",
+    "ramo": "Vidraçaria",
+    "ramo_slug": "vidracaria",
+    "objetivo": "divulgar promoção de box, espelhos ou fechamento de vidro",
+    "tipo_post": "promocional",
+    "estilo": "moderno, limpo, premium, com destaque para brilho e acabamento",
+    "cores": [
+      "azul",
+      "branco",
+      "cinza"
+    ],
+    "layout": "produto em destaque ao centro, faixa de oferta forte e CTA no rodapé",
+    "texto_principal": "Box para banheiro sob medida",
+    "cta": "Chame no WhatsApp",
+    "elementos": [
+      "vidro",
+      "banheiro",
+      "reflexo",
+      "acabamento",
+      "medida sob encomenda"
+    ],
+    "imagem_exemplo": "modelo_01.png",
+    "imagem_exemplo_path": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\banco_modelos\\vidracaria\\modelo_01.png",
+    "criado_em": "2026-05-18T00:00:00.000Z",
+    "atualizado_em": "2026-05-18T20:39:13.686Z",
+    "usos": 2
+  },
+  "modelo_status": "encontrado",
+  "modelo_erro": "",
+  "modelo_usado_em": "2026-05-19T10:53:40.827Z",
+  "modelo_score": 86,
+  "modelo_score_detalhes": [
+    "ramo:+50",
+    "objetivo:+20",
+    "estilo:+15",
+    "usos:+1"
+  ],
+  "company_assets": {
+    "logo": "",
+    "fotos": [],
+    "referencias": []
+  },
+  "product_id": "arte_empresa",
+  "schema_version": 2,
+  "fields": {
+    "ramo": "vidraçaria",
+    "nome_empresa": "Vidros Alfa",
+    "objetivo": "divulgar box sob medida",
+    "oferta": "",
+    "cta": "",
+    "whatsapp": "",
+    "instagram": "",
+    "observacoes": ""
+  },
+  "assets": {
+    "logo": "",
+    "fotos": [],
+    "referencias": []
+  },
+  "legacy": {
+    "time_principal": "",
+    "gols_time_principal": 0,
+    "gols_adversario": 0,
+    "time_adversario": "",
+    "artilheiros": [],
+    "jogadores": [],
+    "jogadores_texto": "",
+    "escudo_principal": "",
+    "escudo_adversario": "",
+    "foto_jogo": "",
+    "categoria": "arte_empresa",
+    "rodada": "divulgar box sob medida",
+    "data": "Vidros Alfa",
+    "hora": "",
+    "arena": "",
+    "mascote_tipo": "",
+    "patrocinadores_qtd": 0,
+    "ramo": "vidraçaria",
+    "nome_empresa": "Vidros Alfa",
+    "objetivo": "divulgar box sob medida",
+    "oferta": "",
+    "cta": "",
+    "whatsapp_contato": "",
+    "instagram": "",
+    "observacoes": "",
+    "niche_id": "vidracaria",
+    "niche_dna_status": "gerado",
+    "niche_dna_origem": "ia",
+    "modelo_status": "encontrado",
+    "modelo_score": 86
+  },
+  "pagamento_pendente": true,
+  "valor_pendente": 8,
+  "motivo_pagamento_pendente": "saldo_insuficiente"
+}

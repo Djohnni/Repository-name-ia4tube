@@ -1,0 +1,72 @@
+[
+  {
+    "data": "2026-05-20T03:00:41.510Z",
+    "cliente_id": "15991120599",
+    "nome_time": "los hermanos",
+    "whatsapp": "15991120599",
+    "sessao": "sess_1779195665196_66bf0a242c8498",
+    "evento": "usuario_inativo",
+    "produto": "arte_empresa",
+    "categoria": "",
+    "pedido_id": "",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnGreen cleanSubmitBtn",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 357052,
+    "payload": {
+      "tempo_ms": 357052,
+      "faixa": "5m",
+      "campo_atual": "btnGreen cleanSubmitBtn",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 357052
+    },
+    "faixa_inatividade": "5m"
+  },
+  {
+    "data": "2026-05-20T03:10:41.508Z",
+    "cliente_id": "15991120599",
+    "nome_time": "los hermanos",
+    "whatsapp": "15991120599",
+    "sessao": "sess_1779195665196_66bf0a242c8498",
+    "evento": "usuario_inativo",
+    "produto": "arte_empresa",
+    "categoria": "",
+    "pedido_id": "",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnGreen cleanSubmitBtn",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 957051,
+    "payload": {
+      "tempo_ms": 957051,
+      "faixa": "15m",
+      "campo_atual": "btnGreen cleanSubmitBtn",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 957051
+    },
+    "faixa_inatividade": "15m"
+  },
+  {
+    "data": "2026-05-20T05:10:30.831Z",
+    "cliente_id": "15991120599",
+    "nome_time": "los hermanos",
+    "whatsapp": "15991120599",
+    "sessao": "sess_1779195665196_66bf0a242c8498",
+    "evento": "pagina_fechada",
+    "produto": "arte_empresa",
+    "categoria": "",
+    "pedido_id": "",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnGreen cleanSubmitBtn",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 2392,
+    "payload": {
+      "tempo_ms": 9436299,
+      "campo_atual": "btnGreen cleanSubmitBtn",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 2392
+    }
+  }
+]

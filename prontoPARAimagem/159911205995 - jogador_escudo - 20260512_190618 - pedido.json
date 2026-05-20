@@ -1,0 +1,33 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [
+    {
+      "nome": "Djohnni dalfovo",
+      "posicao": ""
+    }
+  ],
+  "jogadores_texto": "Djohnni dalfovo",
+  "escudo_principal": "escudo1.png",
+  "escudo_adversario": "",
+  "foto_jogo": "mascote.png",
+  "categoria": "jogador_escudo",
+  "id": "20260512_190618",
+  "whatsapp": "159911205995",
+  "mes": "2026-05",
+  "rodada": "Jogador + escudo",
+  "data": "Djohnni dalfovo",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "aprovado_cliente": false,
+  "baixado_cliente": false,
+  "ajuste_automatico_usado": false,
+  "motivo_ajuste": "",
+  "criado_em": "2026-05-12T19:06:18.084Z"
+}

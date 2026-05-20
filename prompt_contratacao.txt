@@ -1,0 +1,87 @@
+ESCREVA TODO O TEXTO EM PORTUGUÊS (BRASIL)
+
+o titulo esta na informação rodada:
+
+ATENÇÃO EXTREMA — OBEDEÇA SEM ALTERAÇÕES:
+
+SE UMA FOTO DO JOGADOR FOR ENVIADA:
+- USAR EXATAMENTE A MESMA PESSOA
+- NÃO ALTERAR O ROSTO
+- NÃO ALTERAR A EXPRESSÃO
+- NÃO ALTERAR O CORPO
+- NÃO ALTERAR A POSIÇÃO ORIGINAL DO CORPO
+- NÃO ALTERAR O CORTE DE CABELO
+- NÃO ALTERAR A COR DA PELE
+- NÃO INVENTAR DETALHES
+- NÃO TRANSFORMAR O JOGADOR EM OUTRA PESSOA
+- USE A IMAGEM DO JOGADOR COMO REFERÊNCIA PRINCIPAL
+
+O jogador deve ser apenas recortado e inserido no novo cenário, mantendo 100% da identidade original.
+
+CENÁRIO:
+- Fundo de estádio moderno com iluminação forte
+- Atmosfera profissional de anúncio de contratação
+- Estilo redes sociais (Instagram)
+
+ELEMENTOS:
+- Jogador em destaque (sem distorcer)
+- Escudo do time bem visível
+- Composição focada em anúncio (NÃO confronto)
+
+TEXTO obrigatório:
+- Nome do jogador (exatamente como enviado)
+- Informação secundária se houver (posição + idade)
+REGRA CRÍTICA SOBRE NOMES DOS JOGADORES:
+Copie os nomes EXATAMENTE como enviados no pedido.
+
+PROIBIDO:
+- corrigir ortografia
+- trocar letras
+- adicionar/remover acentos
+- adaptar apelidos
+
+Mesmo que pareça errado, manter idêntico ao enviado.
+
+REGRAS CRÍTICAS:
+- NÃO usar “X” (não é confronto)
+- NÃO misturar com outro time
+- NÃO inventar jogador
+- NÃO mudar o nome
+- NÃO escrever errado
+- O texto deve estar legível e correto
+
+ESTILO:
+- Visual impactante
+- Cores baseadas no escudo
+- Iluminação forte, profissional
+
+REGRA CRÍTICA SOBRE NOMES:
+Se houver discordância entre o nome digitado no pedido e o nome escrito no escudo/logo enviado, use SEMPRE o nome escrito no escudo/logo como fonte oficial.
+O cliente pode digitar errado.
+O escudo/logo é a referência principal para nomes de times, marcas e identidade visual.
+Não corrija o escudo pelo texto digitado; corrija o texto digitado pelo escudo.
+
+REGRA CRÍTICA SOBRE TÍTULOS:
+- O título principal da arte deve aparecer APENAS UMA VEZ.
+- NÃO repetir palavras do título em outros locais da imagem.
+- Se o cliente escrever “Contratado”, mostrar “Contratado” somente uma única vez.
+- NÃO criar textos extras automáticos como:
+  “Novo contratado”
+  “Contratação”
+  “Reforço”
+  “Bem-vindo”
+  ou qualquer variação.
+- Usar SOMENTE os textos enviados no pedido.
+
+NUNCA INVENTAR QUALQUER INFORMAÇÃO. USAR APENAS OS DADOS FORNECIDOS NO PEDIDO. SE ALGUM DADO NÃO FOR ENVIADO (EX: ARTILHEIROS, JOGADORES, TEXTOS), NÃO EXIBIR NA IMAGEM.
+
+REGRA CRÍTICA SOBRE NOMES DOS JOGADORES:
+Copie os nomes EXATAMENTE como enviados no pedido.
+
+PROIBIDO:
+- corrigir ortografia
+- trocar letras
+- adicionar/remover acentos
+- adaptar apelidos
+
+Mesmo que pareça errado, manter idêntico ao enviado.

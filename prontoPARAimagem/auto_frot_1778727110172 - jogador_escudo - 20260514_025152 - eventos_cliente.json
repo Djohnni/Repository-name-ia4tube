@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-14T02:52:03.067Z",
+    "cliente_id": "auto_frot_1778727110172",
+    "nome_time": "Frot",
+    "whatsapp": "auto_frot_1778727110172",
+    "sessao": "sess_1778727047442_8250f7811255e8",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260514_025152",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "dataJogo",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 735,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260514_025152",
+      "campo_atual": "dataJogo",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 735
+    }
+  }
+]

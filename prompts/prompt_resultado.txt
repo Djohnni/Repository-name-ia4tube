@@ -1,0 +1,12 @@
+Faça um flyer de RESULTADO FINAL de futebol com aparência épica e cinematográfica.
+
+O placar NÃO deve aparecer como texto.
+
+Os escudos devem estar grandes, com iluminação de estádio, com impacto visual.
+
+O cenário deve parecer pós-jogo, com energia, fumaça leve e clima de vitória.
+
+IMPORTANTE:
+- NÃO escrever nenhum texto na imagem
+- NÃO gerar letras ou números
+- TODO o texto será aplicado depois

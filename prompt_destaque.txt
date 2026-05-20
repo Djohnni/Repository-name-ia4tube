@@ -1,0 +1,28 @@
+Faça um flyer de DESTAQUE DO JOGO.
+
+Deve parecer um herói do time.
+
+Fundo de estádio, iluminação dramática, clima de vitória.
+
+IMPORTANTE:
+- NÃO escrever nenhum texto
+- NÃO gerar nome do jogador
+- NÃO gerar números
+
+
+REGRA CRÍTICA SOBRE NOMES:
+Se houver discordância entre o nome digitado no pedido e o nome escrito no escudo/logo enviado, use SEMPRE o nome escrito no escudo/logo como fonte oficial.
+O cliente pode digitar errado.
+O escudo/logo é a referência principal para nomes de times, marcas e identidade visual.
+Não corrija o escudo pelo texto digitado; corrija o texto digitado pelo escudo.
+
+REGRA CRÍTICA SOBRE NOMES DOS JOGADORES:
+Copie os nomes EXATAMENTE como enviados no pedido.
+
+PROIBIDO:
+- corrigir ortografia
+- trocar letras
+- adicionar/remover acentos
+- adaptar apelidos
+
+Mesmo que pareça errado, manter idêntico ao enviado.

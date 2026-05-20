@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-10T16:54:54.784Z",
+    "cliente_id": "11946551403",
+    "nome_time": "A.A.UNIÃO BRASIL",
+    "whatsapp": "11946551403",
+    "sessao": "sess_1778431882480_04726238160ec",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260510_165448",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 2046,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260510_165448",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 2046
+    }
+  }
+]

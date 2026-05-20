@@ -1,0 +1,33 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [
+    {
+      "nome": "Homer Simpson",
+      "posicao": ""
+    }
+  ],
+  "jogadores_texto": "Homer Simpson",
+  "escudo_principal": "escudo1.png",
+  "escudo_adversario": "",
+  "foto_jogo": "mascote.png",
+  "categoria": "jogador_escudo",
+  "id": "20260510_203856",
+  "whatsapp": "google_114348116044288571073",
+  "mes": "2026-05",
+  "rodada": "Jogador + escudo",
+  "data": "Homer Simpson",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "aprovado_cliente": false,
+  "baixado_cliente": false,
+  "ajuste_automatico_usado": false,
+  "motivo_ajuste": "",
+  "criado_em": "2026-05-10T20:38:56.993Z"
+}

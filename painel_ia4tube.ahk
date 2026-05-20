@@ -1,0 +1,1031 @@
+#Requires AutoHotkey v2.0
+#SingleInstance Force
+#NoTrayIcon
+
+BASE_DIR := "C:\Users\USER\Desktop\resultado\IA4tube"
+PEDIDOS_DIR := BASE_DIR "\Pedidos"
+SUPORTE_DIR := BASE_DIR "\suporte"
+g_minimizado := false
+g_lastAlerta := ""
+g_pipelineSemDesde := 0
+g_errosResolvidos := 0
+g_suporteResolvidos := 0
+g_erroMap := Map()
+g_suporteAssinatura := ""
+g_suporteJanelaAberta := false
+ERROS_RESOLVIDOS_FILE := BASE_DIR "\painel_erros_resolvidos.txt"
+SUPORTE_RESOLVIDOS_FILE := BASE_DIR "\painel_suporte_resolvidos.txt"
+API_BASE := "https://api.omascote.com.br"
+BOT_TOKEN_FILE := BASE_DIR "\bot_token.txt"
+
+if FileExist(ERROS_RESOLVIDOS_FILE) {
+    try g_errosResolvidos := Integer(Trim(FileRead(ERROS_RESOLVIDOS_FILE, "UTF-8")))
+}
+
+if FileExist(SUPORTE_RESOLVIDOS_FILE) {
+    try g_suporteResolvidos := Integer(Trim(FileRead(SUPORTE_RESOLVIDOS_FILE, "UTF-8")))
+}
+
+global GuiPainel, g_minimizado, g_lastAlerta, g_pipelineSemDesde, g_errosResolvidos, g_suporteResolvidos, g_erroMap, g_suporteAssinatura, g_suporteJanelaAberta, ERROS_RESOLVIDOS_FILE, SUPORTE_RESOLVIDOS_FILE
+global BASE_DIR, PEDIDOS_DIR, SUPORTE_DIR, API_BASE, BOT_TOKEN_FILE
+global g_listaConversasIds := Map()
+global g_conversaSelecionadaId := ""
+global g_conversaSelecionadaId := ""
+global txtTitulo, txtStatus, txtFila, txtAndamento, txtHoje, txtErro, txtUltimo, txtBot, txtProgramas, txtSuporte, txtAlerta, txtErroTitulo, txtErroLinhas
+
+GuiPainel := Gui("+AlwaysOnTop -Caption +ToolWindow +Border")
+GuiPainel.BackColor := "202124"
+GuiPainel.SetFont("s8 cFFFFFF", "Segoe UI")
+
+GuiPainel.AddText("x0 y0 w220 h24 Background303134")
+btnMais := GuiPainel.AddText("x154 y4 w16 h18 cCCCCCC BackgroundTrans Center", "+")
+btnMais.OnEvent("Click", AbrirDetalhes)
+GuiPainel.AddText("x176 y4 w16 h18 cCCCCCC BackgroundTrans Center", "_").OnEvent("Click", MinimizarPainel)
+txtTitulo := GuiPainel.AddText("x8 y4 w65 h18 cFFFFFF BackgroundTrans", "IA4Tube")
+txtTitulo.OnEvent("Click", MoverPainel)
+txtStatus := GuiPainel.AddText("x76 y4 w75 h18 c66FF99 BackgroundTrans", "verificando")
+txtStatus.OnEvent("Click", MoverPainel)
+GuiPainel.AddText("x198 y4 w16 h18 cCCCCCC BackgroundTrans Center", "x").OnEvent("Click", (*) => FecharTudo())
+
+txtFila := GuiPainel.AddText("x10 y34 w95 h18 cFFFFFF", "Pend: 0")
+txtAndamento := GuiPainel.AddText("x115 y34 w95 h18 cFFFFFF", "Proc: 0")
+txtHoje := GuiPainel.AddText("x10 y56 w95 h18 cFFFFFF", "Hoje: 0")
+txtErro := GuiPainel.AddText("x115 y56 w95 h18 cFFFFFF", "Erro hoje: 0")
+txtErro.OnEvent("Click", MarcarErrosResolvidos)
+txtUltimo := GuiPainel.AddText("x10 y82 w200 h18 cBFC3C7", "Último: -")
+txtBot := GuiPainel.AddText("x10 y104 w170 h18 cBFC3C7", "Bot: verificando")
+GuiPainel.AddText("x190 y104 w20 h18 cFF6666 Center", "■").OnEvent("Click", FecharBot)
+txtProgramas := GuiPainel.AddText("x10 y126 w200 h52 cBFC3C7", "Bot: -`nOrg: -`nRun: -`nPipe: -")
+txtSuporte := GuiPainel.AddText("x10 y178 w200 h18 c66FF99", "Suporte: 0")
+txtSuporte.OnEvent("Click", BaixarUmSuporteEAbrirPainel)
+txtAlerta := GuiPainel.AddText("x10 y200 w200 h18 c66FF99", "Alerta: tudo ok")
+
+txtErroTitulo := GuiPainel.AddText("x10 y224 w200 h18 cFFD166", "Erros dos pedidos:")
+txtErroLinhas := []
+Loop 8 {
+    yLinha := 246 + ((A_Index - 1) * 20)
+    linha := GuiPainel.AddText("x10 y" yLinha " w200 h18 cFF6666", "")
+    linha.OnEvent("Click", AbrirErroPedido.Bind(A_Index))
+    txtErroLinhas.Push(linha)
+}
+
+GuiPainel.Show("x10 y10 w220 h420 NoActivate")
+
+SetTimer(AtualizarPainel, 5000)
+AtualizarPainel()
+
+MoverPainel(*) {
+    global GuiPainel
+    PostMessage(0xA1, 2,,, GuiPainel.Hwnd)
+}
+
+AtualizarPainel() {
+    global PEDIDOS_DIR, SUPORTE_DIR, GuiPainel, g_minimizado, g_lastAlerta, g_pipelineSemDesde, g_errosResolvidos, g_suporteResolvidos, g_erroMap, txtTitulo, txtStatus, txtFila, txtAndamento, txtHoje, txtErro, txtUltimo, txtBot, txtProgramas, txtSuporte, txtAlerta, txtErroTitulo, txtErroLinhas
+
+    pendentes := 0
+    andamento := 0
+    feitosHoje := 0
+    erros := 0
+    ultimo := ""
+
+    hoje := FormatTime(, "yyyyMMdd")
+
+    if DirExist(PEDIDOS_DIR) {
+        Loop Files PEDIDOS_DIR "\*", "D" {
+            pasta := A_LoopFileFullPath
+            nome := A_LoopFileName
+
+            if (ultimo = "" || StrCompare(nome, ultimo) > 0)
+                ultimo := nome
+
+            temPedido := FileExist(pasta "\pedido.json")
+            temResultado := FileExist(pasta "\resultado_final.png")
+            temOk := FileExist(pasta "\processado_handoff.txt")
+            temLock := FileExist(pasta "\processando.lock")
+            temErro := FileExist(pasta "\erro_runner.txt") || FileExist(pasta "\erro_validacao.txt")
+
+            if (
+                temLock
+                && !temOk
+                && !temErro
+                && temPedido
+                && !temResultado
+            )
+                andamento++
+
+            if (temErro && !temOk && SubStr(nome, 1, 8) = hoje)
+                erros++
+
+            if (SubStr(nome, 1, 8) = hoje && temOk)
+                feitosHoje++
+
+            if (temPedido && !temResultado && !temOk && !temErro && !temLock)
+                pendentes++
+        }
+    }
+
+    errosLista := ColetarErrosPedidos()
+    erros := errosLista.Length
+    RenderizarErrosPainel(errosLista)
+
+    statusProc := GetProgramStatus()
+    runnerAtivo := statusProc.runner
+    botAtivo := statusProc.bot
+
+    txtBot.Text := "Bot: " (statusProc.bot ? "aberto" : "fechado")
+    txtBot.SetFont(statusProc.bot ? "c66FF99" : "cFF6666")
+
+    txtProgramas.Text := "Bot: " (statusProc.bot ? "ON" : "OFF") "`nOrg: " (statusProc.organizador ? "ON" : "OFF") "`nRun: " (statusProc.runner ? "ON" : "OFF") "`nPipe: " (statusProc.pipeline ? "ON" : "OFF")
+
+    errosPendentes := erros
+
+    suporteTotal := ContarArquivosSuporte()
+
+    if (g_suporteResolvidos > suporteTotal) {
+        g_suporteResolvidos := suporteTotal
+        try FileDelete(SUPORTE_RESOLVIDOS_FILE)
+        FileAppend(g_suporteResolvidos, SUPORTE_RESOLVIDOS_FILE, "UTF-8")
+    }
+
+    suportePendentes := suporteTotal - g_suporteResolvidos
+    if (suportePendentes < 0)
+        suportePendentes := 0
+
+    txtSuporte.Text := "Suporte: " suportePendentes
+    txtSuporte.SetFont(suportePendentes > 0 ? "cFF3333" : "c66FF99")
+
+    if (andamento > 0 && !statusProc.pipeline) {
+        if (g_pipelineSemDesde = 0)
+            g_pipelineSemDesde := A_TickCount
+    } else {
+        g_pipelineSemDesde := 0
+    }
+
+    pipelineTravado := (g_pipelineSemDesde > 0 && (A_TickCount - g_pipelineSemDesde) >= 120000)
+
+    alerta := ""
+
+    if (suportePendentes > 0) {
+        alerta := "SUPORTE CLIENTE (" suportePendentes ")"
+
+        if (g_lastAlerta != alerta) {
+            SoundBeep(1400, 220)
+            SoundBeep(1700, 220)
+        }
+    }
+    else if (!statusProc.bot)
+        alerta := "BOT FECHADO"
+    else if (!statusProc.runner && (pendentes > 0 || andamento > 0))
+        alerta := "RUNNER PARADO COM FILA"
+    else if (pipelineTravado && andamento > 0 && (pendentes > 0 || statusProc.pipeline))
+    	alerta := "PIPELINE PARADO 2MIN"
+    else if (errosPendentes > 0)
+        alerta := "ERRO EM PEDIDO"
+
+    if (alerta != "") {
+        txtAlerta.Text := "Alerta: " alerta
+        txtAlerta.SetFont("cFF6666")
+
+        if (alerta != g_lastAlerta) {
+            SoundBeep(900, 180)
+            g_lastAlerta := alerta
+        }
+    } else {
+        txtAlerta.Text := "Alerta: tudo ok"
+        txtAlerta.SetFont("c66FF99")
+        g_lastAlerta := ""
+    }
+
+    if (g_minimizado) {
+        txtTitulo.Text := (alerta != "" 
+            ? "IA4Tube " (statusProc.bot ? "on " : "off ") pendentes " - " feitosHoje
+            : "IA4Tube " (statusProc.bot ? "on " : "off ") pendentes " - " feitosHoje)
+
+        txtTitulo.SetFont(alerta != "" ? "cFF6666" : (statusProc.bot ? "c66FF99" : "cFF6666"))
+
+        txtStatus.Text := ""
+
+        return
+
+FecharTudo(){
+    RunWait('taskkill /FI "CommandLine like %runner_fila.py%" /F', , "Hide")
+    RunWait('taskkill /FI "CommandLine like %resultado_pipeline.py%" /F', , "Hide")
+    RunWait('taskkill /FI "CommandLine like %omascote-bot.ahk%" /F', , "Hide")
+    ExitApp()
+}
+    } else {
+        txtTitulo.Text := "IA4Tube"
+        txtTitulo.SetFont("cFFFFFF")
+    }
+
+    if (statusProc.bot && statusProc.runner) {
+        txtProgramas.SetFont("c66FF99")
+    } else {
+        txtProgramas.SetFont("cFFD166")
+    }
+
+    if (!runnerAtivo) {
+        txtStatus.Text := "runner parado"
+        txtStatus.SetFont("cFF6666")
+    } else if (errosPendentes > 0) {
+        txtStatus.Text := "erro"
+        txtStatus.SetFont("cFF6666")
+    } else if (andamento > 0) {
+        txtStatus.Text := "processando"
+        txtStatus.SetFont("cFFD166")
+    } else {
+        txtStatus.Text := "normal"
+        txtStatus.SetFont("c66FF99")
+    }
+
+    txtFila.Text := "Pend: " pendentes
+    txtAndamento.Text := "Proc: " andamento "/10"
+    txtHoje.Text := "Hoje: " feitosHoje
+    txtErro.Text := "Erro: " errosPendentes
+    txtUltimo.Text := "Último: " (ultimo != "" ? ultimo : "-")
+}
+
+ColetarErrosPedidos() {
+    global PEDIDOS_DIR
+
+    lista := []
+
+    if !DirExist(PEDIDOS_DIR)
+        return lista
+
+    Loop Files PEDIDOS_DIR "\erro_*", "FR" {
+        erroArquivo := A_LoopFileFullPath
+        pasta := A_LoopFileDir
+        nomePedido := StrSplit(pasta, "\")[-1]
+
+        if FileExist(pasta "\processado_handoff.txt")
+            continue
+
+        if FileExist(pasta "\painel_erro_visto.txt")
+            continue
+
+        textoErro := ""
+        try textoErro := Trim(FileRead(erroArquivo, "UTF-8"))
+
+        if (textoErro = "")
+            textoErro := A_LoopFileName
+
+        primeiraLinha := StrSplit(textoErro, "`n")[1]
+        primeiraLinha := StrReplace(primeiraLinha, "`r", "")
+        primeiraLinha := Trim(primeiraLinha)
+
+        if (StrLen(primeiraLinha) > 58)
+            primeiraLinha := SubStr(primeiraLinha, 1, 58) "..."
+
+        lista.Push({
+            pasta: pasta,
+            pedido: nomePedido,
+            arquivo: A_LoopFileName,
+            erro: primeiraLinha
+        })
+    }
+
+    return lista
+}
+
+RenderizarErrosPainel(lista) {
+    global g_erroMap, txtErroTitulo, txtErroLinhas
+
+    g_erroMap := Map()
+
+    total := lista.Length
+    txtErroTitulo.Text := total > 0 ? "Erros dos pedidos: " total : "Erros dos pedidos: nenhum"
+    txtErroTitulo.SetFont(total > 0 ? "cFF6666" : "c66FF99")
+
+    Loop txtErroLinhas.Length {
+        idx := A_Index
+        linha := txtErroLinhas[idx]
+
+        if (idx <= total) {
+            item := lista[idx]
+            g_erroMap[idx] := item.pasta
+            linha.Text := idx ". " item.pedido " - " item.arquivo
+            linha.SetFont("cFF6666")
+        } else {
+            linha.Text := ""
+        }
+    }
+}
+
+AbrirErroPedido(indice, *) {
+    global g_erroMap
+
+    if !g_erroMap.Has(indice)
+        return
+
+    pasta := g_erroMap[indice]
+
+    if DirExist(pasta) {
+        try {
+            FileAppend("visto em " FormatTime(, "yyyy-MM-dd HH:mm:ss"), pasta "\painel_erro_visto.txt", "UTF-8")
+        }
+        Run('explorer.exe "' pasta '"')
+        AtualizarPainel()
+    }
+}
+
+MarcarErrosResolvidos(*) {
+    global PEDIDOS_DIR, g_errosResolvidos, ERROS_RESOLVIDOS_FILE
+
+    hoje := FormatTime(, "yyyyMMdd")
+    erros := 0
+
+    if DirExist(PEDIDOS_DIR) {
+        Loop Files PEDIDOS_DIR "\*", "D" {
+            pasta := A_LoopFileFullPath
+            nome := A_LoopFileName
+
+            temOk := FileExist(pasta "\processado_handoff.txt")
+            temErro := FileExist(pasta "\erro_runner.txt") || FileExist(pasta "\erro_validacao.txt")
+
+            if (temErro && !temOk && SubStr(nome, 1, 8) = hoje)
+                erros++
+        }
+    }
+
+    g_errosResolvidos := erros
+    try FileDelete(ERROS_RESOLVIDOS_FILE)
+    FileAppend(g_errosResolvidos, ERROS_RESOLVIDOS_FILE, "UTF-8")
+    AtualizarPainel()
+}
+
+ContarArquivosSuporte() {
+    global g_suporteAssinatura, g_suporteJanelaAberta
+
+    txt := ApiGet("/bot/suporte/abertas")
+    if (txt = "")
+        return 0
+
+    total := 0
+    pos := 1
+    assinatura := ""
+
+    while pos := RegExMatch(txt, '"id":"([^"]*)".*?"mensagens":\[(.*?)\]', &m, pos) {
+        idConv := m[1]
+        mensagens := m[2]
+        ultimoAutor := UltimoAutorMensagem(mensagens)
+
+        if (ultimoAutor = "cliente") {
+            total++
+            assinatura .= idConv "|"
+        }
+
+        pos += StrLen(m[0])
+    }
+
+    assinatura .= "|" total
+
+    if (g_suporteAssinatura != "" && assinatura != g_suporteAssinatura) {
+        SoundBeep(1100, 180)
+        SoundBeep(1400, 180)
+    }
+
+    g_suporteAssinatura := assinatura
+    return total
+}
+
+UltimoAutorMensagem(txt) {
+    ultimo := ""
+    pos := 1
+
+    while pos := RegExMatch(txt, '"autor":"([^"]*)"', &m, pos) {
+        ultimo := JsonLimpar(m[1])
+        pos += StrLen(m[0])
+    }
+
+    return ultimo
+}
+
+CarregarBotTokenPainel() {
+    global BOT_TOKEN_FILE
+
+    if !FileExist(BOT_TOKEN_FILE)
+        return ""
+
+    try return Trim(FileRead(BOT_TOKEN_FILE, "UTF-8"))
+    catch
+        return ""
+}
+
+ApiGet(endpoint) {
+    global API_BASE
+
+    tokenApi := CarregarBotTokenPainel()
+    if (tokenApi = "")
+        return ""
+
+    try {
+        whr := ComObject("WinHttp.WinHttpRequest.5.1")
+        whr.Open("GET", API_BASE endpoint, false)
+        whr.SetRequestHeader("Authorization", "Bearer " tokenApi)
+        whr.SetRequestHeader("Cache-Control", "no-cache")
+        whr.Send()
+        return whr.ResponseText
+    } catch {
+        return ""
+    }
+}
+
+JsonEscape(txt) {
+    txt := StrReplace(txt, "\", "\\")
+    txt := StrReplace(txt, '"', '\"')
+    txt := StrReplace(txt, "`r", "")
+    txt := StrReplace(txt, "`n", "\n")
+    return txt
+}
+
+ApiPostJson(endpoint, jsonBody) {
+    global API_BASE
+
+    tokenApi := CarregarBotTokenPainel()
+    if (tokenApi = "")
+        return ""
+
+    try {
+        whr := ComObject("WinHttp.WinHttpRequest.5.1")
+        whr.Open("POST", API_BASE endpoint, false)
+        whr.SetRequestHeader("Authorization", "Bearer " tokenApi)
+        whr.SetRequestHeader("Content-Type", "application/json")
+        whr.Send(jsonBody)
+        return whr.ResponseText
+    } catch {
+        return ""
+    }
+}
+
+BaixarUmSuporteEAbrirPainel(*) {
+    global g_suporteResolvidos, SUPORTE_RESOLVIDOS_FILE
+
+    g_suporteResolvidos += 1
+
+    try FileDelete(SUPORTE_RESOLVIDOS_FILE)
+    FileAppend(g_suporteResolvidos, SUPORTE_RESOLVIDOS_FILE, "UTF-8")
+
+    AtualizarPainel()
+    AbrirSuportePainel()
+}
+
+AbrirSuportePainel(*) {
+    global g_suporteJanelaAberta
+
+    g_suporteJanelaAberta := true
+
+    guiS := Gui("+AlwaysOnTop +Resize")
+    guiS.BackColor := "F8FAFC"
+    guiS.SetFont("s9 c111827", "Segoe UI")
+    guiS.Title := "Suporte IA4Tube"
+
+    guiS.AddText("x10 y10 w760 h24 c15803D", "CLIENTES ONLINE")
+    editOnline := guiS.AddEdit("x10 y36 w760 h140 ReadOnly -Wrap c111827 BackgroundFFFFFF")
+
+    guiS.AddText("x10 y190 w760 h24 cB45309", "CHAMADOS ABERTOS")
+
+    listaConversas := guiS.AddListView("x10 y216 w760 h230 Grid -Multi", ["Cliente","Status","Última ação","ID"])
+    listaConversas.ModifyCol(1, 180)
+    listaConversas.ModifyCol(2, 120)
+    listaConversas.ModifyCol(3, 280)
+    listaConversas.ModifyCol(4, 160)
+
+    guiS.AddText("x10 y458 w760 h20 c111827", "Cole ID do pedido, WhatsApp ou ID da conversa. Depois clique em Abrir conversa:")
+    idEdit := guiS.AddEdit("x10 y482 w560 h26 c111827 BackgroundFFFFFF")
+
+    listaConversas.OnEvent("ItemSelect", (ctrl, linha, selecionado) => SelecionarConversaLista(ctrl, linha, selecionado, idEdit))
+    listaConversas.OnEvent("DoubleClick", (ctrl, linha) => (
+        SelecionarConversaLista(ctrl, linha, true, idEdit),
+        AbrirConversaSuporte(idEdit.Value)
+    ))
+
+    btnAbrirConversa := guiS.AddButton("x580 y480 w190 h30", "Abrir conversa")
+    btnAbrirConversa.OnEvent("Click", (*) => AbrirConversaSuporte(idEdit.Value))
+
+    btnAtualizar := guiS.AddButton("x10 y526 w150 h32", "Atualizar")
+    btnAtualizar.OnEvent("Click", (*) => AtualizarSuportePainelCompleto(editOnline, listaConversas))
+
+    guiS.OnEvent("Close", (*) => (
+        g_suporteJanelaAberta := false,
+        AtualizarPainel()
+    ))
+
+    AtualizarSuportePainelCompleto(editOnline, listaConversas)
+    SetTimer(() => AtualizarSuportePainelCompleto(editOnline, listaConversas), 5000)
+
+    guiS.Show("w785 h580")
+}
+
+AtualizarSuportePainel(edit) {
+    abertas := ApiGet("/bot/suporte/abertas")
+    edit.Value := FormatarChamadosSuporte(abertas)
+}
+
+AtualizarSuportePainelCompleto(editOnline, listaConversas) {
+    global g_listaConversasIds
+
+    try {
+        if !IsObject(editOnline)
+            return
+
+        if !IsObject(listaConversas)
+            return
+
+        online := ApiGet("/bot/online")
+        abertas := ApiGet("/bot/suporte/abertas")
+
+        try editOnline.Value := FormatarOnlineSuporte(online)
+
+        try {
+            listaConversas.Delete()
+            g_listaConversasIds := Map()
+
+            pos := 1
+
+            while pos := RegExMatch(abertas, '"id":"([^"]*)".*?"nome_time":"([^"]*)".*?"status":"([^"]*)".*?"ultima_atualizacao":"([^"]*)"', &m, pos) {
+
+                idConv := JsonLimpar(m[1])
+                nome := JsonLimpar(m[2])
+                status := JsonLimpar(m[3])
+                ultima := HoraBrasilIso(JsonLimpar(m[4]))
+
+                row := listaConversas.Add("", nome, status, ultima, idConv)
+                g_listaConversasIds[row] := idConv
+
+                pos += StrLen(m[0])
+            }
+        }
+    } catch {
+    }
+}
+
+SelecionarConversaLista(ctrl, linha, selecionado, idEdit := "") {
+    global g_listaConversasIds, g_conversaSelecionadaId
+
+    try {
+        if (!selecionado)
+            return
+
+        if g_listaConversasIds.Has(linha)
+            g_conversaSelecionadaId := g_listaConversasIds[linha]
+        else
+            g_conversaSelecionadaId := ctrl.GetText(linha, 4)
+
+        if IsObject(idEdit)
+            idEdit.Value := g_conversaSelecionadaId
+    } catch {
+    }
+}
+
+AbrirConversaLista(ctrl, linha := 0) {
+    global g_listaConversasIds, g_conversaSelecionadaId
+
+    try {
+        idConv := Trim(g_conversaSelecionadaId)
+
+        if (idConv = "") {
+            if (!linha)
+                linha := ctrl.GetNext(0)
+
+            if (!linha)
+                linha := ctrl.GetNext(0, "Focused")
+
+            if (linha && g_listaConversasIds.Has(linha))
+                idConv := g_listaConversasIds[linha]
+            else if (linha)
+                idConv := ctrl.GetText(linha, 4)
+        }
+
+        if (Trim(idConv) != "")
+            AbrirConversaSuporte(idConv)
+        else
+            MsgBox("Selecione uma conversa primeiro.")
+    } catch {
+        MsgBox("Não consegui abrir essa conversa.")
+    }
+}
+
+FormatarOnlineSuporte(online) {
+    saida := ""
+    pos := 1
+
+    while pos := RegExMatch(online, '"cliente_id":"([^"]*)".*?"nome_time":"([^"]*)".*?"ultima_atividade":"([^"]*)".*?"pagina_atual":"([^"]*)".*?"produto_atual":"([^"]*)".*?"ultima_acao":"([^"]*)".*?"campo_atual":"([^"]*)".*?"tempo_inativo_ms":([0-9]+)', &m, pos) {
+        idCliente := JsonLimpar(m[1])
+        nome := JsonLimpar(m[2])
+        ultimaAtividade := JsonLimpar(m[3])
+        pagina := JsonLimpar(m[4])
+        produto := JsonLimpar(m[5])
+        acao := JsonLimpar(m[6])
+        campo := JsonLimpar(m[7])
+        tempoMs := Number(m[8])
+
+        if (nome = "")
+            nome := "Cliente"
+
+        tempoSeg := Round(tempoMs / 1000)
+
+        saida .= "ONLINE: " nome "`n"
+        saida .= "ID: " idCliente "`n"
+        saida .= "Página: " pagina "`n"
+        saida .= "Produto: " produto "`n"
+        ultimaHora := HoraBrasilIso(ultimaAtividade)
+
+        saida .= "Última ação: " acao "`n"
+        saida .= "Campo atual: " (campo != "" ? campo : "-") "`n"
+        saida .= "Última atividade: " ultimaHora "`n"
+        saida .= "Inativo: " tempoSeg "s`n"
+        saida .= "----------------------------------------`n"
+
+        pos += StrLen(m[0])
+    }
+
+    return Trim(saida) != "" ? saida : "Nenhum cliente online."
+}
+
+FormatarChamadosSuporte(abertas) {
+    saida := ""
+    pos := 1
+
+    while pos := RegExMatch(abertas, '"id":"([^"]*)".*?"nome_time":"([^"]*)".*?"status":"([^"]*)".*?"precisa_humano":(true|false).*?"mensagens":\[(.*?)\]', &m, pos) {
+        idConv := JsonLimpar(m[1])
+        nome := JsonLimpar(m[2])
+        status := JsonLimpar(m[3])
+        precisa := m[4]
+        mensagens := m[5]
+
+        ultimaMsg := ExtrairUltimaMensagem(mensagens)
+
+        saida .= "CLIENTE: " nome "`n"
+        saida .= "STATUS: " status "`n"
+        saida .= "HUMANO: " (precisa = "true" ? "SIM" : "não") "`n"
+        saida .= "ÚLTIMA MSG: " ultimaMsg "`n"
+        saida .= "ABRIR CONVERSA → " idConv "`n"
+        saida .= "----------------------------------------`n`n"
+
+        pos += StrLen(m[0])
+    }
+
+    return Trim(saida) != "" ? saida : "Nenhum chamado aberto."
+}
+
+ExtrairUltimaMensagem(txt) {
+    ultima := ""
+    pos := 1
+
+    while pos := RegExMatch(txt, '"texto":"([^"]*)"', &m, pos) {
+        ultima := JsonLimpar(m[1])
+        pos += StrLen(m[0])
+    }
+
+    return ultima != "" ? ultima : "-"
+}
+
+JsonLimpar(txt) {
+    txt := StrReplace(txt, '\"', '"')
+    txt := StrReplace(txt, "\n", " ")
+    txt := StrReplace(txt, "\r", " ")
+    txt := StrReplace(txt, "\\", "\")
+    return txt
+}
+
+HoraBrasilIso(iso) {
+    try {
+        if !InStr(iso, "T")
+            return "-"
+
+        partes := StrSplit(iso, "T")
+        data := partes[1]
+        hora := SubStr(StrReplace(partes[2], "Z", ""), 1, 8)
+
+        hh := Integer(SubStr(hora, 1, 2))
+        mm := SubStr(hora, 4, 2)
+        ss := SubStr(hora, 7, 2)
+
+        hh -= 3
+        if (hh < 0)
+            hh += 24
+
+        return Format("{:02}:{:02}:{:02}", hh, Integer(mm), Integer(ss))
+    } catch {
+        return "-"
+    }
+}
+
+ResponderSuporteCliente(conversaId, mensagem, edit := "") {
+    conversaId := Trim(conversaId)
+    mensagem := Trim(mensagem)
+
+    if (conversaId = "" || mensagem = "") {
+        MsgBox("Preencha o ID da conversa e a resposta.")
+        return
+    }
+
+    body := '{"destino":"' JsonEscape(conversaId) '","mensagem":"' JsonEscape(mensagem) '"}'
+    resp := ApiPostJson("/bot/suporte/enviar-cliente", body)
+
+    if (resp = "") {
+        MsgBox("Falha ao enviar resposta.")
+        return
+    }
+
+    if IsObject(edit) {
+        AtualizarSuportePainel(edit)
+    }
+}
+
+AbrirConversaSelecionada(editChamados) {
+    try {
+        texto := editChamados.Text
+    } catch {
+        return
+    }
+
+    linha := ""
+
+    try {
+        linha := editChamados.Value
+    } catch {
+    }
+
+    if (linha = "")
+        linha := texto
+
+    if RegExMatch(linha, '(\d{10,})', &m) {
+        AbrirConversaSuporte(m[1])
+    }
+}
+
+AbrirConversaSuporte(conversaId) {
+    conversaId := Trim(conversaId)
+
+    try {
+        arquivoLidos := BASE_DIR "\suportes_lidos.txt"
+        jaExiste := false
+
+        if FileExist(arquivoLidos) {
+            conteudoLidos := FileRead(arquivoLidos, "UTF-8")
+
+            if InStr("`n" conteudoLidos "`n", "`n" conversaId "`n")
+                jaExiste := true
+        }
+
+        if !jaExiste {
+            FileAppend(conversaId "`n", arquivoLidos, "UTF-8")
+            AtualizarPainel()
+        }
+    } catch {
+    }
+
+    try {
+        ApiPostJson("/bot/suporte/" conversaId "/assumir", "{}")
+    } catch {
+    }
+
+    if (conversaId = "") {
+        MsgBox("Cole o ID da conversa primeiro.")
+        return
+    }
+
+    guiC := Gui("+AlwaysOnTop +Resize")
+    guiC.BackColor := "F8FAFC"
+    guiC.SetFont("s9 c111827", "Segoe UI")
+    guiC.Title := "Conversa IA4Tube"
+
+    guiC.AddText("x10 y10 w760 h22 c111827", "Conversa aberta: " conversaId "  |  ENTER envia mensagem")
+    conversaEdit := guiC.AddEdit("x10 y38 w760 h420 ReadOnly -Wrap c111827 BackgroundFFFFFF")
+
+    guiC.AddText("x10 y474 w760 h20 c111827", "Sua resposta:")
+    msgEdit := guiC.AddEdit("x10 y498 w760 h34 -WantReturn c111827 BackgroundFFFFFF")
+
+; Enter envia pelo botão padrão
+
+    btnEnviar := guiC.AddButton("x10 y545 w160 h34 Default", "Enviar resposta")
+    btnEnviar.OnEvent("Click", (*) => (
+        ResponderSuporteCliente(conversaId, msgEdit.Value),
+        msgEdit.Value := "",
+        AtualizarConversaSuporte(conversaId, conversaEdit)
+    ))
+
+    btnAtualizar := guiC.AddButton("x180 y600 w120 h34", "Atualizar")
+    btnAtualizar.OnEvent("Click", (*) => AtualizarConversaSuporte(conversaId, conversaEdit))
+
+    AtualizarConversaSuporte(conversaId, conversaEdit)
+    SetTimer(() => AtualizarConversaSuporte(conversaId, conversaEdit), 3000)
+
+    guiC.Show("w785 h655")
+}
+
+AtualizarConversaSuporte(conversaId, conversaEdit) {
+    try {
+        abertas := ApiGet("/bot/suporte/abertas")
+
+        bloco := ""
+        pattern := '"id":"' conversaId '".*?"mensagens":\[(.*?)\]'
+        if RegExMatch(abertas, pattern, &m) {
+            bloco := m[1]
+        }
+
+        if (bloco = "") {
+            conversaEdit.Value := "Conversa não encontrada ou já finalizada."
+            return
+        }
+
+        saida := ""
+        pos := 1
+
+        while pos := RegExMatch(bloco, '"autor":"([^"]*)".*?"texto":"([^"]*)"', &msg, pos) {
+            autor := JsonLimpar(msg[1])
+            texto := JsonLimpar(msg[2])
+
+            if (autor = "cliente")
+                saida .= "CLIENTE:`n" texto "`n`n"
+            else if (autor = "humano")
+                saida .= "VOCÊ:`n" texto "`n`n"
+            else
+                saida .= "IA4Tube:`n" texto "`n`n"
+
+            pos += StrLen(msg[0])
+        }
+
+        conversaEdit.Value := Trim(saida) != "" ? saida : "Sem mensagens."
+
+        ; rolar para última mensagem sem travar
+        SendMessage(0x115, 7, 0, conversaEdit.Hwnd)
+    } catch {
+    }
+}
+
+MarcarSuporteResolvido(*) {
+    global g_suporteResolvidos, SUPORTE_RESOLVIDOS_FILE
+
+    g_suporteResolvidos := ContarArquivosSuporte()
+    try FileDelete(SUPORTE_RESOLVIDOS_FILE)
+    FileAppend(g_suporteResolvidos, SUPORTE_RESOLVIDOS_FILE, "UTF-8")
+    AtualizarPainel()
+}
+
+MinimizarPainel(*) {
+    global GuiPainel, g_minimizado, txtTitulo, txtStatus
+
+    g_minimizado := !g_minimizado
+
+    if (g_minimizado) {
+        txtTitulo.Move(8, 4, 145, 18)
+        txtStatus.Text := ""
+        GuiPainel.Show("w220 h24 NoActivate")
+    } else {
+        txtTitulo.Move(8, 4, 65, 18)
+        txtTitulo.Text := "IA4Tube"
+        txtTitulo.SetFont("cFFFFFF")
+        GuiPainel.Show("w220 h420 NoActivate")
+        AtualizarPainel()
+    }
+}
+
+AbrirDetalhes(*) {
+    global PEDIDOS_DIR
+
+    gui2 := Gui("+AlwaysOnTop +Resize")
+    gui2.SetFont("s9", "Segoe UI")
+
+    txt := ""
+
+    if DirExist(PEDIDOS_DIR) {
+        Loop Files PEDIDOS_DIR "\*", "D" {
+            pasta := A_LoopFileFullPath
+            nome := A_LoopFileName
+
+            if FileExist(pasta "\processando.lock")
+                txt .= "PROCESSANDO: " nome "`n"
+
+            if ((FileExist(pasta "\erro_runner.txt") || FileExist(pasta "\erro_validacao.txt")) && !FileExist(pasta "\processado_handoff.txt"))
+                txt .= "ERRO: " nome "`n"
+
+            if FileExist(pasta "\processado_handoff.txt")
+                txt .= "OK: " nome "`n"
+        }
+    }
+
+    gui2.AddEdit("w500 h400 ReadOnly", txt)
+    gui2.Show("w520 h420")
+}
+
+GetProgramStatus() {
+    s := {bot:false, organizador:false, runner:false, pipeline:false}
+
+    try {
+        wmi := ComObjGet("winmgmts:")
+        query := "Select * from Win32_Process Where Name = 'AutoHotkey64.exe' Or Name = 'AutoHotkey32.exe' Or Name = 'AutoHotkey.exe' Or Name = 'python.exe' Or Name = 'pythonw.exe'"
+
+        for proc in wmi.ExecQuery(query) {
+            cmd := ""
+            try cmd := StrLower(proc.CommandLine)
+
+            if (InStr(cmd, "omascote-bot.ahk"))
+                s.bot := true
+
+            if (InStr(cmd, "organizador.ahk"))
+                s.organizador := true
+
+            if (InStr(cmd, "runner_fila.py"))
+                s.runner := true
+
+            if (InStr(cmd, "_pipeline.py") || InStr(cmd, "resultado_pipeline.py") || InStr(cmd, "escalacao_pipeline.py") || InStr(cmd, "contratacao_pipeline.py"))
+                s.pipeline := true
+        }
+    } catch {
+    }
+
+    return s
+}
+
+IsBotAtivo() {
+    try {
+        wmi := ComObjGet("winmgmts:")
+        query := "Select * from Win32_Process Where Name = 'AutoHotkey64.exe' Or Name = 'AutoHotkey32.exe' Or Name = 'AutoHotkey.exe'"
+
+        for proc in wmi.ExecQuery(query) {
+            cmd := ""
+            try cmd := proc.CommandLine
+
+            if (InStr(StrLower(cmd), "omascote-bot.ahk"))
+                return true
+        }
+    } catch {
+        return false
+    }
+
+    return false
+}
+
+FecharBot(*) {
+    try {
+        wmi := ComObjGet("winmgmts:")
+        query := "Select * from Win32_Process Where Name = 'AutoHotkey64.exe' Or Name = 'AutoHotkey32.exe' Or Name = 'AutoHotkey.exe'"
+
+        for proc in wmi.ExecQuery(query) {
+            cmd := ""
+            try cmd := proc.CommandLine
+
+            if (InStr(StrLower(cmd), "omascote-bot.ahk"))
+                proc.Terminate()
+        }
+    } catch {
+    }
+}
+
+FecharTudo(){
+    try {
+        wmi := ComObjGet("winmgmts:")
+        query := "Select * from Win32_Process Where Name = 'python.exe' Or Name = 'pythonw.exe' Or Name = 'AutoHotkey64.exe' Or Name = 'AutoHotkey32.exe' Or Name = 'AutoHotkey.exe'"
+
+        for proc in wmi.ExecQuery(query) {
+            cmd := ""
+            try cmd := StrLower(proc.CommandLine)
+
+            if (
+                InStr(cmd, "runner_fila.py")
+                || InStr(cmd, "resultado_pipeline.py")
+                || InStr(cmd, "escalacao_pipeline.py")
+                || InStr(cmd, "contratacao_pipeline.py")
+                || InStr(cmd, "omascote-bot.ahk")
+            ){
+                proc.Terminate()
+            }
+        }
+    } catch {
+    }
+
+    ExitApp()
+}
+
+IsRunnerAtivo() {
+    try {
+        wmi := ComObjGet("winmgmts:")
+        query := "Select * from Win32_Process Where Name = 'python.exe' Or Name = 'pythonw.exe'"
+
+        for proc in wmi.ExecQuery(query) {
+            cmd := ""
+            try cmd := proc.CommandLine
+
+            if (InStr(StrLower(cmd), "runner_fila.py"))
+                return true
+        }
+    } catch {
+        return false
+    }
+
+    return false
+}
+
+
+
+
+
+
+
+
+
+
+

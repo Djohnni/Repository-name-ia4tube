@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-14T09:01:33.133Z",
+    "cliente_id": "auto_ronaldinhogaucho_1778749286886",
+    "nome_time": "Ronaldinho gaúcho",
+    "whatsapp": "auto_ronaldinhogaucho_1778749286886",
+    "sessao": "sess_1778749141689_045ba60d60e6b",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260514_090129",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 2800,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260514_090129",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 2800
+    }
+  }
+]

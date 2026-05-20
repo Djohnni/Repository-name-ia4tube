@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-14T07:56:17.873Z",
+    "cliente_id": "auto_lorenzo_1778745373730",
+    "nome_time": "Lorenzo",
+    "whatsapp": "auto_lorenzo_1778745373730",
+    "sessao": "sess_1778745055159_9c74c75549dd48",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260514_075616",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 3535,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260514_075616",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 3535
+    }
+  }
+]

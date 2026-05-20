@@ -1,0 +1,29 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [
+    {
+      "nome": "Jogador + escudo",
+      "posicao": ""
+    }
+  ],
+  "jogadores_texto": "Jogador + escudo",
+  "escudo_principal": "escudo1.png",
+  "escudo_adversario": "",
+  "foto_jogo": "mascote.png",
+  "categoria": "jogador_escudo",
+  "id": "20260502_000928",
+  "whatsapp": "97984362692",
+  "mes": "2026-05",
+  "rodada": "Jogador + escudo",
+  "data": "Jogador + escudo",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "criado_em": "2026-05-02T00:09:28.675Z"
+}

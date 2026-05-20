@@ -1,0 +1,26 @@
+{
+  "pedido_id": "20260519_195008",
+  "modelo": "gpt-image-2",
+  "size": "1024x1536",
+  "quality": "medium",
+  "input_fidelity": "high",
+  "output_format_api": "jpeg",
+  "resultado_final": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\dados\\pedidos\\15991120599\\2026-05\\20260519_195008 - Copia (2)\\resultado_final.png",
+  "resultado_copia": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\resultados_prontos\\resultado_20260519_195008.png",
+  "prompt_file": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\prompt_arte_empresa.txt",
+  "texto_referencia": "",
+  "linhas_texto": [
+    "Ramo: Vidraçaria",
+    "Nome da empresa: vidraçaria tapajós",
+    "Objetivo da arte: Quero mostrar meus projetos",
+    "WhatsApp: 15991120599",
+    "Instagram: @tapajós"
+  ],
+  "referencias": [
+    "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\dados\\pedidos\\15991120599\\2026-05\\20260519_195008 - Copia (2)\\logo.png",
+    "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\dados\\pedidos\\15991120599\\2026-05\\20260519_195008 - Copia (2)\\foto01.jpg",
+    "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\banco_modelos\\vidracaria\\ativos\\modelo_01\\preview.jpg",
+    "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\dados\\pedidos\\15991120599\\2026-05\\20260519_195008 - Copia (2)\\preview_ia4tube.jpg"
+  ],
+  "gerado_em": "2026-05-19T20:32:03"
+}

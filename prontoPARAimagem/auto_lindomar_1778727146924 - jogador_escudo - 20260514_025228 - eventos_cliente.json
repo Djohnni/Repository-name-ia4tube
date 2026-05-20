@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-14T02:52:37.397Z",
+    "cliente_id": "auto_lindomar_1778727146924",
+    "nome_time": "Lindomar",
+    "whatsapp": "auto_lindomar_1778727146924",
+    "sessao": "sess_1778727005903_0dcf3afe3e57e8",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260514_025228",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 2714,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260514_025228",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 2714
+    }
+  }
+]

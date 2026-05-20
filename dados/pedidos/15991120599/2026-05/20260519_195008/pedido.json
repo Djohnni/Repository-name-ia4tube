@@ -1,0 +1,234 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [],
+  "jogadores_texto": "",
+  "escudo_principal": "",
+  "escudo_adversario": "",
+  "foto_jogo": "",
+  "categoria": "arte_empresa",
+  "id": "20260519_195008",
+  "whatsapp": "15991120599",
+  "mes": "2026-05",
+  "rodada": "Quero mostrar meus projetos",
+  "data": "vidraçaria tapajós",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "aprovado_cliente": false,
+  "baixado_cliente": false,
+  "ajuste_automatico_usado": false,
+  "motivo_ajuste": "",
+  "criado_em": "2026-05-19T22:50:08.009Z",
+  "ramo": "Vidraçaria",
+  "nome_empresa": "vidraçaria tapajós",
+  "objetivo": "Quero mostrar meus projetos",
+  "oferta": "",
+  "cta": "",
+  "whatsapp_contato": "15991120599",
+  "instagram": "@tapajós",
+  "observacoes": "",
+  "niche_id": "vidracaria",
+  "niche_dna": {
+    "estilo_visual": "moderno e premium com toque minimalista",
+    "publico_alvo": [
+      "proprietários de imóveis",
+      "construtoras pequenas",
+      "reformadores",
+      "arquitetos locais"
+    ],
+    "cores_sugeridas": [
+      "azul escuro",
+      "cinza metálico",
+      "branco",
+      "toques de dourado"
+    ],
+    "tipo_layout": [
+      "imagem com destaque para produto em ambiente real",
+      "texto claro e direto ao lado ou sobreposição suave",
+      "logo no canto superior ou inferior"
+    ],
+    "ofertas_comuns": [
+      "orçamento grátis",
+      "medição gratuita",
+      "instalação rápida",
+      "desconto para clientes fidelidade"
+    ],
+    "chamadas": [
+      "Box de vidro sob medida para seu ambiente",
+      "Transforme seu espaço com elegância e segurança",
+      "Vidros Alfa: qualidade que protege e valoriza seu imóvel"
+    ],
+    "ctas": [
+      "Chame no WhatsApp",
+      "Solicite seu orçamento grátis",
+      "Converse agora com nossos especialistas"
+    ],
+    "elementos_visuais": [
+      "fotografias de boxes de vidro modernos",
+      "ícones de segurança e resistência",
+      "linhas e formas geométricas leves",
+      "logotipo com símbolo de vidro ou transparência"
+    ],
+    "tipos_de_post": [
+      "promoção de orçamento grátis",
+      "antes e depois da instalação",
+      "destaque de tipos de vidro e funcionalidades",
+      "depoimentos de clientes satisfeitos",
+      "dicas de manutenção e limpeza"
+    ]
+  },
+  "niche_dna_status": "gerado",
+  "niche_dna_origem": "ia",
+  "niche_dna_gerado_em": "2026-05-18T20:39:13.679Z",
+  "niche_dna_erro": "",
+  "modelo_referencia": {
+    "id": "vidracaria_modelo_01",
+    "versao": "1.0.0",
+    "ativo": true,
+    "nicho": "Vidracaria",
+    "nicho_slug": "vidracaria",
+    "ramo": "Vidracaria",
+    "ramo_slug": "vidracaria",
+    "subtipo": "box e espelhos sob medida",
+    "objetivo": "divulgar promocao de box, espelhos ou fechamento de vidro",
+    "tipo_post": "promocional",
+    "formato": "feed",
+    "estilo": [
+      "moderno",
+      "limpo",
+      "premium",
+      "brilho tecnico"
+    ],
+    "paleta": [
+      "azul",
+      "branco",
+      "cinza"
+    ],
+    "composicao": "produto em destaque ao centro, faixa de oferta forte e CTA no rodape",
+    "densidade_texto": "media",
+    "tipo_fundo": "ambiente claro com reflexos de vidro",
+    "iluminacao": "brilhante e limpa",
+    "emocao_visual": "confianca e acabamento profissional",
+    "foco_comercial": "orcamento rapido para servico sob medida",
+    "qualidade_visual": "premium_curado",
+    "score": 82,
+    "aprovacoes": 0,
+    "rejeicoes": 0,
+    "origem": "curadoria_manual",
+    "criado_por": "IA4Tube",
+    "tags": [
+      "box",
+      "espelho",
+      "vidro",
+      "banheiro",
+      "acabamento",
+      "whatsapp"
+    ],
+    "cores": [
+      "azul",
+      "branco",
+      "cinza"
+    ],
+    "layout": "produto em destaque ao centro, faixa de oferta forte e CTA no rodape",
+    "texto_principal": "Box para banheiro sob medida",
+    "cta": "Chame no WhatsApp",
+    "elementos": [
+      "vidro",
+      "banheiro",
+      "reflexo",
+      "acabamento",
+      "medida sob encomenda"
+    ],
+    "imagem_exemplo": "preview.jpg",
+    "imagem_exemplo_path": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\banco_modelos\\vidracaria\\ativos\\modelo_01\\preview.jpg",
+    "criado_em": "2026-05-18T00:00:00.000Z",
+    "atualizado_em": "2026-05-19T00:00:00.000Z",
+    "usos": 6
+  },
+  "modelo_status": "encontrado",
+  "modelo_erro": "",
+  "modelo_usado_em": "2026-05-19T22:50:08.021Z",
+  "modelo_score": 74.1,
+  "modelo_score_detalhes": [
+    "ramo:+50",
+    "estilo:+15",
+    "usos:+5",
+    "qualidade:+4.1"
+  ],
+  "company_assets": {
+    "logo": "logo.png",
+    "fotos": [
+      "foto01.jpg"
+    ],
+    "referencias": []
+  },
+  "product_id": "arte_empresa",
+  "schema_version": 2,
+  "fields": {
+    "ramo": "Vidraçaria",
+    "ramo_origem": "lista",
+    "nome_empresa": "vidraçaria tapajós",
+    "objetivo": "Quero mostrar meus projetos",
+    "objetivo_origem": "lista",
+    "estilo_visual_cliente": "foto_detalhes",
+    "oferta": "",
+    "cta": "",
+    "whatsapp": "15991120599",
+    "instagram": "@tapajós",
+    "observacoes": "",
+    "campos_dinamicos": {
+      "tipo_vidro": "fachada em ACM",
+      "descricao_projeto": "Fachada em acm"
+    }
+  },
+  "assets": {
+    "logo": "logo.png",
+    "fotos": [
+      "foto01.jpg"
+    ],
+    "referencias": []
+  },
+  "legacy": {
+    "time_principal": "",
+    "gols_time_principal": 0,
+    "gols_adversario": 0,
+    "time_adversario": "",
+    "artilheiros": [],
+    "jogadores": [],
+    "jogadores_texto": "",
+    "escudo_principal": "",
+    "escudo_adversario": "",
+    "foto_jogo": "",
+    "categoria": "arte_empresa",
+    "rodada": "Quero mostrar meus projetos",
+    "data": "vidraçaria tapajós",
+    "hora": "",
+    "arena": "",
+    "mascote_tipo": "",
+    "patrocinadores_qtd": 0,
+    "ramo": "Vidraçaria",
+    "nome_empresa": "vidraçaria tapajós",
+    "objetivo": "Quero mostrar meus projetos",
+    "oferta": "",
+    "cta": "",
+    "whatsapp_contato": "15991120599",
+    "instagram": "@tapajós",
+    "observacoes": "",
+    "niche_id": "vidracaria",
+    "niche_dna_status": "gerado",
+    "niche_dna_origem": "ia",
+    "modelo_status": "encontrado",
+    "modelo_score": 74.1,
+    "descricao_instagram": "PATROCINADOR\nVidraçaria Tapajós — mostrando nossos projetos.\nVeja mais pelo WhatsApp 15991120599 ou no Instagram @tapajós\n\n#vidraçaria #vidros #projetos #tapajos\n#ia4tube"
+  },
+  "pagamento_pendente": true,
+  "valor_pendente": 8,
+  "motivo_pagamento_pendente": "saldo_insuficiente",
+  "descricao_instagram": "PATROCINADOR\nVidraçaria Tapajós — mostrando nossos projetos.\nVeja mais pelo WhatsApp 15991120599 ou no Instagram @tapajós\n\n#vidraçaria #vidros #projetos #tapajos\n#ia4tube"
+}

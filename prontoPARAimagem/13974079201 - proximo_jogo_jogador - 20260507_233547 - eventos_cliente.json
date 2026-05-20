@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-07T23:35:50.094Z",
+    "cliente_id": "13974079201",
+    "nome_time": "Sociedade Esportiva Barreiros",
+    "whatsapp": "13974079201",
+    "sessao": "sess_1778196529884_5045d9168478d8",
+    "evento": "pedido_concluido",
+    "produto": "proximo_jogo_jogador",
+    "categoria": "jogador",
+    "pedido_id": "20260507_233547",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 2071,
+    "payload": {
+      "produto": "proximo_jogo_jogador",
+      "categoria": "jogador",
+      "pedido_id": "20260507_233547",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 2071
+    }
+  }
+]

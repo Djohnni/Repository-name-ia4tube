@@ -1,0 +1,29 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [
+    {
+      "nome": "Ayla Ohata Dalfovo",
+      "posicao": ""
+    }
+  ],
+  "jogadores_texto": "Ayla Ohata Dalfovo",
+  "escudo_principal": "escudo1.png",
+  "escudo_adversario": "",
+  "foto_jogo": "mascote.png",
+  "categoria": "jogador_escudo",
+  "id": "20260501_184025",
+  "whatsapp": "14991169491",
+  "mes": "2026-05",
+  "rodada": "Jogador + escudo",
+  "data": "Ayla Ohata Dalfovo",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "criado_em": "2026-05-01T18:40:25.588Z"
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-14T03:07:55.151Z",
+    "cliente_id": "auto_eduardoplacido_1778728062426",
+    "nome_time": "Eduardo Plácido",
+    "whatsapp": "auto_eduardoplacido_1778728062426",
+    "sessao": "sess_1778727983225_9fee324c8e9ac8",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260514_030744",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 3126,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260514_030744",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 3126
+    }
+  }
+]

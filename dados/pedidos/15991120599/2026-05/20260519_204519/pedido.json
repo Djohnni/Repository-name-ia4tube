@@ -1,0 +1,173 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [],
+  "jogadores_texto": "",
+  "escudo_principal": "",
+  "escudo_adversario": "",
+  "foto_jogo": "",
+  "categoria": "arte_empresa",
+  "id": "20260519_204519",
+  "whatsapp": "15991120599",
+  "mes": "2026-05",
+  "rodada": "Quero parecer mais profissional",
+  "data": "iA4tube",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "aprovado_cliente": false,
+  "baixado_cliente": false,
+  "ajuste_automatico_usado": false,
+  "motivo_ajuste": "",
+  "criado_em": "2026-05-19T23:45:19.695Z",
+  "ramo": "Marketing visual para empresas",
+  "nome_empresa": "iA4tube",
+  "objetivo": "Quero parecer mais profissional",
+  "oferta": "",
+  "cta": "",
+  "whatsapp_contato": "",
+  "instagram": "",
+  "observacoes": "",
+  "niche_id": "marketing_visual_para_empresas",
+  "niche_dna": {
+    "estilo_visual": "moderno e limpo com toque tecnológico",
+    "publico_alvo": [
+      "pequenos empresários",
+      "empreendedores digitais",
+      "microempreendedores",
+      "profissionais liberais"
+    ],
+    "cores_sugeridas": [
+      "azul escuro",
+      "cinza claro",
+      "branco",
+      "verde vibrante"
+    ],
+    "tipo_layout": [
+      "grade simétrica",
+      "uso de espaços negativos",
+      "tipografia bold para títulos",
+      "elementos gráficos minimalistas"
+    ],
+    "ofertas_comuns": [
+      "consultoria visual personalizada",
+      "criação de identidade visual",
+      "pacotes de posts para Instagram e WhatsApp",
+      "análise gratuita do perfil visual"
+    ],
+    "chamadas": [
+      "Sua marca com visual profissional",
+      "Aumente suas vendas com design de qualidade",
+      "Visual que conecta e vende",
+      "Impulsione seu negócio com marketing visual"
+    ],
+    "ctas": [
+      "chama no whats",
+      "faça um orçamento",
+      "sempre online para você",
+      "converse com um especialista"
+    ],
+    "elementos_visuais": [
+      "ícones lineares",
+      "gráficos simples",
+      "formas geométricas",
+      "imagens clean com pessoas e tecnologia"
+    ],
+    "tipos_de_post": [
+      "antes e depois da identidade visual",
+      "dicas rápidas de design",
+      "depoimentos de clientes",
+      "promoções temporárias",
+      "passo a passo para melhorar o visual da marca"
+    ]
+  },
+  "niche_dna_status": "gerado",
+  "niche_dna_origem": "ia",
+  "niche_dna_gerado_em": "2026-05-19T17:20:22.082Z",
+  "niche_dna_erro": "",
+  "modelo_referencia": null,
+  "modelo_status": "pendente",
+  "modelo_erro": "Nenhum modelo parecido encontrado",
+  "modelo_usado_em": "",
+  "modelo_score": 24.1,
+  "modelo_score_detalhes": [
+    "estilo:+15",
+    "usos:+5",
+    "qualidade:+4.1"
+  ],
+  "company_assets": {
+    "logo": "logo.png",
+    "fotos": [
+      "foto01.jpg"
+    ],
+    "referencias": []
+  },
+  "product_id": "arte_empresa",
+  "schema_version": 2,
+  "fields": {
+    "ramo": "Marketing visual para empresas",
+    "ramo_origem": "lista",
+    "nome_empresa": "iA4tube",
+    "objetivo": "Quero parecer mais profissional",
+    "objetivo_origem": "lista",
+    "estilo_visual_cliente": "foto_detalhes",
+    "oferta": "",
+    "cta": "",
+    "whatsapp": "",
+    "instagram": "",
+    "observacoes": "",
+    "campos_dinamicos": {
+      "servico_principal": "criação de artes automatocias",
+      "frase_impacto": "sua empresa com cara de profissional"
+    }
+  },
+  "assets": {
+    "logo": "logo.png",
+    "fotos": [
+      "foto01.jpg"
+    ],
+    "referencias": []
+  },
+  "legacy": {
+    "time_principal": "",
+    "gols_time_principal": 0,
+    "gols_adversario": 0,
+    "time_adversario": "",
+    "artilheiros": [],
+    "jogadores": [],
+    "jogadores_texto": "",
+    "escudo_principal": "",
+    "escudo_adversario": "",
+    "foto_jogo": "",
+    "categoria": "arte_empresa",
+    "rodada": "Quero parecer mais profissional",
+    "data": "iA4tube",
+    "hora": "",
+    "arena": "",
+    "mascote_tipo": "",
+    "patrocinadores_qtd": 0,
+    "ramo": "Marketing visual para empresas",
+    "nome_empresa": "iA4tube",
+    "objetivo": "Quero parecer mais profissional",
+    "oferta": "",
+    "cta": "",
+    "whatsapp_contato": "",
+    "instagram": "",
+    "observacoes": "",
+    "niche_id": "marketing_visual_para_empresas",
+    "niche_dna_status": "gerado",
+    "niche_dna_origem": "ia",
+    "modelo_status": "pendente",
+    "modelo_score": 24.1,
+    "descricao_instagram": "PATROCINADOR\niA4tube — Marketing visual para empresas, com foco em parecer mais profissional.\nArte pensada para fortalecer identidade e transmitir confiança.\nConfira nosso perfil para ver mais trabalhos.\n\n#marketingvisual #branding #design #profissionalismo #ia4tube"
+  },
+  "pagamento_pendente": true,
+  "valor_pendente": 8,
+  "motivo_pagamento_pendente": "saldo_insuficiente",
+  "descricao_instagram": "PATROCINADOR\niA4tube — Marketing visual para empresas, com foco em parecer mais profissional.\nArte pensada para fortalecer identidade e transmitir confiança.\nConfira nosso perfil para ver mais trabalhos.\n\n#marketingvisual #branding #design #profissionalismo #ia4tube"
+}

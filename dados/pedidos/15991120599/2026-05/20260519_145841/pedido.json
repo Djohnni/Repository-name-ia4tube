@@ -1,0 +1,170 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [],
+  "jogadores_texto": "",
+  "escudo_principal": "",
+  "escudo_adversario": "",
+  "foto_jogo": "",
+  "categoria": "arte_empresa",
+  "id": "20260519_145841",
+  "whatsapp": "15991120599",
+  "mes": "2026-05",
+  "rodada": "Quero divulgar meus serviços",
+  "data": "30% de desconto para os primeiros mensalistas",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "aprovado_cliente": false,
+  "baixado_cliente": false,
+  "ajuste_automatico_usado": false,
+  "motivo_ajuste": "",
+  "criado_em": "2026-05-19T17:58:41.810Z",
+  "ramo": "Marketing visual para empresas",
+  "nome_empresa": "iA4tube",
+  "objetivo": "Quero divulgar meus serviços",
+  "oferta": "30% de desconto para os primeiros mensalistas",
+  "cta": "whats",
+  "whatsapp_contato": "15991120599",
+  "instagram": "@ia4tube",
+  "observacoes": "",
+  "niche_id": "marketing_visual_para_empresas",
+  "niche_dna": {
+    "estilo_visual": "moderno e limpo com toque tecnológico",
+    "publico_alvo": [
+      "pequenos empresários",
+      "empreendedores digitais",
+      "microempreendedores",
+      "profissionais liberais"
+    ],
+    "cores_sugeridas": [
+      "azul escuro",
+      "cinza claro",
+      "branco",
+      "verde vibrante"
+    ],
+    "tipo_layout": [
+      "grade simétrica",
+      "uso de espaços negativos",
+      "tipografia bold para títulos",
+      "elementos gráficos minimalistas"
+    ],
+    "ofertas_comuns": [
+      "consultoria visual personalizada",
+      "criação de identidade visual",
+      "pacotes de posts para Instagram e WhatsApp",
+      "análise gratuita do perfil visual"
+    ],
+    "chamadas": [
+      "Sua marca com visual profissional",
+      "Aumente suas vendas com design de qualidade",
+      "Visual que conecta e vende",
+      "Impulsione seu negócio com marketing visual"
+    ],
+    "ctas": [
+      "chama no whats",
+      "faça um orçamento",
+      "sempre online para você",
+      "converse com um especialista"
+    ],
+    "elementos_visuais": [
+      "ícones lineares",
+      "gráficos simples",
+      "formas geométricas",
+      "imagens clean com pessoas e tecnologia"
+    ],
+    "tipos_de_post": [
+      "antes e depois da identidade visual",
+      "dicas rápidas de design",
+      "depoimentos de clientes",
+      "promoções temporárias",
+      "passo a passo para melhorar o visual da marca"
+    ]
+  },
+  "niche_dna_status": "gerado",
+  "niche_dna_origem": "ia",
+  "niche_dna_gerado_em": "2026-05-19T17:20:22.082Z",
+  "niche_dna_erro": "",
+  "modelo_referencia": null,
+  "modelo_status": "pendente",
+  "modelo_erro": "Nenhum modelo parecido encontrado",
+  "modelo_usado_em": "",
+  "modelo_score": 30,
+  "modelo_score_detalhes": [
+    "objetivo:+10",
+    "estilo:+15",
+    "usos:+5"
+  ],
+  "company_assets": {
+    "logo": "logo.png",
+    "fotos": [],
+    "referencias": []
+  },
+  "product_id": "arte_empresa",
+  "schema_version": 2,
+  "fields": {
+    "ramo": "Marketing visual para empresas",
+    "ramo_origem": "lista",
+    "nome_empresa": "iA4tube",
+    "objetivo": "Quero divulgar meus serviços",
+    "objetivo_origem": "lista",
+    "estilo_visual_cliente": "leve",
+    "oferta": "30% de desconto para os primeiros mensalistas",
+    "cta": "whats",
+    "whatsapp": "15991120599",
+    "instagram": "@ia4tube",
+    "observacoes": "",
+    "campos_dinamicos": {
+      "servico_principal": "criação de artes prontas para divulgar",
+      "beneficio_principal": "nao se preocupe mais com o marketing, é só enviar a foto aqui, preencher a informaçao e pronto",
+      "frase_impacto": "sua emrpesa com cara profissional nas redes"
+    }
+  },
+  "assets": {
+    "logo": "logo.png",
+    "fotos": [],
+    "referencias": []
+  },
+  "legacy": {
+    "time_principal": "",
+    "gols_time_principal": 0,
+    "gols_adversario": 0,
+    "time_adversario": "",
+    "artilheiros": [],
+    "jogadores": [],
+    "jogadores_texto": "",
+    "escudo_principal": "",
+    "escudo_adversario": "",
+    "foto_jogo": "",
+    "categoria": "arte_empresa",
+    "rodada": "Quero divulgar meus serviços",
+    "data": "30% de desconto para os primeiros mensalistas",
+    "hora": "",
+    "arena": "",
+    "mascote_tipo": "",
+    "patrocinadores_qtd": 0,
+    "ramo": "Marketing visual para empresas",
+    "nome_empresa": "iA4tube",
+    "objetivo": "Quero divulgar meus serviços",
+    "oferta": "30% de desconto para os primeiros mensalistas",
+    "cta": "whats",
+    "whatsapp_contato": "15991120599",
+    "instagram": "@ia4tube",
+    "observacoes": "",
+    "niche_id": "marketing_visual_para_empresas",
+    "niche_dna_status": "gerado",
+    "niche_dna_origem": "ia",
+    "modelo_status": "pendente",
+    "modelo_score": 30,
+    "descricao_instagram": "PATROCINADOR\niA4tube — marketing visual para empresas.\n30% de desconto para os primeiros mensalistas. Fale pelo WhatsApp 15991120599 ou no @ia4tube\n\n#marketingvisual #design #branding #desconto #mensalistas\n#ia4tube"
+  },
+  "pagamento_pendente": true,
+  "valor_pendente": 8,
+  "motivo_pagamento_pendente": "saldo_insuficiente",
+  "descricao_instagram": "PATROCINADOR\niA4tube — marketing visual para empresas.\n30% de desconto para os primeiros mensalistas. Fale pelo WhatsApp 15991120599 ou no @ia4tube\n\n#marketingvisual #design #branding #desconto #mensalistas\n#ia4tube"
+}

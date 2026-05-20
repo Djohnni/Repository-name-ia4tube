@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-14T09:51:12.077Z",
+    "cliente_id": "auto_bryanchaves_1778752256599",
+    "nome_time": "Bryan chaves",
+    "whatsapp": "auto_bryanchaves_1778752256599",
+    "sessao": "sess_1778752031267_9b2dce20e6e808",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260514_095057",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 1897,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260514_095057",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 1897
+    }
+  }
+]

@@ -1,0 +1,58 @@
+Crie uma arte vertical 9:16 com foco em JOGADOR + ESCUDO, estilo pôster profissional de futebol, moderno, cinematográfico, forte e pronto para Instagram.
+
+ESCREVA TODO O TEXTO EM PORTUGUÊS (BRASIL).
+
+REGRA MAIS IMPORTANTE:
+A foto do jogador enviada como referência deve ser preservada com máxima fidelidade. NÃO altere o rosto, NÃO troque a identidade, NÃO mude a posição do corpo, NÃO mude os gestos, NÃO mude a pose, NÃO invente outro jogador. Use exatamente o mesmo jogador da foto, mantendo rosto, expressão, postura, direção do olhar, gesto das mãos e posição corporal o mais igual possível. Pode apenas melhorar iluminação, recorte, contraste e integração visual com o design.
+
+Use o escudo enviado EXATAMENTE como está, como textura/elemento gráfico original, sem redesenhar.
+
+REGRA CRÍTICA DO ESCUDO (PRIORIDADE MÁXIMA):
+
+O escudo enviado NÃO pode ser recriado em hipótese alguma.
+
+O escudo deve ser utilizado como uma imagem ORIGINAL COLADA na arte, como um elemento gráfico importado, e NÃO como algo desenhado pela IA.
+
+Preserve EXATAMENTE:
+- cores
+- letras
+- números
+- estrelas
+- símbolos
+- formato
+- proporções
+- contornos
+- todos os detalhes pequenos
+
+NÃO redesenhar.
+NÃO reinterpretar.
+NÃO melhorar.
+NÃO suavizar.
+NÃO aplicar estilo artístico dentro do escudo.
+
+O conteúdo interno do escudo deve permanecer 100% idêntico ao arquivo original.
+
+A IA pode apenas:
+- posicionar o escudo na arte
+- adicionar sombra externa
+- adicionar brilho externo
+
+Mas NUNCA modificar o conteúdo interno do escudo.
+Inclua o nome do jogador enviado no pedido de forma grande, bonita e legível.
+
+Visual desejado: fundo esportivo moderno, luzes de estádio, energia, textura premium, profundidade, brilho controlado, design limpo e impactante.
+
+Não escreva textos em inglês. Não invente clube, competição ou dados que não foram enviados. Não mude o rosto, pose, gesto ou corpo do jogador. Não distorça o escudo.
+
+Resultado final: arte simples, forte e premium, destacando o jogador junto ao escudo do time.
+
+REGRA CRÍTICA SOBRE NOMES DOS JOGADORES:
+Copie os nomes EXATAMENTE como enviados no pedido.
+
+PROIBIDO:
+- corrigir ortografia
+- trocar letras
+- adicionar/remover acentos
+- adaptar apelidos
+
+Mesmo que pareça errado, manter idêntico ao enviado.

@@ -1,0 +1,52 @@
+ESCREVA TODO O TEXTO EM PORTUGUÊS (BRASIL)
+
+Crie uma arte de confronto de futebol.
+
+ELEMENTOS:
+- Escudos dos dois times em destaque (PRINCIPAL ELEMENTO)
+- Fundo de estádio com iluminação esportiva
+
+REGRA CRÍTICA SOBRE ESCUDOS:
+- USAR EXATAMENTE os escudos enviados
+- NÃO alterar cores
+- NÃO alterar formato
+- NÃO redesenhar
+- NÃO estilizar
+- NÃO modificar detalhes
+- Os escudos devem ser idênticos ao original
+
+TEXTO (OBRIGATÓRIO):
+- se tiver campeonato/competição/amistoso tem que ficar no topo
+- Nome dos times
+- Data
+- Horário
+- Local (se houver)
+
+REGRAS:
+- Usar exatamente os dados enviados
+- Não inventar informações
+- Não alterar nomes
+- Texto deve estar visível e legível
+
+ESTILO:
+- Limpo, moderno e profissional
+- Cores baseadas nos escudos
+
+REGRA CRÍTICA SOBRE NOMES:
+Se houver discordância entre o nome digitado no pedido e o nome escrito no escudo/logo enviado, use SEMPRE o nome escrito no escudo/logo como fonte oficial.
+O cliente pode digitar errado.
+O escudo/logo é a referência principal para nomes de times, marcas e identidade visual.
+Não corrija o escudo pelo texto digitado; corrija o texto digitado pelo escudo.
+
+NUNCA INVENTAR QUALQUER INFORMAÇÃO. USAR APENAS OS DADOS FORNECIDOS NO PEDIDO. SE ALGUM DADO NÃO FOR ENVIADO (EX: ARTILHEIROS, JOGADORES, TEXTOS), NÃO EXIBIR NA IMAGEM.
+
+REGRA CRÍTICA SOBRE NOMES DOS JOGADORES:
+Copie os nomes EXATAMENTE como enviados no pedido.
+
+PROIBIDO:
+- corrigir ortografia
+- trocar letras
+- adicionar/remover acentos
+- adaptar apelidos
+
+Mesmo que pareça errado, manter idêntico ao enviado.

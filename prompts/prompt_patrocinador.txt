@@ -1,0 +1,12 @@
+Faça um flyer de PATROCINADOR de futebol.
+
+O escudo do time deve ser destaque.
+
+O patrocinador deve aparecer valorizado, mas menor que o escudo.
+
+Visual premium, limpo, profissional.
+
+IMPORTANTE:
+- NÃO escrever nenhum texto
+- NÃO gerar nomes
+- NÃO gerar informações

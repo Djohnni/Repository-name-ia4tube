@@ -1,0 +1,33 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [
+    {
+      "nome": "Marcelo",
+      "posicao": ""
+    }
+  ],
+  "jogadores_texto": "Marcelo",
+  "escudo_principal": "escudo1.png",
+  "escudo_adversario": "",
+  "foto_jogo": "mascote.png",
+  "categoria": "jogador_escudo",
+  "id": "20260514_091725",
+  "whatsapp": "auto_marcelo_1778750243645",
+  "mes": "2026-05",
+  "rodada": "Jogador + escudo",
+  "data": "Marcelo",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "aprovado_cliente": false,
+  "baixado_cliente": false,
+  "ajuste_automatico_usado": false,
+  "motivo_ajuste": "",
+  "criado_em": "2026-05-14T09:17:25.673Z"
+}

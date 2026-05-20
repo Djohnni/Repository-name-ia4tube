@@ -1,0 +1,41 @@
+Crie uma arte esportiva profissional no formato 1024x1536s, estilo futebol moderno.
+
+A imagem deve destacar patrocinadores de forma organizada e valorizada.
+
+FUNDO:
+- fundo com cores baseadas no escudo do time
+- leve iluminação esportiva (estádio ou luz suave)
+- textura sutil, sem poluição visual
+
+ELEMENTOS:
+- título no topo: usar o texto enviado em DADOS DO PEDIDO
+- escudo do time em destaque (parte superior ou central)
+- área central com os patrocinadores organizados em grade
+- logos bem alinhados, com espaçamento equilibrado
+- texto principal na parte inferior: usar o texto enviado em DADOS DO PEDIDO
+
+ESTILO:
+- visual limpo e profissional
+- foco nos patrocinadores (não esconder logos)
+- contraste alto para leitura
+- evitar excesso de efeitos
+
+REGRAS:
+- não alterar os logos enviados
+- não deformar imagens dos patrocinadores
+- manter proporção dos logos
+- não inventar textos
+
+IMPORTANTE:
+- arte pronta para redes sociais
+- aparência organizada e valorizando os patrocinadores
+
+ESCREVA TODO O TEXTO EM PORTUGUÊS (BRASIL)
+
+REGRA CRÍTICA SOBRE NOMES:
+Se houver discordância entre o nome digitado no pedido e o nome escrito no escudo/logo enviado, use SEMPRE o nome escrito no escudo/logo como fonte oficial.
+O cliente pode digitar errado.
+O escudo/logo é a referência principal para nomes de times, marcas e identidade visual.
+Não corrija o escudo pelo texto digitado; corrija o texto digitado pelo escudo.
+
+NUNCA INVENTAR QUALQUER INFORMAÇÃO. USAR APENAS OS DADOS FORNECIDOS NO PEDIDO. SE ALGUM DADO NÃO FOR ENVIADO (EX: ARTILHEIROS, JOGADORES, TEXTOS), NÃO EXIBIR NA IMAGEM.

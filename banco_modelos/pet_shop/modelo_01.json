@@ -1,0 +1,17 @@
+{
+  "id": "pet_shop_modelo_01",
+  "ramo": "Pet Shop",
+  "ramo_slug": "pet_shop",
+  "objetivo": "divulgar banho, tosa, pacote de cuidados ou promoção",
+  "tipo_post": "promocional",
+  "estilo": "alegre, amigável, leve, com sensação de cuidado e confiança",
+  "cores": ["verde", "azul", "branco"],
+  "layout": "pet em destaque, bloco de benefício, oferta clara e CTA para agendamento",
+  "texto_principal": "Banho e tosa com carinho",
+  "cta": "Agende pelo WhatsApp",
+  "elementos": ["cachorro", "gato", "patinhas", "banho", "cuidado"],
+  "imagem_exemplo": "modelo_01.png",
+  "criado_em": "2026-05-18T00:00:00.000Z",
+  "atualizado_em": "2026-05-18T00:00:00.000Z",
+  "usos": 0
+}

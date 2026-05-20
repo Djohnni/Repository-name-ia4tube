@@ -1,0 +1,168 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [],
+  "jogadores_texto": "",
+  "escudo_principal": "",
+  "escudo_adversario": "",
+  "foto_jogo": "",
+  "categoria": "arte_empresa",
+  "id": "20260519_233453",
+  "whatsapp": "15991120599",
+  "mes": "2026-05",
+  "rodada": "Quero mostrar novidades",
+  "data": "30% de desconto só hoje",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "aprovado_cliente": false,
+  "baixado_cliente": false,
+  "ajuste_automatico_usado": false,
+  "motivo_ajuste": "",
+  "criado_em": "2026-05-20T02:34:53.807Z",
+  "ramo": "Supermercado",
+  "nome_empresa": "mercado ascurra",
+  "objetivo": "Quero mostrar novidades",
+  "oferta": "30% de desconto só hoje",
+  "cta": "",
+  "whatsapp_contato": "",
+  "instagram": "@carangole",
+  "observacoes": "",
+  "niche_id": "supermercado",
+  "niche_dna": {
+    "estilo_visual": "clean e vibrante",
+    "publico_alvo": [
+      "famílias",
+      "donas de casa",
+      "pequenos comerciantes",
+      "jovens adultos"
+    ],
+    "cores_sugeridas": [
+      "verde",
+      "amarelo",
+      "vermelho",
+      "branco"
+    ],
+    "tipo_layout": [
+      "imagem do produto com destaque à oferta",
+      "blocos de texto e preço",
+      "fundo simples"
+    ],
+    "ofertas_comuns": [
+      "descontos progressivos",
+      "promoção relâmpago",
+      "compre 2 leve 3",
+      "desconto por quantidade"
+    ],
+    "chamadas": [
+      "Novidades fresquinhas!",
+      "Só hoje: 30% OFF!",
+      "Aproveite e economize!",
+      "Promoção imperdível no Mercado Ascurra"
+    ],
+    "ctas": [
+      "Corra e aproveite!",
+      "Garanta já seu desconto!",
+      "Visite nossa loja!",
+      "Oferta por tempo limitado!"
+    ],
+    "elementos_visuais": [
+      "ícones de sacola de compras",
+      "tag de desconto",
+      "ilustrações de frutas e verduras",
+      "foto de produtos em destaque",
+      "barras coloridas para separar seções"
+    ],
+    "tipos_de_post": [
+      "promoção do dia",
+      "lançamento de produtos",
+      "destaque de ofertas semanais",
+      "posts de lembrete de liquidações"
+    ]
+  },
+  "niche_dna_status": "gerado",
+  "niche_dna_origem": "ia",
+  "niche_dna_gerado_em": "2026-05-20T02:34:59.416Z",
+  "niche_dna_erro": "",
+  "modelo_referencia": null,
+  "modelo_status": "pendente",
+  "modelo_erro": "Nenhum modelo parecido encontrado",
+  "modelo_usado_em": "",
+  "modelo_score": 24.1,
+  "modelo_score_detalhes": [
+    "estilo:+15",
+    "usos:+5",
+    "qualidade:+4.1"
+  ],
+  "company_assets": {
+    "logo": "logo.png",
+    "fotos": [],
+    "referencias": []
+  },
+  "product_id": "arte_empresa",
+  "schema_version": 2,
+  "fields": {
+    "ramo": "Supermercado",
+    "ramo_origem": "lista",
+    "nome_empresa": "mercado ascurra",
+    "objetivo": "Quero mostrar novidades",
+    "objetivo_origem": "lista",
+    "estilo_visual_cliente": "leve",
+    "oferta": "30% de desconto só hoje",
+    "cta": "",
+    "whatsapp": "",
+    "instagram": "@carangole",
+    "observacoes": "",
+    "campos_dinamicos": {
+      "produto_principal": "arroz integral R$8,00",
+      "beneficios": "mais saude para sua cozinha"
+    }
+  },
+  "assets": {
+    "logo": "logo.png",
+    "fotos": [],
+    "referencias": []
+  },
+  "legacy": {
+    "time_principal": "",
+    "gols_time_principal": 0,
+    "gols_adversario": 0,
+    "time_adversario": "",
+    "artilheiros": [],
+    "jogadores": [],
+    "jogadores_texto": "",
+    "escudo_principal": "",
+    "escudo_adversario": "",
+    "foto_jogo": "",
+    "categoria": "arte_empresa",
+    "rodada": "Quero mostrar novidades",
+    "data": "30% de desconto só hoje",
+    "hora": "",
+    "arena": "",
+    "mascote_tipo": "",
+    "patrocinadores_qtd": 0,
+    "ramo": "Supermercado",
+    "nome_empresa": "mercado ascurra",
+    "objetivo": "Quero mostrar novidades",
+    "oferta": "30% de desconto só hoje",
+    "cta": "",
+    "whatsapp_contato": "",
+    "instagram": "@carangole",
+    "observacoes": "",
+    "niche_id": "supermercado",
+    "niche_dna_status": "gerado",
+    "niche_dna_origem": "ia",
+    "modelo_status": "pendente",
+    "modelo_score": 24.1,
+    "descricao_instagram": "PATROCINADOR\nNovidade no Mercado Ascurra: arroz integral por R$8,00.\nSó hoje: 30% de desconto — mais saúde para sua cozinha.\nPasse no @carangole e confira.\n\n#MercadoAscurra #Desconto #ArrozIntegral #MaisSaúde #Promoção #ia4tube"
+  },
+  "pagamento_pendente": true,
+  "valor_pendente": 8,
+  "motivo_pagamento_pendente": "saldo_insuficiente",
+  "descricao_instagram": "PATROCINADOR\nNovidade no Mercado Ascurra: arroz integral por R$8,00.\nSó hoje: 30% de desconto — mais saúde para sua cozinha.\nPasse no @carangole e confira.\n\n#MercadoAscurra #Desconto #ArrozIntegral #MaisSaúde #Promoção #ia4tube"
+}

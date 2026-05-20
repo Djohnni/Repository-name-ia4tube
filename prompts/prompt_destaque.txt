@@ -1,0 +1,10 @@
+Faça um flyer de DESTAQUE DO JOGO.
+
+Deve parecer um herói do time.
+
+Fundo de estádio, iluminação dramática, clima de vitória.
+
+IMPORTANTE:
+- NÃO escrever nenhum texto
+- NÃO gerar nome do jogador
+- NÃO gerar números

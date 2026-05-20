@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-12T19:06:21.449Z",
+    "cliente_id": "159911205995",
+    "nome_time": "Los hermanos",
+    "whatsapp": "159911205995",
+    "sessao": "sess_1778609163288_4d4bfce6b81028",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260512_190618",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 1467,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260512_190618",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 1467
+    }
+  }
+]

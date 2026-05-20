@@ -1,0 +1,56 @@
+{
+  "id": "vidracaria_modelo_01",
+  "versao": "1.0.0",
+  "ativo": true,
+  "nicho": "Vidracaria",
+  "nicho_slug": "vidracaria",
+  "subtipo": "box e espelhos sob medida",
+  "objetivo": "divulgar promocao de box, espelhos ou fechamento de vidro",
+  "tipo_post": "promocional",
+  "formato": "feed",
+  "estilo": [
+    "moderno",
+    "limpo",
+    "premium",
+    "brilho tecnico"
+  ],
+  "paleta": [
+    "azul",
+    "branco",
+    "cinza"
+  ],
+  "composicao": "produto em destaque ao centro, faixa de oferta forte e CTA no rodape",
+  "densidade_texto": "media",
+  "tipo_fundo": "ambiente claro com reflexos de vidro",
+  "iluminacao": "brilhante e limpa",
+  "emocao_visual": "confianca e acabamento profissional",
+  "foco_comercial": "orcamento rapido para servico sob medida",
+  "qualidade_visual": "premium_curado",
+  "score": 82,
+  "usos": 6,
+  "aprovacoes": 0,
+  "rejeicoes": 0,
+  "origem": "curadoria_manual",
+  "criado_por": "IA4Tube",
+  "criado_em": "2026-05-18T00:00:00.000Z",
+  "atualizado_em": "2026-05-19T22:50:08.016Z",
+  "tags": [
+    "box",
+    "espelho",
+    "vidro",
+    "banheiro",
+    "acabamento",
+    "whatsapp"
+  ],
+  "texto_principal": "Box para banheiro sob medida",
+  "cta": "Chame no WhatsApp",
+  "elementos": [
+    "vidro",
+    "banheiro",
+    "reflexo",
+    "acabamento",
+    "medida sob encomenda"
+  ],
+  "imagem_exemplo": "preview.jpg",
+  "thumb": "thumb.jpg"
+}

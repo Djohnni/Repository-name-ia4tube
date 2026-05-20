@@ -1,0 +1,22 @@
+{
+  "gahc1000yahoo.com.br": {
+    "nome_time": "gahc1000yahoo.com.br",
+    "senha_hash": "$2a$08$NRdKP7SUYh2heZ6o.rJuBuJz39BvAPKcjQl//pbHKAqCIv4daXHAy",
+    "plano": 0,
+    "saldo_mensal": 0,
+    "saldo_extra": 0,
+    "usados_no_ciclo": 0,
+    "ciclo_mes": "2026-05",
+    "ativo": true
+  },
+  "15991120599": {
+    "nome_time": "los hermanos",
+    "senha_hash": "$2a$08$xhpkPd0uwxtL6qxKzKXKeOiWYV1ErWVWKBW/1smH0Llg48nyHQLoe",
+    "plano": 0,
+    "saldo_mensal": 0,
+    "saldo_extra": 0,
+    "usados_no_ciclo": 0,
+    "ciclo_mes": "2026-05",
+    "ativo": true
+  }
+}

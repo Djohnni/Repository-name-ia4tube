@@ -1,0 +1,33 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [
+    {
+      "nome": "ia4tube",
+      "posicao": ""
+    }
+  ],
+  "jogadores_texto": "ia4tube",
+  "escudo_principal": "escudo1.png",
+  "escudo_adversario": "",
+  "foto_jogo": "mascote.png",
+  "categoria": "jogador_escudo",
+  "id": "20260512_053253",
+  "whatsapp": "15991120599",
+  "mes": "2026-05",
+  "rodada": "Jogador + escudo",
+  "data": "ia4tube",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "aprovado_cliente": false,
+  "baixado_cliente": false,
+  "ajuste_automatico_usado": false,
+  "motivo_ajuste": "",
+  "criado_em": "2026-05-12T05:32:53.827Z"
+}

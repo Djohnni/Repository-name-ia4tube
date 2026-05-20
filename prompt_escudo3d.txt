@@ -1,0 +1,41 @@
+Transforme o escudo ou logo enviado em um OBJETO 3D REALISTA.
+
+* Espessura real (não pode ser plano)
+* Extrusão visível nas bordas
+* Material tipo metal premium com leve brilho
+* Iluminação de estúdio lateral
+* Reflexos realistas + sombra suave
+
+REGRA CRÍTICA:
+Use o escudo ou logo EXATAMENTE como está, como textura.
+
+PROIBIDO:
+- redesenhar
+- alterar cores
+- alterar formato
+- alterar texto
+- inventar qualquer elemento
+
+A única mudança permitida é dar profundidade 3D.
+
+TEXTO:
+Se houver texto no escudo ou logo, mantenha EXATAMENTE igual ao original enviado.
+NÃO corrigir, NÃO interpretar, NÃO substituir.
+
+IMPORTANTE:
+Este tipo de pedido NÃO possui texto obrigatório na arte.
+NÃO adicionar títulos como "ESCUDO 3D" ou qualquer outro texto externo.
+O único texto permitido é o que já existe dentro do escudo original.
+
+VALIDAÇÃO:
+- NÃO reprovar por texto diferente de "ESCUDO 3D"
+- NÃO esperar nenhum texto específico
+- Considerar correto qualquer texto presente no escudo original
+
+FUNDO:
+Escuro, limpo, estilo estúdio.
+
+RESULTADO:
+Objeto 3D realista, profissional, 100% fiel ao original.
+
+ESCREVA TODO O TEXTO EM PORTUGUÊS (BRASIL)

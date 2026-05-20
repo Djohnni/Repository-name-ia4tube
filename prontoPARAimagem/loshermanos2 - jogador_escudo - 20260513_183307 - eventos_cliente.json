@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-13T18:33:07.981Z",
+    "cliente_id": "loshermanos2",
+    "nome_time": "loshermanos2",
+    "whatsapp": "loshermanos2",
+    "sessao": "sess_1778696936953_e37c6e7115b6",
+    "evento": "pedido_concluido",
+    "produto": "resultado_jogo_jogador",
+    "categoria": "jogador",
+    "pedido_id": "20260513_183307",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "optionBtn",
+    "ultima_acao": "click_interface",
+    "tempo_inativo_ms": 643,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260513_183307",
+      "campo_atual": "optionBtn",
+      "ultima_acao": "click_interface",
+      "tempo_inativo_ms": 643
+    }
+  }
+]

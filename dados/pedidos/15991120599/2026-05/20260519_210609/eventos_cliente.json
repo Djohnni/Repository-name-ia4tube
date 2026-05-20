@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-20T00:06:11.494Z",
+    "cliente_id": "15991120599",
+    "nome_time": "los hermanos",
+    "whatsapp": "15991120599",
+    "sessao": "sess_1779195665196_66bf0a242c8498",
+    "evento": "pedido_concluido",
+    "produto": "arte_empresa",
+    "categoria": "",
+    "pedido_id": "20260519_210609",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnGreen cleanSubmitBtn",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 24,
+    "payload": {
+      "produto": "arte_empresa",
+      "categoria": "empresa",
+      "pedido_id": "20260519_210609",
+      "campo_atual": "btnGreen cleanSubmitBtn",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 24
+    }
+  }
+]

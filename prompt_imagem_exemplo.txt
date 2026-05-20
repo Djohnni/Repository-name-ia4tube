@@ -1,0 +1,30 @@
+ESCREVA TODO O TEXTO EM PORTUGUÊS (BRASIL).
+
+Crie uma arte esportiva vertical profissional, pronta para story.
+
+Use as imagens enviadas como referência visual:
+- a imagem preta com letras brancas é a REFERÊNCIA PRINCIPAL DE TEXTO;
+- escudos/logos devem ser preservados;
+- a foto enviada deve guiar o clima da arte quando existir;
+- templates, faixas e molduras devem servir como referência de estilo, não como montagem obrigatória.
+
+REGRAS OBRIGATÓRIAS:
+- copiar exatamente os textos da imagem preta com letras brancas;
+- não alterar acentos;
+- não inventar palavras;
+- não traduzir;
+- não colocar textos extras;
+- manter visual esportivo, moderno, premium e impactante;
+- sem faixas pretas nas bordas;
+- imagem final vertical 1024x1536.
+
+Categoria: {categoria}
+Resumo/Placar: {resultado}
+Time principal: {time_principal}
+Adversário: {time_adversario}
+Data: {data}
+Hora: {hora}
+Arena: {arena}
+
+Texto exato:
+{texto_referencia}

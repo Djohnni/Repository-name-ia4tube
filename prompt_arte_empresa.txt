@@ -1,0 +1,50 @@
+Crie uma arte profissional para uma empresa ou pequeno negocio.
+
+Objetivo da imagem:
+- criar uma arte pronta para postar em Instagram, WhatsApp ou redes sociais;
+- destacar o servico, produto, oferta ou mensagem principal;
+- transformar os dados do cliente em uma comunicacao comercial clara;
+- manter leitura rapida em tela de celular;
+- passar credibilidade, profissionalismo e desejo de contato.
+
+Use as referencias visuais assim:
+- logo: referencia visual principal da marca; use cores, contraste, energia, sensacao e identidade grafica da logo;
+- fotos: produto, servico, ambiente, equipe ou prova visual do negocio;
+- referencias do cliente: estilo desejado, sem copiar marcas de terceiros;
+- modelo interno: guia de composicao, hierarquia, ritmo visual e estilo geral, sem superar a identidade da logo;
+- DNA do nicho: direcao comercial, cores, linguagem, elementos e tipos de post.
+
+Conteudo obrigatorio:
+- campos_dinamicos preenchidos pelo cliente tem prioridade maxima;
+- tudo que estiver em campos_dinamicos deve ser tratado como conteudo obrigatorio da arte;
+- nao substitua esses dados por texto generico;
+- nao ignore preco, nome de produto/lanche/servico, ingredientes, descricao ou delivery;
+- se existir preco, use exatamente como enviado;
+- se existir nome do produto, lanche ou servico, use como titulo principal da arte;
+- se existir ingredientes ou descricao, use como texto secundario;
+- se existir delivery = sim, pode aparecer como informacao curta tipo Delivery disponivel;
+- o DNA do nicho e apenas inspiracao secundaria de estilo, nunca conteudo principal.
+
+Prioridade visual:
+- a identidade visual vem primeiro da logo;
+- nao use cores aleatorias quando a logo tiver cores fortes ou identidade clara;
+- combine a arte com a paleta, contraste e sensacao visual da logo;
+- se houver foto do cliente, use para representar produto, servico ou ambiente, mas mantenha a marca guiada pela logo.
+
+Estilo visual escolhido:
+- foto_detalhes: REGRA MAIS IMPORTANTE: usar somente informacoes enviadas pelo cliente; nao inventar slogan, CTA, promocao, preco, beneficio, chamada comercial, frase de impacto ou texto extra; manter a foto enviada como base principal, sem recriar flyer do zero e sem mudar completamente a composicao; apenas melhorar iluminacao, acabamento, nitidez, contraste, composicao leve, pequenos detalhes profissionais, moldura discreta e logo discreta; a foto enviada deve continuar sendo claramente a arte principal;
+- leve: composicao limpa, elegante, com bastante respiro; pode adicionar poucas informacoes visuais, sempre usando somente o que o cliente enviou; pouco texto, poucos elementos, pouca poluicao visual e logo visivel mas discreta;
+- normal: visual comercial equilibrado, profissional, com CTA visivel e informacoes principais organizadas;
+- agressivo: visual promocional forte, alto contraste, CTA destacado e oferta/preco em evidencia quando existir, sempre respeitando a identidade da logo.
+
+Regras de criacao:
+- use somente informacoes presentes no pedido;
+- nao invente telefone, Instagram, endereco, preco, desconto, promocao, slogan, CTA, beneficio, nome de produto ou promessa;
+- use oferta e CTA somente se estiverem preenchidos;
+- nao invente texto quando houver campos dinamicos preenchidos;
+- se um campo estiver vazio, omita;
+- evite poluicao visual e excesso de texto;
+- priorize uma mensagem principal forte;
+- deixe nome da empresa, objetivo/oferta e CTA com hierarquia clara;
+- crie uma composicao comercial, moderna e pronta para conversao;
+- garanta contraste, legibilidade e organizacao visual.

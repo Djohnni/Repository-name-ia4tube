@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-14T05:19:05.981Z",
+    "cliente_id": "auto_rometite_1778735934720",
+    "nome_time": "Rometite",
+    "whatsapp": "auto_rometite_1778735934720",
+    "sessao": "sess_1778735647254_2764cb9c026bc8",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260514_051855",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 1910,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260514_051855",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 1910
+    }
+  }
+]

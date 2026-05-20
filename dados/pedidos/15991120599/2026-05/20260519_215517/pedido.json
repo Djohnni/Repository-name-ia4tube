@@ -1,0 +1,174 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [],
+  "jogadores_texto": "",
+  "escudo_principal": "",
+  "escudo_adversario": "",
+  "foto_jogo": "",
+  "categoria": "arte_empresa",
+  "id": "20260519_215517",
+  "whatsapp": "15991120599",
+  "mes": "2026-05",
+  "rodada": "Quero divulgar uma promoção",
+  "data": "compartilhe no instagram e concorra",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "aprovado_cliente": false,
+  "baixado_cliente": false,
+  "ajuste_automatico_usado": false,
+  "motivo_ajuste": "",
+  "criado_em": "2026-05-20T00:55:17.144Z",
+  "ramo": "Confecção",
+  "nome_empresa": "confecções Julio",
+  "objetivo": "Quero divulgar uma promoção",
+  "oferta": "compartilhe no instagram e concorra",
+  "cta": "",
+  "whatsapp_contato": "15991120599",
+  "instagram": "@julioconfeccçoes",
+  "observacoes": "",
+  "niche_id": "confeccao",
+  "niche_dna": {
+    "estilo_visual": "moderno e acolhedor",
+    "publico_alvo": [
+      "mulheres jovens",
+      "homens adultos",
+      "microempreendedores",
+      "consumidores locais"
+    ],
+    "cores_sugeridas": [
+      "azul",
+      "laranja",
+      "branco",
+      "cinza claro"
+    ],
+    "tipo_layout": [
+      "banner promocional",
+      "carrossel",
+      "stories",
+      "flyer digital"
+    ],
+    "ofertas_comuns": [
+      "desconto progressivo",
+      "compre e ganhe",
+      "promoção compartilhe e concorra",
+      "frete grátis na compra acima de X"
+    ],
+    "chamadas": [
+      "Garanta seu look com desconto!",
+      "Não perca essa promoção exclusiva!",
+      "Compartilhe e concorra a prêmios!",
+      "Moda com preço que cabe no bolso!"
+    ],
+    "ctas": [
+      "Compartilhe agora",
+      "Compre já",
+      "Participe da promoção",
+      "Confira os modelos"
+    ],
+    "elementos_visuais": [
+      "fotos de roupas com fundo clean",
+      "ícones de compartilhamento",
+      "selo de promoção",
+      "texturas de tecido",
+      "elementos gráficos minimalistas"
+    ],
+    "tipos_de_post": [
+      "post estático para feed",
+      "story com CTA interativo",
+      "carrossel com looks diferentes",
+      "reel com demonstração de produtos"
+    ]
+  },
+  "niche_dna_status": "gerado",
+  "niche_dna_origem": "ia",
+  "niche_dna_gerado_em": "2026-05-20T00:55:23.147Z",
+  "niche_dna_erro": "",
+  "modelo_referencia": null,
+  "modelo_status": "pendente",
+  "modelo_erro": "Nenhum modelo parecido encontrado",
+  "modelo_usado_em": "",
+  "modelo_score": 44.1,
+  "modelo_score_detalhes": [
+    "objetivo:+20",
+    "estilo:+15",
+    "usos:+5",
+    "qualidade:+4.1"
+  ],
+  "company_assets": {
+    "logo": "logo.png",
+    "fotos": [
+      "foto01.jpg"
+    ],
+    "referencias": []
+  },
+  "product_id": "arte_empresa",
+  "schema_version": 2,
+  "fields": {
+    "ramo": "Confecção",
+    "ramo_origem": "lista",
+    "nome_empresa": "confecções Julio",
+    "objetivo": "Quero divulgar uma promoção",
+    "objetivo_origem": "lista",
+    "estilo_visual_cliente": "leve",
+    "oferta": "compartilhe no instagram e concorra",
+    "cta": "",
+    "whatsapp": "15991120599",
+    "instagram": "@julioconfeccçoes",
+    "observacoes": "",
+    "campos_dinamicos": {
+      "promocao": "30% de desconto",
+      "validade": "até sabado"
+    }
+  },
+  "assets": {
+    "logo": "logo.png",
+    "fotos": [
+      "foto01.jpg"
+    ],
+    "referencias": []
+  },
+  "legacy": {
+    "time_principal": "",
+    "gols_time_principal": 0,
+    "gols_adversario": 0,
+    "time_adversario": "",
+    "artilheiros": [],
+    "jogadores": [],
+    "jogadores_texto": "",
+    "escudo_principal": "",
+    "escudo_adversario": "",
+    "foto_jogo": "",
+    "categoria": "arte_empresa",
+    "rodada": "Quero divulgar uma promoção",
+    "data": "compartilhe no instagram e concorra",
+    "hora": "",
+    "arena": "",
+    "mascote_tipo": "",
+    "patrocinadores_qtd": 0,
+    "ramo": "Confecção",
+    "nome_empresa": "confecções Julio",
+    "objetivo": "Quero divulgar uma promoção",
+    "oferta": "compartilhe no instagram e concorra",
+    "cta": "",
+    "whatsapp_contato": "15991120599",
+    "instagram": "@julioconfeccçoes",
+    "observacoes": "",
+    "niche_id": "confeccao",
+    "niche_dna_status": "gerado",
+    "niche_dna_origem": "ia",
+    "modelo_status": "pendente",
+    "modelo_score": 44.1,
+    "descricao_instagram": "PROMOÇÃO\nconfecções Julio: compartilhe no Instagram e concorra.\nWhatsApp: 15991120599\nInstagram: @julioconfeccçoes\n\n#promocao #compartilhe #confecoes #ia4tube"
+  },
+  "pagamento_pendente": true,
+  "valor_pendente": 8,
+  "motivo_pagamento_pendente": "saldo_insuficiente",
+  "descricao_instagram": "PROMOÇÃO\nconfecções Julio: compartilhe no Instagram e concorra.\nWhatsApp: 15991120599\nInstagram: @julioconfeccçoes\n\n#promocao #compartilhe #confecoes #ia4tube"
+}

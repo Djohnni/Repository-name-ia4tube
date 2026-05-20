@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-14T09:10:06.187Z",
+    "cliente_id": "auto_allejo_1778749790454",
+    "nome_time": "Allejo",
+    "whatsapp": "auto_allejo_1778749790454",
+    "sessao": "sess_1778749625560_2fd448d720b618",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260514_090953",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 3155,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260514_090953",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 3155
+    }
+  }
+]

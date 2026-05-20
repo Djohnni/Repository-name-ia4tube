@@ -1,0 +1,29 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [
+    {
+      "nome": "Tinho",
+      "posicao": ""
+    }
+  ],
+  "jogadores_texto": "Tinho",
+  "escudo_principal": "escudo1.png",
+  "escudo_adversario": "",
+  "foto_jogo": "mascote.png",
+  "categoria": "jogador_escudo",
+  "id": "20260508_131457",
+  "whatsapp": "15991120599",
+  "mes": "2026-05",
+  "rodada": "Jogador + escudo",
+  "data": "Tinho",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "criado_em": "2026-05-08T13:14:57.837Z"
+}

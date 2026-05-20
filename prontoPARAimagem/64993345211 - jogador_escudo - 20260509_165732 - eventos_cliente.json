@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-09T16:57:34.311Z",
+    "cliente_id": "64993345211",
+    "nome_time": "Tigres do serrado fc",
+    "whatsapp": "64993345211",
+    "sessao": "sess_1778345718558_6d565472bb0258",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260509_165732",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 5460,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260509_165732",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 5460
+    }
+  }
+]

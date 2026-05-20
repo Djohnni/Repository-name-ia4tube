@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-14T10:55:31.171Z",
+    "cliente_id": "auto_nandolima_1778756127297",
+    "nome_time": "Nando Lima",
+    "whatsapp": "auto_nandolima_1778756127297",
+    "sessao": "sess_1778753918498_1c7fb22960f3a8",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260514_105529",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 5871,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260514_105529",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 5871
+    }
+  }
+]

@@ -1,0 +1,203 @@
+{
+  "versao": "1.0.0",
+  "gerado_em": "2026-05-19T22:50:08.020Z",
+  "total_modelos_ativos": 3,
+  "modelos": [
+    {
+      "id": "barbearia_modelo_01",
+      "versao": "1.0.0",
+      "ativo": true,
+      "nicho": "Barbearia",
+      "nicho_slug": "barbearia",
+      "ramo": "Barbearia",
+      "ramo_slug": "barbearia",
+      "subtipo": "corte e barba",
+      "objetivo": "divulgar corte, barba, combo ou agendamento",
+      "tipo_post": "promocional",
+      "formato": "feed",
+      "estilo": [
+        "urbano",
+        "masculino",
+        "elegante",
+        "contraste forte"
+      ],
+      "paleta": [
+        "preto",
+        "branco",
+        "dourado"
+      ],
+      "composicao": "foto do servico ou profissional em destaque, preco em selo e CTA direto",
+      "densidade_texto": "baixa",
+      "tipo_fundo": "fundo escuro com textura discreta",
+      "iluminacao": "contraste dramatico",
+      "emocao_visual": "estilo e confianca",
+      "foco_comercial": "agendamento rapido de horario",
+      "qualidade_visual": "premium_curado",
+      "score": 78,
+      "aprovacoes": 0,
+      "rejeicoes": 0,
+      "origem": "curadoria_manual",
+      "criado_por": "IA4Tube",
+      "tags": [
+        "barba",
+        "cabelo",
+        "navalha",
+        "cadeira de barbeiro",
+        "combo",
+        "whatsapp"
+      ],
+      "cores": [
+        "preto",
+        "branco",
+        "dourado"
+      ],
+      "layout": "foto do servico ou profissional em destaque, preco em selo e CTA direto",
+      "texto_principal": "Corte + barba com horario marcado",
+      "cta": "Agende pelo WhatsApp",
+      "elementos": [
+        "barba",
+        "cabelo",
+        "navalha",
+        "cadeira de barbeiro",
+        "acabamento"
+      ],
+      "imagem_exemplo": "preview.jpg",
+      "imagem_exemplo_path": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\banco_modelos\\barbearia\\ativos\\modelo_01\\preview.jpg",
+      "criado_em": "2026-05-18T00:00:00.000Z",
+      "atualizado_em": "2026-05-19T00:00:00.000Z",
+      "usos": 0,
+      "arquivo_json": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\banco_modelos\\barbearia\\ativos\\modelo_01\\metadata.json"
+    },
+    {
+      "id": "pet_shop_modelo_01",
+      "versao": "1.0.0",
+      "ativo": true,
+      "nicho": "Pet Shop",
+      "nicho_slug": "pet_shop",
+      "ramo": "Pet Shop",
+      "ramo_slug": "pet_shop",
+      "subtipo": "banho e tosa",
+      "objetivo": "divulgar banho, tosa, pacote de cuidados ou promocao",
+      "tipo_post": "promocional",
+      "formato": "feed",
+      "estilo": [
+        "alegre",
+        "amigavel",
+        "leve",
+        "cuidado"
+      ],
+      "paleta": [
+        "verde",
+        "azul",
+        "branco"
+      ],
+      "composicao": "pet em destaque, bloco de beneficio, oferta clara e CTA para agendamento",
+      "densidade_texto": "media",
+      "tipo_fundo": "fundo claro com elementos suaves",
+      "iluminacao": "natural e acolhedora",
+      "emocao_visual": "carinho e confianca",
+      "foco_comercial": "agendamento de banho e tosa",
+      "qualidade_visual": "premium_curado",
+      "score": 80,
+      "aprovacoes": 0,
+      "rejeicoes": 0,
+      "origem": "curadoria_manual",
+      "criado_por": "IA4Tube",
+      "tags": [
+        "cachorro",
+        "gato",
+        "patinhas",
+        "banho",
+        "tosa",
+        "cuidado",
+        "whatsapp"
+      ],
+      "cores": [
+        "verde",
+        "azul",
+        "branco"
+      ],
+      "layout": "pet em destaque, bloco de beneficio, oferta clara e CTA para agendamento",
+      "texto_principal": "Banho e tosa com carinho",
+      "cta": "Agende pelo WhatsApp",
+      "elementos": [
+        "cachorro",
+        "gato",
+        "patinhas",
+        "banho",
+        "cuidado"
+      ],
+      "imagem_exemplo": "preview.jpg",
+      "imagem_exemplo_path": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\banco_modelos\\pet_shop\\ativos\\modelo_01\\preview.jpg",
+      "criado_em": "2026-05-18T00:00:00.000Z",
+      "atualizado_em": "2026-05-19T00:00:00.000Z",
+      "usos": 0,
+      "arquivo_json": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\banco_modelos\\pet_shop\\ativos\\modelo_01\\metadata.json"
+    },
+    {
+      "id": "vidracaria_modelo_01",
+      "versao": "1.0.0",
+      "ativo": true,
+      "nicho": "Vidracaria",
+      "nicho_slug": "vidracaria",
+      "ramo": "Vidracaria",
+      "ramo_slug": "vidracaria",
+      "subtipo": "box e espelhos sob medida",
+      "objetivo": "divulgar promocao de box, espelhos ou fechamento de vidro",
+      "tipo_post": "promocional",
+      "formato": "feed",
+      "estilo": [
+        "moderno",
+        "limpo",
+        "premium",
+        "brilho tecnico"
+      ],
+      "paleta": [
+        "azul",
+        "branco",
+        "cinza"
+      ],
+      "composicao": "produto em destaque ao centro, faixa de oferta forte e CTA no rodape",
+      "densidade_texto": "media",
+      "tipo_fundo": "ambiente claro com reflexos de vidro",
+      "iluminacao": "brilhante e limpa",
+      "emocao_visual": "confianca e acabamento profissional",
+      "foco_comercial": "orcamento rapido para servico sob medida",
+      "qualidade_visual": "premium_curado",
+      "score": 82,
+      "aprovacoes": 0,
+      "rejeicoes": 0,
+      "origem": "curadoria_manual",
+      "criado_por": "IA4Tube",
+      "tags": [
+        "box",
+        "espelho",
+        "vidro",
+        "banheiro",
+        "acabamento",
+        "whatsapp"
+      ],
+      "cores": [
+        "azul",
+        "branco",
+        "cinza"
+      ],
+      "layout": "produto em destaque ao centro, faixa de oferta forte e CTA no rodape",
+      "texto_principal": "Box para banheiro sob medida",
+      "cta": "Chame no WhatsApp",
+      "elementos": [
+        "vidro",
+        "banheiro",
+        "reflexo",
+        "acabamento",
+        "medida sob encomenda"
+      ],
+      "imagem_exemplo": "preview.jpg",
+      "imagem_exemplo_path": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\banco_modelos\\vidracaria\\ativos\\modelo_01\\preview.jpg",
+      "criado_em": "2026-05-18T00:00:00.000Z",
+      "atualizado_em": "2026-05-19T22:50:08.016Z",
+      "usos": 6,
+      "arquivo_json": "C:\\Users\\SEJA BEM VINDO(A)\\Desktop\\ia4tube_oficial\\IA4tube\\banco_modelos\\vidracaria\\ativos\\modelo_01\\metadata.json"
+    }
+  ]
+}

@@ -1,0 +1,165 @@
+{
+  "time_principal": "",
+  "gols_time_principal": 0,
+  "gols_adversario": 0,
+  "time_adversario": "",
+  "artilheiros": [],
+  "jogadores": [],
+  "jogadores_texto": "",
+  "escudo_principal": "",
+  "escudo_adversario": "",
+  "foto_jogo": "",
+  "categoria": "arte_empresa",
+  "id": "20260519_113812",
+  "whatsapp": "15991120599",
+  "mes": "2026-05",
+  "rodada": "Quero divulgar combo",
+  "data": "acai do lucas",
+  "hora": "",
+  "arena": "",
+  "mascote_tipo": "",
+  "patrocinadores_qtd": 0,
+  "status": "novo",
+  "aprovado_cliente": false,
+  "baixado_cliente": false,
+  "ajuste_automatico_usado": false,
+  "motivo_ajuste": "",
+  "criado_em": "2026-05-19T14:38:12.179Z",
+  "ramo": "Açaí",
+  "nome_empresa": "acai do lucas",
+  "objetivo": "Quero divulgar combo",
+  "oferta": "",
+  "cta": "chame no whats",
+  "whatsapp_contato": "15991120599",
+  "instagram": "@vidrosalfa",
+  "observacoes": "",
+  "niche_id": "acai",
+  "niche_dna": {
+    "estilo_visual": "natural, vibrante e fresco",
+    "publico_alvo": [
+      "jovens",
+      "famílias",
+      "pessoas fitness",
+      "amantes de açaí"
+    ],
+    "cores_sugeridas": [
+      "roxo",
+      "verde",
+      "branco",
+      "amarelo"
+    ],
+    "tipo_layout": [
+      "foto do produto em destaque",
+      "texto promocional grande",
+      "botão de chamada para ação"
+    ],
+    "ofertas_comuns": [
+      "combo açaí + toppings",
+      "promoção compre 2 leve 3",
+      "desconto para pedidos pelo WhatsApp"
+    ],
+    "chamadas": [
+      "Sabor que refresca seu dia!",
+      "Combo especial para você!",
+      "Mais saúde e sabor no seu lanche!",
+      "Açaí do Lucas, o melhor açaí na sua casa!"
+    ],
+    "ctas": [
+      "Chame no Whats",
+      "Peça já pelo WhatsApp",
+      "Garanta seu combo agora",
+      "Fale conosco no Whats"
+    ],
+    "elementos_visuais": [
+      "folhas tropicais",
+      "ilustrações de frutas",
+      "elementos de colheita",
+      "texturas de madeira e natureza"
+    ],
+    "tipos_de_post": [
+      "promoção de combos",
+      "destaque de ingredientes naturais",
+      "depoimentos de clientes",
+      "reels mostrando preparo do açaí"
+    ]
+  },
+  "niche_dna_status": "gerado",
+  "niche_dna_origem": "ia",
+  "niche_dna_gerado_em": "2026-05-19T14:38:18.495Z",
+  "niche_dna_erro": "",
+  "modelo_referencia": null,
+  "modelo_status": "pendente",
+  "modelo_erro": "Nenhum modelo parecido encontrado",
+  "modelo_usado_em": "",
+  "modelo_score": 35,
+  "modelo_score_detalhes": [
+    "objetivo:+20",
+    "estilo:+15"
+  ],
+  "company_assets": {
+    "logo": "logo.png",
+    "fotos": [],
+    "referencias": []
+  },
+  "product_id": "arte_empresa",
+  "schema_version": 2,
+  "fields": {
+    "ramo": "Açaí",
+    "ramo_origem": "lista",
+    "nome_empresa": "acai do lucas",
+    "objetivo": "Quero divulgar combo",
+    "objetivo_origem": "lista",
+    "oferta": "",
+    "cta": "chame no whats",
+    "whatsapp": "15991120599",
+    "instagram": "@vidrosalfa",
+    "observacoes": "",
+    "campos_dinamicos": {
+      "nome_combo": "combo casal R$38",
+      "itens_combo": "2 lanches 2 batatas",
+      "preco": "39,90"
+    }
+  },
+  "assets": {
+    "logo": "logo.png",
+    "fotos": [],
+    "referencias": []
+  },
+  "legacy": {
+    "time_principal": "",
+    "gols_time_principal": 0,
+    "gols_adversario": 0,
+    "time_adversario": "",
+    "artilheiros": [],
+    "jogadores": [],
+    "jogadores_texto": "",
+    "escudo_principal": "",
+    "escudo_adversario": "",
+    "foto_jogo": "",
+    "categoria": "arte_empresa",
+    "rodada": "Quero divulgar combo",
+    "data": "acai do lucas",
+    "hora": "",
+    "arena": "",
+    "mascote_tipo": "",
+    "patrocinadores_qtd": 0,
+    "ramo": "Açaí",
+    "nome_empresa": "acai do lucas",
+    "objetivo": "Quero divulgar combo",
+    "oferta": "",
+    "cta": "chame no whats",
+    "whatsapp_contato": "15991120599",
+    "instagram": "@vidrosalfa",
+    "observacoes": "",
+    "niche_id": "acai",
+    "niche_dna_status": "gerado",
+    "niche_dna_origem": "ia",
+    "modelo_status": "pendente",
+    "modelo_score": 35,
+    "descricao_instagram": "Patrocinador: Açaí do Lucas traz combo especial pra você.\nPeça pelo WhatsApp: 15991120599\nSiga @vidrosalfa\nChame no whats e aproveite com calma.\n\n#açaí #combo #acai #acaiDoLucas #patrocínio #ia4tube"
+  },
+  "pagamento_pendente": false,
+  "valor_pendente": 8,
+  "motivo_pagamento_pendente": "saldo_insuficiente",
+  "descricao_instagram": "Patrocinador: Açaí do Lucas traz combo especial pra você.\nPeça pelo WhatsApp: 15991120599\nSiga @vidrosalfa\nChame no whats e aproveite com calma.\n\n#açaí #combo #acai #acaiDoLucas #patrocínio #ia4tube"
+}

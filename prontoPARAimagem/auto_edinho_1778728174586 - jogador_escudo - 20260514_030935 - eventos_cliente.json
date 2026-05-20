@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-14T03:09:39.069Z",
+    "cliente_id": "auto_edinho_1778728174586",
+    "nome_time": "Edinho",
+    "whatsapp": "auto_edinho_1778728174586",
+    "sessao": "sess_1778728042088_075264bfb82988",
+    "evento": "pedido_concluido",
+    "produto": "jogador_escudo",
+    "categoria": "jogador",
+    "pedido_id": "20260514_030935",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 1474,
+    "payload": {
+      "produto": "jogador_escudo",
+      "categoria": "jogador",
+      "pedido_id": "20260514_030935",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 1474
+    }
+  }
+]

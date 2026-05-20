@@ -1,0 +1,85 @@
+ESCREVA TODO O TEXTO EM PORTUGUÊS (BRASIL)
+
+Crie uma arte esportiva profissional de ESCALAÇÃO para jogo de futebol, formato vertical 1024x1536.
+
+OBJETIVO:
+Mostrar a escalação do time para a partida, com visual limpo, moderno e pronto para redes sociais.
+
+REGRA CRÍTICA SOBRE ESCUDOS:
+- USAR EXATAMENTE os escudos enviados
+- NÃO alterar cores
+- NÃO alterar formato
+- NÃO redesenhar
+- NÃO estilizar
+- NÃO modificar detalhes
+- Os escudos devem ser idênticos ao original
+ELEMENTOS:
+- se tiver 1 escudo apenas então Escudo do time em destaque, mas se tiver 2 então faça eles mais ao lado 1 contra o outro com pouco destaque
+- Lista de jogadores enviada em DADOS DO PEDIDO
+- Fundo esportivo com estádio, luzes e cores baseadas no escudo
+
+REGRA CRÍTICA SOBRE ESCUDOS:
+- USAR EXATAMENTE os escudos enviados
+- NÃO alterar cores
+- NÃO alterar formato
+- NÃO redesenhar
+- NÃO estilizar
+- NÃO modificar detalhes
+- Os escudos devem ser idênticos ao original
+
+REGRAS DE TEXTO:
+- Escrever exatamente os nomes dos jogadores enviados
+- Não inventar jogadores
+- Não remover jogadores
+- Não trocar nomes
+- Texto legível, organizado e em destaque
+
+SE HOUVER FOTO DE PESSOA/JOGADOR:
+- NÃO alterar rosto
+- NÃO alterar corpo
+- NÃO alterar pose
+- NÃO alterar roupa
+- Usar a foto apenas como referência fiel/recorte, sem recriar a pessoa
+
+ESTILO:
+- Visual forte, limpo e profissional
+- Boa leitura da lista
+- Sem excesso de efeitos
+
+REGRA CRÍTICA SOBRE NOMES:
+Se houver discordância entre o nome digitado no pedido e o nome escrito no escudo/logo enviado, use SEMPRE o nome escrito no escudo/logo como fonte oficial.
+O cliente pode digitar errado.
+O escudo/logo é a referência principal para nomes de times, marcas e identidade visual.
+Não corrija o escudo pelo texto digitado; corrija o texto digitado pelo escudo.
+
+NUNCA INVENTAR QUALQUER INFORMAÇÃO. USAR APENAS OS DADOS FORNECIDOS NO PEDIDO. SE ALGUM DADO NÃO FOR ENVIADO (EX: ARTILHEIROS, JOGADORES, TEXTOS), NÃO EXIBIR NA IMAGEM.
+
+REGRA CRÍTICA SOBRE JOGADORES:
+- TODOS os jogadores enviados pertencem à MESMA lista principal.
+- NÃO separar jogadores em:
+  titulares
+  reservas
+  suplentes
+  banco
+- NÃO criar categoria “suplentes”.
+- NÃO dividir a lista automaticamente.
+- Exibir TODOS os jogadores juntos exatamente na ordem enviada.
+
+REGRA CRÍTICA DE NUMERAÇÃO:
+- A lista de jogadores deve aparecer COMPLETA.
+- NÃO pular nenhum número.
+- NÃO remover o número 4.
+- Se a lista enviada tiver 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 e 11, todos esses números devem aparecer.
+- O número e o nome devem permanecer juntos exatamente como enviado.
+- Antes de finalizar, conferir se a quantidade de jogadores exibida é igual à quantidade enviada no pedido.
+
+REGRA CRÍTICA SOBRE NOMES DOS JOGADORES:
+Copie os nomes EXATAMENTE como enviados no pedido.
+
+PROIBIDO:
+- corrigir ortografia
+- trocar letras
+- adicionar/remover acentos
+- adaptar apelidos
+
+Mesmo que pareça errado, manter idêntico ao enviado.

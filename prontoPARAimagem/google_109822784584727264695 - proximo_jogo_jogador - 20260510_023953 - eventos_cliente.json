@@ -1,0 +1,26 @@
+[
+  {
+    "data": "2026-05-10T02:40:08.591Z",
+    "cliente_id": "google_109822784584727264695",
+    "nome_time": "Leandro Ristau (Alemão)",
+    "whatsapp": "google_109822784584727264695",
+    "sessao": "sess_1778380297668_33342213cc587",
+    "evento": "pedido_concluido",
+    "produto": "proximo_jogo_jogador",
+    "categoria": "jogador",
+    "pedido_id": "20260510_023953",
+    "pagina": "/app.html",
+    "logado": true,
+    "campo_atual": "btnEnviar",
+    "ultima_acao": "tentou_enviar_pedido",
+    "tempo_inativo_ms": 1721,
+    "payload": {
+      "produto": "proximo_jogo_jogador",
+      "categoria": "jogador",
+      "pedido_id": "20260510_023953",
+      "campo_atual": "btnEnviar",
+      "ultima_acao": "tentou_enviar_pedido",
+      "tempo_inativo_ms": 1721
+    }
+  }
+]
