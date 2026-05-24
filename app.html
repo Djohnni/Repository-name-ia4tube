@@ -8391,23 +8391,18 @@ const IA4_OBJETIVOS_GERAIS = [
 const IA4_ESTILOS_VISUAIS_CLIENTE = [
   {
     value: "foto_detalhes",
-    title: "Só embelezar a foto",
-    description: "Apenas melhora a foto enviada pelo cliente, mantendo a imagem original como foco principal, com acabamento profissional e poucos elementos."
+    title: "Embelezar foto",
+    description: "Apenas adiciona moldura, logo e pequenos detalhes profissionais na foto enviada."
   },
   {
     value: "leve",
     title: "Visual leve",
-    description: "Visual clean e elegante, com poucas informações, poucos elementos e aparência mais leve e organizada."
+    description: "Mantém a foto principal e adiciona elementos leves, organização visual e acabamento profissional."
   },
   {
     value: "normal",
     title: "Normal IA4Tube",
-    description: "Visual profissional equilibrado, com identidade forte, informações principais e aparência comercial."
-  },
-  {
-    value: "agressivo",
-    title: "Visual agressivo",
-    description: "Visual mais chamativo e promocional, com contraste forte, destaque visual e aparência de anúncio."
+    description: "A IA cria uma arte mais completa, adicionando textos, elementos e modificações visuais automaticamente."
   }
 ];
 
@@ -10252,14 +10247,28 @@ function abrirEscolhaEstiloAntesEnvio(form){
   card.appendChild(title);
 
   [
-    { value: "leve", title: "Visual leve" },
-    { value: "normal", title: "Normal IA4Tube" },
-    { value: "agressivo", title: "Visual agressivo" }
+    {
+      value: "foto_detalhes",
+      title: "Embelezar foto",
+      description: "Apenas adiciona moldura, logo e pequenos detalhes profissionais na foto enviada."
+    },
+    {
+      value: "leve",
+      title: "Visual leve",
+      description: "Mantém a foto principal e adiciona elementos leves, organização visual e acabamento profissional."
+    },
+    {
+      value: "normal",
+      title: "Normal IA4Tube",
+      description: "A IA cria uma arte mais completa, adicionando textos, elementos e modificações visuais automaticamente."
+    }
   ].forEach((option) => {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.textContent = option.title;
-    btn.style.cssText = "width:100%;min-height:58px;margin-top:10px;border:1px solid #bbf7d0;border-radius:18px;background:#f8fff9;color:#14532d;font-size:16px;font-weight:950;cursor:pointer;box-shadow:0 10px 22px rgba(15,23,42,.08);";
+    btn.innerHTML = `<strong>${htmlEscape(option.title)}</strong><span>${htmlEscape(option.description)}</span>`;
+    btn.style.cssText = "width:100%;min-height:72px;margin-top:10px;border:1px solid #bbf7d0;border-radius:18px;background:#f8fff9;color:#14532d;font-size:16px;font-weight:950;cursor:pointer;box-shadow:0 10px 22px rgba(15,23,42,.08);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;text-align:left;padding:12px 14px;";
+    const desc = btn.querySelector("span");
+    if(desc) desc.style.cssText = "font-size:12px;line-height:1.25;font-weight:750;color:#4b6354;";
     btn.addEventListener("click", () => {
       if(styleInput) styleInput.value = option.value;
       form.dataset.visualStyleConfirmed = "1";
@@ -10328,7 +10337,7 @@ async function submitCleanProductForm(e){
 
     delete form.dataset.visualStyleConfirmed;
     const styleInput = form.querySelector("[data-visual-style-value]");
-    if(styleInput && !["leve", "normal", "agressivo"].includes(styleInput.value)){
+    if(styleInput && !["foto_detalhes", "leve", "normal"].includes(styleInput.value)){
       styleInput.value = "normal";
     }
   }
