@@ -9236,11 +9236,12 @@ function getCleanFieldValue(form, key){
 const IA4_EMPRESA_PROFILE_KEY = "ia4tube_empresa_perfil";
 
 function salvarPerfilEmpresaLocal(fields = {}){
-  if(!fields.nome_empresa && !fields.ramo) return;
+  if(!fields.nome_empresa && !fields.ramo && !fields.logo_data_url) return;
   try{
+    const atual = carregarPerfilEmpresaLocal();
     localStorage.setItem(IA4_EMPRESA_PROFILE_KEY, JSON.stringify({
-      nome_empresa: fields.nome_empresa || "",
-      ramo: fields.ramo || ""
+      ...atual,
+      ...fields
     }));
   }catch(e){}
 }
@@ -9273,6 +9274,45 @@ function preencherPerfilEmpresaLocal(form){
     if(ramoOrigin && !ramoOrigin.value) ramoOrigin.value = "cache";
     if(ramoBox && perfil.ramo) ramoBox.dataset.nicheSelected = "cache";
   }
+
+  atualizarCardEmpresaLocal(form);
+}
+
+function atualizarCardEmpresaLocal(form){
+  if(form && form.dataset.productForm !== "arte_empresa") return;
+  const block = form?.closest("[data-clean-product-block]") || document.querySelector('[data-clean-product-block="arte_empresa"]');
+  if(!block) return;
+
+  const perfil = carregarPerfilEmpresaLocal();
+  const title = block.querySelector(".cleanProductTitle");
+  if(title){
+    title.textContent = (perfil.nome_empresa || "").trim() || (PRODUCTS.arte_empresa?.title || PRODUCTS.arte_empresa?.name || "Arte para Empresa");
+  }
+
+  const img = block.querySelector(".cleanProductImage img");
+  if(img){
+    if(!img.dataset.defaultSrc) img.dataset.defaultSrc = img.getAttribute("src") || "";
+    img.src = perfil.logo_data_url || img.dataset.defaultSrc;
+  }
+}
+
+function salvarPerfilEmpresaLocalDoForm(form){
+  if(!form || form.dataset.productForm !== "arte_empresa") return;
+  salvarPerfilEmpresaLocal({
+    nome_empresa: getCleanFieldValue(form, "nome_empresa"),
+    ramo: getCleanFieldValue(form, "ramo")
+  });
+  atualizarCardEmpresaLocal(form);
+}
+
+function salvarLogoEmpresaLocal(file, form){
+  if(!form || form.dataset.productForm !== "arte_empresa" || !file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    salvarPerfilEmpresaLocal({ logo_data_url: String(reader.result || "") });
+    atualizarCardEmpresaLocal(form);
+  };
+  reader.readAsDataURL(file);
 }
 
 function normalizeIa4Key(value){
@@ -9477,7 +9517,9 @@ function bindNicheAutocomplete(root){
       hidden.value = manual.value.trim();
       if(origin) origin.value = hidden.value ? "manual" : "";
       box.dataset.nicheSelected = hidden.value ? "manual" : "";
-      resetObjectivePickerForForm(box.closest("[data-product-form]"));
+      const form = box.closest("[data-product-form]");
+      resetObjectivePickerForForm(form);
+      salvarPerfilEmpresaLocalDoForm(form);
     });
 
     list.addEventListener("click", (e) => {
@@ -9492,7 +9534,9 @@ function bindNicheAutocomplete(root){
         box.dataset.nicheSelected = "list";
         box.classList.remove("is-open", "is-manual");
         manual.value = "";
-        resetObjectivePickerForForm(box.closest("[data-product-form]"));
+        const form = box.closest("[data-product-form]");
+        resetObjectivePickerForForm(form);
+        salvarPerfilEmpresaLocalDoForm(form);
         return;
       }
 
@@ -10394,6 +10438,9 @@ function bindCleanProductForms(root){
       if(!label) return;
       const files = Array.from(input.files || []);
       label.textContent = files.length ? files.map(file => file.name).join(", ") : "Nenhum arquivo";
+      if(form?.dataset.productForm === "arte_empresa" && input.dataset.asset === "logo" && files[0]){
+        salvarLogoEmpresaLocal(files[0], form);
+      }
     });
   });
 
@@ -10416,6 +10463,9 @@ function bindCleanProductForms(root){
 
   root.querySelectorAll("[data-product-form]").forEach(form => {
     preencherPerfilEmpresaLocal(form);
+    if(form.dataset.productForm === "arte_empresa"){
+      getCleanFormField(form, "nome_empresa")?.addEventListener("input", () => salvarPerfilEmpresaLocalDoForm(form));
+    }
     form.addEventListener("submit", submitCleanProductForm);
   });
 
