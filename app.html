@@ -8998,20 +8998,7 @@ function renderCleanObjectivePickerField(product, field){
 function renderCleanVisualStyleField(product, field){
   const key = htmlEscape(field.key);
   const defaultValue = htmlEscape(field.defaultValue || "normal");
-  return `
-    <div class="cleanFieldCard" data-clean-field-card="${key}">
-      <label class="cleanFieldLabel">Estilo visual</label>
-      <input type="hidden" name="${key}" data-field="${key}" value="${defaultValue}" data-visual-style-value>
-      <div class="cleanVisualStyleGrid" data-visual-style-picker>
-        ${IA4_ESTILOS_VISUAIS_CLIENTE.map((option) => `
-          <button type="button" class="cleanVisualStyleOption${option.value === (field.defaultValue || "normal") ? " is-selected" : ""}" data-visual-style-option="${htmlEscape(option.value)}">
-            <span class="cleanVisualStyleTitle">${htmlEscape(option.title)}</span>
-            <span class="cleanVisualStyleDesc">${htmlEscape(option.description)}</span>
-          </button>
-        `).join("")}
-      </div>
-    </div>
-  `;
+  return `<input type="hidden" name="${key}" data-field="${key}" value="${defaultValue}" data-visual-style-value>`;
 }
 
 function renderCleanTextareaField(product, field){
@@ -10204,6 +10191,51 @@ function restaurarPedidosAtivos(pedidos){
   }
 }
 
+function abrirEscolhaEstiloAntesEnvio(form){
+  document.getElementById("ia4StyleChoiceOverlay")?.remove();
+
+  const styleInput = form.querySelector("[data-visual-style-value]");
+  const overlay = document.createElement("div");
+  overlay.id = "ia4StyleChoiceOverlay";
+  overlay.style.cssText = "position:fixed;inset:0;z-index:100000;background:rgba(15,23,42,.72);display:flex;align-items:center;justify-content:center;padding:18px;";
+
+  const card = document.createElement("div");
+  card.style.cssText = "width:min(440px,94vw);background:#ffffff;border-radius:24px;padding:22px;box-shadow:0 24px 70px rgba(15,23,42,.35);color:#111827;";
+
+  const title = document.createElement("div");
+  title.textContent = "Qual estilo você quer para sua arte?";
+  title.style.cssText = "font-size:22px;font-weight:950;line-height:1.12;text-align:center;margin-bottom:16px;";
+  card.appendChild(title);
+
+  [
+    { value: "leve", title: "Visual leve" },
+    { value: "normal", title: "Normal IA4Tube" },
+    { value: "agressivo", title: "Visual agressivo" }
+  ].forEach((option) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = option.title;
+    btn.style.cssText = "width:100%;min-height:58px;margin-top:10px;border:1px solid #bbf7d0;border-radius:18px;background:#f8fff9;color:#14532d;font-size:16px;font-weight:950;cursor:pointer;box-shadow:0 10px 22px rgba(15,23,42,.08);";
+    btn.addEventListener("click", () => {
+      if(styleInput) styleInput.value = option.value;
+      form.dataset.visualStyleConfirmed = "1";
+      overlay.remove();
+      form.requestSubmit();
+    });
+    card.appendChild(btn);
+  });
+
+  const backBtn = document.createElement("button");
+  backBtn.type = "button";
+  backBtn.textContent = "Voltar";
+  backBtn.style.cssText = "width:100%;min-height:46px;margin-top:12px;border:0;border-radius:16px;background:#eef2f7;color:#334155;font-size:14px;font-weight:900;cursor:pointer;";
+  backBtn.addEventListener("click", () => overlay.remove());
+  card.appendChild(backBtn);
+
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+}
+
 async function submitCleanProductForm(e){
   e.preventDefault();
 
@@ -10242,6 +10274,19 @@ async function submitCleanProductForm(e){
       campo_atual: ia4CampoAtual || ""
     });
     return;
+  }
+
+  if(productKey === "arte_empresa"){
+    if(form.dataset.visualStyleConfirmed !== "1"){
+      abrirEscolhaEstiloAntesEnvio(form);
+      return;
+    }
+
+    delete form.dataset.visualStyleConfirmed;
+    const styleInput = form.querySelector("[data-visual-style-value]");
+    if(styleInput && !["leve", "normal", "agressivo"].includes(styleInput.value)){
+      styleInput.value = "normal";
+    }
   }
 
   if(!token){
