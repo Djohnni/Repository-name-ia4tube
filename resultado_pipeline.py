@@ -618,7 +618,18 @@ def build_company_context(order_model: dict) -> str:
     ]).strip()
 
 
-def build_company_prompt(prompt_base: str, texto_formatado: str, contexto_empresa: str, bloco_ajuste: str = "", conteudo_obrigatorio: str = "") -> str:
+def build_company_prompt(prompt_base: str, texto_formatado: str, contexto_empresa: str, bloco_ajuste: str = "", conteudo_obrigatorio: str = "", knowledge_context: str = "") -> str:
+    knowledge_context = str(knowledge_context or "").strip()
+    bloco_conhecimento_nicho = ""
+    if knowledge_context:
+        bloco_conhecimento_nicho = f"""
+
+CONHECIMENTO DO NICHO:
+Use as orientacoes abaixo apenas como apoio estrategico.
+Elas nao podem substituir nem contradizer os dados reais do cliente.
+{knowledge_context}
+"""
+
     return f"""{prompt_base}
 
 {bloco_ajuste}
@@ -636,6 +647,7 @@ INFORMACOES DO CLIENTE:
 {conteudo_obrigatorio}
 
 {contexto_empresa}
+{bloco_conhecimento_nicho}
 
 DIRECAO VISUAL E COMERCIAL:
 - A logo da empresa e a referencia visual principal da marca.
@@ -2222,7 +2234,15 @@ REGRAS CRÍTICAS DE INTERPRETAÇÃO:
 """
 
     if is_company_product(order_model):
-        prompt = build_company_prompt(prompt_base, texto_formatado, contexto_empresa, bloco_ajuste, conteudo_obrigatorio)
+        niche_knowledge_context = str(pedido.get("niche_knowledge_context", "") or "").strip()
+        prompt = build_company_prompt(
+            prompt_base,
+            texto_formatado,
+            contexto_empresa,
+            bloco_ajuste,
+            conteudo_obrigatorio,
+            niche_knowledge_context
+        )
 
     log(f"📝 Prompt usado: {prompt_file_usado.name}")
 
