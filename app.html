@@ -5446,6 +5446,10 @@ body.ia4-empresas .selectorStage{
   margin-bottom:10px;
 }
 
+body.ia4-empresas .cleanEscudo3dBlock:not([hidden]){
+  display:grid !important;
+}
+
 body.ia4-empresas .centerBtn{
   cursor:pointer;
 }
@@ -8204,6 +8208,7 @@ const IA4_EMPRESA_RAMOS = [
   "Equipamentos médicos",
   "Ervas medicinais",
   "Escapamentos",
+  "Futebol",
   "Escola de costura",
   "Escola de futebol",
   "Escola de robótica",
@@ -8601,6 +8606,16 @@ const IA4_OBJETIVOS_POR_CATEGORIA = {
 };
 
 const IA4_OBJETIVOS_POR_NICHO = {
+  futebol: [
+    { id: "futebol_mascote_3d", label: "Mascote 3D", productKey: "mascote_uniforme" },
+    { id: "futebol_escudo_3d", label: "Escudo 3D", productKey: "escudo3d" },
+    { id: "futebol_resultado", label: "Resultado", productKey: "resultado" },
+    { id: "futebol_proximo_jogo", label: "Próximo Jogo", productKey: "proximo_jogo" },
+    { id: "futebol_escalacao", label: "Escalação", productKey: "escalacao" },
+    { id: "futebol_contratacao", label: "Contratação", productKey: "contratacao" },
+    { id: "futebol_patrocinador", label: "Patrocinador", productKey: "patrocinador" },
+    { id: "futebol_treino", label: "Treino", productKey: "proximo_jogo" }
+  ],
   hamburgueria: [
     { id: "divulgar_lanche", label: "Quero divulgar meu lanche", fields: "lanche", photoLabel: "Foto do lanche" },
     { id: "divulgar_combo_hamburgueria", label: "Quero divulgar combo", fields: "combo", photoLabel: "Foto do combo" }
@@ -9109,8 +9124,26 @@ function formatCleanProductPrice(product){
 }
 
 const IA4_EMPRESAS_MODE = document.body?.classList.contains("ia4-empresas");
+const IA4_FOOTBALL_FORM_PRODUCT_IDS = [
+  "mascote_uniforme",
+  "resultado",
+  "proximo_jogo",
+  "escalacao",
+  "contratacao",
+  "patrocinador"
+];
+const IA4_FOOTBALL_PRODUCT_IDS = [
+  "mascote_uniforme",
+  "escudo3d",
+  "resultado",
+  "proximo_jogo",
+  "escalacao",
+  "contratacao",
+  "patrocinador"
+];
 const CLEAN_PRODUCT_RENDER_ORDER = IA4_EMPRESAS_MODE ? [
-  "arte_empresa"
+  "arte_empresa",
+  ...IA4_FOOTBALL_FORM_PRODUCT_IDS
 ] : [
   "arte_empresa",
   "jogador_escudo",
@@ -9189,7 +9222,7 @@ function renderCleanProductForms(){
 
   const escudo3dProduct = PRODUCTS.escudo3d;
   const escudo3dPriceLabel = formatCleanProductPrice(escudo3dProduct);
-  const escudo3dHtml = (!IA4_EMPRESAS_MODE && escudo3dProduct) ? `
+  const escudo3dHtml = (escudo3dProduct) ? `
     <section class="cleanProductBlock cleanEscudo3dBlock" data-clean-product-block="escudo3d">
       <div class="cleanProductImage" aria-hidden="true">
         <img src="${htmlEscape(escudo3dProduct.image || "")}" alt="">
@@ -9213,7 +9246,31 @@ function renderCleanProductForms(){
   ` : "";
 
   root.innerHTML = escudo3dHtml + formsHtml;
+  setFootballProductVisibility("");
   bindCleanProductForms(root);
+}
+
+function setFootballProductVisibility(activeProductKey = ""){
+  if(!IA4_EMPRESAS_MODE) return;
+
+  IA4_FOOTBALL_PRODUCT_IDS.forEach((productKey) => {
+    const block = document.querySelector(`[data-clean-product-block="${CSS.escape(productKey)}"]`);
+    if(block) block.hidden = productKey !== activeProductKey;
+  });
+
+  if(!activeProductKey && escudo3dFile){
+    escudo3dFile.value = "";
+    setEscudo3dCleanFileLabel("Selecionar escudo");
+  }
+}
+
+function openFootballProductFromObjective(objective){
+  const productKey = objective?.productKey || "";
+  if(!IA4_EMPRESAS_MODE || !productKey) return;
+
+  setFootballProductVisibility(productKey);
+  activateCleanProductBlock(productKey);
+  scrollToCleanProductBlock(productKey);
 }
 
 function getCleanFormField(form, key){
@@ -9346,8 +9403,16 @@ function getRamoCategory(ramo){
   return "";
 }
 
+function isFootballRamo(ramo){
+  return normalizeIa4Key(ramo) === "futebol";
+}
+
 function getObjectivesForRamo(ramo){
   const ramoKey = normalizeIa4Key(ramo);
+  if(isFootballRamo(ramo)){
+    return IA4_OBJETIVOS_POR_NICHO.futebol || [];
+  }
+
   const category = getRamoCategory(ramo);
   return uniqObjectives([
     ...(IA4_OBJETIVOS_POR_NICHO[ramoKey] || []),
@@ -9366,9 +9431,11 @@ function renderObjectiveOptions(box, shouldOpen = false){
     <button type="button" class="cleanNicheOption" data-objective-option="${htmlEscape(objective.id)}">${htmlEscape(objective.label)}</button>
   `);
 
-  options.push(`
-    <button type="button" class="cleanNicheOption cleanNicheOptionManual" data-objective-manual-trigger>Outro objetivo</button>
-  `);
+  if(!isFootballRamo(ramo)){
+    options.push(`
+      <button type="button" class="cleanNicheOption cleanNicheOptionManual" data-objective-manual-trigger>Outro objetivo</button>
+    `);
+  }
 
   list.innerHTML = options.join("");
   if(shouldOpen) box.classList.add("is-open");
@@ -9429,6 +9496,7 @@ function resetObjectivePickerForForm(form){
   box.classList.remove("is-open", "is-manual");
   renderDynamicObjectiveFields(box, null);
   renderObjectiveOptions(box);
+  setFootballProductVisibility("");
 }
 
 function collectDynamicObjectiveFields(form){
@@ -9497,6 +9565,8 @@ function bindNicheAutocomplete(root){
       box.classList.remove("is-manual");
       manual.value = "";
       clearConfirmedValue();
+      const form = box.closest("[data-product-form]");
+      resetObjectivePickerForForm(form);
       renderNicheOptions(box, search.value);
     });
 
@@ -9579,6 +9649,7 @@ function bindObjectivePicker(root){
         box.classList.remove("is-open", "is-manual");
         manual.value = "";
         renderDynamicObjectiveFields(box, objective);
+        openFootballProductFromObjective(objective);
         return;
       }
 
@@ -9590,6 +9661,7 @@ function bindObjectivePicker(root){
         box.classList.add("is-manual");
         box.classList.remove("is-open");
         renderDynamicObjectiveFields(box, null);
+        setFootballProductVisibility("");
         manual.focus();
       }
     });
@@ -14609,20 +14681,30 @@ async function baixarPedido(id){
     pedido_id: id || ""
   });
 
-  marcarPedidoBaixado(id);
-  carregarHistorico();
-
   try{
     const r = await fetch(`${API_BASE}/pedidos/${id}/download-resultado`, {
       headers: { "Authorization": "Bearer " + token }
     });
 
-    if(!r.ok){
-      alert("Erro ao baixar imagem");
+    const contentType = (r.headers.get("content-type") || "").toLowerCase();
+
+    if(!r.ok || !contentType.startsWith("image/")){
+      const text = await r.text().catch(()=>"");
+      let mensagem = "Erro ao baixar imagem";
+      try{
+        const data = JSON.parse(text || "{}");
+        mensagem = data.error || data.mensagem || data.message || mensagem;
+      }catch{}
+      alert(mensagem);
       return;
     }
 
     const blob = await r.blob();
+    if(!blob || blob.size === 0){
+      alert("A imagem veio vazia. Tente baixar novamente.");
+      return;
+    }
+
     const url = window.URL.createObjectURL(blob);
 
     const a = document.createElement("a");
@@ -14632,7 +14714,10 @@ async function baixarPedido(id){
     a.click();
     a.remove();
 
-    window.URL.revokeObjectURL(url);
+    marcarPedidoBaixado(id);
+    carregarHistorico();
+
+    setTimeout(()=>window.URL.revokeObjectURL(url), 30000);
 
   }catch{
     alert("Erro de rede ao baixar");
