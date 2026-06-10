@@ -6506,8 +6506,8 @@ body.ia4-empresas .centerBtn{
 
 <div class="ia4ToastPedido" id="ia4ToastPedido" onclick="fecharAvisoPedido()">
   <div class="ia4ToastPedidoBox">
-    <strong>✅ Pedido recebido!</strong>
-    <span>Sua arte já entrou em produção. Acompanhe em Meus pedidos — quando ficar pronta, ela aparecerá lá para baixar.</span>
+    <strong id="ia4ToastPedidoTitulo">✅ Pedido recebido!</strong>
+    <span id="ia4ToastPedidoMensagem">Sua arte já entrou em produção. Acompanhe em Meus pedidos — quando ficar pronta, ela aparecerá lá para baixar.</span>
   </div>
 </div>
 
@@ -7069,6 +7069,33 @@ const PRODUCTS = {
     hiddenFields: ["patro"]
   },
 
+  treino: {
+    mode: "flyer",
+    title: "Dia de Treino",
+    hint: "Crie uma arte de treino, preparação, foco e evolução da equipe.",
+    flyerTipo: "treino",
+    labels: {
+      rodada: "Chamada da arte",
+      data: "Data ou frase",
+      hora: "Contexto / competição",
+      arena: "Local do treino (opcional)",
+      esc1: "Escudo do time",
+      mascote: "Foto do treino ou equipe"
+    },
+    placeholders: {
+      rodada: "Ex: Dia de Treino, Foco Total, Trabalho Forte",
+      data: "Ex: Seguimos trabalhando",
+      hora: "Ex: Preparação para o campeonato",
+      arena: "Ex: CT do clube"
+    },
+    required: {
+      esc1: true,
+      esc2: false
+    },
+    phraseMenu: false,
+    hiddenFields: ["placar", "esc2", "patro"]
+  },
+
   patrocinador: {
     mode: "flyer",
     title: "Mostre quem apoia seu time",
@@ -7309,6 +7336,35 @@ const PRODUCT_CONFIG_DETAILS = {
     serializer: "proximo_jogo",
     legacy: { endpoint: "/pedidos", flyerTipo: "zz1ft", backendCategoria: "proximo_jogo" },
     specialRules: { usesMatchTeams: true, savedEscudo1Fallback: true }
+  },
+
+  treino: {
+    id: "treino",
+    name: "Dia de Treino",
+    price: 7,
+    visualCategory: "time",
+    image: "produtos/proximo_jogo.jpg",
+    fields: {
+      rodada: { visible: true, required: true },
+      data: { visible: true, required: false },
+      hora: { visible: true, required: false },
+      arena: { visible: true, required: false },
+      esc1: { visible: true, required: true },
+      mascote: { visible: true, required: false }
+    },
+    validation: {
+      requiredInputs: ["rodada"],
+      requiredUploads: ["escudo1"]
+    },
+    uploads: {
+      escudo1: { used: true, required: true, formField: "escudo1", outputName: "escudo1.png" },
+      escudo2: { used: false, required: false, formField: "escudo2", outputName: "escudo2.png" },
+      mascote: { used: true, required: false, formField: "mascote", outputName: "mascote.png" },
+      patrocinadores: { used: false, required: false, formField: "patrocinadores" }
+    },
+    serializer: "treino",
+    legacy: { endpoint: "/pedidos", flyerTipo: "treino", backendCategoria: "treino" },
+    specialRules: { savedEscudo1Fallback: true }
   },
 
   patrocinador: {
@@ -7707,6 +7763,26 @@ const PRODUCT_SERIALIZERS = {
 
     appendEscudo1();
     appendEscudo2();
+    appendArquivoAtivo("mascote", "mascote", "mascote");
+  },
+
+  treino(ctx){
+    const { fd, product, val, appendTextoAtivo, appendArquivoAtivo, appendEscudo1 } = ctx;
+    const titulo = val("rodada") || product.title || "Dia de Treino";
+
+    fd.append("rodada", titulo);
+    fd.append("data", val("dataJogo") || titulo);
+    appendTextoAtivo("hora", "hora", val("hora"));
+    appendTextoAtivo("arena", "arena", val("arena"));
+
+    fd.append("jogadores_json", "[]");
+    fd.append("jogadores_texto", "");
+    fd.append("artilheiros", "[]");
+    fd.append("artilheiros_json", "[]");
+    fd.append("artilheiros_texto", "");
+    fd.append("artilheiros_qtd", "0");
+
+    appendEscudo1();
     appendArquivoAtivo("mascote", "mascote", "mascote");
   },
 
@@ -8607,14 +8683,14 @@ const IA4_OBJETIVOS_POR_CATEGORIA = {
 
 const IA4_OBJETIVOS_POR_NICHO = {
   futebol: [
+    { id: "treino", label: "Dia de Treino", productKey: "treino" },
     { id: "futebol_mascote_3d", label: "Mascote 3D", productKey: "mascote_uniforme" },
     { id: "futebol_escudo_3d", label: "Escudo 3D", productKey: "escudo3d" },
     { id: "futebol_resultado", label: "Resultado", productKey: "resultado" },
     { id: "futebol_proximo_jogo", label: "Próximo Jogo", productKey: "proximo_jogo" },
     { id: "futebol_escalacao", label: "Escalação", productKey: "escalacao" },
     { id: "futebol_contratacao", label: "Contratação", productKey: "contratacao" },
-    { id: "futebol_patrocinador", label: "Patrocinador", productKey: "patrocinador" },
-    { id: "futebol_treino", label: "Treino", productKey: "proximo_jogo" }
+    { id: "futebol_patrocinador", label: "Patrocinador", productKey: "patrocinador" }
   ],
   hamburgueria: [
     { id: "divulgar_lanche", label: "Quero divulgar meu lanche", fields: "lanche", photoLabel: "Foto do lanche" },
@@ -8833,6 +8909,18 @@ const CLEAN_PRODUCT_FORM_SCHEMAS = {
       { key: "home_crest", type: "file", legacyName: "escudo1", labelKey: "esc1", required: true, savedFallback: true },
       { key: "away_crest", type: "file", legacyName: "escudo2", labelKey: "esc2", required: false },
       { key: "match_photo", type: "file", legacyName: "mascote", labelKey: "mascote", required: false }
+    ]
+  },
+  treino: {
+    endpoint: "/pedidos",
+    validationMessage: "Preencha a chamada do treino e envie o escudo do time.",
+    fields: [
+      { key: "title", type: "text", legacyName: "rodada", labelKey: "rodada", placeholderKey: "rodada", required: true },
+      { key: "headline", type: "text", legacyName: "data", labelKey: "data", placeholderKey: "data", required: false, defaultValue: "Dia de Treino" },
+      { key: "context", type: "text", legacyName: "hora", labelKey: "hora", placeholderKey: "hora", required: false },
+      { key: "venue", type: "text", legacyName: "arena", labelKey: "arena", placeholderKey: "arena", required: false },
+      { key: "team_crest", type: "file", legacyName: "escudo1", labelKey: "esc1", required: true, savedFallback: true },
+      { key: "training_photo", type: "file", legacyName: "mascote", labelKey: "mascote", required: false }
     ]
   },
   patrocinador: {
@@ -9125,6 +9213,7 @@ function formatCleanProductPrice(product){
 
 const IA4_EMPRESAS_MODE = document.body?.classList.contains("ia4-empresas");
 const IA4_FOOTBALL_FORM_PRODUCT_IDS = [
+  "treino",
   "mascote_uniforme",
   "resultado",
   "proximo_jogo",
@@ -9133,6 +9222,7 @@ const IA4_FOOTBALL_FORM_PRODUCT_IDS = [
   "patrocinador"
 ];
 const IA4_FOOTBALL_PRODUCT_IDS = [
+  "treino",
   "mascote_uniforme",
   "escudo3d",
   "resultado",
@@ -10659,7 +10749,7 @@ function updateChosenPlaceholders(product){
 }
 
 function updateProductFieldVisibility(product){
-  const flyerFields = ["rodada", "artilheiros", "data", "hora", "arena", "mascote", "esc1", "esc2", "patro"];
+  const flyerFields = ["placar", "rodada", "artilheiros", "data", "hora", "arena", "mascote", "esc1", "esc2", "patro"];
 
   flyerFields.forEach((field)=>{
     const el = document.querySelector(`.field-${field}`);
@@ -11176,9 +11266,17 @@ async function comprarCreditos(pacote, metodo = "checkout", triggerBtn = null){
 
 let timerAvisoPedido = null;
 
-function mostrarAvisoPedido(){
+function mostrarAvisoPedido(
+  titulo = "✅ Pedido recebido!",
+  mensagem = "Sua arte já entrou em produção. Acompanhe em Meus pedidos — quando ficar pronta, ela aparecerá lá para baixar."
+){
   const aviso = document.getElementById("ia4ToastPedido");
   if(!aviso) return;
+
+  const tituloEl = document.getElementById("ia4ToastPedidoTitulo");
+  const mensagemEl = document.getElementById("ia4ToastPedidoMensagem");
+  if(tituloEl) tituloEl.textContent = titulo;
+  if(mensagemEl) mensagemEl.textContent = mensagem;
 
   aviso.classList.add("show");
 
@@ -12036,6 +12134,11 @@ function validarPedidoAntesDeEnviar(productKey){
     addFile("escudo2", "Envie o escudo do Time B.");
   }
 
+  if(productKey === "treino"){
+    addInput("rodada", "Preencha a chamada do treino.");
+    addFile("escudo1", "Envie o escudo do time.");
+  }
+
   if(productKey === "proximo_jogo_jogador"){
     addInput("timePrincipal", "Preencha o Time A.");
     addInput("timeAdv", "Preencha o adversário.");
@@ -12210,6 +12313,23 @@ function configureOptionalSections(productKey){
     return;
   }
 
+  if(productKey === "treino"){
+    lockOpen("rodada");
+    lockOpen("esc1");
+    keepClosed("data");
+    keepClosed("hora");
+    keepClosed("arena");
+    keepClosed("mascote");
+
+    const rodadaToggle = document.querySelector(`[data-optional-field="rodada"] [data-optional-toggle]`);
+    if(rodadaToggle) rodadaToggle.style.display = "none";
+
+    const esc1Toggle = document.querySelector(`[data-optional-field="esc1"] [data-optional-toggle]`);
+    if(esc1Toggle) esc1Toggle.style.display = "none";
+
+    return;
+  }
+
   if(productKey === "proximo_jogo_jogador"){
     lockOpen("data");
     lockOpen("hora");
@@ -12316,6 +12436,7 @@ function arrangeFieldSequence(productKey){
     escalacao: ["rodada", "data", "hora", "esc1", "artilheiros", "optionalDivider", "arena", "esc2", "mascote", "submit", "msg"],
     contratacao: ["rodada", "data", "esc1", "esc2", "optionalDivider", "hora", "submit", "msg"],
     proximo_jogo: ["placar", "esc1", "esc2", "data", "hora", "optionalDivider", "arena", "mascote", "submit", "msg"],
+    treino: ["rodada", "esc1", "optionalDivider", "data", "hora", "arena", "mascote", "submit", "msg"],
     patrocinador: ["rodada", "esc1", "patro", "optionalDivider", "data", "submit", "msg"],
     proximo_jogo_jogador: ["placar", "esc1", "esc2", "mascote", "data", "hora", "optionalDivider", "arena", "submit", "msg"],
     resultado_jogo_jogador: ["placar", "esc1", "esc2", "mascote", "optionalDivider", "hora", "data", "submit", "msg"],
@@ -14716,6 +14837,10 @@ async function baixarPedido(id){
 
     marcarPedidoBaixado(id);
     carregarHistorico();
+    mostrarAvisoPedido(
+      "✅ Imagem baixada!",
+      "Sua imagem foi baixada com sucesso. Confira a pasta de downloads do seu navegador."
+    );
 
     setTimeout(()=>window.URL.revokeObjectURL(url), 30000);
 
