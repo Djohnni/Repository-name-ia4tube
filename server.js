@@ -11,6 +11,7 @@ const orderStorage = require("./src/orders/order.storage");
 const orderStatus = require("./src/orders/order.status");
 const orderService = require("./src/orders/order.service");
 const billingService = require("./src/billing/billing.service");
+const carouselService = require("./src/company-carousels/carousels.service");
 
 const app = express();
 
@@ -26,8 +27,10 @@ const DATA_DIR = isRender
   : path.join(__dirname, "dados");
 
 const PEDIDOS_DIR = path.join(DATA_DIR, "pedidos");
+const CAROUSELS_DIR = path.join(DATA_DIR, "carrosseis");
 const CLIENTES_FILE = path.join(DATA_DIR, "clientes.json");
 const BOT_ADMIN_WHATSAPP = process.env.BOT_ADMIN_WHATSAPP || "15991120599";
+const BOT_RUNNER_TOKEN = process.env.BOT_RUNNER_TOKEN || "";
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || "";
 const MP_PROCESSADOS_FILE = path.join(DATA_DIR, "mp_processados.json");
 const TEMPO_ESTIMADO_FILE = path.join(DATA_DIR, "tempo_estimado.json");
@@ -61,6 +64,7 @@ function ensureDir(p) {
 
 ensureDir(DATA_DIR);
 ensureDir(PEDIDOS_DIR);
+ensureDir(CAROUSELS_DIR);
 ensureDir(path.join(DATA_DIR, "tmp_uploads"));
 ensureDir(ANALYTICS_DIR);
 
@@ -611,6 +615,35 @@ function auth(req, res, next) {
     return res.status(401).json({ ok: false, error: "Token inválido" });
   }
 }
+function botRunnerAuth(req, res, next) {
+  const h = req.headers.authorization || "";
+  const token = h.startsWith("Bearer ") ? h.slice(7) : "";
+
+  if (!token) {
+    return res.status(401).json({ ok: false, error: "Sem token" });
+  }
+
+  if (BOT_RUNNER_TOKEN && token === BOT_RUNNER_TOKEN) {
+    req.user = {
+      whatsapp: BOT_ADMIN_WHATSAPP,
+      bot_runner: true
+    };
+    return next();
+  }
+
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+
+    if (!isBotAdmin(req)) {
+      return res.status(403).json({ ok: false, error: "Acesso negado" });
+    }
+
+    return next();
+  } catch {
+    return res.status(401).json({ ok: false, error: "Token invalido" });
+  }
+}
+
 
 // ===== UPLOAD (multer) =====
 const storage = multer.diskStorage({
@@ -1393,6 +1426,201 @@ app.post("/webhook/mercadopago", async (req, res) => {
     return res.json({ ok: true });
   }
 });
+
+// ===== CARROSSEIS IA4TUBE =====
+app.post("/empresa/carrosseis/solicitar", auth, (req, res) => {
+  const whatsapp = req.user.whatsapp;
+  const clientes = readClientes();
+  const cliente = clientes[whatsapp];
+
+  if (!cliente) {
+    return res.status(404).json({ ok: false, error: "Cliente nao encontrado" });
+  }
+
+  try {
+    const carrossel = carouselService.createRequest({
+      baseDir: CAROUSELS_DIR,
+      cliente,
+      whatsapp,
+      body: req.body || {}
+    });
+
+    clientes[whatsapp] = cliente;
+    writeClientes(clientes);
+
+    return res.json({
+      ok: true,
+      carrossel_id: carrossel.carrossel_id || carrossel.id,
+      ciclo: carrossel.ciclo,
+      status: "pendente",
+      status_label: "Pendente"
+    });
+  } catch (error) {
+    console.error("[carrosseis] erro ao solicitar", {
+      whatsapp,
+      message: error?.message,
+      stack: error?.stack
+    });
+    return res.status(error?.statusCode || 500).json({
+      ok: false,
+      code: error?.code || "carousel_request_error",
+      error: error?.message || "Nao foi possivel solicitar o carrossel agora."
+    });
+  }
+});
+
+app.get("/empresa/carrosseis/:carrosselId/status", auth, (req, res) => {
+  const whatsapp = req.user.whatsapp;
+  try {
+    return res.json(carouselService.publicStatusPayload({
+      baseDir: CAROUSELS_DIR,
+      whatsapp,
+      carrosselId: req.params.carrosselId
+    }));
+  } catch (error) {
+    return res.status(error?.statusCode || 500).json({
+      ok: false,
+      code: error?.code || "carousel_status_error",
+      error: error?.message || "Nao foi possivel consultar o status do carrossel."
+    });
+  }
+});
+
+app.get("/empresa/carrosseis/:carrosselId/download", auth, (req, res) => {
+  const whatsapp = req.user.whatsapp;
+  try {
+    const result = carouselService.downloadForCarousel({
+      baseDir: CAROUSELS_DIR,
+      whatsapp,
+      carrosselId: req.params.carrosselId
+    });
+
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", "attachment; filename=\"" + result.filename + "\"");
+    return res.sendFile(result.filePath);
+  } catch (error) {
+    return res.status(error?.statusCode || 500).json({
+      ok: false,
+      code: error?.code || "carousel_download_error",
+      error: error?.message || "Carrossel nao encontrado"
+    });
+  }
+});
+
+app.get("/bot/empresa/carrosseis/novos", botRunnerAuth, (req, res) => {
+  if (!isBotAdmin(req)) {
+    return res.status(403).json({ ok: false, error: "Acesso negado" });
+  }
+
+  const limit = Number(req.query?.limit || 5);
+  const carrosseis = carouselService.listBotPending({
+    baseDir: CAROUSELS_DIR,
+    limit: Number.isFinite(limit) && limit > 0 ? Math.min(limit, 50) : 5
+  });
+
+  return res.json({ ok: true, carrosseis });
+});
+
+app.get("/bot/empresa/carrosseis/:carrosselId/zip", botRunnerAuth, (req, res) => {
+  if (!isBotAdmin(req)) {
+    return res.status(403).json({ ok: false, error: "Acesso negado" });
+  }
+
+  const request = carouselService.findRequestById({
+    baseDir: CAROUSELS_DIR,
+    carrosselId: req.params.carrosselId
+  });
+
+  if (!request) {
+    return res.status(404).json({ ok: false, error: "Solicitacao nao encontrada" });
+  }
+
+  res.setHeader("Content-Type", "application/zip");
+  res.setHeader("Content-Disposition", "attachment; filename=\"" + req.params.carrosselId + ".zip\"");
+
+  const archive = archiver("zip", { zlib: { level: 9 } });
+  archive.on("error", err => res.status(500).end(String(err)));
+  archive.pipe(res);
+  archive.directory(request.base_path, false);
+  archive.finalize();
+});
+
+app.post("/bot/empresa/carrosseis/:carrosselId/status", botRunnerAuth, (req, res) => {
+  if (!isBotAdmin(req)) {
+    return res.status(403).json({ ok: false, error: "Acesso negado" });
+  }
+
+  const request = carouselService.findRequestById({
+    baseDir: CAROUSELS_DIR,
+    carrosselId: req.params.carrosselId
+  });
+
+  if (!request) {
+    return res.status(404).json({ ok: false, error: "Solicitacao nao encontrada" });
+  }
+
+  const updated = carouselService.updateRequestStatus(
+    request,
+    String(req.body?.status || "processando"),
+    String(req.body?.message || "")
+  );
+
+  return res.json({
+    ok: true,
+    carrossel_id: updated.carrossel_id || updated.id,
+    status: updated.status
+  });
+});
+
+app.post(
+  "/bot/empresa/carrosseis/:carrosselId/upload-resultado",
+  botRunnerAuth,
+  uploadResultado.fields([
+    { name: "resultado", maxCount: 1 }
+  ]),
+  (req, res) => {
+    if (!isBotAdmin(req)) {
+      return res.status(403).json({ ok: false, error: "Acesso negado" });
+    }
+
+    const resultadoFile = req.files?.resultado?.[0] || null;
+
+    if (!resultadoFile) {
+      return res.status(400).json({ ok: false, error: "Arquivo resultado nao enviado" });
+    }
+
+    try {
+      const apiInfo = req.body?.api_info ? JSON.parse(req.body.api_info) : {};
+      const request = carouselService.saveUploadedResult({
+        baseDir: CAROUSELS_DIR,
+        carrosselId: req.params.carrosselId,
+        resultPath: resultadoFile.path,
+        descricaoInstagram: req.body?.descricao_instagram || "",
+        apiInfo
+      });
+
+      return res.json({
+        ok: true,
+        carrossel_id: request.carrossel_id || request.id,
+        status: "pronto",
+        arquivo: "resultado.zip"
+      });
+    } catch (error) {
+      try {
+        if (resultadoFile?.path && fs.existsSync(resultadoFile.path)) fs.unlinkSync(resultadoFile.path);
+      } catch {}
+      console.error("[carrosseis] falha ao salvar resultado", {
+        carrosselId: req.params.carrosselId,
+        message: error?.message,
+        stack: error?.stack
+      });
+      return res.status(error?.statusCode || 500).json({
+        ok: false,
+        error: error?.message || "Falha ao salvar resultado"
+      });
+    }
+  }
+);
 
 // ===== CRIA PEDIDO =====
 function criarPedidoHandler(categoria) {
