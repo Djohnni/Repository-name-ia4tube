@@ -5855,15 +5855,14 @@ body.ia4-empresas .centerBtn{
 
         <div class="saldoTopoExtra">
             <div class="saldoBoxTopo" style="position:relative;">
-              <button class="btnGreen" id="btnAbrirSaldo">Adicionar saldo</button>
+              <button class="btnGreen" id="btnAbrirSaldo">Comprar arte avulsa</button>
 
               <div class="saldoMenu" id="saldoMenu">
                 <div class="saldoPacote">
-                  <div class="saldoCardKicker">Ideal para começar</div>
-                  <div class="saldoCardValor">R$8</div>
-                  <div class="saldoCardDesc">Crédito rápido para testar o fluxo completo.</div>
-                  <button type="button" class="saldoPagamentoBtn" data-pacote="saldo_800" data-metodo="pix" data-label="Gerar Pix R$8,00"><span class="saldoPagamentoIcon">🟢</span><span>Gerar Pix R$8,00</span></button>
-                  <button type="button" class="saldoPagamentoBtn" data-pacote="saldo_800" data-metodo="cartao" data-label="Cartão R$8,00"><span class="saldoPagamentoIcon">💳</span><span>Cartão R$8,00</span></button>
+                  <div class="saldoCardKicker">Arte avulsa</div>
+                  <div class="saldoCardValor">R$1,99</div>
+                  <div class="saldoCardDesc">Compre 1 arte sem assinatura. Planos continuam com benefícios exclusivos.</div>
+                  <button type="button" class="saldoPagamentoBtn" data-arte-avulsa="1" data-label="Gerar Pix R$1,99"><span class="saldoPagamentoIcon">🟢</span><span>Comprar 1 arte por R$1,99</span></button>
                 </div>
 
                 <div class="saldoPacote">
@@ -7534,7 +7533,7 @@ const PRODUCT_CONFIG_DETAILS = {
     name: "Arte para Empresa",
     title: "Arte para Empresa",
     hint: "Informe o ramo, a empresa e o objetivo da arte. Envie logo, fotos e referências se quiser deixar o pedido mais completo.",
-    price: 8,
+    price: 1.99,
     mode: "flyer",
     flyerTipo: "arte_empresa",
     visualCategory: "empresa",
@@ -10594,6 +10593,14 @@ async function submitCleanProductForm(e){
         erro: out.error || "Erro ao enviar"
       });
       cancelarProgressoNoProduto(form);
+      if(productKey === "arte_empresa" && (out.code === "billing_required" || r.status === 402)){
+        const msg = out.error || "Compre 1 arte avulsa por R$1,99 para criar sua arte.";
+        setCleanProductMsg(form, `${msg} Clique em OK para gerar o Pix agora.`, true);
+        if(confirm("Comprar 1 arte avulsa por R$1,99 agora?")){
+          comprarArteAvulsaSite();
+        }
+        return;
+      }
       setCleanProductMsg(form, out.error || "Erro ao enviar", true);
     }
   }catch{
@@ -11220,11 +11227,59 @@ let escudo3dCadastroFile = null;
 let saldoPixAtual = null;
 
 const SALDO_PIX_LABELS = {
+  arte_avulsa_199: "R$1,99",
   saldo_800: "R$8,00",
   saldo_1800: "R$18,00",
   saldo_2800: "R$28,00",
   saldo_4800: "R$48,00"
 };
+
+async function comprarArteAvulsaSite(triggerBtn = null){
+  if(!token){
+    acaoDepoisDoCadastro = () => comprarArteAvulsaSite(triggerBtn);
+    abrirCadastroVisitanteModal();
+    return;
+  }
+
+  const originalHtml = triggerBtn?.innerHTML || "";
+  if(triggerBtn){
+    triggerBtn.disabled = true;
+    triggerBtn.innerHTML = `<span class="saldoPagamentoIcon">⚡</span><span>Gerando Pix R$1,99...</span>`;
+  }
+
+  try{
+    const r = await fetch(`${API_BASE}/billing/arte-avulsa/pix`, {
+      method:"POST",
+      headers:{
+        "Authorization": "Bearer " + token,
+        "Content-Type": "application/json"
+      },
+      body: "{}"
+    });
+
+    const data = await r.json();
+    if(!data.ok){
+      alert(data.error || "Erro ao gerar Pix da arte avulsa.");
+      return;
+    }
+
+    ia4Track("iniciou_pagamento_arte_avulsa", {
+      produto: "arte_empresa",
+      valor: data.valor_pago || 1.99
+    });
+
+    abrirModalPixSaldo("arte_avulsa_199", data);
+  }catch{
+    alert("Erro de rede ao gerar Pix da arte avulsa.");
+  }finally{
+    if(triggerBtn){
+      setTimeout(()=>{
+        triggerBtn.disabled = false;
+        triggerBtn.innerHTML = originalHtml;
+      }, 900);
+    }
+  }
+}
 
 async function comprarCreditos(pacote, metodo = "checkout", triggerBtn = null){
   if(!token){
@@ -14243,6 +14298,7 @@ function abrirModalPixSaldo(pacote, data) {
   if(!modal || !body) return;
 
   const valor = SALDO_PIX_LABELS[pacote] || `R$${Number(data.valor_pago || 0).toFixed(2).replace(".", ",")}`;
+  const isArteAvulsa = pacote === "arte_avulsa_199" || data.tipo === "arte_avulsa_pix" || data.purchase_id;
   saldoPixAtual = {
     pix: data.pix_copia_cola || "",
     pacote,
@@ -14254,7 +14310,7 @@ function abrirModalPixSaldo(pacote, data) {
   body.innerHTML = `
     ${src ? `<img class="pixQrImagem" src="${src}" alt="QR Code Pix">` : ``}
     <div class="pixQrTexto">
-      Após o pagamento, o saldo é liberado automaticamente.
+      ${isArteAvulsa ? "Após o pagamento, 1 arte avulsa será liberada automaticamente." : "Após o pagamento, o saldo é liberado automaticamente."}
     </div>
     <button type="button" class="menuPedidoBtn" onclick="copiarPixSaldoAtual()">
       Copiar Pix ${valor}
@@ -14273,7 +14329,8 @@ async function copiarPixSaldoAtual() {
 
   try{
     await copiarTextoPix(saldoPixAtual.pix);
-    alert("Pix copiado. Após o pagamento, o saldo é liberado automaticamente.");
+    const isArteAvulsa = saldoPixAtual.pacote === "arte_avulsa_199";
+    alert(isArteAvulsa ? "Pix copiado. Após o pagamento, 1 arte avulsa será liberada automaticamente." : "Pix copiado. Após o pagamento, o saldo é liberado automaticamente.");
   }catch(e){
     alert("Não foi possível copiar o Pix.");
   }
@@ -15211,6 +15268,10 @@ btnAbrirSaldo?.addEventListener("click", (e)=>{
 
 document.querySelectorAll(".saldoPagamentoBtn").forEach((btn)=>{
   btn.addEventListener("click", ()=>{
+    if(btn.dataset.arteAvulsa === "1"){
+      comprarArteAvulsaSite(btn);
+      return;
+    }
     comprarCreditos(btn.dataset.pacote, btn.dataset.metodo || "checkout", btn);
   });
 });

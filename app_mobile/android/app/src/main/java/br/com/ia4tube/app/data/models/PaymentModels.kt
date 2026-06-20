@@ -24,5 +24,9 @@ data class BillingPixResult(
     val credito: Double = 0.0,
     val planId: String = "",
     val planName: String = "",
-    val artesMes: Int = 0
+    val artesMes: Int = 0,
+    val purchaseId: String = "",
+    val tipo: String = "",
+    val produtoId: String = "",
+    val quantidade: Int = 0
 )

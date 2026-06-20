@@ -136,6 +136,12 @@ class IA4TubeApiClient(
                 artesMensaisTotal = json.optInt("artes_mensais_total", 0),
                 artesMensaisUsadas = json.optInt("artes_mensais_usadas", 0),
                 artesMensaisRestantes = json.optInt("artes_mensais_restantes", 0),
+                artesAvulsasRestantes = json.optInt("artes_avulsas_restantes", 0),
+                artesAvulsasUsadas = json.optInt("artes_avulsas_usadas", 0),
+                artesAvulsasTotalCompradas = json.optInt("artes_avulsas_total_compradas", 0),
+                arteAvulsaValor = json.optDouble("arte_avulsa_valor", 1.99),
+                arteAvulsaProdutoId = json.optString("arte_avulsa_produto_id"),
+                arteAvulsaTitulo = json.optString("arte_avulsa_titulo"),
                 saldoExtra = json.optDouble("saldo_extra", 0.0),
                 carrosseisLimite = json.optionalInt("carrosseis_limite"),
                 carrosseisUsados = json.optionalInt("carrosseis_usados"),
@@ -575,6 +581,16 @@ class IA4TubeApiClient(
             .url("${AppConfig.apiBase}/billing/saldo/pix")
             .header("Authorization", "Bearer $token")
             .post(bodyJson.toString().toRequestBody(JSON))
+            .build()
+
+        executeJson(request) { json -> billingPixFromJson(json) }
+    }
+
+    suspend fun criarArteAvulsaPix(token: String): ApiResult<BillingPixResult> = withContext(Dispatchers.IO) {
+        val request = Request.Builder()
+            .url("${AppConfig.apiBase}/billing/arte-avulsa/pix")
+            .header("Authorization", "Bearer $token")
+            .post(ByteArray(0).toRequestBody(null))
             .build()
 
         executeJson(request) { json -> billingPixFromJson(json) }
@@ -1058,7 +1074,11 @@ class IA4TubeApiClient(
                 credito = json.optDouble("credito", 0.0),
                 planId = json.optString("plan_id"),
                 planName = json.optString("plan_name"),
-                artesMes = json.optInt("artes_mes", 0)
+                artesMes = json.optInt("artes_mes", 0),
+                purchaseId = json.optString("purchase_id"),
+                tipo = json.optString("tipo"),
+                produtoId = json.optString("produto_id"),
+                quantidade = json.optInt("quantidade", 0)
             )
         }
 

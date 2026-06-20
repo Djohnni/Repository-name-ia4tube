@@ -79,7 +79,6 @@ import br.com.ia4tube.app.ui.text.asString
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import kotlin.math.floor
 
 @Composable
 fun HomeScreen(
@@ -565,11 +564,11 @@ private fun FuturisticHomePanel(
 ) {
     val normalizedPlanStatus = state.planoStatus.trim().lowercase()
     val hasActivePlan = normalizedPlanStatus in setOf("active", "ativo") && state.planoNome.isNotBlank()
-    val extraArts = floor((state.saldoExtra + 0.0001) / 9.90).toInt().coerceAtLeast(0)
-    val totalAvailableArts = (if (hasActivePlan) state.artesMensaisRestantes else 0) + extraArts
+    val standaloneArts = state.artesAvulsasRestantes.coerceAtLeast(0)
+    val totalAvailableArts = (if (hasActivePlan) state.artesMensaisRestantes else 0) + standaloneArts
     val planCircleLabel = when {
         hasActivePlan -> displayPlanName(state.planoNome)
-        extraArts > 0 -> "Saldo"
+        standaloneArts > 0 -> "Arte avulsa"
         else -> "Sem plano"
     }
     val planCircleNumber = if (totalAvailableArts > 0) {

@@ -30,6 +30,12 @@ class PlansViewModel(
         }
     }
 
+    fun comprarArteAvulsa() {
+        startPixAction("arte_avulsa") {
+            repository.criarArteAvulsaPix()
+        }
+    }
+
     fun assinarPlano(planId: String) {
         startPixAction(planId) {
             repository.criarPlanoPix(planId)

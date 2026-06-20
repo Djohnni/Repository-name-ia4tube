@@ -102,7 +102,7 @@ fun PlansScreen(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "Escolha um plano mensal ou adicione saldo para criar artes avulsas.",
+                        text = "Compre 1 arte avulsa ou escolha um plano mensal com beneficios completos.",
                         color = secondaryText,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -127,15 +127,15 @@ fun PlansScreen(
                 }
             }
 
-            BalanceCard(
+            StandaloneArtCard(
                 accent = accent,
                 buttonTextColor = buttonTextColor,
                 cardColor = cardColor,
                 softCardColor = softCardColor,
                 primaryText = primaryText,
                 secondaryText = secondaryText,
-                loading = state.loadingAction == "saldo",
-                onAddBalance = { viewModel.comprarSaldo() }
+                loading = state.loadingAction == "arte_avulsa",
+                onBuyArt = { viewModel.comprarArteAvulsa() }
             )
 
             Text(
@@ -229,10 +229,10 @@ private fun PixPaymentDialog(
     val qrBitmap = remember(pix.qrCodeBase64) {
         decodeQrCodeBase64(pix.qrCodeBase64)
     }
-    val title = if (pix.planName.isNotBlank()) {
-        "Pix do ${pix.planName}"
-    } else {
-        "Pix para adicionar saldo"
+    val title = when {
+        pix.planName.isNotBlank() -> "Pix do ${pix.planName}"
+        pix.tipo == "arte_avulsa_pix" || pix.purchaseId.isNotBlank() -> "Pix da arte avulsa"
+        else -> "Pix para adicionar saldo"
     }
 
     AlertDialog(
@@ -256,7 +256,7 @@ private fun PixPaymentDialog(
                     )
                 }
                 Text(
-                    text = "Depois do pagamento, o plano ou saldo será liberado automaticamente quando o Mercado Pago confirmar.",
+                    text = "Depois do pagamento, sua compra sera liberada automaticamente quando o Mercado Pago confirmar.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -296,7 +296,7 @@ private fun decodeQrCodeBase64(value: String) = runCatching {
 }.getOrNull()
 
 @Composable
-private fun BalanceCard(
+private fun StandaloneArtCard(
     accent: Color,
     buttonTextColor: Color,
     cardColor: Color,
@@ -304,7 +304,7 @@ private fun BalanceCard(
     primaryText: Color,
     secondaryText: Color,
     loading: Boolean,
-    onAddBalance: () -> Unit
+    onBuyArt: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -330,24 +330,24 @@ private fun BalanceCard(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = "Adicionar saldo",
+                text = "Arte avulsa",
                 color = primaryText,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.ExtraBold
             )
             Text(
-                text = "Prefere criar sem assinatura? Adicione saldo e pague apenas pelas artes que fizer.",
+                text = "Quer criar sem assinatura? Compre uma arte pronta para postar.",
                 color = secondaryText,
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = "Arte avulsa a partir de R$ 9,90",
+                text = "1 arte por R$ 1,99",
                 color = accent,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.ExtraBold
             )
             Button(
-                onClick = onAddBalance,
+                onClick = onBuyArt,
                 enabled = !loading,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
@@ -364,7 +364,7 @@ private fun BalanceCard(
                     )
                 } else {
                     Text(
-                        text = "Adicionar saldo",
+                        text = "Comprar 1 arte por R$ 1,99",
                         fontWeight = FontWeight.ExtraBold
                     )
                 }
