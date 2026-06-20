@@ -5446,8 +5446,278 @@ body.ia4-empresas .selectorStage{
   margin-bottom:10px;
 }
 
+body.ia4-empresas .cleanEscudo3dBlock:not([hidden]){
+  display:grid !important;
+}
+
 body.ia4-empresas .centerBtn{
   cursor:pointer;
+}
+
+[data-clean-product-block="arte_empresa"]{
+  gap:12px;
+  padding:12px;
+  border-radius:24px;
+  background:#ffffff;
+  border-color:#e8f0ea;
+  box-shadow:0 18px 44px rgba(15,23,42,.08);
+}
+
+[data-clean-product-block="arte_empresa"].is-active{
+  border-color:#bbf7d0;
+  box-shadow:0 20px 46px rgba(15,23,42,.10);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanProductForm{
+  gap:12px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanProductHeader{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 116px;
+  align-items:center;
+  gap:14px;
+  padding:4px 2px 8px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanProductHeaderText{
+  display:grid;
+  gap:6px;
+  min-width:0;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanProductTitle{
+  font-size:clamp(24px, 6vw, 34px);
+  line-height:1;
+  letter-spacing:0;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanProductPrice{
+  justify-self:start;
+  width:max-content;
+  padding:6px 10px;
+  font-size:13px;
+  background:#f0fdf4;
+  border-color:#bbf7d0;
+  color:#147a36;
+  box-shadow:0 8px 18px rgba(22,163,74,.10);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanProductHeader .cleanProductImage{
+  width:116px;
+  height:96px;
+  justify-self:end;
+  border-radius:22px;
+  background:linear-gradient(180deg,#f0fdf4,#ffffff);
+  border:1px solid #dcfce7;
+  box-shadow:0 14px 30px rgba(22,163,74,.12);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanProductHeader .cleanProductImage img{
+  width:100%;
+  height:100% !important;
+  object-fit:contain;
+  padding:8px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanFieldCard{
+  gap:8px;
+  padding:12px;
+  border-radius:20px;
+  background:#ffffff;
+  border:1px solid #e6eee9;
+  box-shadow:0 12px 26px rgba(15,23,42,.06);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="ramo"],
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="nome_empresa"],
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="objetivo"],
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="estilo_visual_cliente"]{
+  position:relative;
+  grid-template-columns:38px minmax(0,1fr);
+  column-gap:10px;
+  align-items:start;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="ramo"]::before,
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="nome_empresa"]::before,
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="objetivo"]::before,
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="estilo_visual_cliente"]::before{
+  display:grid;
+  place-items:center;
+  width:34px;
+  height:34px;
+  border-radius:999px;
+  background:linear-gradient(145deg,#16a34a,#22c55e);
+  color:#ffffff;
+  font-size:16px;
+  font-weight:950;
+  box-shadow:0 10px 20px rgba(22,163,74,.22), inset 0 0 0 4px rgba(255,255,255,.16);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="ramo"]::before{ content:"1"; }
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="nome_empresa"]::before{ content:"2"; }
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="objetivo"]::before{ content:"3"; }
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="estilo_visual_cliente"]::before{ content:"4"; }
+
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="ramo"] > *,
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="nome_empresa"] > *,
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="objetivo"] > *,
+[data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="estilo_visual_cliente"] > *{
+  grid-column:2;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanFieldLabel{
+  gap:0;
+  color:#102017;
+  font-size:14px;
+  line-height:1.15;
+  font-weight:950;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanFieldLabel::before{
+  display:none;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanInputWrap{
+  position:relative;
+  display:block;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanInputIcon{
+  position:absolute;
+  left:14px;
+  top:50%;
+  z-index:1;
+  width:20px;
+  height:20px;
+  transform:translateY(-50%);
+  color:#22c55e;
+  opacity:.72;
+  pointer-events:none;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanInputIcon svg{
+  display:block;
+  width:20px;
+  height:20px;
+}
+
+[data-clean-product-block="arte_empresa"] input:not(.fileHidden):not([type="hidden"]),
+[data-clean-product-block="arte_empresa"] textarea,
+[data-clean-product-block="arte_empresa"] .cleanObjectiveToggle{
+  min-height:56px;
+  padding:15px 16px;
+  border-radius:18px;
+  border:1px solid #dfeae3 !important;
+  background:#ffffff !important;
+  color:#0f172a !important;
+  box-shadow:0 12px 26px rgba(15,23,42,.07) !important;
+  font-size:14px;
+  font-weight:850 !important;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanInputWrap input:not(.fileHidden):not([type="hidden"]),
+[data-clean-product-block="arte_empresa"] .cleanInputWrap textarea,
+[data-clean-product-block="arte_empresa"] .cleanObjectiveToggle{
+  padding-left:46px;
+}
+
+[data-clean-product-block="arte_empresa"] textarea{
+  min-height:82px;
+  resize:vertical;
+}
+
+[data-clean-product-block="arte_empresa"] input:not(.fileHidden):not([type="hidden"])::placeholder,
+[data-clean-product-block="arte_empresa"] textarea::placeholder{
+  color:#6b7a70 !important;
+  font-weight:800 !important;
+  opacity:.9 !important;
+}
+
+[data-clean-product-block="arte_empresa"] input:not(.fileHidden):not([type="hidden"]):focus,
+[data-clean-product-block="arte_empresa"] textarea:focus,
+[data-clean-product-block="arte_empresa"] .cleanObjectiveToggle:focus{
+  border-color:#86efac !important;
+  box-shadow:0 0 0 4px rgba(34,197,94,.13), 0 14px 28px rgba(15,23,42,.08) !important;
+  transform:none !important;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanObjectiveToggle{
+  position:relative;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanObjectiveToggle .cleanInputIcon{
+  left:14px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanNicheAutocomplete{
+  gap:8px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanNicheList{
+  border-color:#dfeae3;
+  box-shadow:0 18px 38px rgba(15,23,42,.14);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanNicheManual{
+  padding-top:0;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanVisualStyleGrid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanVisualStyleOption{
+  min-height:92px;
+  padding:11px;
+  border-radius:18px;
+  border-color:#dfeae3;
+  box-shadow:0 10px 20px rgba(15,23,42,.05);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanVisualStyleTitle{
+  font-size:13px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanVisualStyleDesc{
+  font-size:11.5px;
+  line-height:1.28;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanFileBox{
+  min-height:56px;
+  border-radius:18px;
+  border-color:#dfeae3;
+  background:#ffffff;
+  box-shadow:0 12px 26px rgba(15,23,42,.06);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanFilePlus{
+  background:#16a34a;
+  box-shadow:0 8px 16px rgba(22,163,74,.20);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanOptionalDetails{
+  gap:10px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanOptionalDetails summary{
+  padding:12px;
+  border-radius:18px;
+  border-color:#e6eee9;
+  box-shadow:0 10px 22px rgba(15,23,42,.06);
+}
+
+[data-clean-product-block="arte_empresa"] .cleanOptionalFields{
+  gap:10px;
+}
+
+[data-clean-product-block="arte_empresa"] .cleanSubmitBtn{
+  min-height:62px;
+  border-radius:18px;
+  font-size:18px;
 }
 
 @media (max-width:680px){
@@ -5463,6 +5733,77 @@ body.ia4-empresas .centerBtn{
 
   .cleanProductHeader{
     flex-direction:column;
+  }
+
+  [data-clean-product-block="arte_empresa"]{
+    padding:10px;
+    border-radius:22px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanProductHeader{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 98px;
+    align-items:center;
+    gap:10px;
+    padding-bottom:6px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanProductHeader .cleanProductImage{
+    width:98px;
+    height:82px;
+    border-radius:20px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanProductTitle{
+    font-size:24px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanProductPrice{
+    font-size:12px;
+    padding:5px 9px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard{
+    padding:11px;
+    border-radius:18px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="ramo"],
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="nome_empresa"],
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="objetivo"],
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="estilo_visual_cliente"]{
+    grid-template-columns:36px minmax(0,1fr);
+    column-gap:9px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="ramo"]::before,
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="nome_empresa"]::before,
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="objetivo"]::before,
+  [data-clean-product-block="arte_empresa"] .cleanFieldCard[data-clean-field-card="estilo_visual_cliente"]::before{
+    width:32px;
+    height:32px;
+    font-size:15px;
+  }
+
+  [data-clean-product-block="arte_empresa"] input:not(.fileHidden):not([type="hidden"]),
+  [data-clean-product-block="arte_empresa"] textarea,
+  [data-clean-product-block="arte_empresa"] .cleanObjectiveToggle{
+    min-height:54px;
+    padding:14px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanInputWrap input:not(.fileHidden):not([type="hidden"]),
+  [data-clean-product-block="arte_empresa"] .cleanInputWrap textarea,
+  [data-clean-product-block="arte_empresa"] .cleanObjectiveToggle{
+    padding-left:44px;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanVisualStyleGrid{
+    grid-template-columns:1fr;
+  }
+
+  [data-clean-product-block="arte_empresa"] .cleanVisualStyleOption{
+    min-height:0;
   }
 
   .cleanScoreGrid{
@@ -6165,8 +6506,8 @@ body.ia4-empresas .centerBtn{
 
 <div class="ia4ToastPedido" id="ia4ToastPedido" onclick="fecharAvisoPedido()">
   <div class="ia4ToastPedidoBox">
-    <strong>✅ Pedido recebido!</strong>
-    <span>Sua arte já entrou em produção. Acompanhe em Meus pedidos — quando ficar pronta, ela aparecerá lá para baixar.</span>
+    <strong id="ia4ToastPedidoTitulo">✅ Pedido recebido!</strong>
+    <span id="ia4ToastPedidoMensagem">Sua arte já entrou em produção. Acompanhe em Meus pedidos — quando ficar pronta, ela aparecerá lá para baixar.</span>
   </div>
 </div>
 
@@ -6262,7 +6603,7 @@ body.ia4-empresas .centerBtn{
 </div>
 
 <script>
-const API_BASE = ["localhost", "127.0.0.1"].includes(location.hostname) ? "http://localhost:3000" : "https://api.omascote.com.br";
+const API_BASE = ["localhost", "127.0.0.1"].includes(location.hostname) ? "http://localhost:3000" : "https://ia4tube-api.onrender.com";
 
 let token = localStorage.getItem("omascote_token");
 
@@ -6728,6 +7069,33 @@ const PRODUCTS = {
     hiddenFields: ["patro"]
   },
 
+  treino: {
+    mode: "flyer",
+    title: "Dia de Treino",
+    hint: "Crie uma arte de treino, preparação, foco e evolução da equipe.",
+    flyerTipo: "treino",
+    labels: {
+      rodada: "Chamada da arte",
+      data: "Data ou frase",
+      hora: "Contexto / competição",
+      arena: "Local do treino (opcional)",
+      esc1: "Escudo do time",
+      mascote: "Foto do treino ou equipe"
+    },
+    placeholders: {
+      rodada: "Ex: Dia de Treino, Foco Total, Trabalho Forte",
+      data: "Ex: Seguimos trabalhando",
+      hora: "Ex: Preparação para o campeonato",
+      arena: "Ex: CT do clube"
+    },
+    required: {
+      esc1: true,
+      esc2: false
+    },
+    phraseMenu: false,
+    hiddenFields: ["placar", "esc2", "patro"]
+  },
+
   patrocinador: {
     mode: "flyer",
     title: "Mostre quem apoia seu time",
@@ -6970,6 +7338,35 @@ const PRODUCT_CONFIG_DETAILS = {
     specialRules: { usesMatchTeams: true, savedEscudo1Fallback: true }
   },
 
+  treino: {
+    id: "treino",
+    name: "Dia de Treino",
+    price: 7,
+    visualCategory: "time",
+    image: "produtos/proximo_jogo.jpg",
+    fields: {
+      rodada: { visible: true, required: true },
+      data: { visible: true, required: false },
+      hora: { visible: true, required: false },
+      arena: { visible: true, required: false },
+      esc1: { visible: true, required: true },
+      mascote: { visible: true, required: false }
+    },
+    validation: {
+      requiredInputs: ["rodada"],
+      requiredUploads: ["escudo1"]
+    },
+    uploads: {
+      escudo1: { used: true, required: true, formField: "escudo1", outputName: "escudo1.png" },
+      escudo2: { used: false, required: false, formField: "escudo2", outputName: "escudo2.png" },
+      mascote: { used: true, required: false, formField: "mascote", outputName: "mascote.png" },
+      patrocinadores: { used: false, required: false, formField: "patrocinadores" }
+    },
+    serializer: "treino",
+    legacy: { endpoint: "/pedidos", flyerTipo: "treino", backendCategoria: "treino" },
+    specialRules: { savedEscudo1Fallback: true }
+  },
+
   patrocinador: {
     id: "patrocinador",
     name: "Mostre quem apoia seu time",
@@ -7141,7 +7538,7 @@ const PRODUCT_CONFIG_DETAILS = {
     mode: "flyer",
     flyerTipo: "arte_empresa",
     visualCategory: "empresa",
-    image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 900'%3E%3Crect width='900' height='900' fill='%230f172a'/%3E%3Crect x='90' y='110' width='720' height='520' rx='42' fill='%23ffffff'/%3E%3Crect x='140' y='170' width='300' height='42' rx='12' fill='%231e88ff'/%3E%3Crect x='140' y='250' width='620' height='34' rx='10' fill='%23e5e7eb'/%3E%3Crect x='140' y='314' width='500' height='34' rx='10' fill='%23e5e7eb'/%3E%3Crect x='140' y='410' width='210' height='140' rx='28' fill='%23f4b400'/%3E%3Crect x='390' y='410' width='370' height='140' rx='28' fill='%2334a853'/%3E%3Crect x='180' y='690' width='540' height='74' rx='37' fill='%231fbf63'/%3E%3C/svg%3E",
+    image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 520 420'%3E%3Crect width='520' height='420' rx='46' fill='%23f0fdf4'/%3E%3Cellipse cx='260' cy='358' rx='170' ry='28' fill='%23bbf7d0' opacity='.75'/%3E%3Crect x='110' y='172' width='300' height='168' rx='22' fill='%23ffffff' stroke='%2386efac' stroke-width='8'/%3E%3Cpath d='M138 108h244l44 76H94z' fill='%2316a34a'/%3E%3Cpath d='M94 184h332v18c0 22-18 40-40 40s-40-18-40-40c0 22-18 40-40 40s-40-18-40-40c0 22-18 40-40 40s-40-18-40-40c0 22-18 40-40 40s-52-18-52-40z' fill='%2322c55e'/%3E%3Crect x='148' y='252' width='82' height='88' rx='14' fill='%23dcfce7'/%3E%3Crect x='258' y='252' width='108' height='48' rx='14' fill='%23bbf7d0'/%3E%3Ccircle cx='382' cy='116' r='40' fill='%23ffffff' stroke='%2386efac' stroke-width='8'/%3E%3Cpath d='M365 116l13 13 24-28' fill='none' stroke='%2316a34a' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E",
     labels: {
       ramo: "Ramo da empresa",
       nome_empresa: "Nome da empresa",
@@ -7369,6 +7766,26 @@ const PRODUCT_SERIALIZERS = {
     appendArquivoAtivo("mascote", "mascote", "mascote");
   },
 
+  treino(ctx){
+    const { fd, product, val, appendTextoAtivo, appendArquivoAtivo, appendEscudo1 } = ctx;
+    const titulo = val("rodada") || product.title || "Dia de Treino";
+
+    fd.append("rodada", titulo);
+    fd.append("data", val("dataJogo") || titulo);
+    appendTextoAtivo("hora", "hora", val("hora"));
+    appendTextoAtivo("arena", "arena", val("arena"));
+
+    fd.append("jogadores_json", "[]");
+    fd.append("jogadores_texto", "");
+    fd.append("artilheiros", "[]");
+    fd.append("artilheiros_json", "[]");
+    fd.append("artilheiros_texto", "");
+    fd.append("artilheiros_qtd", "0");
+
+    appendEscudo1();
+    appendArquivoAtivo("mascote", "mascote", "mascote");
+  },
+
   resultado(ctx){
     const { fd, val, campoAtivo, appendTextoAtivo, appendArquivoAtivo, appendEscudo1, appendEscudo2, coletarArtilheiros } = ctx;
     const t1 = val("timePrincipal");
@@ -7468,6 +7885,13 @@ function getProductSerializer(productKey){
 }
 
 const CLEAN_PRODUCT_SCHEMA_VERSION = 2;
+
+const IA4_RAMOS_BLOQUEADOS = new Set([
+  "funeraria",
+  "servicos_funerarios",
+  "velorio",
+  "cemiterio"
+]);
 
 const IA4_EMPRESA_RAMOS = [
   "Açaí",
@@ -7646,7 +8070,6 @@ const IA4_EMPRESA_RAMOS = [
   "Food truck",
   "Fotografia",
   "Fretes e mudanças",
-  "Funerária",
   "Galeteria",
   "Gráfica",
   "Guincho",
@@ -7867,6 +8290,7 @@ const IA4_EMPRESA_RAMOS = [
   "Equipamentos médicos",
   "Ervas medicinais",
   "Escapamentos",
+  "Futebol",
   "Escola de costura",
   "Escola de futebol",
   "Escola de robótica",
@@ -8037,7 +8461,7 @@ const IA4_EMPRESA_RAMOS = [
   "Web design",
   "Xerox e cópias",
   "Zeladoria"
-];
+].filter((ramo) => !isBlockedRamo(ramo));
 
 const IA4_OBJETIVOS_GERAIS = [
   { id: "divulgar_trabalho", label: "Quero divulgar meu trabalho", fields: "servico" },
@@ -8054,23 +8478,18 @@ const IA4_OBJETIVOS_GERAIS = [
 const IA4_ESTILOS_VISUAIS_CLIENTE = [
   {
     value: "foto_detalhes",
-    title: "Só embelezar a foto",
-    description: "Apenas melhora a foto enviada pelo cliente, mantendo a imagem original como foco principal, com acabamento profissional e poucos elementos."
+    title: "Embelezar foto",
+    description: "Apenas adiciona moldura, logo e pequenos detalhes profissionais na foto enviada."
   },
   {
     value: "leve",
     title: "Visual leve",
-    description: "Visual clean e elegante, com poucas informações, poucos elementos e aparência mais leve e organizada."
+    description: "Mantém a foto principal e adiciona elementos leves, organização visual e acabamento profissional."
   },
   {
     value: "normal",
     title: "Normal IA4Tube",
-    description: "Visual profissional equilibrado, com identidade forte, informações principais e aparência comercial."
-  },
-  {
-    value: "agressivo",
-    title: "Visual agressivo",
-    description: "Visual mais chamativo e promocional, com contraste forte, destaque visual e aparência de anúncio."
+    description: "A IA cria uma arte mais completa, adicionando textos, elementos e modificações visuais automaticamente."
   }
 ];
 
@@ -8187,7 +8606,7 @@ const IA4_CATEGORIA_KEYWORDS = {
     "administradora", "advocacia", "advogado", "agencia", "aluguel_de_som", "animacao_de_festas", "arquitetura", "assessoria", "auditoria",
     "balancas", "capelania", "carretos", "cartorio", "cerimonial", "clube_de_assinatura", "coach", "cobranca", "comunicacao_visual", "condominios", "conserto_de_computadores", "conserto_de_impressoras", "consignado", "consorcio", "consultoria", "contabilidade",
     "contabeis", "corretora", "coworking", "criacao_de_sites", "credito", "despachante", "designer_grafico", "distribuidora", "drones", "e_commerce",
-    "emprestimos", "escritorio_virtual", "estacionamento", "estudio_de_gravacao", "eventos", "financeira", "fotografia", "franquia", "funeraria", "gestao", "grafica", "hospedagem_de_sites", "hostel", "hotel", "imobiliaria", "influenciador", "internet_fibra", "lan_house", "locadora", "marketing", "mei", "motel", "operadora_de_internet", "organizacao", "pousada", "publicidade", "reciclagem", "rh",
+    "emprestimos", "escritorio_virtual", "estacionamento", "estudio_de_gravacao", "eventos", "financeira", "fotografia", "franquia", "gestao", "grafica", "hospedagem_de_sites", "hostel", "hotel", "imobiliaria", "influenciador", "internet_fibra", "lan_house", "locadora", "marketing", "mei", "motel", "operadora_de_internet", "organizacao", "pousada", "publicidade", "reciclagem", "rh",
     "fibra_optica", "seguranca_do_trabalho", "seguros", "seguro_residencial", "servico_de_portaria", "servicos_administrativos", "servicos_gerais", "software", "tecnologia", "telecom", "transportadora", "transportes_executivos", "visual_merchandising",
     "turismo", "web_design"
   ],
@@ -8269,6 +8688,16 @@ const IA4_OBJETIVOS_POR_CATEGORIA = {
 };
 
 const IA4_OBJETIVOS_POR_NICHO = {
+  futebol: [
+    { id: "treino", label: "Dia de Treino", productKey: "treino" },
+    { id: "futebol_mascote_3d", label: "Mascote 3D", productKey: "mascote_uniforme" },
+    { id: "futebol_escudo_3d", label: "Escudo 3D", productKey: "escudo3d" },
+    { id: "futebol_resultado", label: "Resultado", productKey: "resultado" },
+    { id: "futebol_proximo_jogo", label: "Próximo Jogo", productKey: "proximo_jogo" },
+    { id: "futebol_escalacao", label: "Escalação", productKey: "escalacao" },
+    { id: "futebol_contratacao", label: "Contratação", productKey: "contratacao" },
+    { id: "futebol_patrocinador", label: "Patrocinador", productKey: "patrocinador" }
+  ],
   hamburgueria: [
     { id: "divulgar_lanche", label: "Quero divulgar meu lanche", fields: "lanche", photoLabel: "Foto do lanche" },
     { id: "divulgar_combo_hamburgueria", label: "Quero divulgar combo", fields: "combo", photoLabel: "Foto do combo" }
@@ -8488,6 +8917,18 @@ const CLEAN_PRODUCT_FORM_SCHEMAS = {
       { key: "match_photo", type: "file", legacyName: "mascote", labelKey: "mascote", required: false }
     ]
   },
+  treino: {
+    endpoint: "/pedidos",
+    validationMessage: "Preencha a chamada do treino e envie o escudo do time.",
+    fields: [
+      { key: "title", type: "text", legacyName: "rodada", labelKey: "rodada", placeholderKey: "rodada", required: true },
+      { key: "headline", type: "text", legacyName: "data", labelKey: "data", placeholderKey: "data", required: false, defaultValue: "Dia de Treino" },
+      { key: "context", type: "text", legacyName: "hora", labelKey: "hora", placeholderKey: "hora", required: false },
+      { key: "venue", type: "text", legacyName: "arena", labelKey: "arena", placeholderKey: "arena", required: false },
+      { key: "team_crest", type: "file", legacyName: "escudo1", labelKey: "esc1", required: true, savedFallback: true },
+      { key: "training_photo", type: "file", legacyName: "mascote", labelKey: "mascote", required: false }
+    ]
+  },
   patrocinador: {
     endpoint: "/pedidos",
     validationMessage: "Preencha o título da arte, envie o escudo do time e envie os patrocinadores.",
@@ -8587,11 +9028,31 @@ function getCleanFieldPlaceholder(product, field){
   return field.placeholder || product?.placeholders?.[field.placeholderKey] || "";
 }
 
+function getCleanFieldIcon(product, field){
+  if(product?.id !== "arte_empresa") return "";
+  const icons = {
+    ramo: "M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z",
+    nome_empresa: "M5 21V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v15M9 8h1M14 8h1M9 12h1M14 12h1M9 16h1M14 16h1",
+    objetivo: "M12 21s7-4.4 7-11a7 7 0 1 0-14 0c0 6.6 7 11 7 11zM12 7v4l3 2",
+    oferta: "M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7M4 12h16M12 21V8M7.5 8A2.5 2.5 0 1 1 12 6.5A2.5 2.5 0 1 1 16.5 8",
+    cta: "M5 12h14M13 6l6 6-6 6",
+    whatsapp: "M5 19l1.2-3.5A7.5 7.5 0 1 1 9 18.2z",
+    instagram: "M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4zM9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0zM17.5 6.5h.01",
+    observacoes: "M4 5h16M4 12h16M4 19h10",
+    objetivo_btn: "M12 3l2.4 5 5.6.8-4 3.9.9 5.5L12 15.7 7.1 18.2l.9-5.5-4-3.9 5.6-.8z",
+    manual: "M4 20h4l10.5-10.5a2.8 2.8 0 0 0-4-4L4 16z"
+  };
+  const path = icons[field.key] || icons.manual;
+  return `<span class="cleanInputIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="${path}"/></svg></span>`;
+}
+
 function renderCleanTextField(product, field){
+  const icon = getCleanFieldIcon(product, field);
+  const inputHtml = `<input name="${htmlEscape(field.key)}" data-field="${htmlEscape(field.key)}" placeholder="${htmlEscape(getCleanFieldPlaceholder(product, field))}">`;
   return `
     <div class="cleanFieldCard" data-clean-field-card="${htmlEscape(field.key)}">
       <label class="cleanFieldLabel">${getCleanFieldLabel(product, field)}</label>
-      <input name="${htmlEscape(field.key)}" data-field="${htmlEscape(field.key)}" placeholder="${htmlEscape(getCleanFieldPlaceholder(product, field))}">
+      ${icon ? `<div class="cleanInputWrap">${icon}${inputHtml}</div>` : inputHtml}
     </div>
   `;
 }
@@ -8605,13 +9066,11 @@ function renderCleanNicheAutocompleteField(product, field){
       <div class="cleanNicheAutocomplete" data-niche-autocomplete>
         <input type="hidden" name="${key}" data-field="${key}" data-niche-value>
         <input type="hidden" name="ramo_origem" data-field="ramo_origem" data-niche-origin>
-        <input data-niche-search placeholder="${placeholder}" autocomplete="off" aria-autocomplete="list">
+        <div class="cleanInputWrap">${getCleanFieldIcon(product, field)}<input data-niche-search placeholder="${placeholder}" autocomplete="off" aria-autocomplete="list"></div>
         <div class="cleanNicheList" data-niche-list></div>
         <div class="cleanNicheManual" data-niche-manual-wrap>
-          <div class="cleanNicheHelp">Escreva o ramo exatamente como você quer que a IA entenda.</div>
-          <input data-niche-manual placeholder="Digite seu ramo">
+          <div class="cleanInputWrap">${getCleanFieldIcon(product, { key: "manual" })}<input data-niche-manual placeholder="Digite seu ramo"></div>
         </div>
-        <div class="cleanNicheHelp">Selecione uma opção da lista. Texto digitado sem clique não é confirmado.</div>
       </div>
     </div>
   `;
@@ -8626,15 +9085,14 @@ function renderCleanObjectivePickerField(product, field){
         <input type="hidden" name="${key}" data-field="${key}" data-objective-value>
         <input type="hidden" name="objetivo_origem" data-field="objetivo_origem" data-objective-origin>
         <button type="button" class="cleanObjectiveToggle" data-objective-toggle>
+          ${getCleanFieldIcon(product, { key: "objetivo_btn" })}
           <span data-objective-selected-label>Selecionar objetivo</span>
           <span class="cleanObjectiveArrow" aria-hidden="true">▼</span>
         </button>
         <div class="cleanNicheList" data-objective-list></div>
         <div class="cleanNicheManual" data-objective-manual-wrap>
-          <div class="cleanNicheHelp">Escreva o objetivo de forma simples e realista.</div>
-          <input data-objective-manual placeholder="Digite outro objetivo">
+          <div class="cleanInputWrap">${getCleanFieldIcon(product, { key: "manual" })}<input data-objective-manual placeholder="Digite outro objetivo"></div>
         </div>
-        <div class="cleanNicheHelp">Escolha um objetivo. As perguntas abaixo mudam conforme sua escolha.</div>
         <div class="cleanDynamicFields" data-dynamic-fields></div>
       </div>
     </div>
@@ -8644,27 +9102,16 @@ function renderCleanObjectivePickerField(product, field){
 function renderCleanVisualStyleField(product, field){
   const key = htmlEscape(field.key);
   const defaultValue = htmlEscape(field.defaultValue || "normal");
-  return `
-    <div class="cleanFieldCard" data-clean-field-card="${key}">
-      <label class="cleanFieldLabel">Estilo visual</label>
-      <input type="hidden" name="${key}" data-field="${key}" value="${defaultValue}" data-visual-style-value>
-      <div class="cleanVisualStyleGrid" data-visual-style-picker>
-        ${IA4_ESTILOS_VISUAIS_CLIENTE.map((option) => `
-          <button type="button" class="cleanVisualStyleOption${option.value === (field.defaultValue || "normal") ? " is-selected" : ""}" data-visual-style-option="${htmlEscape(option.value)}">
-            <span class="cleanVisualStyleTitle">${htmlEscape(option.title)}</span>
-            <span class="cleanVisualStyleDesc">${htmlEscape(option.description)}</span>
-          </button>
-        `).join("")}
-      </div>
-    </div>
-  `;
+  return `<input type="hidden" name="${key}" data-field="${key}" value="${defaultValue}" data-visual-style-value>`;
 }
 
 function renderCleanTextareaField(product, field){
+  const icon = getCleanFieldIcon(product, field);
+  const textareaHtml = `<textarea name="${htmlEscape(field.key)}" data-field="${htmlEscape(field.key)}" placeholder="${htmlEscape(getCleanFieldPlaceholder(product, field))}"></textarea>`;
   return `
     <div class="cleanFieldCard" data-clean-field-card="${htmlEscape(field.key)}">
       <label class="cleanFieldLabel">${getCleanFieldLabel(product, field)}</label>
-      <textarea name="${htmlEscape(field.key)}" data-field="${htmlEscape(field.key)}" placeholder="${htmlEscape(getCleanFieldPlaceholder(product, field))}"></textarea>
+      ${icon ? `<div class="cleanInputWrap">${icon}${textareaHtml}</div>` : textareaHtml}
     </div>
   `;
 }
@@ -8757,7 +9204,7 @@ function renderCleanFieldsGrouped(product, schema){
   return `
     ${requiredHtml}
     <details class="cleanOptionalDetails">
-      <summary>Campos opcionais — clique para deixar mais completo</summary>
+      <summary>Campos opcionais</summary>
       <div class="cleanOptionalFields">
         ${optionalHtml}
       </div>
@@ -8771,8 +9218,28 @@ function formatCleanProductPrice(product){
 }
 
 const IA4_EMPRESAS_MODE = document.body?.classList.contains("ia4-empresas");
+const IA4_FOOTBALL_FORM_PRODUCT_IDS = [
+  "treino",
+  "mascote_uniforme",
+  "resultado",
+  "proximo_jogo",
+  "escalacao",
+  "contratacao",
+  "patrocinador"
+];
+const IA4_FOOTBALL_PRODUCT_IDS = [
+  "treino",
+  "mascote_uniforme",
+  "escudo3d",
+  "resultado",
+  "proximo_jogo",
+  "escalacao",
+  "contratacao",
+  "patrocinador"
+];
 const CLEAN_PRODUCT_RENDER_ORDER = IA4_EMPRESAS_MODE ? [
-  "arte_empresa"
+  "arte_empresa",
+  ...IA4_FOOTBALL_FORM_PRODUCT_IDS
 ] : [
   "arte_empresa",
   "jogador_escudo",
@@ -8784,6 +9251,22 @@ const CLEAN_PRODUCT_RENDER_ORDER = IA4_EMPRESAS_MODE ? [
   "contratacao"
 ];
 
+function removerProdutosFutebolNoModoEmpresas(){
+  if(!IA4_EMPRESAS_MODE) return;
+
+  [
+    ".productGroupTime",
+    ".productGroupJogador",
+    ".productGroupBrinde",
+    ".categoryChoiceRow",
+    ".categoryMiniRow",
+    ".homeExamples",
+    ".optionsRow.productGroup"
+  ].forEach((selector) => {
+    document.querySelectorAll(selector).forEach((el) => el.remove());
+  });
+}
+
 function setEscudo3dCleanFileLabel(text){
   document.querySelectorAll("[data-escudo3d-clean-file-name]").forEach(el => {
     el.textContent = text || "Selecionar escudo";
@@ -8793,6 +9276,8 @@ function setEscudo3dCleanFileLabel(text){
 function renderCleanProductForms(){
   const root = document.getElementById("productFormsRoot");
   if(!root) return;
+
+  removerProdutosFutebolNoModoEmpresas();
 
   const formsHtml = CLEAN_PRODUCT_RENDER_ORDER.map(productKey => {
     const product = PRODUCTS[productKey];
@@ -8804,14 +9289,18 @@ function renderCleanProductForms(){
           <img src="${htmlEscape(product.image || "")}" alt="">
         </div>`;
     const imageBeforeForm = productKey !== "arte_empresa";
+    const headerImageHtml = productKey === "arte_empresa" ? imageHtml : "";
 
     return `
       <section class="cleanProductBlock" data-clean-product-block="${htmlEscape(productKey)}">
         ${imageBeforeForm ? imageHtml : ""}
         <form class="cleanProductForm" data-product-form="${htmlEscape(productKey)}" enctype="multipart/form-data" novalidate>
           <div class="cleanProductHeader">
-            <h3 class="cleanProductTitle">${htmlEscape(product.title || product.name || productKey)}</h3>
-            ${priceLabel ? `<div class="cleanProductPrice">${htmlEscape(priceLabel)}</div>` : ""}
+            <div class="cleanProductHeaderText">
+              <h3 class="cleanProductTitle">${htmlEscape(product.title || product.name || productKey)}</h3>
+              ${priceLabel ? `<div class="cleanProductPrice">${htmlEscape(priceLabel)}</div>` : ""}
+            </div>
+            ${headerImageHtml}
           </div>
           ${renderCleanFieldsGrouped(product, schema)}
           <button class="btnGreen cleanSubmitBtn" type="submit">Criar minha arte 🚀</button>
@@ -8822,14 +9311,14 @@ function renderCleanProductForms(){
             <a href="#" class="cleanResultDownload" data-clean-result-download>Baixar imagem</a>
           </div>
         </form>
-        ${imageBeforeForm ? "" : imageHtml}
+        ${imageBeforeForm ? "" : ""}
       </section>
     `;
   }).join("");
 
   const escudo3dProduct = PRODUCTS.escudo3d;
   const escudo3dPriceLabel = formatCleanProductPrice(escudo3dProduct);
-  const escudo3dHtml = (!IA4_EMPRESAS_MODE && escudo3dProduct) ? `
+  const escudo3dHtml = (escudo3dProduct) ? `
     <section class="cleanProductBlock cleanEscudo3dBlock" data-clean-product-block="escudo3d">
       <div class="cleanProductImage" aria-hidden="true">
         <img src="${htmlEscape(escudo3dProduct.image || "")}" alt="">
@@ -8853,7 +9342,31 @@ function renderCleanProductForms(){
   ` : "";
 
   root.innerHTML = escudo3dHtml + formsHtml;
+  setFootballProductVisibility("");
   bindCleanProductForms(root);
+}
+
+function setFootballProductVisibility(activeProductKey = ""){
+  if(!IA4_EMPRESAS_MODE) return;
+
+  IA4_FOOTBALL_PRODUCT_IDS.forEach((productKey) => {
+    const block = document.querySelector(`[data-clean-product-block="${CSS.escape(productKey)}"]`);
+    if(block) block.hidden = productKey !== activeProductKey;
+  });
+
+  if(!activeProductKey && escudo3dFile){
+    escudo3dFile.value = "";
+    setEscudo3dCleanFileLabel("Selecionar escudo");
+  }
+}
+
+function openFootballProductFromObjective(objective){
+  const productKey = objective?.productKey || "";
+  if(!IA4_EMPRESAS_MODE || !productKey) return;
+
+  setFootballProductVisibility(productKey);
+  activateCleanProductBlock(productKey);
+  scrollToCleanProductBlock(productKey);
 }
 
 function getCleanFormField(form, key){
@@ -8871,11 +9384,12 @@ function getCleanFieldValue(form, key){
 const IA4_EMPRESA_PROFILE_KEY = "ia4tube_empresa_perfil";
 
 function salvarPerfilEmpresaLocal(fields = {}){
-  if(!fields.nome_empresa && !fields.ramo) return;
+  if(!fields.nome_empresa && !fields.ramo && !fields.logo_data_url) return;
   try{
+    const atual = carregarPerfilEmpresaLocal();
     localStorage.setItem(IA4_EMPRESA_PROFILE_KEY, JSON.stringify({
-      nome_empresa: fields.nome_empresa || "",
-      ramo: fields.ramo || ""
+      ...atual,
+      ...fields
     }));
   }catch(e){}
 }
@@ -8898,7 +9412,7 @@ function preencherPerfilEmpresaLocal(form){
     if(nomeInput && !nomeInput.value) nomeInput.value = perfil.nome_empresa;
   }
 
-  if(perfil.ramo){
+  if(perfil.ramo && !isBlockedRamo(perfil.ramo)){
     const ramoBox = form.querySelector("[data-niche-autocomplete]");
     const ramoSearch = ramoBox?.querySelector("[data-niche-search]");
     const ramoHidden = ramoBox?.querySelector("[data-niche-value]");
@@ -8908,6 +9422,46 @@ function preencherPerfilEmpresaLocal(form){
     if(ramoOrigin && !ramoOrigin.value) ramoOrigin.value = "cache";
     if(ramoBox && perfil.ramo) ramoBox.dataset.nicheSelected = "cache";
   }
+
+  atualizarCardEmpresaLocal(form);
+}
+
+function atualizarCardEmpresaLocal(form){
+  if(form && form.dataset.productForm !== "arte_empresa") return;
+  const block = form?.closest("[data-clean-product-block]") || document.querySelector('[data-clean-product-block="arte_empresa"]');
+  if(!block) return;
+
+  const perfil = carregarPerfilEmpresaLocal();
+  const title = block.querySelector(".cleanProductTitle");
+  if(title){
+    title.textContent = (perfil.nome_empresa || "").trim() || (PRODUCTS.arte_empresa?.title || PRODUCTS.arte_empresa?.name || "Arte para Empresa");
+  }
+
+  const img = block.querySelector(".cleanProductImage img");
+  if(img){
+    if(!img.dataset.defaultSrc) img.dataset.defaultSrc = img.getAttribute("src") || "";
+    img.src = perfil.logo_data_url || img.dataset.defaultSrc;
+  }
+}
+
+function salvarPerfilEmpresaLocalDoForm(form){
+  if(!form || form.dataset.productForm !== "arte_empresa") return;
+  const ramo = getCleanFieldValue(form, "ramo");
+  salvarPerfilEmpresaLocal({
+    nome_empresa: getCleanFieldValue(form, "nome_empresa"),
+    ramo: isBlockedRamo(ramo) ? "" : ramo
+  });
+  atualizarCardEmpresaLocal(form);
+}
+
+function salvarLogoEmpresaLocal(file, form){
+  if(!form || form.dataset.productForm !== "arte_empresa" || !file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    salvarPerfilEmpresaLocal({ logo_data_url: String(reader.result || "") });
+    atualizarCardEmpresaLocal(form);
+  };
+  reader.readAsDataURL(file);
 }
 
 function normalizeIa4Key(value){
@@ -8920,6 +9474,10 @@ function normalizeNicheSearchText(value){
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim();
+}
+
+function isBlockedRamo(value){
+  return IA4_RAMOS_BLOQUEADOS.has(normalizeIa4Key(value));
 }
 
 function uniqObjectives(items = []){
@@ -8946,8 +9504,16 @@ function getRamoCategory(ramo){
   return "";
 }
 
+function isFootballRamo(ramo){
+  return normalizeIa4Key(ramo) === "futebol";
+}
+
 function getObjectivesForRamo(ramo){
   const ramoKey = normalizeIa4Key(ramo);
+  if(isFootballRamo(ramo)){
+    return IA4_OBJETIVOS_POR_NICHO.futebol || [];
+  }
+
   const category = getRamoCategory(ramo);
   return uniqObjectives([
     ...(IA4_OBJETIVOS_POR_NICHO[ramoKey] || []),
@@ -8966,9 +9532,11 @@ function renderObjectiveOptions(box, shouldOpen = false){
     <button type="button" class="cleanNicheOption" data-objective-option="${htmlEscape(objective.id)}">${htmlEscape(objective.label)}</button>
   `);
 
-  options.push(`
-    <button type="button" class="cleanNicheOption cleanNicheOptionManual" data-objective-manual-trigger>Outro objetivo</button>
-  `);
+  if(!isFootballRamo(ramo)){
+    options.push(`
+      <button type="button" class="cleanNicheOption cleanNicheOptionManual" data-objective-manual-trigger>Outro objetivo</button>
+    `);
+  }
 
   list.innerHTML = options.join("");
   if(shouldOpen) box.classList.add("is-open");
@@ -8994,7 +9562,6 @@ function renderDynamicObjectiveFields(box, objective = null){
   }
 
   wrap.innerHTML = `
-    <div class="cleanNicheHelp">Campos opcionais para deixar a arte mais certeira.</div>
     ${fields.map((field) => `
       <div class="cleanDynamicField">
         <label>${htmlEscape(field.label)}</label>
@@ -9030,6 +9597,7 @@ function resetObjectivePickerForForm(form){
   box.classList.remove("is-open", "is-manual");
   renderDynamicObjectiveFields(box, null);
   renderObjectiveOptions(box);
+  setFootballProductVisibility("");
 }
 
 function collectDynamicObjectiveFields(form){
@@ -9047,6 +9615,7 @@ function getNicheSuggestions(query){
   const list = IA4_EMPRESA_RAMOS
     .filter((ramo, index, arr) => arr.indexOf(ramo) === index)
     .filter((ramo) => {
+      if(isBlockedRamo(ramo)) return false;
       if(!normalizedQuery) return true;
       const aliases = IA4_RAMO_ALIASES[ramo] || [];
       return normalizeNicheSearchText(ramo).includes(normalizedQuery) ||
@@ -9098,6 +9667,8 @@ function bindNicheAutocomplete(root){
       box.classList.remove("is-manual");
       manual.value = "";
       clearConfirmedValue();
+      const form = box.closest("[data-product-form]");
+      resetObjectivePickerForForm(form);
       renderNicheOptions(box, search.value);
     });
 
@@ -9110,10 +9681,19 @@ function bindNicheAutocomplete(root){
     });
 
     manual.addEventListener("input", () => {
-      hidden.value = manual.value.trim();
+      const manualValue = manual.value.trim();
+      if(isBlockedRamo(manualValue)){
+        hidden.value = "";
+        if(origin) origin.value = "";
+        box.dataset.nicheSelected = "";
+        return;
+      }
+      hidden.value = manualValue;
       if(origin) origin.value = hidden.value ? "manual" : "";
       box.dataset.nicheSelected = hidden.value ? "manual" : "";
-      resetObjectivePickerForForm(box.closest("[data-product-form]"));
+      const form = box.closest("[data-product-form]");
+      resetObjectivePickerForForm(form);
+      salvarPerfilEmpresaLocalDoForm(form);
     });
 
     list.addEventListener("click", (e) => {
@@ -9128,7 +9708,9 @@ function bindNicheAutocomplete(root){
         box.dataset.nicheSelected = "list";
         box.classList.remove("is-open", "is-manual");
         manual.value = "";
-        resetObjectivePickerForForm(box.closest("[data-product-form]"));
+        const form = box.closest("[data-product-form]");
+        resetObjectivePickerForForm(form);
+        salvarPerfilEmpresaLocalDoForm(form);
         return;
       }
 
@@ -9176,6 +9758,7 @@ function bindObjectivePicker(root){
         box.classList.remove("is-open", "is-manual");
         manual.value = "";
         renderDynamicObjectiveFields(box, objective);
+        openFootballProductFromObjective(objective);
         return;
       }
 
@@ -9187,6 +9770,7 @@ function bindObjectivePicker(root){
         box.classList.add("is-manual");
         box.classList.remove("is-open");
         renderDynamicObjectiveFields(box, null);
+        setFootballProductVisibility("");
         manual.focus();
       }
     });
@@ -9802,7 +10386,10 @@ function restaurarPedidosAtivos(pedidos){
 
     if(produtosRestaurados.has(ativo.product_id)) continue;
 
-    const form = getCleanProductFormByProductId(ativo.product_id);
+    let form = getCleanProductFormByProductId(ativo.product_id);
+    if(!form && IA4_EMPRESAS_MODE){
+      form = getCleanProductFormByProductId("arte_empresa");
+    }
     if(!form) continue;
 
     produtosRestaurados.add(ativo.product_id);
@@ -9822,6 +10409,65 @@ function restaurarPedidosAtivos(pedidos){
 
     acompanharResultadoClean(pedido.id, form);
   }
+}
+
+function abrirEscolhaEstiloAntesEnvio(form){
+  document.getElementById("ia4StyleChoiceOverlay")?.remove();
+
+  const styleInput = form.querySelector("[data-visual-style-value]");
+  const overlay = document.createElement("div");
+  overlay.id = "ia4StyleChoiceOverlay";
+  overlay.style.cssText = "position:fixed;inset:0;z-index:100000;background:rgba(15,23,42,.72);display:flex;align-items:center;justify-content:center;padding:18px;";
+
+  const card = document.createElement("div");
+  card.style.cssText = "width:min(440px,94vw);background:#ffffff;border-radius:24px;padding:22px;box-shadow:0 24px 70px rgba(15,23,42,.35);color:#111827;";
+
+  const title = document.createElement("div");
+  title.textContent = "Qual estilo você quer para sua arte?";
+  title.style.cssText = "font-size:22px;font-weight:950;line-height:1.12;text-align:center;margin-bottom:16px;";
+  card.appendChild(title);
+
+  [
+    {
+      value: "foto_detalhes",
+      title: "Embelezar foto",
+      description: "Apenas adiciona moldura, logo e pequenos detalhes profissionais na foto enviada."
+    },
+    {
+      value: "leve",
+      title: "Visual leve",
+      description: "Mantém a foto principal e adiciona elementos leves, organização visual e acabamento profissional."
+    },
+    {
+      value: "normal",
+      title: "Normal IA4Tube",
+      description: "A IA cria uma arte mais completa, adicionando textos, elementos e modificações visuais automaticamente."
+    }
+  ].forEach((option) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.innerHTML = `<strong>${htmlEscape(option.title)}</strong><span>${htmlEscape(option.description)}</span>`;
+    btn.style.cssText = "width:100%;min-height:72px;margin-top:10px;border:1px solid #bbf7d0;border-radius:18px;background:#f8fff9;color:#14532d;font-size:16px;font-weight:950;cursor:pointer;box-shadow:0 10px 22px rgba(15,23,42,.08);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;text-align:left;padding:12px 14px;";
+    const desc = btn.querySelector("span");
+    if(desc) desc.style.cssText = "font-size:12px;line-height:1.25;font-weight:750;color:#4b6354;";
+    btn.addEventListener("click", () => {
+      if(styleInput) styleInput.value = option.value;
+      form.dataset.visualStyleConfirmed = "1";
+      overlay.remove();
+      form.requestSubmit();
+    });
+    card.appendChild(btn);
+  });
+
+  const backBtn = document.createElement("button");
+  backBtn.type = "button";
+  backBtn.textContent = "Voltar";
+  backBtn.style.cssText = "width:100%;min-height:46px;margin-top:12px;border:0;border-radius:16px;background:#eef2f7;color:#334155;font-size:14px;font-weight:900;cursor:pointer;";
+  backBtn.addEventListener("click", () => overlay.remove());
+  card.appendChild(backBtn);
+
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
 }
 
 async function submitCleanProductForm(e){
@@ -9862,6 +10508,19 @@ async function submitCleanProductForm(e){
       campo_atual: ia4CampoAtual || ""
     });
     return;
+  }
+
+  if(productKey === "arte_empresa"){
+    if(form.dataset.visualStyleConfirmed !== "1"){
+      abrirEscolhaEstiloAntesEnvio(form);
+      return;
+    }
+
+    delete form.dataset.visualStyleConfirmed;
+    const styleInput = form.querySelector("[data-visual-style-value]");
+    if(styleInput && !["foto_detalhes", "leve", "normal"].includes(styleInput.value)){
+      styleInput.value = "normal";
+    }
   }
 
   if(!token){
@@ -9969,6 +10628,9 @@ function bindCleanProductForms(root){
       if(!label) return;
       const files = Array.from(input.files || []);
       label.textContent = files.length ? files.map(file => file.name).join(", ") : "Nenhum arquivo";
+      if(form?.dataset.productForm === "arte_empresa" && input.dataset.asset === "logo" && files[0]){
+        salvarLogoEmpresaLocal(files[0], form);
+      }
     });
   });
 
@@ -9991,6 +10653,9 @@ function bindCleanProductForms(root){
 
   root.querySelectorAll("[data-product-form]").forEach(form => {
     preencherPerfilEmpresaLocal(form);
+    if(form.dataset.productForm === "arte_empresa"){
+      getCleanFormField(form, "nome_empresa")?.addEventListener("input", () => salvarPerfilEmpresaLocalDoForm(form));
+    }
     form.addEventListener("submit", submitCleanProductForm);
   });
 
@@ -10103,7 +10768,7 @@ function updateChosenPlaceholders(product){
 }
 
 function updateProductFieldVisibility(product){
-  const flyerFields = ["rodada", "artilheiros", "data", "hora", "arena", "mascote", "esc1", "esc2", "patro"];
+  const flyerFields = ["placar", "rodada", "artilheiros", "data", "hora", "arena", "mascote", "esc1", "esc2", "patro"];
 
   flyerFields.forEach((field)=>{
     const el = document.querySelector(`.field-${field}`);
@@ -10442,7 +11107,7 @@ function applyLocal(){
   const usados = localStorage.getItem("omascote_usados") || "";
 
   welcomeEl.textContent = nome || "Seu negócio";
-  planoEl.textContent = `Plano: ${plano || "—"} pedidos/mês`;
+  planoEl.textContent = `Plano: ${plano || "—"}`;
   usadosEl.textContent = `Usados no mês: ${usados || "—"}`;
   if(saldoEl){
     saldoEl.textContent = "Saldo disponível: —";
@@ -10460,7 +11125,7 @@ async function refreshMe(){
     const data = await r.json();
     if(data.ok){
       localStorage.setItem("omascote_nome_time", data.nome_time || "");
-      localStorage.setItem("omascote_plano", data.plano || "");
+      localStorage.setItem("omascote_plano", data.plano_nome || data.plano_atual || data.plano || "");
       localStorage.setItem("omascote_usados", data.usados_no_ciclo || "");
       localStorage.setItem("omascote_saldo", data.saldo ?? "");
       applyLocal();
@@ -10620,9 +11285,17 @@ async function comprarCreditos(pacote, metodo = "checkout", triggerBtn = null){
 
 let timerAvisoPedido = null;
 
-function mostrarAvisoPedido(){
+function mostrarAvisoPedido(
+  titulo = "✅ Pedido recebido!",
+  mensagem = "Sua arte já entrou em produção. Acompanhe em Meus pedidos — quando ficar pronta, ela aparecerá lá para baixar."
+){
   const aviso = document.getElementById("ia4ToastPedido");
   if(!aviso) return;
+
+  const tituloEl = document.getElementById("ia4ToastPedidoTitulo");
+  const mensagemEl = document.getElementById("ia4ToastPedidoMensagem");
+  if(tituloEl) tituloEl.textContent = titulo;
+  if(mensagemEl) mensagemEl.textContent = mensagem;
 
   aviso.classList.add("show");
 
@@ -11480,6 +12153,11 @@ function validarPedidoAntesDeEnviar(productKey){
     addFile("escudo2", "Envie o escudo do Time B.");
   }
 
+  if(productKey === "treino"){
+    addInput("rodada", "Preencha a chamada do treino.");
+    addFile("escudo1", "Envie o escudo do time.");
+  }
+
   if(productKey === "proximo_jogo_jogador"){
     addInput("timePrincipal", "Preencha o Time A.");
     addInput("timeAdv", "Preencha o adversário.");
@@ -11654,6 +12332,23 @@ function configureOptionalSections(productKey){
     return;
   }
 
+  if(productKey === "treino"){
+    lockOpen("rodada");
+    lockOpen("esc1");
+    keepClosed("data");
+    keepClosed("hora");
+    keepClosed("arena");
+    keepClosed("mascote");
+
+    const rodadaToggle = document.querySelector(`[data-optional-field="rodada"] [data-optional-toggle]`);
+    if(rodadaToggle) rodadaToggle.style.display = "none";
+
+    const esc1Toggle = document.querySelector(`[data-optional-field="esc1"] [data-optional-toggle]`);
+    if(esc1Toggle) esc1Toggle.style.display = "none";
+
+    return;
+  }
+
   if(productKey === "proximo_jogo_jogador"){
     lockOpen("data");
     lockOpen("hora");
@@ -11760,6 +12455,7 @@ function arrangeFieldSequence(productKey){
     escalacao: ["rodada", "data", "hora", "esc1", "artilheiros", "optionalDivider", "arena", "esc2", "mascote", "submit", "msg"],
     contratacao: ["rodada", "data", "esc1", "esc2", "optionalDivider", "hora", "submit", "msg"],
     proximo_jogo: ["placar", "esc1", "esc2", "data", "hora", "optionalDivider", "arena", "mascote", "submit", "msg"],
+    treino: ["rodada", "esc1", "optionalDivider", "data", "hora", "arena", "mascote", "submit", "msg"],
     patrocinador: ["rodada", "esc1", "patro", "optionalDivider", "data", "submit", "msg"],
     proximo_jogo_jogador: ["placar", "esc1", "esc2", "mascote", "data", "hora", "optionalDivider", "arena", "submit", "msg"],
     resultado_jogo_jogador: ["placar", "esc1", "esc2", "mascote", "optionalDivider", "hora", "data", "submit", "msg"],
@@ -13788,7 +14484,7 @@ function atualizarMenuPedidosTopo(pedidos){
         ${barraProducaoPedido(p)}
         ${p.status === "pronto" ? `
 <div class="descBox">
-  <div id="desc_topo_${p.id}" class="descTexto">${p.descricao_instagram || ""}</div>
+  <div id="desc_topo_${p.id}" class="descTexto" data-patrocinador="${pedidoWebEhPatrocinador(p) ? "1" : "0"}">${limparDescricaoInstagram(p.descricao_instagram || "", p)}</div>
   <div class="copyHint">copiar</div>
   <button class="btnCopiar" onclick="copiarDescricaoTopo('${p.id}')">📋</button>
 </div>
@@ -13949,7 +14645,7 @@ async function carregarHistorico(){
 
 ${p.status === "pronto" ? `
 <div class="descBox">
-  <div id="desc_${p.id}" class="descTexto">${p.descricao_instagram || ""}</div>
+  <div id="desc_${p.id}" class="descTexto" data-patrocinador="${pedidoWebEhPatrocinador(p) ? "1" : "0"}">${limparDescricaoInstagram(p.descricao_instagram || "", p)}</div>
   <div class="copyHint">copiar</div>
   <button class="btnCopiar" onclick="copiarDescricao('${p.id}')">📋</button>
 </div>
@@ -13987,11 +14683,78 @@ ${ia4FinalizarContaBox(p)}
   }
 }
 
+function normalizarLinhaDescricaoInstagram(texto){
+  return String(texto || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/[,:.;!?\-\u2013\u2014]+$/g, "")
+    .trim();
+}
+
+function pedidoWebEhPatrocinador(pedido){
+  if(!pedido) return false;
+  return [
+    pedido.product_id,
+    pedido.categoria,
+    pedido.tipo_arte,
+    pedido.tipo,
+    pedido.objetivo,
+    pedido.rodada
+  ].map(v => String(v || "").toLowerCase()).join(" ").includes("patrocin");
+}
+
+function removerHashtagsPatrocinador(linha){
+  return String(linha || "")
+    .split(/\s+/)
+    .filter(parte => {
+      const normalizada = normalizarLinhaDescricaoInstagram(parte);
+      return normalizada !== "#patrocinador" && normalizada !== "#patrocinadores";
+    })
+    .join(" ")
+    .trim();
+}
+
+function limparDescricaoInstagram(texto, pedido){
+  const labels = new Set([
+    "descricao para instagram",
+    "descricao para postagem",
+    "legenda para instagram",
+    "sugestao de descricao",
+    "sugestao de legenda",
+    "caption",
+    "instagram caption",
+    "resultado",
+    "proximo jogo",
+    "escalacao",
+    "contratacao",
+    "dia de treino"
+  ]);
+  const podeUsarPatrocinador = pedidoWebEhPatrocinador(pedido);
+  return String(texto || "")
+    .split(/\r?\n/)
+    .map(linha => linha.trim())
+    .filter(Boolean)
+    .filter(linha => {
+      const normalizada = normalizarLinhaDescricaoInstagram(linha);
+      if(labels.has(normalizada)) return false;
+      if(normalizada === "patrocinador" || normalizada === "patrocinadores") return false;
+      return true;
+    })
+    .map(linha => podeUsarPatrocinador ? linha : removerHashtagsPatrocinador(linha))
+    .filter(Boolean)
+    .join("\n")
+    .trim();
+}
+
 async function copiarDescricao(id){
   const el = document.getElementById("desc_" + id);
   if(!el) return;
 
-  navigator.clipboard.writeText(el.innerText);
+  navigator.clipboard.writeText(limparDescricaoInstagram(el.innerText, {
+    categoria: el.dataset.patrocinador === "1" ? "patrocinador" : ""
+  }));
   alert("Copiado!");
 }
 
@@ -13999,7 +14762,9 @@ async function copiarDescricaoTopo(id){
   const el = document.getElementById("desc_topo_" + id);
   if(!el) return;
 
-  navigator.clipboard.writeText(el.innerText);
+  navigator.clipboard.writeText(limparDescricaoInstagram(el.innerText, {
+    categoria: el.dataset.patrocinador === "1" ? "patrocinador" : ""
+  }));
   alert("Copiado!");
 }
 
@@ -14125,20 +14890,30 @@ async function baixarPedido(id){
     pedido_id: id || ""
   });
 
-  marcarPedidoBaixado(id);
-  carregarHistorico();
-
   try{
     const r = await fetch(`${API_BASE}/pedidos/${id}/download-resultado`, {
       headers: { "Authorization": "Bearer " + token }
     });
 
-    if(!r.ok){
-      alert("Erro ao baixar imagem");
+    const contentType = (r.headers.get("content-type") || "").toLowerCase();
+
+    if(!r.ok || !contentType.startsWith("image/")){
+      const text = await r.text().catch(()=>"");
+      let mensagem = "Erro ao baixar imagem";
+      try{
+        const data = JSON.parse(text || "{}");
+        mensagem = data.error || data.mensagem || data.message || mensagem;
+      }catch{}
+      alert(mensagem);
       return;
     }
 
     const blob = await r.blob();
+    if(!blob || blob.size === 0){
+      alert("A imagem veio vazia. Tente baixar novamente.");
+      return;
+    }
+
     const url = window.URL.createObjectURL(blob);
 
     const a = document.createElement("a");
@@ -14148,7 +14923,14 @@ async function baixarPedido(id){
     a.click();
     a.remove();
 
-    window.URL.revokeObjectURL(url);
+    marcarPedidoBaixado(id);
+    carregarHistorico();
+    mostrarAvisoPedido(
+      "✅ Imagem baixada!",
+      "Sua imagem foi baixada com sucesso. Confira a pasta de downloads do seu navegador."
+    );
+
+    setTimeout(()=>window.URL.revokeObjectURL(url), 30000);
 
   }catch{
     alert("Erro de rede ao baixar");

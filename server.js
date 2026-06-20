@@ -11,7 +11,13 @@ const orderStorage = require("./src/orders/order.storage");
 const orderStatus = require("./src/orders/order.status");
 const orderService = require("./src/orders/order.service");
 const billingService = require("./src/billing/billing.service");
+const billingPlans = require("./src/billing/plans");
+const graphicMaterialsService = require("./src/company-graphic-materials/materials.service");
+const graphicMaterialsCatalog = require("./src/company-graphic-materials/materials.catalog");
 const carouselService = require("./src/company-carousels/carousels.service");
+const monthlyPlanningService = require("./src/company-monthly-planning/planning.service");
+const fcmService = require("./src/notifications/fcm.service");
+const seoNichePages = require("./src/seo/niche-page-renderer");
 
 const app = express();
 
@@ -20,18 +26,25 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "TROQUE_ISSO_AGORA";
 
 // ===== DATA STORAGE (RENDER DISK) =====
-const isRender = process.env.RENDER || process.env.NODE_ENV === "production";
-
-const DATA_DIR = isRender
-  ? "/var/data"
-  : path.join(__dirname, "dados");
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "dados");
 
 const PEDIDOS_DIR = path.join(DATA_DIR, "pedidos");
+const TMP_UPLOADS_DIR = path.join(DATA_DIR, "tmp_uploads");
+const GRAPHIC_MATERIALS_DIR = path.join(DATA_DIR, "materiais_graficos");
 const CAROUSELS_DIR = path.join(DATA_DIR, "carrosseis");
+const MONTHLY_PLANNINGS_DIR = path.join(DATA_DIR, "planejamentos_mensais");
 const CLIENTES_FILE = path.join(DATA_DIR, "clientes.json");
 const BOT_ADMIN_WHATSAPP = process.env.BOT_ADMIN_WHATSAPP || "15991120599";
 const BOT_RUNNER_TOKEN = process.env.BOT_RUNNER_TOKEN || "";
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || "";
+const MP_NOTIFICATION_URL = process.env.MP_NOTIFICATION_URL || "https://ia4tube-api.onrender.com/webhook/mercadopago";
+const PUBLIC_API_BASE_URL = (process.env.PUBLIC_API_BASE_URL || "https://ia4tube-api.onrender.com").replace(/\/+$/, "");
+const EMPRESA_ARTE_AVULSA_VALOR = productsRegistry.getProductPrice("arte_empresa") || 9.90;
+const MP_PROCESSANDO_RETRY_MS = 10 * 60 * 1000;
+const MONTHLY_PLANNING_NOTIFICATIONS_INTERVAL_MS = Math.max(
+  30 * 1000,
+  Number(process.env.MONTHLY_PLANNING_NOTIFICATIONS_INTERVAL_MS || 60 * 1000)
+);
 const MP_PROCESSADOS_FILE = path.join(DATA_DIR, "mp_processados.json");
 const TEMPO_ESTIMADO_FILE = path.join(DATA_DIR, "tempo_estimado.json");
 const ONLINE_FILE = path.join(DATA_DIR, "usuarios_online.json");
@@ -39,6 +52,7 @@ const SUPORTE_ABERTAS_FILE = path.join(DATA_DIR, "suporte_conversas_abertas.json
 const SUPORTE_FINALIZADAS_FILE = path.join(DATA_DIR, "suporte_conversas_finalizadas.json");
 const ANALYTICS_DIR = path.join(DATA_DIR, "analytics");
 const EVENTOS_CLIENTES_FILE = path.join(DATA_DIR, "eventos_clientes.json");
+const SEO_NICHES_DIR = path.join(__dirname, "public", "nichos");
 
 const CLIENTES_TESTE = [
   "Los Hermanos",
@@ -48,7 +62,7 @@ const CLIENTES_TESTE = [
 
 // CORS: permite seu site chamar a API
 app.use(cors({
-  origin: ["https://omascote.com.br", "http://127.0.0.1:8080", "http://localhost:8080"],
+  origin: ["https://ia4tube.com", "https://www.ia4tube.com", "http://127.0.0.1:8080", "http://localhost:8080"],
   credentials: false
 }));
 
@@ -64,8 +78,10 @@ function ensureDir(p) {
 
 ensureDir(DATA_DIR);
 ensureDir(PEDIDOS_DIR);
+ensureDir(TMP_UPLOADS_DIR);
+ensureDir(GRAPHIC_MATERIALS_DIR);
 ensureDir(CAROUSELS_DIR);
-ensureDir(path.join(DATA_DIR, "tmp_uploads"));
+ensureDir(MONTHLY_PLANNINGS_DIR);
 ensureDir(ANALYTICS_DIR);
 
 if (!fs.existsSync(CLIENTES_FILE)) {
@@ -105,7 +121,7 @@ if (!fs.existsSync(EVENTOS_CLIENTES_FILE)) {
 
 // ===== HELPERS =====
 function readClientes() {
-  return JSON.parse(fs.readFileSync(CLIENTES_FILE, "utf8") || "{}");
+  return JSON.parse((fs.readFileSync(CLIENTES_FILE, "utf8") || "{}").replace(/^\uFEFF/, ""));
 }
 
 function writeClientes(obj) {
@@ -118,6 +134,15 @@ function readMpProcessados() {
 
 function writeMpProcessados(obj) {
   fs.writeFileSync(MP_PROCESSADOS_FILE, JSON.stringify(obj, null, 2), "utf8");
+}
+
+function isMpProcessandoStale(registro) {
+  if (!registro || registro.status !== "processando") return false;
+
+  const tentativaEm = new Date(registro.ultima_tentativa_em || registro.criado_em || 0).getTime();
+  if (!tentativaEm || Number.isNaN(tentativaEm)) return true;
+
+  return Date.now() - tentativaEm > MP_PROCESSANDO_RETRY_MS;
 }
 
 function readTempoEstimado() {
@@ -147,6 +172,7 @@ function getCustoPedido(categoria, cliente) {
   if (categoria === "escalacao") return 8.00;
   if (categoria === "contratacao") return 7.00;
   if (categoria === "proximo_jogo") return 7.00;
+  if (categoria === "treino") return 7.00;
   if (categoria === "patrocinador") return 8.00;
   if (categoria === "escudo3d") return 4.00;
 
@@ -170,6 +196,7 @@ function nomeCategoriaPedido(categoria) {
     escalacao: "Escalação",
     contratacao: "Contratação",
     proximo_jogo: "Próximo jogo",
+    treino: "Dia de Treino",
     patrocinador: "Patrocinador / Apoio",
     escudo3d: "Escudo 3D",
     proximo_jogo_jogador: "Próximo jogo jogador",
@@ -615,6 +642,7 @@ function auth(req, res, next) {
     return res.status(401).json({ ok: false, error: "Token inválido" });
   }
 }
+
 function botRunnerAuth(req, res, next) {
   const h = req.headers.authorization || "";
   const token = h.startsWith("Bearer ") ? h.slice(7) : "";
@@ -640,15 +668,69 @@ function botRunnerAuth(req, res, next) {
 
     return next();
   } catch {
-    return res.status(401).json({ ok: false, error: "Token invalido" });
+    return res.status(401).json({ ok: false, error: "Token inválido" });
   }
 }
 
-
 // ===== UPLOAD (multer) =====
+const TMP_UPLOAD_MAX_AGE_MS = 6 * 60 * 60 * 1000;
+const TMP_UPLOAD_CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
+
+function flattenUploadedFiles(files = {}) {
+  return Object.values(files).flat().filter(Boolean);
+}
+
+function cleanupUploadedFiles(files = {}) {
+  for (const file of flattenUploadedFiles(files)) {
+    try {
+      if (file?.path && file.path.startsWith(TMP_UPLOADS_DIR) && fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+    } catch (error) {
+      console.warn("[uploads] falha ao remover temporario da requisicao", {
+        path: file?.path,
+        message: error?.message
+      });
+    }
+  }
+}
+
+function cleanupOldTmpUploads() {
+  try {
+    ensureDir(TMP_UPLOADS_DIR);
+    const now = Date.now();
+    let removed = 0;
+    let freedBytes = 0;
+
+    for (const entry of fs.readdirSync(TMP_UPLOADS_DIR, { withFileTypes: true })) {
+      if (!entry.isFile()) continue;
+
+      const filePath = path.join(TMP_UPLOADS_DIR, entry.name);
+      const stat = fs.statSync(filePath);
+
+      if (now - stat.mtimeMs < TMP_UPLOAD_MAX_AGE_MS) continue;
+
+      fs.unlinkSync(filePath);
+      removed += 1;
+      freedBytes += stat.size;
+    }
+
+    if (removed > 0) {
+      console.log("[uploads] limpeza tmp_uploads", {
+        removed,
+        freed_mb: Number((freedBytes / 1024 / 1024).toFixed(2))
+      });
+    }
+  } catch (error) {
+    console.warn("[uploads] falha na limpeza tmp_uploads", {
+      message: error?.message
+    });
+  }
+}
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) =>
-    cb(null, path.join(DATA_DIR, "tmp_uploads")),
+    cb(null, TMP_UPLOADS_DIR),
 
   filename: (req, file, cb) => {
     const safe = file.originalname.replace(/[^\w.\-]+/g, "_");
@@ -681,6 +763,37 @@ const uploadResultado = multer({ storage });
 // Health check
 app.get("/", (req, res) => {
   res.json({ ok: true, msg: "omascote-api online" });
+});
+
+function envInt(name, fallback) {
+  const value = Number(process.env[name]);
+  return Number.isFinite(value) ? value : fallback;
+}
+
+function envBool(name, fallback = false) {
+  const value = String(process.env[name] || "").trim().toLowerCase();
+  if (["1", "true", "yes", "sim", "on"].includes(value)) return true;
+  if (["0", "false", "no", "nao", "n\u00e3o", "off"].includes(value)) return false;
+  return fallback;
+}
+
+app.get("/app/version", (req, res) => {
+  const latestVersionCode = envInt("IA4TUBE_ANDROID_LATEST_VERSION_CODE", 5);
+  const minimumVersionCode = envInt("IA4TUBE_ANDROID_MINIMUM_VERSION_CODE", 1);
+  const latestVersionName = process.env.IA4TUBE_ANDROID_LATEST_VERSION_NAME || "0.1.0";
+
+  return res.json({
+    ok: true,
+    latest_version_code: latestVersionCode,
+    minimum_version_code: minimumVersionCode,
+    latest_version_name: latestVersionName,
+    update_required: envBool("IA4TUBE_ANDROID_UPDATE_REQUIRED", false),
+    title: process.env.IA4TUBE_ANDROID_UPDATE_TITLE || "Nova vers\u00e3o dispon\u00edvel",
+    message: process.env.IA4TUBE_ANDROID_UPDATE_MESSAGE ||
+      "Atualize o app para receber melhorias, corre\u00e7\u00f5es e uma experi\u00eancia mais est\u00e1vel.",
+    play_store_url: process.env.IA4TUBE_ANDROID_PLAY_STORE_URL ||
+      "https://play.google.com/store/apps/details?id=com.ia4tube.app"
+  });
 });
 
 app.get("/tempo-estimado", (req, res) => {
@@ -721,7 +834,7 @@ app.post("/evento", (req, res) => {
   }
 });
 
-app.post("/bot/tempo-estimado", auth, (req, res) => {
+app.post("/bot/tempo-estimado", botRunnerAuth, (req, res) => {
   if (!isBotAdmin(req)) {
     return res.status(403).json({ ok: false, error: "Acesso negado" });
   }
@@ -1087,20 +1200,361 @@ app.get("/me", auth, (req, res) => {
     return res.status(404).json({ ok: false, error: "Cliente não encontrado" });
   }
 
+  const cicloAtualizado = billingService.refreshManualPlanCycle(c);
+  const carrosselCycleBefore = JSON.stringify({
+    carrosseis_ciclo: c.carrosseis_ciclo || "",
+    carrosseis_criados: c.carrosseis_criados || null
+  });
+  const billing = billingService.getBillingStatus(c);
+  const carrosselUsage = carouselService.carouselUsagePayload(c);
+  const carrosselCycleAfter = JSON.stringify({
+    carrosseis_ciclo: c.carrosseis_ciclo || "",
+    carrosseis_criados: c.carrosseis_criados || null
+  });
+
+  if (cicloAtualizado.changed || carrosselCycleBefore !== carrosselCycleAfter) {
+    clientes[req.user.whatsapp] = c;
+    writeClientes(clientes);
+  }
+
+  const bonusTesteVisual = req.user.whatsapp === "15991120599" ? 999 : 0;
+  const saldoVisivel = Number(c.saldo_mensal || 0) + Number(c.saldo_extra || 0) + bonusTesteVisual;
+
   return res.json({
     ok: true,
     nome_time: c.nome_time,
     plano: c.plano,
+    plano_atual: billing.plano_atual,
+    plano_status: billing.plano_status,
+    plano_nome: billing.plano_nome,
+    plano_renova_em: billing.plano_renova_em,
+    artes_mensais_total: billing.artes_mensais_total,
+    artes_mensais_usadas: billing.artes_mensais_usadas,
+    artes_mensais_restantes: billing.artes_mensais_restantes,
     saldo_mensal: Number(c.saldo_mensal || 0),
     saldo_extra: Number(c.saldo_extra || 0),
-    saldo: Number(c.saldo_mensal || 0) + Number(c.saldo_extra || 0),
+    saldo: saldoVisivel,
     usados_no_ciclo: c.usados_no_ciclo,
+    carrosseis_limite: carrosselUsage.limite_plano,
+    carrosseis_usados: carrosselUsage.usado_no_ciclo,
+    carrosseis_restantes: carrosselUsage.restante_no_ciclo,
+    carrosseis_ciclo: carrosselUsage.ciclo,
     brinde_mascote_disponivel: c.brinde_mascote_disponivel === true,
-    ativo: c.ativo
+    ativo: c.ativo,
+    billing
   });
 });
 
+app.post("/me/fcm-token", auth, (req, res) => {
+  const fcmToken = String(req.body?.token || "").trim();
+  const platform = String(req.body?.platform || "android").trim().toLowerCase() || "android";
+
+  if (!fcmToken) {
+    return res.status(400).json({ ok: false, error: "Token FCM obrigatorio" });
+  }
+
+  const clientes = readClientes();
+  const c = clientes[req.user.whatsapp];
+
+  if (!c) {
+    return res.status(404).json({ ok: false, error: "Cliente nao encontrado" });
+  }
+
+  const now = new Date().toISOString();
+  c.notificacoes = c.notificacoes && typeof c.notificacoes === "object" && !Array.isArray(c.notificacoes)
+    ? c.notificacoes
+    : {};
+
+  const existingTokens = Array.isArray(c.notificacoes.fcm_tokens)
+    ? c.notificacoes.fcm_tokens.filter(item => item && typeof item === "object" && item.token)
+    : [];
+  const current = existingTokens.find(item => item.token === fcmToken);
+
+  if (current) {
+    current.platform = platform;
+    current.ativo = true;
+    current.atualizado_em = now;
+  } else {
+    existingTokens.push({
+      token: fcmToken,
+      platform,
+      ativo: true,
+      atualizado_em: now
+    });
+  }
+
+  c.notificacoes.fcm_tokens = existingTokens;
+  clientes[req.user.whatsapp] = c;
+  writeClientes(clientes);
+
+  return res.json({
+    ok: true,
+    salvo: true,
+    tokens_ativos: existingTokens.filter(item => item.ativo !== false).length
+  });
+});
+
+function fcmSenderForType(tipo = "") {
+  switch (String(tipo || "").trim().toLowerCase()) {
+    case "arte_pronta":
+      return fcmService.sendArtePronta;
+    case "pedido_atualizado":
+      return fcmService.sendPedidoAtualizado;
+    case "planejamento_mensal":
+      return fcmService.sendPlanejamentoMensal;
+    case "nova_versao":
+      return fcmService.sendNovaVersao;
+    case "aviso_geral":
+    default:
+      return fcmService.sendAvisoGeral;
+  }
+}
+
+function publicApiUrl(pathname = "") {
+  const cleanPath = String(pathname || "").startsWith("/")
+    ? String(pathname || "")
+    : `/${pathname || ""}`;
+  return `${PUBLIC_API_BASE_URL}${cleanPath}`;
+}
+
+function sendClientPushAsync(whatsapp, tipo, payload = {}) {
+  try {
+    const clientes = readClientes();
+    const cliente = clientes[whatsapp];
+
+    if (!cliente) {
+      console.warn("[fcm] cliente nao encontrado", { whatsapp, tipo });
+      return;
+    }
+
+    const sender = fcmSenderForType(tipo);
+    sender(cliente, payload)
+      .then((result) => {
+        if (!result?.ok) {
+          console.warn("[fcm] push nao enviado", { whatsapp, tipo, result });
+          return;
+        }
+        console.log("[fcm] push enviado", {
+          whatsapp,
+          tipo,
+          sent: result.sent || 0,
+          mock: result.mock === true
+        });
+      })
+      .catch((error) => {
+        console.warn("[fcm] falha ao enviar push", {
+          whatsapp,
+          tipo,
+          message: error?.message
+        });
+      });
+  } catch (error) {
+    console.warn("[fcm] falha ao preparar push", {
+      whatsapp,
+      tipo,
+      message: error?.message
+    });
+  }
+}
+
+app.post("/bot/notificacoes/teste", botRunnerAuth, async (req, res) => {
+  if (!isBotAdmin(req)) {
+    return res.status(403).json({ ok: false, error: "Acesso negado" });
+  }
+
+  const whatsapp = String(req.body?.whatsapp || "").trim();
+  const tipo = String(req.body?.tipo || "aviso_geral").trim() || "aviso_geral";
+
+  if (!whatsapp) {
+    return res.status(400).json({ ok: false, error: "WhatsApp obrigatorio" });
+  }
+
+  const clientes = readClientes();
+  const cliente = clientes[whatsapp];
+
+  if (!cliente) {
+    return res.status(404).json({ ok: false, error: "Cliente nao encontrado" });
+  }
+
+  try {
+    const sender = fcmSenderForType(tipo);
+    const result = await sender(cliente, {
+      title: req.body?.title,
+      body: req.body?.body || req.body?.message,
+      pedido_id: req.body?.pedido_id,
+      planejamento_id: req.body?.planejamento_id,
+      planejamento_item_id: req.body?.planejamento_item_id,
+      latest_version_code: req.body?.latest_version_code,
+      latest_version_name: req.body?.latest_version_name,
+      image_url: req.body?.image_url || req.body?.imageUrl || req.body?.image || req.body?.picture,
+      data: req.body?.data && typeof req.body.data === "object" ? req.body.data : {}
+    });
+
+    return res.json({ ok: result?.ok === true, result });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      error: error?.message || "Falha ao enviar notificacao de teste"
+    });
+  }
+});
+
 // ===== MERCADO PAGO =====
+async function createMercadoPagoPixPayment({ amount, description, payerKey, externalReference, metadata, idempotencyKey }) {
+  if (!MP_ACCESS_TOKEN) {
+    const error = new Error("MP_ACCESS_TOKEN nao configurado");
+    error.statusCode = 500;
+    throw error;
+  }
+
+  const payerEmail = `${String(payerKey).replace(/\D/g, "") || "cliente"}@ia4tube.com.br`;
+  const paymentPayload = {
+    transaction_amount: Number(Number(amount).toFixed(2)),
+    description,
+    payment_method_id: "pix",
+    payer: {
+      email: payerEmail
+    },
+    external_reference: externalReference,
+    metadata,
+    notification_url: MP_NOTIFICATION_URL
+  };
+
+  const r = await fetch("https://api.mercadopago.com/v1/payments", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${MP_ACCESS_TOKEN}`,
+      "Content-Type": "application/json",
+      "X-Idempotency-Key": idempotencyKey
+    },
+    body: JSON.stringify(paymentPayload)
+  });
+
+  const data = await r.json();
+
+  if (!r.ok) {
+    const error = new Error("Erro ao gerar Pix");
+    error.statusCode = 500;
+    error.detail = data;
+    throw error;
+  }
+
+  const transactionData = data.point_of_interaction?.transaction_data || {};
+  return {
+    data,
+    pixCopiaCola: transactionData.qr_code || "",
+    qrCodeBase64: transactionData.qr_code_base64 || "",
+    ticketUrl: transactionData.ticket_url || ""
+  };
+}
+
+app.get("/billing/status", auth, (req, res) => {
+  const clientes = readClientes();
+  const c = clientes[req.user.whatsapp];
+
+  if (!c) {
+    return res.status(404).json({ ok: false, error: "Cliente nao encontrado" });
+  }
+
+  const cicloAtualizado = billingService.refreshManualPlanCycle(c);
+  if (cicloAtualizado.changed) {
+    clientes[req.user.whatsapp] = c;
+    writeClientes(clientes);
+  }
+
+  return res.json({
+    ok: true,
+    ...billingService.getBillingStatus(c)
+  });
+});
+
+app.post("/billing/saldo/pix", auth, async (req, res) => {
+  try {
+    const { pacote = "saldo_990" } = req.body || {};
+    const whatsapp = req.user.whatsapp;
+    const p = billingPlans.getBalancePackage(pacote);
+
+    if (!p) {
+      return res.status(400).json({ ok: false, error: "Pacote invalido" });
+    }
+
+    const result = await createMercadoPagoPixPayment({
+      amount: p.amount,
+      description: p.title,
+      payerKey: whatsapp,
+      externalReference: `saldo_extra|${whatsapp}|${p.id}|${Date.now()}`,
+      metadata: {
+        tipo: "saldo_extra",
+        whatsapp,
+        pacote: p.id,
+        credito: Number(p.credit)
+      },
+      idempotencyKey: `saldo_extra_${whatsapp}_${p.id}_${Date.now()}`
+    });
+
+    return res.json({
+      ok: true,
+      pix_copia_cola: result.pixCopiaCola,
+      qr_code_base64: result.qrCodeBase64,
+      ticket_url: result.ticketUrl,
+      payment_id: result.data.id,
+      pacote: p.id,
+      valor_pago: Number(p.amount),
+      credito: Number(p.credit)
+    });
+  } catch (e) {
+    return res.status(e.statusCode || 500).json({
+      ok: false,
+      error: e.message || "Erro interno ao gerar Pix",
+      detalhe: e.detail
+    });
+  }
+});
+
+app.post("/billing/planos/:planId/pix", auth, async (req, res) => {
+  try {
+    const whatsapp = req.user.whatsapp;
+    const plan = billingPlans.getPlan(req.params.planId);
+
+    if (!plan) {
+      return res.status(400).json({ ok: false, error: "Plano invalido" });
+    }
+
+    const result = await createMercadoPagoPixPayment({
+      amount: plan.price,
+      description: `IA4Tube - ${plan.name}`,
+      payerKey: whatsapp,
+      externalReference: `plano_pix|${whatsapp}|${plan.id}|${Date.now()}`,
+      metadata: {
+        tipo: "plano_pix",
+        whatsapp,
+        plan_id: plan.id,
+        plan_name: plan.name,
+        artes_mes: Number(plan.artsPerMonth)
+      },
+      idempotencyKey: `plano_pix_${whatsapp}_${plan.id}_${Date.now()}`
+    });
+
+    return res.json({
+      ok: true,
+      pix_copia_cola: result.pixCopiaCola,
+      qr_code_base64: result.qrCodeBase64,
+      ticket_url: result.ticketUrl,
+      payment_id: result.data.id,
+      plan_id: plan.id,
+      plan_name: plan.name,
+      valor_pago: Number(plan.price),
+      artes_mes: Number(plan.artsPerMonth)
+    });
+  } catch (e) {
+    return res.status(e.statusCode || 500).json({
+      ok: false,
+      error: e.message || "Erro interno ao gerar Pix",
+      detalhe: e.detail
+    });
+  }
+});
+
 app.post("/comprar-creditos", auth, async (req, res) => {
   try {
     if (!MP_ACCESS_TOKEN) {
@@ -1138,11 +1592,11 @@ app.post("/comprar-creditos", auth, async (req, res) => {
         credito: Number(p.credito)
       },
       back_urls: {
-        success: "https://omascote.com.br/app.html",
-        failure: "https://omascote.com.br/app.html",
-        pending: "https://omascote.com.br/app.html"
+        success: "https://ia4tube.com/app.html",
+        failure: "https://ia4tube.com/app.html",
+        pending: "https://ia4tube.com/app.html"
       },
-      notification_url: "https://api.omascote.com.br/webhook/mercadopago",
+      notification_url: "https://ia4tube-api.onrender.com/webhook/mercadopago",
       auto_return: "approved"
     };
 
@@ -1175,7 +1629,7 @@ app.post("/comprar-creditos", auth, async (req, res) => {
 app.post("/comprar-creditos-pix", auth, async (req, res) => {
   try {
     if (!MP_ACCESS_TOKEN) {
-      return res.status(500).json({ ok: false, error: "MP_ACCESS_TOKEN nÃ£o configurado" });
+      return res.status(500).json({ ok: false, error: "MP_ACCESS_TOKEN não configurado" });
     }
 
     const { pacote } = req.body || {};
@@ -1191,7 +1645,7 @@ app.post("/comprar-creditos-pix", auth, async (req, res) => {
     const p = pacotes[pacote];
 
     if (!p) {
-      return res.status(400).json({ ok: false, error: "Pacote invÃ¡lido" });
+      return res.status(400).json({ ok: false, error: "Pacote inválido" });
     }
 
     const payerEmail = `${String(whatsapp).replace(/\D/g, "") || "cliente"}@ia4tube.com.br`;
@@ -1209,7 +1663,7 @@ app.post("/comprar-creditos-pix", auth, async (req, res) => {
         pacote,
         credito: Number(p.credito)
       },
-      notification_url: "https://api.omascote.com.br/webhook/mercadopago"
+      notification_url: "https://ia4tube-api.onrender.com/webhook/mercadopago"
     };
 
     const r = await fetch("https://api.mercadopago.com/v1/payments", {
@@ -1255,14 +1709,21 @@ app.post("/webhook/mercadopago", async (req, res) => {
     }
 
     let processados = readMpProcessados();
+    const registroAtual = processados[paymentId];
 
-    if (processados[paymentId]) {
+    if (registroAtual && registroAtual.status !== "processando") {
       return res.json({ ok: true, duplicado: true });
+    }
+
+    if (registroAtual && !isMpProcessandoStale(registroAtual)) {
+      return res.json({ ok: true, processando: true });
     }
 
     processados[paymentId] = {
       status: "processando",
-      criado_em: new Date().toISOString()
+      criado_em: registroAtual?.criado_em || new Date().toISOString(),
+      ultima_tentativa_em: new Date().toISOString(),
+      tentativas: Number(registroAtual?.tentativas || 0) + 1
     };
 
     writeMpProcessados(processados);
@@ -1350,12 +1811,13 @@ app.post("/webhook/mercadopago", async (req, res) => {
       pedido.pagamento_confirmado_em = new Date().toISOString();
       pedido.mp_payment_status = "approved";
 
-      const valorBonusPedido = Number(
+      const deveCreditarBonusPedido = pedido.creditar_saldo_ao_pagar_pix === true;
+      const valorBonusPedido = deveCreditarBonusPedido ? Number(
         pedido.valor_pendente ||
         pagamento.metadata?.valor_pendente ||
         pagamento.transaction_amount ||
         0
-      );
+      ) : 0;
 
       if (valorBonusPedido > 0) {
         const clientes = readClientes();
@@ -1385,10 +1847,104 @@ app.post("/webhook/mercadopago", async (req, res) => {
       return res.json({ ok: true });
     }
 
-    const whatsapp = pagamento.metadata?.whatsapp || external.split("|")[0];
-    const credito = Number(pagamento.metadata?.credito || 0);
+    if (tipo === "plano_pix") {
+      const whatsapp = pagamento.metadata?.whatsapp || external.split("|")[1];
+      const planId = pagamento.metadata?.plan_id || external.split("|")[2];
+      const plan = billingPlans.getPlan(planId);
 
-    if (!whatsapp || !credito) {
+      if (!whatsapp || !plan) {
+        processados = readMpProcessados();
+        processados[paymentId] = {
+          tipo: "plano_pix",
+          whatsapp,
+          plan_id: planId,
+          status: "erro_plano_invalido",
+          criado_em: new Date().toISOString()
+        };
+        writeMpProcessados(processados);
+        return res.json({ ok: true });
+      }
+
+      const clientes = readClientes();
+      const c = clientes[whatsapp];
+
+      if (!c) {
+        processados = readMpProcessados();
+        processados[paymentId] = {
+          tipo: "plano_pix",
+          whatsapp,
+          plan_id: plan.id,
+          status: "cliente_nao_encontrado",
+          criado_em: new Date().toISOString()
+        };
+        writeMpProcessados(processados);
+        return res.json({ ok: true });
+      }
+
+      const resultadoPlano = billingService.applyManualPlanPayment(c, plan, {
+        paymentId: String(paymentId),
+        paidAt: pagamento.date_approved || pagamento.date_last_updated || new Date().toISOString()
+      });
+
+      c.ultimo_pix_plano_valor = Number(pagamento.transaction_amount || plan.price);
+      c.ultimo_pix_plano_status = resultadoPlano.status;
+      clientes[whatsapp] = c;
+      writeClientes(clientes);
+
+      processados = readMpProcessados();
+      processados[paymentId] = {
+        tipo: "plano_pix",
+        whatsapp,
+        plan_id: plan.id,
+        plano_status: resultadoPlano.status,
+        status: pagamento.status,
+        criado_em: new Date().toISOString()
+      };
+      writeMpProcessados(processados);
+
+      return res.json({ ok: true });
+    }
+
+    if (tipo !== "saldo" && tipo !== "saldo_extra") {
+      processados = readMpProcessados();
+      processados[paymentId] = {
+        tipo: tipo || "desconhecido",
+        status: "ignorado",
+        criado_em: new Date().toISOString()
+      };
+      writeMpProcessados(processados);
+      return res.json({ ok: true, status: "tipo_ignorado" });
+    }
+
+    const externalParts = external.split("|");
+    let whatsapp = String(pagamento.metadata?.whatsapp || "").trim();
+
+    if (!whatsapp) {
+      if (tipo === "saldo_extra" && externalParts[0] === "saldo_extra") {
+        whatsapp = String(externalParts[1] || "").trim();
+      } else {
+        whatsapp = String(externalParts[0] || "").trim();
+      }
+    }
+
+    const credito = Number(pagamento.metadata?.credito || 0);
+    const clienteReferenciaValida = whatsapp &&
+      whatsapp !== "saldo" &&
+      whatsapp !== "saldo_extra" &&
+      !whatsapp.includes("|");
+
+    if (!clienteReferenciaValida || !credito) {
+      processados = readMpProcessados();
+      processados[paymentId] = {
+        tipo,
+        whatsapp,
+        credito,
+        payment_id: String(paymentId),
+        external_reference: external,
+        status: "erro_sem_whatsapp_ou_credito",
+        criado_em: new Date().toISOString()
+      };
+      writeMpProcessados(processados);
       return res.json({ ok: true, error: "sem whatsapp ou credito" });
     }
 
@@ -1396,6 +1952,23 @@ app.post("/webhook/mercadopago", async (req, res) => {
     const c = clientes[whatsapp];
 
     if (!c) {
+      console.warn("[mercadopago webhook] cliente_nao_encontrado", {
+        paymentId: String(paymentId),
+        tipo,
+        whatsapp,
+        external_reference: external
+      });
+      processados = readMpProcessados();
+      processados[paymentId] = {
+        tipo,
+        whatsapp,
+        credito,
+        payment_id: String(paymentId),
+        external_reference: external,
+        status: "cliente_nao_encontrado",
+        criado_em: new Date().toISOString()
+      };
+      writeMpProcessados(processados);
       return res.json({ ok: true, error: "cliente não encontrado" });
     }
 
@@ -1411,7 +1984,9 @@ app.post("/webhook/mercadopago", async (req, res) => {
     clientes[whatsapp] = c;
     writeClientes(clientes);
 
+    processados = readMpProcessados();
     processados[paymentId] = {
+      tipo,
       whatsapp,
       credito,
       status: pagamento.status,
@@ -1427,13 +2002,304 @@ app.post("/webhook/mercadopago", async (req, res) => {
   }
 });
 
+// ===== MATERIAIS GRAFICOS DA EMPRESA =====
+app.get("/empresa/materiais-graficos", auth, (req, res) => {
+  const whatsapp = req.user.whatsapp;
+  const clientes = readClientes();
+  const cliente = clientes[whatsapp];
+
+  if (!cliente) {
+    return res.status(404).json({ ok: false, error: "Cliente nao encontrado" });
+  }
+
+  try {
+    const requestedRamo = String(req.query?.ramo || cliente.ramo || cliente.nicho || "").trim();
+    const payload = graphicMaterialsService.publicListPayload({
+      cliente,
+      ramo: requestedRamo,
+      baseDir: GRAPHIC_MATERIALS_DIR,
+      whatsapp
+    });
+    const generalCount = payload.materiais.filter((material) => material.scope !== "ramo").length;
+    const branchCount = payload.materiais.filter((material) => material.scope === "ramo").length;
+    console.log("[materiais-graficos] listagem", {
+      whatsapp,
+      ramo_recebido: req.query?.ramo || "",
+      ramo_usado: requestedRamo,
+      ramo_resolvido: graphicMaterialsCatalog.folderForRamo(requestedRamo),
+      materiais_gerais: generalCount,
+      materiais_ramo: branchCount,
+      plano_atual: cliente.plano_atual || cliente.plano || "",
+      plano_status: cliente.plano_status || "",
+      plano_ativo: billingService.isPlanActive(cliente)
+    });
+    clientes[whatsapp] = cliente;
+    writeClientes(clientes);
+    return res.json(payload);
+  } catch (error) {
+    console.error("[materiais-graficos] erro ao listar", {
+      whatsapp,
+      message: error?.message,
+      stack: error?.stack
+    });
+    return res.status(500).json({
+      ok: false,
+      error: "Nao foi possivel listar os materiais graficos agora."
+    });
+  }
+});
+
+app.post(
+  "/empresa/materiais-graficos/:materialId/solicitar",
+  auth,
+  upload.single("logo"),
+  (req, res) => {
+    const whatsapp = req.user.whatsapp;
+    const clientes = readClientes();
+    const cliente = clientes[whatsapp];
+
+    if (!cliente) {
+      if (req.file?.path && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+      return res.status(404).json({ ok: false, error: "Cliente nao encontrado" });
+    }
+
+    try {
+      const document = graphicMaterialsService.createRequest({
+        baseDir: GRAPHIC_MATERIALS_DIR,
+        cliente,
+        whatsapp,
+        materialId: req.params.materialId,
+        body: req.body || {},
+        logoPath: req.file?.path || ""
+      });
+
+      clientes[whatsapp] = cliente;
+      writeClientes(clientes);
+
+      return res.json({
+        ok: true,
+        document_id: document.document_id,
+        material_id: document.material_id,
+        title: document.title,
+        scope: document.scope,
+        ciclo: document.ciclo,
+        status: "processing",
+        status_label: "Em produção"
+      });
+    } catch (error) {
+      console.error("[materiais-graficos] erro ao solicitar", {
+        whatsapp,
+        materialId: req.params.materialId,
+        message: error?.message,
+        stack: error?.stack
+      });
+      return res.status(error?.statusCode || 500).json({
+        ok: false,
+        code: error?.code || "graphic_material_request_error",
+        error: error?.message || "Nao foi possivel solicitar o material grafico agora."
+      });
+    } finally {
+      if (req.file?.path && fs.existsSync(req.file.path)) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch {}
+      }
+    }
+  }
+);
+
+app.get("/empresa/materiais-graficos/:materialId/status", auth, (req, res) => {
+  const whatsapp = req.user.whatsapp;
+  const clientes = readClientes();
+  const cliente = clientes[whatsapp];
+
+  if (!cliente) {
+    return res.status(404).json({ ok: false, error: "Cliente nao encontrado" });
+  }
+
+  try {
+    const payload = graphicMaterialsService.materialStatusPayload({
+      cliente,
+      ramo: req.query?.ramo || "",
+      baseDir: GRAPHIC_MATERIALS_DIR,
+      whatsapp,
+      materialId: req.params.materialId
+    });
+    clientes[whatsapp] = cliente;
+    writeClientes(clientes);
+    return res.json(payload);
+  } catch (error) {
+    return res.status(error?.statusCode || 500).json({
+      ok: false,
+      code: error?.code || "graphic_material_status_error",
+      error: error?.message || "Nao foi possivel consultar o status do material grafico."
+    });
+  }
+});
+
+app.get("/empresa/materiais-graficos/:materialId/download", auth, (req, res) => {
+  const whatsapp = req.user.whatsapp;
+  const clientes = readClientes();
+  const cliente = clientes[whatsapp];
+
+  if (!cliente) {
+    return res.status(404).json({ ok: false, error: "Cliente nao encontrado" });
+  }
+
+  try {
+    const document = graphicMaterialsService.downloadForMaterial({
+      baseDir: GRAPHIC_MATERIALS_DIR,
+      cliente,
+      whatsapp,
+      materialId: req.params.materialId
+    });
+
+    res.setHeader("Content-Type", "image/png");
+    res.setHeader("Content-Disposition", `attachment; filename="${document.filename}"`);
+    return res.sendFile(document.filePath);
+  } catch (error) {
+    return res.status(error?.statusCode || 500).json({
+      ok: false,
+      code: error?.code || "graphic_material_download_error",
+      error: error?.message || "Material grafico nao encontrado"
+    });
+  }
+});
+
+app.get("/bot/empresa/materiais-graficos/novos", botRunnerAuth, (req, res) => {
+  if (!isBotAdmin(req)) {
+    return res.status(403).json({ ok: false, error: "Acesso negado" });
+  }
+
+  const limit = Number(req.query?.limit || 5);
+  const materiais = graphicMaterialsService.listBotPending({
+    baseDir: GRAPHIC_MATERIALS_DIR,
+    limit: Number.isFinite(limit) && limit > 0 ? Math.min(limit, 50) : 5
+  });
+
+  return res.json({ ok: true, materiais });
+});
+
+app.get("/bot/empresa/materiais-graficos/:documentId/zip", botRunnerAuth, (req, res) => {
+  if (!isBotAdmin(req)) {
+    return res.status(403).json({ ok: false, error: "Acesso negado" });
+  }
+
+  const request = graphicMaterialsService.findRequestByDocument({
+    baseDir: GRAPHIC_MATERIALS_DIR,
+    documentId: req.params.documentId
+  });
+
+  if (!request) {
+    return res.status(404).json({ ok: false, error: "Solicitacao nao encontrada" });
+  }
+
+  res.setHeader("Content-Type", "application/zip");
+  res.setHeader("Content-Disposition", `attachment; filename="${req.params.documentId}.zip"`);
+
+  const archive = archiver("zip", { zlib: { level: 9 } });
+  archive.on("error", err => res.status(500).end(String(err)));
+  archive.pipe(res);
+  archive.directory(request.base_path, false);
+  archive.finalize();
+});
+
+app.post("/bot/empresa/materiais-graficos/:documentId/status", botRunnerAuth, (req, res) => {
+  if (!isBotAdmin(req)) {
+    return res.status(403).json({ ok: false, error: "Acesso negado" });
+  }
+
+  const request = graphicMaterialsService.findRequestByDocument({
+    baseDir: GRAPHIC_MATERIALS_DIR,
+    documentId: req.params.documentId
+  });
+
+  if (!request) {
+    return res.status(404).json({ ok: false, error: "Solicitacao nao encontrada" });
+  }
+
+  const updated = graphicMaterialsService.updateRequestStatus(
+    request,
+    String(req.body?.status || "processando"),
+    String(req.body?.message || "")
+  );
+
+  return res.json({
+    ok: true,
+    document_id: updated.document_id || updated.id,
+    status: updated.status
+  });
+});
+
+app.post(
+  "/bot/empresa/materiais-graficos/:documentId/upload-resultado",
+  botRunnerAuth,
+  uploadResultado.fields([
+    { name: "resultado", maxCount: 1 },
+    { name: "preview", maxCount: 1 }
+  ]),
+  (req, res) => {
+    if (!isBotAdmin(req)) {
+      cleanupUploadedFiles(req.files);
+      return res.status(403).json({ ok: false, error: "Acesso negado" });
+    }
+
+    const resultadoFile = req.files?.resultado?.[0] || null;
+    const previewFile = req.files?.preview?.[0] || null;
+
+    if (!resultadoFile) {
+      cleanupUploadedFiles(req.files);
+      return res.status(400).json({ ok: false, error: "Arquivo resultado nao enviado" });
+    }
+
+    try {
+      const apiInfo = req.body?.api_info ? JSON.parse(req.body.api_info) : {};
+      const request = graphicMaterialsService.saveUploadedResult({
+        baseDir: GRAPHIC_MATERIALS_DIR,
+        documentId: req.params.documentId,
+        resultPath: resultadoFile.path,
+        previewPath: previewFile?.path || "",
+        apiInfo
+      });
+
+      const clientes = readClientes();
+      const cliente = clientes[request.whatsapp];
+      if (cliente) {
+        graphicMaterialsService.markClientCreated(cliente, request);
+        clientes[request.whatsapp] = cliente;
+        writeClientes(clientes);
+      }
+
+      return res.json({
+        ok: true,
+        document_id: request.document_id || request.id,
+        material_id: request.material_id,
+        status: "created",
+        arquivo: "resultado_final.png",
+        preview: previewFile ? "preview_ia4tube.jpg" : ""
+      });
+    } catch (error) {
+      cleanupUploadedFiles(req.files);
+      console.error("[materiais-graficos] falha ao salvar resultado", {
+        documentId: req.params.documentId,
+        message: error?.message,
+        stack: error?.stack
+      });
+      return res.status(error?.statusCode || 500).json({
+        ok: false,
+        error: error?.message || "Falha ao salvar resultado"
+      });
+    }
+  }
+);
+
 // ===== CARROSSEIS IA4TUBE =====
 app.post(
   "/empresa/carrosseis/solicitar",
   auth,
   upload.fields([
     { name: "logo", maxCount: 1 },
-    { name: "fotos", maxCount: 20 }
+    { name: "fotos", maxCount: 2 }
   ]),
   (req, res) => {
     const whatsapp = req.user.whatsapp;
@@ -1441,6 +2307,7 @@ app.post(
     const cliente = clientes[whatsapp];
 
     if (!cliente) {
+      cleanupUploadedFiles(req.files);
       return res.status(404).json({ ok: false, error: "Cliente nao encontrado" });
     }
 
@@ -1465,6 +2332,7 @@ app.post(
         quota: carrossel.quota || null
       });
     } catch (error) {
+      cleanupUploadedFiles(req.files);
       console.error("[carrosseis] erro ao solicitar", {
         whatsapp,
         message: error?.message,
@@ -1478,6 +2346,26 @@ app.post(
     }
   }
 );
+
+app.get("/empresa/carrosseis", auth, (req, res) => {
+  const whatsapp = req.user.whatsapp;
+  try {
+    const limit = Number(req.query?.limit || 50);
+    const carrosseis = carouselService.listClientRequests({
+      baseDir: CAROUSELS_DIR,
+      whatsapp,
+      limit: Number.isFinite(limit) && limit > 0 ? Math.min(limit, 100) : 50
+    });
+
+    return res.json({ ok: true, carrosseis });
+  } catch (error) {
+    return res.status(error?.statusCode || 500).json({
+      ok: false,
+      code: error?.code || "carousel_list_error",
+      error: error?.message || "Nao foi possivel listar os carrosseis."
+    });
+  }
+});
 
 app.get("/empresa/carrosseis/:carrosselId/status", auth, (req, res) => {
   const whatsapp = req.user.whatsapp;
@@ -1506,7 +2394,7 @@ app.get("/empresa/carrosseis/:carrosselId/download", auth, (req, res) => {
     });
 
     res.setHeader("Content-Type", "application/zip");
-    res.setHeader("Content-Disposition", "attachment; filename=\"" + result.filename + "\"");
+    res.setHeader("Content-Disposition", `attachment; filename="${result.filename}"`);
     return res.sendFile(result.filePath);
   } catch (error) {
     return res.status(error?.statusCode || 500).json({
@@ -1546,7 +2434,7 @@ app.get("/bot/empresa/carrosseis/:carrosselId/zip", botRunnerAuth, (req, res) =>
   }
 
   res.setHeader("Content-Type", "application/zip");
-  res.setHeader("Content-Disposition", "attachment; filename=\"" + req.params.carrosselId + ".zip\"");
+  res.setHeader("Content-Disposition", `attachment; filename="${req.params.carrosselId}.zip"`);
 
   const archive = archiver("zip", { zlib: { level: 9 } });
   archive.on("error", err => res.status(500).end(String(err)));
@@ -1590,12 +2478,14 @@ app.post(
   ]),
   (req, res) => {
     if (!isBotAdmin(req)) {
+      cleanupUploadedFiles(req.files);
       return res.status(403).json({ ok: false, error: "Acesso negado" });
     }
 
     const resultadoFile = req.files?.resultado?.[0] || null;
 
     if (!resultadoFile) {
+      cleanupUploadedFiles(req.files);
       return res.status(400).json({ ok: false, error: "Arquivo resultado nao enviado" });
     }
 
@@ -1616,9 +2506,7 @@ app.post(
         arquivo: "resultado.zip"
       });
     } catch (error) {
-      try {
-        if (resultadoFile?.path && fs.existsSync(resultadoFile.path)) fs.unlinkSync(resultadoFile.path);
-      } catch {}
+      cleanupUploadedFiles(req.files);
       console.error("[carrosseis] falha ao salvar resultado", {
         carrosselId: req.params.carrosselId,
         message: error?.message,
@@ -1632,15 +2520,520 @@ app.post(
   }
 );
 
+// ===== PLANEJAMENTO MENSAL =====
+app.post(
+  "/empresa/planejamento-mensal/solicitar",
+  auth,
+  upload.fields([
+    { name: "fotos", maxCount: 10 }
+  ]),
+  (req, res) => {
+    const whatsapp = req.user.whatsapp;
+    const clientes = readClientes();
+    const cliente = clientes[whatsapp];
+
+    if (!cliente) {
+      cleanupUploadedFiles(req.files);
+      return res.status(404).json({ ok: false, error: "Cliente nao encontrado" });
+    }
+
+    try {
+      const clienteBefore = JSON.stringify(cliente);
+      const planejamento = monthlyPlanningService.createRequest({
+        baseDir: MONTHLY_PLANNINGS_DIR,
+        cliente,
+        whatsapp,
+        body: req.body || {},
+        files: req.files || {}
+      });
+
+      if (JSON.stringify(cliente) !== clienteBefore) {
+        clientes[whatsapp] = cliente;
+        writeClientes(clientes);
+      }
+
+      return res.json({
+        ok: true,
+        planejamento_id: planejamento.planejamento_id || planejamento.id,
+        ciclo: planejamento.ciclo,
+        status: planejamento.status,
+        status_label: "Em analise",
+        quantidade_reservada: planejamento.quantidade_reservada,
+        artes_deste_ciclo: planejamento.artes_deste_ciclo,
+        reservadas_no_planejamento: planejamento.reservadas_no_planejamento,
+        livres_para_criar_arte: planejamento.livres_para_criar_arte,
+        reserva_definitiva: true,
+        fase_4_pendente: false
+      });
+    } catch (error) {
+      cleanupUploadedFiles(req.files);
+      console.error("[planejamento-mensal] erro ao solicitar", {
+        whatsapp,
+        message: error?.message,
+        stack: error?.stack
+      });
+      return res.status(error?.statusCode || 500).json({
+        ok: false,
+        code: error?.code || "monthly_planning_request_error",
+        error: error?.message || "Nao foi possivel criar o Planejamento Mensal agora.",
+        artes_livres: error?.artes_livres,
+        billing: error?.billing
+      });
+    }
+  }
+);
+
+app.get("/empresa/planejamento-mensal", auth, (req, res) => {
+  const whatsapp = req.user.whatsapp;
+  const clientes = readClientes();
+  const cliente = clientes[whatsapp];
+
+  if (!cliente) {
+    return res.status(404).json({ ok: false, error: "Cliente nao encontrado" });
+  }
+
+  try {
+    return res.json(monthlyPlanningService.listClientPlannings({
+      baseDir: MONTHLY_PLANNINGS_DIR,
+      whatsapp,
+      pedidosDir: PEDIDOS_DIR
+    }));
+  } catch (error) {
+    console.error("[planejamento-mensal] erro ao listar", {
+      whatsapp,
+      message: error?.message,
+      stack: error?.stack
+    });
+    return res.status(500).json({
+      ok: false,
+      code: "monthly_planning_list_error",
+      error: "Nao foi possivel listar os Planejamentos Mensais agora."
+    });
+  }
+});
+
+app.get("/empresa/planejamento-mensal/:planningId", auth, (req, res) => {
+  const whatsapp = req.user.whatsapp;
+  const clientes = readClientes();
+  const cliente = clientes[whatsapp];
+
+  if (!cliente) {
+    return res.status(404).json({ ok: false, error: "Cliente nao encontrado" });
+  }
+
+  try {
+    return res.json(monthlyPlanningService.publicDetailPayload({
+      baseDir: MONTHLY_PLANNINGS_DIR,
+      whatsapp,
+      planningId: req.params.planningId,
+      pedidosDir: PEDIDOS_DIR
+    }));
+  } catch (error) {
+    return res.status(error?.statusCode || 500).json({
+      ok: false,
+      code: error?.code || "monthly_planning_detail_error",
+      error: error?.message || "Nao foi possivel consultar o Planejamento Mensal."
+    });
+  }
+});
+
+app.post("/empresa/planejamento-mensal/:planningId/cancelar", auth, (req, res) => {
+  const whatsapp = req.user.whatsapp;
+  const clientes = readClientes();
+  const cliente = clientes[whatsapp];
+
+  if (!cliente) {
+    return res.status(404).json({ ok: false, error: "Cliente nao encontrado" });
+  }
+
+  try {
+    const clienteBefore = JSON.stringify(cliente);
+    const planejamento = monthlyPlanningService.cancelPlanning({
+      baseDir: MONTHLY_PLANNINGS_DIR,
+      whatsapp,
+      planningId: req.params.planningId,
+      cliente
+    });
+
+    if (JSON.stringify(cliente) !== clienteBefore) {
+      clientes[whatsapp] = cliente;
+      writeClientes(clientes);
+    }
+
+    return res.json({
+      ok: true,
+      planejamento_id: planejamento.planejamento_id || planejamento.id,
+      status: planejamento.status,
+      status_label: planejamento.status_label || "Cancelado",
+      billing_alterado: planejamento.cancelamento?.billing_alterado === true,
+      reserva_definitiva: true,
+      artes_devolvidas: Number(planejamento.cancelamento?.artes_devolvidas || 0),
+      livres_para_criar_arte: Number(planejamento.cancelamento?.livres_para_criar_arte || planejamento.livres_para_criar_arte || 0)
+    });
+  } catch (error) {
+    return res.status(error?.statusCode || 500).json({
+      ok: false,
+      code: error?.code || "monthly_planning_cancel_error",
+      error: error?.message || "Nao foi possivel cancelar o Planejamento Mensal."
+    });
+  }
+});
+
+app.get("/bot/empresa/planejamento-mensal/novos", botRunnerAuth, (req, res) => {
+  if (!isBotAdmin(req)) {
+    return res.status(403).json({ ok: false, error: "Acesso negado" });
+  }
+
+  try {
+    return res.json(monthlyPlanningService.listBotPending({
+      baseDir: MONTHLY_PLANNINGS_DIR,
+      limit: req.query.limit,
+      claim: req.query.claim !== "false"
+    }));
+  } catch (error) {
+    console.error("[planejamento-mensal][bot] erro ao listar novos", {
+      message: error?.message,
+      stack: error?.stack
+    });
+    return res.status(500).json({
+      ok: false,
+      error: "Nao foi possivel listar Planejamentos Mensais pendentes."
+    });
+  }
+});
+
+app.get("/bot/empresa/planejamento-mensal/:planningId/zip", botRunnerAuth, (req, res) => {
+  if (!isBotAdmin(req)) {
+    return res.status(403).json({ ok: false, error: "Acesso negado" });
+  }
+
+  try {
+    const planejamento = monthlyPlanningService.findPlanningByIdAny({
+      baseDir: MONTHLY_PLANNINGS_DIR,
+      planningId: req.params.planningId
+    });
+
+    if (!planejamento) {
+      return res.status(404).json({ ok: false, error: "Planejamento Mensal nao encontrado" });
+    }
+
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", `attachment; filename=\"${planejamento.planejamento_id || planejamento.id}.zip\"`);
+
+    const archive = archiver("zip", { zlib: { level: 9 } });
+    archive.on("error", (error) => {
+      throw error;
+    });
+    archive.pipe(res);
+    archive.directory(planejamento.base_path, false);
+    archive.finalize();
+  } catch (error) {
+    console.error("[planejamento-mensal][bot] erro ao gerar zip", {
+      planningId: req.params.planningId,
+      message: error?.message,
+      stack: error?.stack
+    });
+    if (!res.headersSent) {
+      return res.status(500).json({ ok: false, error: "Falha ao gerar ZIP do Planejamento Mensal" });
+    }
+  }
+});
+
+app.post("/bot/empresa/planejamento-mensal/:planningId/status", botRunnerAuth, (req, res) => {
+  if (!isBotAdmin(req)) {
+    return res.status(403).json({ ok: false, error: "Acesso negado" });
+  }
+
+  try {
+    const planejamento = monthlyPlanningService.updatePlanningStatus({
+      baseDir: MONTHLY_PLANNINGS_DIR,
+      planningId: req.params.planningId,
+      status: String(req.body?.status || "").trim(),
+      message: req.body?.message || req.body?.erro || ""
+    });
+
+    return res.json({
+      ok: true,
+      planejamento_id: planejamento.planejamento_id || planejamento.id,
+      status: planejamento.status
+    });
+  } catch (error) {
+    console.error("[planejamento-mensal][bot] erro ao atualizar status", {
+      planningId: req.params.planningId,
+      message: error?.message,
+      stack: error?.stack
+    });
+    return res.status(error?.statusCode || 500).json({
+      ok: false,
+      code: error?.code || "monthly_planning_bot_status_error",
+      error: error?.message || "Falha ao atualizar status do Planejamento Mensal"
+    });
+  }
+});
+
+app.post("/bot/empresa/planejamento-mensal/:planningId/upload-plano", botRunnerAuth, (req, res) => {
+  if (!isBotAdmin(req)) {
+    return res.status(403).json({ ok: false, error: "Acesso negado" });
+  }
+
+  try {
+    const planejamentoAtual = monthlyPlanningService.findPlanningByIdAny({
+      baseDir: MONTHLY_PLANNINGS_DIR,
+      planningId: req.params.planningId
+    });
+    const clientes = readClientes();
+    const cliente = planejamentoAtual?.whatsapp ? clientes[planejamentoAtual.whatsapp] : null;
+    const clienteBefore = cliente ? JSON.stringify(cliente) : "";
+
+    const planejamento = monthlyPlanningService.savePlanResult({
+      baseDir: MONTHLY_PLANNINGS_DIR,
+      pedidosDir: PEDIDOS_DIR,
+      planningId: req.params.planningId,
+      payload: req.body || {},
+      cliente
+    });
+
+    if (cliente && JSON.stringify(cliente) !== clienteBefore) {
+      clientes[planejamentoAtual.whatsapp] = cliente;
+      writeClientes(clientes);
+    }
+
+    const planoMensal = planejamento.plano_mensal || {};
+    const postagens = Array.isArray(planoMensal.postagens)
+      ? planoMensal.postagens
+      : Array.isArray(planoMensal.itens)
+        ? planoMensal.itens
+        : [];
+
+    return res.json({
+      ok: true,
+      planejamento_id: planejamento.planejamento_id || planejamento.id,
+      status: planejamento.status,
+      postagens: postagens.length,
+      pedidos_filhos_criados: Number(planejamento.pedidos_criados?.total || planejamento.pedidos_filhos_criados || 0)
+    });
+  } catch (error) {
+    console.error("[planejamento-mensal][bot] erro ao receber plano", {
+      planningId: req.params.planningId,
+      message: error?.message,
+      stack: error?.stack
+    });
+    return res.status(error?.statusCode || 500).json({
+      ok: false,
+      code: error?.code || "monthly_planning_bot_upload_error",
+      error: error?.message || "Falha ao salvar plano do Planejamento Mensal"
+    });
+  }
+});
+
+app.get("/bot/empresa/planejamento-mensal/artes/novas", botRunnerAuth, (req, res) => {
+  if (!isBotAdmin(req)) {
+    return res.status(403).json({ ok: false, error: "Acesso negado" });
+  }
+
+  try {
+    return res.json(monthlyPlanningService.listPlanningArtPending({
+      pedidosDir: PEDIDOS_DIR,
+      limit: req.query.limit
+    }));
+  } catch (error) {
+    console.error("[planejamento-mensal][artes] erro ao listar novas", {
+      message: error?.message,
+      stack: error?.stack
+    });
+    return res.status(500).json({
+      ok: false,
+      error: "Nao foi possivel listar artes do Planejamento Mensal."
+    });
+  }
+});
+
+app.get("/bot/empresa/planejamento-mensal/artes/:pedidoId/zip", botRunnerAuth, (req, res) => {
+  if (!isBotAdmin(req)) {
+    return res.status(403).json({ ok: false, error: "Acesso negado" });
+  }
+
+  try {
+    const arte = monthlyPlanningService.findPlanningArtOrder({
+      pedidosDir: PEDIDOS_DIR,
+      pedidoId: req.params.pedidoId
+    });
+
+    if (!arte) {
+      return res.status(404).json({ ok: false, error: "Arte do Planejamento Mensal nao encontrada" });
+    }
+
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", `attachment; filename=\"${arte.pedidoId}.zip\"`);
+
+    const archive = archiver("zip", { zlib: { level: 9 } });
+    archive.on("error", (error) => {
+      throw error;
+    });
+    archive.pipe(res);
+    archive.directory(arte.base, false);
+    archive.finalize();
+  } catch (error) {
+    console.error("[planejamento-mensal][artes] erro ao gerar zip", {
+      pedidoId: req.params.pedidoId,
+      message: error?.message,
+      stack: error?.stack
+    });
+    if (!res.headersSent) {
+      return res.status(500).json({ ok: false, error: "Falha ao gerar ZIP da arte do Planejamento Mensal" });
+    }
+  }
+});
+
+app.post("/bot/empresa/planejamento-mensal/artes/:pedidoId/status", botRunnerAuth, (req, res) => {
+  if (!isBotAdmin(req)) {
+    return res.status(403).json({ ok: false, error: "Acesso negado" });
+  }
+
+  try {
+    const arte = monthlyPlanningService.updatePlanningArtStatus({
+      pedidosDir: PEDIDOS_DIR,
+      pedidoId: req.params.pedidoId,
+      status: String(req.body?.status || "").trim(),
+      message: req.body?.message || req.body?.erro || ""
+    });
+
+    return res.json({ ok: true, arte });
+  } catch (error) {
+    console.error("[planejamento-mensal][artes] erro ao atualizar status", {
+      pedidoId: req.params.pedidoId,
+      message: error?.message,
+      stack: error?.stack
+    });
+    return res.status(error?.statusCode || 500).json({
+      ok: false,
+      code: error?.code || "monthly_planning_art_status_error",
+      error: error?.message || "Falha ao atualizar status da arte do Planejamento Mensal"
+    });
+  }
+});
+
+app.post(
+  "/bot/empresa/planejamento-mensal/artes/:pedidoId/upload-resultado",
+  botRunnerAuth,
+  uploadResultado.fields([
+    { name: "resultado", maxCount: 1 },
+    { name: "preview", maxCount: 1 }
+  ]),
+  (req, res) => {
+    if (!isBotAdmin(req)) {
+      cleanupUploadedFiles(req.files);
+      return res.status(403).json({ ok: false, error: "Acesso negado" });
+    }
+
+    const resultado = req.files?.resultado?.[0];
+    const preview = req.files?.preview?.[0];
+    if (!resultado?.path) {
+      cleanupUploadedFiles(req.files);
+      return res.status(400).json({ ok: false, error: "Arquivo resultado_final.png obrigatorio" });
+    }
+
+    try {
+      let apiInfo = null;
+      if (req.body?.api_info) {
+        try {
+          apiInfo = JSON.parse(String(req.body.api_info || "{}"));
+        } catch {
+          apiInfo = null;
+        }
+      }
+
+      const arte = monthlyPlanningService.savePlanningArtResult({
+        pedidosDir: PEDIDOS_DIR,
+        pedidoId: req.params.pedidoId,
+        resultadoPath: resultado.path,
+        previewPath: preview?.path || "",
+        descricaoInstagram: req.body?.descricao_instagram || "",
+        apiInfo
+      });
+
+      return res.json({ ok: true, arte });
+    } catch (error) {
+      cleanupUploadedFiles(req.files);
+      console.error("[planejamento-mensal][artes] erro ao receber resultado", {
+        pedidoId: req.params.pedidoId,
+        message: error?.message,
+        stack: error?.stack
+      });
+      return res.status(error?.statusCode || 500).json({
+        ok: false,
+        code: error?.code || "monthly_planning_art_upload_error",
+        error: error?.message || "Falha ao salvar resultado da arte do Planejamento Mensal"
+      });
+    }
+  }
+);
+
+let monthlyPlanningNotificationsRunning = false;
+
+function monthlyPlanningNotificationPayload({ planning, post }) {
+  const pedidoId = post.pedido_id || "";
+  return {
+    title: "Hora de postar",
+    body: "Sua arte planejada para hoje esta pronta. Toque para ver e copiar a legenda.",
+    image_url: pedidoId ? publicApiUrl(`/pedidos/${encodeURIComponent(pedidoId)}/preview`) : "",
+    data: {
+      tipo: "planejamento_mensal",
+      route: "monthly_planning_detail",
+      planejamento_id: planning.planejamento_id || planning.id || "",
+      planejamento_item_id: post.planejamento_item_id || "",
+      pedido_id: pedidoId
+    }
+  };
+}
+
+async function runMonthlyPlanningNotifications() {
+  if (monthlyPlanningNotificationsRunning) return;
+
+  monthlyPlanningNotificationsRunning = true;
+  try {
+    const clientes = readClientes();
+    const result = await monthlyPlanningService.processDueNotifications({
+      baseDir: MONTHLY_PLANNINGS_DIR,
+      pedidosDir: PEDIDOS_DIR,
+      clientes,
+      now: new Date(),
+      sendNotification: async ({ cliente, planning, post }) => {
+        return fcmService.sendPlanejamentoMensal(
+          cliente,
+          {
+            ...monthlyPlanningNotificationPayload({ planning, post }),
+            planejamento_id: planning.planejamento_id || planning.id || "",
+            planejamento_item_id: post.planejamento_item_id || "",
+            pedido_id: post.pedido_id || ""
+          }
+        );
+      }
+    });
+
+    if (result.sent || result.errors || result.mock) {
+      console.log("[planejamento-mensal][notificacoes]", result);
+    }
+  } catch (error) {
+    console.error("[planejamento-mensal][notificacoes] erro no agendador", {
+      message: error?.message,
+      stack: error?.stack
+    });
+  } finally {
+    monthlyPlanningNotificationsRunning = false;
+  }
+}
+
 // ===== CRIA PEDIDO =====
 function criarPedidoHandler(categoria) {
   return async (req, res) => {
+    try {
     const whatsapp = req.user.whatsapp;
     const clientes = readClientes();
     const c = clientes[whatsapp];
 
-    if (!c || !c.ativo) {
-      return res.status(403).json({ ok: false, error: "Mensalidade inativa" });
+    if (!c) {
+      return res.status(404).json({ ok: false, error: "Cliente não encontrado" });
     }
 
     const mesAtual = nowYYYYMM();
@@ -1649,9 +3042,10 @@ function criarPedidoHandler(categoria) {
     const temBrindeMascote = billingService.hasMascoteUniformeGift(categoria, c);
 
     const custoPedido = getCustoPedido(categoria, c);
-    const custoEfetivoPedido = custoPedido;
+    const isArteEmpresa = categoria === "arte_empresa";
+    const custoEfetivoPedido = isArteEmpresa ? EMPRESA_ARTE_AVULSA_VALOR : custoPedido;
 
-    const temSaldoSuficiente = billingService.hasEnoughBalance(c, custoEfetivoPedido);
+    const temSaldoSuficiente = !isArteEmpresa && billingService.hasEnoughBalance(c, custoEfetivoPedido);
 
     const fields = orderService.normalizeOrderBody(req.body);
 
@@ -1670,6 +3064,28 @@ function criarPedidoHandler(categoria) {
       });
     }
 
+    let cobrancaEmpresa = null;
+    if (isArteEmpresa) {
+      cobrancaEmpresa = billingService.resolveCompanyArtCharge(c, {
+        custoPedido: custoEfetivoPedido,
+        now: new Date()
+      });
+
+      if (cobrancaEmpresa.allowed !== true) {
+        clientes[whatsapp] = c;
+        writeClientes(clientes);
+        return res.status(402).json({
+          ok: false,
+          code: "billing_required",
+          error: "Assine um plano ou adicione saldo para criar sua arte.",
+          required_amount: cobrancaEmpresa.required_amount,
+          saldo_extra: cobrancaEmpresa.saldo_extra,
+          artes_mensais_restantes: cobrancaEmpresa.artes_mensais_restantes,
+          plano_status: cobrancaEmpresa.plano_status
+        });
+      }
+    }
+
     const draft = await orderService.createOrderDraft({
       categoria,
       pedidosDir: PEDIDOS_DIR,
@@ -1681,7 +3097,20 @@ function criarPedidoHandler(categoria) {
 
     const id = draft.id;
 
-    if (temSaldoSuficiente) {
+    if (isArteEmpresa) {
+      billingService.applyResolvedCompanyArtCharge(c, cobrancaEmpresa, {
+        custoPedido: custoEfetivoPedido,
+        mesAtual
+      });
+      draft.pedido.cobranca_origem = cobrancaEmpresa.source;
+      draft.pedido.valor_cobrado = cobrancaEmpresa.source === "saldo_extra" ? custoEfetivoPedido : 0;
+      draft.pedido.plano_id = cobrancaEmpresa.source === "plano" ? cobrancaEmpresa.planId : "";
+      draft.pedido.plano_ciclo = cobrancaEmpresa.source === "plano" ? cobrancaEmpresa.planCycle : "";
+      draft.pedido.pagamento_pendente = false;
+      draft.pedido.valor_pendente = 0;
+      draft.pedido.motivo_pagamento_pendente = "";
+      orderService.orderStorage.writeOrder(draft.base, draft.pedido);
+    } else if (temSaldoSuficiente) {
       billingService.applyOrderCharge(c, { custoPedido: custoEfetivoPedido, mesAtual, temBrindeMascote });
     } else {
       draft.pedido.pagamento_pendente = true;
@@ -1696,6 +3125,21 @@ function criarPedidoHandler(categoria) {
     removeOldPedidos(whatsapp, 15);
 
     return res.json({ ok: true, pedido_id: id });
+    } catch (error) {
+      cleanupUploadedFiles(req.files);
+      console.error("[pedidos] erro ao criar pedido", {
+        categoria,
+        message: error?.message,
+        stack: error?.stack
+      });
+
+      if (res.headersSent) return;
+
+      return res.status(error?.statusCode || 500).json({
+        ok: false,
+        error: "Não foi possível criar o pedido agora. Tente novamente em alguns instantes."
+      });
+    }
   };
 }
 
@@ -1710,7 +3154,8 @@ app.post(
     { name: "patrocinadores", maxCount: 20 },
     { name: "logo", maxCount: 1 },
     { name: "fotos", maxCount: 20 },
-    { name: "referencias", maxCount: 20 }
+    { name: "referencias", maxCount: 20 },
+    { name: "modelo_existente", maxCount: 1 }
   ]),
   (req, res) => {
     const flyer_tipo = (req.body?.flyer_tipo || "").toLowerCase();
@@ -1722,6 +3167,7 @@ app.post(
     if (flyer_tipo === "zz1fs") return criarPedidoHandler("escalacao")(req, res);
     if (flyer_tipo === "zz1fm") return criarPedidoHandler("contratacao")(req, res);
     if (flyer_tipo === "zz1ft") return criarPedidoHandler("proximo_jogo")(req, res);
+    if (flyer_tipo === "treino") return criarPedidoHandler("treino")(req, res);
     if (flyer_tipo === "zz1fj") return criarPedidoHandler("patrocinador")(req, res);
     if (flyer_tipo === "jog_proximo") return criarPedidoHandler("proximo_jogo_jogador")(req, res);
     if (flyer_tipo === "jog_resultado") return criarPedidoHandler("resultado_jogo_jogador")(req, res);
@@ -1742,7 +3188,8 @@ app.post(
     { name: "patrocinadores", maxCount: 20 },
     { name: "logo", maxCount: 1 },
     { name: "fotos", maxCount: 20 },
-    { name: "referencias", maxCount: 20 }
+    { name: "referencias", maxCount: 20 },
+    { name: "modelo_existente", maxCount: 1 }
   ]),
   criarPedidoHandler("mascote")
 );
@@ -1757,13 +3204,14 @@ app.post(
     { name: "patrocinadores", maxCount: 20 },
     { name: "logo", maxCount: 1 },
     { name: "fotos", maxCount: 20 },
-    { name: "referencias", maxCount: 20 }
+    { name: "referencias", maxCount: 20 },
+    { name: "modelo_existente", maxCount: 1 }
   ]),
   criarPedidoHandler("resultado")
 );
 
 // ===== BOT ADMIN: LISTAR NOVOS DE TODOS OS CLIENTES =====
-app.get("/bot/pedidos/novos", auth, (req, res) => {
+app.get("/bot/pedidos/novos", botRunnerAuth, (req, res) => {
   if (!isBotAdmin(req)) {
     return res.status(403).json({ ok: false, error: "Acesso negado" });
   }
@@ -1793,6 +3241,8 @@ app.get("/bot/pedidos/novos", auth, (req, res) => {
         const statusPedido = readOrderStatus(base, "");
 
         if (statusPedido === "novo" || statusPedido === "ajuste_pendente") {
+          const pedido = safeReadJson(path.join(base, "pedido.json")) || {};
+          if (monthlyPlanningService.isPlanningOrder(pedido)) continue;
           pedidos.push({ id, whatsapp, mes, status: statusPedido });
         }
       }
@@ -1802,7 +3252,7 @@ app.get("/bot/pedidos/novos", auth, (req, res) => {
   return res.json({ ok: true, pedidos });
 });
 
-app.get("/bot/pedidos/:id/zip", auth, (req, res) => {
+app.get("/bot/pedidos/:id/zip", botRunnerAuth, (req, res) => {
   if (!isBotAdmin(req)) {
     return res.status(403).json({ ok: false, error: "Acesso negado" });
   }
@@ -1843,6 +3293,23 @@ app.post("/bot/pedidos/:id/status", auth, (req, res) => {
   }
 
   writeOrderStatus(base, status);
+  try {
+    const pedido = readPedido(base) || {};
+    if (pedido.whatsapp && !monthlyPlanningService.isPlanningOrder(pedido)) {
+      sendClientPushAsync(pedido.whatsapp, "pedido_atualizado", {
+        pedido_id: req.params.id,
+        status,
+        body: status === orderStatus.ORDER_STATUS.EM_PRODUCAO
+          ? "Sua arte entrou em producao. Toque para acompanhar."
+          : "Seu pedido teve uma atualizacao. Toque para acompanhar."
+      });
+    }
+  } catch (error) {
+    console.warn("[fcm] nao foi possivel preparar push de status", {
+      pedido_id: req.params.id,
+      message: error?.message
+    });
+  }
 
   return res.json({ ok: true });
 });
@@ -1870,11 +3337,40 @@ app.get("/pedidos/novos", auth, (req, res) => {
   return res.json({ ok: true, pedidos });
 });
 
+function downloadBloqueadoPorCadastro(cliente) {
+  return cliente?.cadastro_automatico === true && cliente?.conta_finalizada !== true;
+}
+
+function mensagemDownloadBloqueado(cliente) {
+  return downloadBloqueadoPorCadastro(cliente)
+    ? "Crie seu login e senha para liberar o download."
+    : "";
+}
+
 app.get("/meus-pedidos", auth, (req, res) => {
   registrarOnline(req, { ultima_acao: "meus_pedidos" });
 
   const whatsapp = req.user.whatsapp;
-  const itens = listPedidoBasesByWhatsapp(whatsapp).slice(0, 15);
+  const clientes = readClientes();
+  const cliente = clientes[whatsapp];
+  const bloqueioDownload = downloadBloqueadoPorCadastro(cliente);
+  const mensagemBloqueioDownload = mensagemDownloadBloqueado(cliente);
+  const itens = listPedidoBasesByWhatsapp(whatsapp)
+    .filter((item) => {
+      const pedido = item.pedido || {};
+      return !(
+        pedido.origem === "planejamento_mensal" ||
+        pedido.planejamento_id ||
+        pedido.planejamento_mensal?.planejamento_id
+      );
+    })
+    .slice(0, 15);
+  const planejamentos = monthlyPlanningService.listClientPlanningGroups({
+    baseDir: MONTHLY_PLANNINGS_DIR,
+    pedidosDir: PEDIDOS_DIR,
+    whatsapp,
+    limit: 15
+  });
 
   const pedidos = itens.map((item) => {
     const resultadoFinalPath = path.join(item.base, "resultado_final.png");
@@ -1883,6 +3379,8 @@ app.get("/meus-pedidos", auth, (req, res) => {
     const aprovadoCliente = item.pedido.aprovado_cliente === true;
     const pagamentoPendente = item.pedido.pagamento_pendente === true;
     const ajusteUsado = item.pedido.ajuste_automatico_usado === true;
+    const downloadBloqueado = imagemPronta && !pagamentoPendente && bloqueioDownload;
+    const podeBaixar = imagemPronta && !pagamentoPendente && !downloadBloqueado;
 
     return {
       id: item.id,
@@ -1894,19 +3392,21 @@ app.get("/meus-pedidos", auth, (req, res) => {
         ? `${req.protocol}://${req.get("host")}/pedidos/${item.id}/preview`
         : null,
       imagem_pronta: imagemPronta,
-      descricao_instagram: item.pedido.descricao_instagram || "",
+      descricao_instagram: descricaoPostagemPedido(item.pedido),
       aprovado_cliente: aprovadoCliente,
       pagamento_pendente: pagamentoPendente,
       valor_pendente: Number(item.pedido.valor_pendente || 0),
       motivo_pagamento_pendente: item.pedido.motivo_pagamento_pendente || "",
       ajuste_automatico_usado: ajusteUsado,
       motivo_ajuste: item.pedido.motivo_ajuste || "",
-      pode_baixar: imagemPronta && aprovadoCliente && !pagamentoPendente,
-      pode_pedir_ajuste: imagemPronta && !aprovadoCliente && !ajusteUsado && status === "pronto"
+      pode_baixar: podeBaixar,
+      download_bloqueado: downloadBloqueado,
+      mensagem_download_bloqueado: downloadBloqueado ? mensagemBloqueioDownload : "",
+      pode_pedir_ajuste: imagemPronta && !ajusteUsado && status === "pronto"
     };
   });
 
-  return res.json({ ok: true, pedidos });
+  return res.json({ ok: true, pedidos, planejamentos });
 });
 
 app.post("/pedidos/:id/pagar-com-saldo", auth, (req, res) => {
@@ -1919,6 +3419,7 @@ app.post("/pedidos/:id/pagar-com-saldo", auth, (req, res) => {
 
   const pedidoPath = path.join(base, "pedido.json");
   const pedido = safeReadJson(pedidoPath) || {};
+  const isArteEmpresa = pedido.categoria === "arte_empresa" || pedido.product_id === "arte_empresa";
 
   if (pedido.pagamento_pendente !== true) {
     return res.json({
@@ -2029,7 +3530,7 @@ app.post("/pedidos/:id/gerar-pix", auth, async (req, res) => {
         pedido_id: id,
         valor_pendente: Number(valorPendente.toFixed(2))
       },
-      notification_url: "https://api.omascote.com.br/webhook/mercadopago"
+      notification_url: "https://ia4tube-api.onrender.com/webhook/mercadopago"
     };
 
     const r = await fetch("https://api.mercadopago.com/v1/payments", {
@@ -2119,10 +3620,18 @@ app.post("/pedidos/:id/aprovar", auth, (req, res) => {
 
   fs.writeFileSync(pedidoPath, JSON.stringify(pedido, null, 2), "utf8");
 
+  const clientes = readClientes();
+  const cliente = clientes[whatsapp];
+  const imagemPronta = fs.existsSync(path.join(base, "resultado_final.png"));
+  const pagamentoPendente = pedido.pagamento_pendente === true;
+  const downloadBloqueado = imagemPronta && !pagamentoPendente && downloadBloqueadoPorCadastro(cliente);
+
   return res.json({
     ok: true,
     aprovado_cliente: true,
-    pode_baixar: true
+    pode_baixar: imagemPronta && !pagamentoPendente && !downloadBloqueado,
+    download_bloqueado: downloadBloqueado,
+    mensagem_download_bloqueado: downloadBloqueado ? mensagemDownloadBloqueado(cliente) : ""
   });
 });
 
@@ -2213,13 +3722,6 @@ app.get("/pedidos/:id/download-resultado", auth, (req, res) => {
     });
   }
 
-  if (pedido.aprovado_cliente !== true) {
-    return res.status(403).json({
-      ok: false,
-      error: "Aprove a prévia antes de baixar a imagem em alta qualidade."
-    });
-  }
-
   const clientes = readClientes();
   const cliente = clientes[whatsapp];
 
@@ -2249,6 +3751,133 @@ app.get("/pedidos/:id/download-resultado", auth, (req, res) => {
   return res.sendFile(arquivo);
 });
 
+function normalizarLinhaDescricaoInstagram(texto = "") {
+  return String(texto || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/[,:.;!?\-\u2013\u2014]+$/g, "")
+    .trim();
+}
+
+function pedidoEhPatrocinador(pedido = {}) {
+  const contexto = [
+    pedido.product_id,
+    pedido.categoria,
+    pedido.objetivo,
+    pedido.rodada,
+    pedido.tipo_arte
+  ].map((valor) => String(valor || "").toLowerCase()).join(" ");
+
+  return contexto.includes("patrocin");
+}
+
+function removerHashtagsPatrocinador(linha = "") {
+  return String(linha || "")
+    .split(/\s+/)
+    .filter((parte) => {
+      const normalizada = normalizarLinhaDescricaoInstagram(parte);
+      return normalizada !== "#patrocinador" && normalizada !== "#patrocinadores";
+    })
+    .join(" ")
+    .trim();
+}
+
+function sanitizarDescricaoInstagram(texto = "", pedido = {}) {
+  const linhas = String(texto || "")
+    .split(/\r?\n/)
+    .map((linha) => linha.trim())
+    .filter(Boolean);
+
+  if (!linhas.length) return "";
+
+  const rotulos = new Set([
+    "descricao para instagram",
+    "descricao para postagem",
+    "legenda para instagram",
+    "sugestao de descricao",
+    "sugestao de legenda",
+    "caption",
+    "instagram caption",
+    "resultado",
+    "proximo jogo",
+    "escalacao",
+    "contratacao",
+    "dia de treino"
+  ]);
+  const podeUsarPatrocinador = pedidoEhPatrocinador(pedido);
+  return linhas.filter((linha) => {
+    const normalizada = normalizarLinhaDescricaoInstagram(linha);
+    if (rotulos.has(normalizada)) return false;
+    if (normalizada === "patrocinador" || normalizada === "patrocinadores") return false;
+    return true;
+  }).map((linha) => {
+    if (podeUsarPatrocinador) return linha;
+    return removerHashtagsPatrocinador(linha);
+  }).filter(Boolean).join("\n").trim();
+}
+
+function descricaoPostagemPedido(pedido = {}) {
+  const pronta = sanitizarDescricaoInstagram(pedido.descricao_instagram || "", pedido);
+  if (pronta && !descricaoPostagemGenerica(pronta)) return pronta;
+
+  const nome = String(pedido.nome_empresa || pedido.data || "").trim();
+  const ramo = String(pedido.ramo || "").trim();
+  const tipo = String(pedido.product_id || pedido.categoria || "arte").replace(/_/g, " ").trim();
+  const objetivo = String(pedido.objetivo || pedido.rodada || "").trim();
+  const frase = String(pedido.frase_foto || pedido.oferta || objetivo || "").trim();
+  const cta = String(pedido.cta || "").trim();
+  const historia = String(pedido.historia_empresa || "").trim();
+  const insta = String(pedido.instagram || "").trim();
+  const whatsapp = String(pedido.whatsapp_contato || "").trim();
+  const contexto = [ramo, tipo, objetivo, frase].join(" ").toLowerCase();
+  const marca = nome || ramo || "sua marca";
+  const linhas = [];
+
+  if (contexto.includes("marketing") || contexto.includes("redes") || contexto.includes("divulg")) {
+    linhas.push(`${marca}: sua empresa precisa aparecer melhor para vender mais e ser lembrada pelo cliente certo.`);
+    linhas.push(frase || "Criamos artes profissionais para divulgar produtos, servicos e promocoes com mais impacto.");
+  } else if (contexto.includes("lava") || contexto.includes("automot") || contexto.includes("carro")) {
+    linhas.push(`${marca}: carro limpo, cuidado no detalhe e atendimento caprichado para deixar seu veiculo com cara de novo.`);
+  } else if (
+    contexto.includes("futebol") ||
+    contexto.includes("jogo") ||
+    contexto.includes("time") ||
+    contexto.includes("torcida") ||
+    contexto.includes("escala")
+  ) {
+    linhas.push(`${marca} em campo com energia total. E dia de apoiar, vibrar e mostrar a forca da torcida.`);
+  } else if (frase) {
+    linhas.push(`${marca} apresenta: ${frase}`);
+  } else if (ramo) {
+    linhas.push(`${marca} traz uma novidade especial para quem procura ${ramo.toLowerCase()} com qualidade e atendimento de verdade.`);
+  } else {
+    linhas.push(`${marca} preparou uma novidade especial para voce conhecer hoje.`);
+  }
+
+  if (historia) linhas.push(historia.length > 180 ? `${historia.slice(0, 177)}...` : historia);
+  linhas.push(cta || "Chame agora e veja como podemos te atender.");
+  if (whatsapp) linhas.push(`WhatsApp: ${whatsapp}`);
+  if (insta) linhas.push(insta.startsWith("@") ? insta : `@${insta}`);
+  linhas.push("#IA4Tube #ArteComIA");
+
+  return sanitizarDescricaoInstagram(linhas.join("\n"), pedido);
+}
+
+function descricaoPostagemGenerica(texto = "") {
+  const normalizada = normalizarLinhaDescricaoInstagram(String(texto).trim())
+    .replace(/\s+/g, " ");
+  return !normalizada ||
+    normalizada.includes("pedido ia4tube") ||
+    normalizada.includes("arte pronta") ||
+    normalizada.includes("arte profissional para sua marca") ||
+    normalizada.includes("apresentamos novidades") ||
+    normalizada.includes("fique de olho nas proximas") ||
+    normalizada.includes("acompanhe para saber mais") ||
+    normalizada === "#ia4tube #artecomia";
+}
+
 // ===== INFO DO PEDIDO =====
 app.get("/pedidos/:id/info", auth, (req, res) => {
   const whatsapp = req.user.whatsapp;
@@ -2271,24 +3900,40 @@ app.get("/pedidos/:id/info", auth, (req, res) => {
   const status = readOrderStatus(base, "novo");
 
   const imagem_pronta = fs.existsSync(resultadoFinalPath);
+  const clientes = readClientes();
+  const cliente = clientes[whatsapp];
+  const pagamentoPendente = pedido.pagamento_pendente === true;
+  const downloadBloqueado = imagem_pronta && !pagamentoPendente && downloadBloqueadoPorCadastro(cliente);
 
   return res.json({
     ok: true,
     id: req.params.id,
     status,
     categoria: pedido.categoria || "",
+    tipo_arte: pedido.product_id || pedido.categoria || "",
+    nome_empresa: pedido.nome_empresa || "",
+    ramo: pedido.ramo || "",
+    objetivo: pedido.objetivo || pedido.rodada || "",
+    frase_foto: pedido.frase_foto || "",
+    cta: pedido.cta || "",
+    whatsapp_contato: pedido.whatsapp_contato || "",
+    instagram: pedido.instagram || "",
+    historia_empresa: pedido.historia_empresa || "",
     imagem_pronta,
     preview_url: imagem_pronta
       ? `${req.protocol}://${req.get("host")}/pedidos/${req.params.id}/preview`
       : null,
     aprovado_cliente: pedido.aprovado_cliente === true,
-    pagamento_pendente: pedido.pagamento_pendente === true,
+    pagamento_pendente: pagamentoPendente,
     valor_pendente: Number(pedido.valor_pendente || 0),
     motivo_pagamento_pendente: pedido.motivo_pagamento_pendente || "",
+    descricao_instagram: descricaoPostagemPedido(pedido),
     ajuste_automatico_usado: pedido.ajuste_automatico_usado === true,
     motivo_ajuste: pedido.motivo_ajuste || "",
-    pode_baixar: imagem_pronta && pedido.aprovado_cliente === true && pedido.pagamento_pendente !== true,
-    pode_pedir_ajuste: imagem_pronta && pedido.aprovado_cliente !== true && pedido.ajuste_automatico_usado !== true && status === "pronto"
+    pode_baixar: imagem_pronta && !pagamentoPendente && !downloadBloqueado,
+    download_bloqueado: downloadBloqueado,
+    mensagem_download_bloqueado: downloadBloqueado ? mensagemDownloadBloqueado(cliente) : "",
+    pode_pedir_ajuste: imagem_pronta && pedido.ajuste_automatico_usado !== true && status === "pronto"
   });
 });
 
@@ -2388,7 +4033,7 @@ app.post("/pedidos/:id/status", auth, (req, res) => {
 // ===== UPLOAD DO RESULTADO FINAL =====
 app.post(
   "/bot/pedidos/:id/upload-resultado",
-  auth,
+  botRunnerAuth,
   uploadResultado.fields([
     { name: "resultado", maxCount: 1 },
     { name: "preview", maxCount: 1 }
@@ -2403,6 +4048,7 @@ app.post(
     const base = getPedidoBaseGlobal(req.params.id);
 
     if (!base) {
+      cleanupUploadedFiles(req.files);
       return res.status(404).json({ ok: false, error: "Pedido não encontrado" });
     }
 
@@ -2410,6 +4056,7 @@ app.post(
     const previewFile = req.files?.preview?.[0] || null;
 
     if (!resultadoFile) {
+      cleanupUploadedFiles(req.files);
       return res.status(400).json({ ok: false, error: "Arquivo resultado não enviado" });
     }
 
@@ -2442,6 +4089,12 @@ app.post(
           pedidoData.baixado_cliente = false;
           pedidoData.resultado_enviado_em = new Date().toISOString();
           fs.writeFileSync(pedidoPath, JSON.stringify(pedidoData, null, 2), "utf8");
+          if (pedidoData.whatsapp && !monthlyPlanningService.isPlanningOrder(pedidoData)) {
+            sendClientPushAsync(pedidoData.whatsapp, "arte_pronta", {
+              pedido_id: req.params.id,
+              image_url: publicApiUrl(`/pedidos/${encodeURIComponent(req.params.id)}/preview`)
+            });
+          }
         }
       } catch (e) {}
 
@@ -2451,6 +4104,12 @@ app.post(
         preview: previewFile ? "preview_ia4tube.jpg" : ""
       });
     } catch (e) {
+      cleanupUploadedFiles(req.files);
+      console.error("[uploads] falha ao salvar resultado", {
+        pedido_id: req.params.id,
+        message: e?.message,
+        stack: e?.stack
+      });
       return res.status(500).json({
         ok: false,
         error: "Falha ao salvar resultado"
@@ -2543,6 +4202,21 @@ if(msg.includes("como baixar") || msg.includes("baixar novamente")){
   });
 }
 
+if(
+  msg.includes("plano") ||
+  msg.includes("planos") ||
+  msg.includes("assinatura") ||
+  msg.includes("mensalidade") ||
+  msg.includes("essencial") ||
+  msg.includes("profissional") ||
+  msg.includes("empresarial")
+){
+  return res.json({
+    ok:true,
+    resposta:"Planos IA4Tube:\n\n- i4 Essencial: R$ 39,90/mês, 6 artes por mês, 3 Materiais Gráficos da Empresa por mês, 1 Carrossel por mês e suporte via WhatsApp.\n\n- i4 Profissional: R$ 79,90/mês, 16 artes por mês, 5 Materiais Gráficos da Empresa por mês, 1 Material Gráfico de Nicho por mês, 2 Carrosséis por mês e suporte via WhatsApp.\n\n- i4 Empresarial: R$ 149,90/mês, 36 artes por mês, todos os Materiais Gráficos Gerais liberados, 3 Materiais Gráficos de Nicho por mês, 4 Carrosséis por mês e suporte via WhatsApp."
+  });
+}
+
 if(msg.includes("saldo") && msg.includes("como")){
   return res.json({
     ok:true,
@@ -2619,6 +4293,7 @@ COMPORTAMENTO:
 - Se for cumprimento, responda: "Oi! Escolha uma opção no menu do suporte."
 - Se o cliente pedir opções, disser "quais opções", "me dê as opções" ou algo parecido, responda curto: "Use os botões do menu do suporte."
 - Se o cliente falar "dúvida sobre produto" ou perguntar "como funciona", responda: "Escolha o produto no menu abaixo."
+- Se o cliente perguntar sobre planos, assinatura, mensalidade, Essencial, Profissional ou Empresarial, responda somente: "Planos IA4Tube: i4 Essencial R$ 39,90/mês com 6 artes, 3 Materiais Gráficos da Empresa, 1 Carrossel e suporte via WhatsApp. i4 Profissional R$ 79,90/mês com 16 artes, 5 Materiais Gráficos da Empresa, 1 Material Gráfico de Nicho, 2 Carrosséis e suporte via WhatsApp. i4 Empresarial R$ 149,90/mês com 36 artes, todos os Materiais Gráficos Gerais, 3 Materiais Gráficos de Nicho, 4 Carrosséis e suporte via WhatsApp."
 
 - Se o cliente disser "Quero entender Resultado do jogo", explique somente Resultado do jogo.
 - Se o cliente disser "Quero entender Escalação", explique somente Escalação.
@@ -2966,7 +4641,7 @@ app.get("/bot/online", auth, (req, res) => {
   }
 });
 
-app.post("/bot/suporte/erro-pedido", auth, (req, res) => {
+app.post("/bot/suporte/erro-pedido", botRunnerAuth, (req, res) => {
   try {
     if (!isBotAdmin(req)) {
       return res.status(403).json({ ok:false, error:"Acesso negado" });
@@ -3255,7 +4930,164 @@ app.post("/bot/suporte/limpar-finalizadas", auth, (req, res) => {
   }
 });
 
+function escapeXml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function listSeoNicheSlugs() {
+  if (!fs.existsSync(SEO_NICHES_DIR)) {
+    return [];
+  }
+
+  return fs.readdirSync(SEO_NICHES_DIR)
+    .filter((fileName) => fileName.endsWith(".json") && !fileName.startsWith("_"))
+    .map((fileName) => {
+      const expectedSlug = path.basename(fileName, ".json");
+      const filePath = path.join(SEO_NICHES_DIR, fileName);
+
+      try {
+        const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+        const slug = String(data.slug || "").trim().toLowerCase();
+
+        if (slug !== expectedSlug) {
+          console.warn("[seo] sitemap ignorou nicho com slug divergente", {
+            fileName,
+            expectedSlug,
+            slug
+          });
+          return null;
+        }
+
+        if (!/^[a-z0-9-]{2,80}$/.test(slug)) {
+          console.warn("[seo] sitemap ignorou nicho com slug invalido", {
+            fileName,
+            slug
+          });
+          return null;
+        }
+
+        return slug;
+      } catch (e) {
+        console.warn("[seo] sitemap ignorou JSON invalido", {
+          fileName,
+          message: e?.message
+        });
+        return null;
+      }
+    })
+    .filter(Boolean)
+    .sort();
+}
+
+app.get("/sitemap.xml", (req, res) => {
+  const baseUrl = "https://ia4tube.com";
+  const urls = [
+    { loc: `${baseUrl}/`, changefreq: "daily", priority: "1.0" },
+    ...listSeoNicheSlugs().map((slug) => ({
+      loc: `${baseUrl}/${slug}`,
+      changefreq: "weekly",
+      priority: "0.8"
+    }))
+  ];
+
+  const body = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map((item) => `  <url>
+    <loc>${escapeXml(item.loc)}</loc>
+    <changefreq>${escapeXml(item.changefreq)}</changefreq>
+    <priority>${escapeXml(item.priority)}</priority>
+  </url>`).join("\n")}
+</urlset>`;
+
+  return res.type("application/xml").send(body);
+});
+
+app.get("/robots.txt", (req, res) => {
+  return res.type("text/plain").send(`User-agent: *
+Allow: /
+
+Disallow: /login
+Disallow: /painel
+Disallow: /admin
+Disallow: /api
+
+Sitemap: https://ia4tube.com/sitemap.xml
+`);
+});
+
+app.get("/:nichoSlug", (req, res, next) => {
+  const slug = String(req.params.nichoSlug || "").trim().toLowerCase();
+
+  if (!/^[a-z0-9-]{2,80}$/.test(slug)) {
+    return next();
+  }
+
+  try {
+    const nicheData = seoNichePages.readNichePageData(SEO_NICHES_DIR, slug);
+
+    if (nicheData) {
+      return res.type("html").send(seoNichePages.renderNichePage(nicheData));
+    }
+  } catch (e) {
+    console.error("[seo] erro ao renderizar pagina de nicho", {
+      slug,
+      message: e?.message
+    });
+    return res.status(500).send("Erro ao carregar pagina de nicho");
+  }
+
+  const legacyPagePath = path.join(SEO_NICHES_DIR, `${slug}.html`);
+
+  if (fs.existsSync(legacyPagePath)) {
+    return res.sendFile(legacyPagePath);
+  }
+
+  return next();
+});
+
+app.use((err, req, res, next) => {
+  cleanupUploadedFiles(req.files);
+  console.error("[api] erro nao tratado", {
+    path: req.path,
+    method: req.method,
+    message: err?.message,
+    stack: err?.stack
+  });
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({
+      ok: false,
+      error: "Não foi possível enviar a imagem. Verifique o arquivo e tente novamente."
+    });
+  }
+
+  if (String(err?.message || "").includes("Apenas imagens")) {
+    return res.status(400).json({
+      ok: false,
+      error: err.message
+    });
+  }
+
+  return res.status(err?.statusCode || 500).json({
+    ok: false,
+    error: "Não foi possível criar o pedido agora. Tente novamente em alguns instantes."
+  });
+});
+
+cleanupOldTmpUploads();
+setInterval(cleanupOldTmpUploads, TMP_UPLOAD_CLEANUP_INTERVAL_MS);
 setInterval(finalizarConversasSuporteInativas, 60 * 1000);
+setTimeout(runMonthlyPlanningNotifications, 15 * 1000);
+setInterval(runMonthlyPlanningNotifications, MONTHLY_PLANNING_NOTIFICATIONS_INTERVAL_MS);
 
 app.listen(PORT, () => {
   console.log("API rodando na porta", PORT);

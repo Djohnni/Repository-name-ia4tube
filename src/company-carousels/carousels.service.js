@@ -2,14 +2,10 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const billingService = require("../billing/billing.service");
+const plansRegistry = require("../billing/plans");
 
 const VALID_STATUSES = new Set(["pendente", "baixado", "processando", "pronto", "erro"]);
 const READY_STATUSES = new Set(["pronto"]);
-const CAROUSEL_PLAN_LIMITS = {
-  essencial: 1,
-  profissional: 2,
-  empresarial: 4
-};
 const CAROUSEL_LIMIT_REACHED_MESSAGE = "Voc\u00ea atingiu o limite de carross\u00e9is do seu plano neste ciclo.";
 
 function safeSegment(value, fallback = "item") {
@@ -31,13 +27,33 @@ function planCycle(cliente) {
   return String(cliente?.plano_ciclo || cliente?.ciclo_mes || currentMonthCycle()).trim();
 }
 
+function isCarouselPlanActive(cliente) {
+  if (billingService.isPlanActive(cliente)) return true;
+
+  const status = String(cliente?.plano_status || "").trim().toLowerCase();
+  if (status !== "active" && status !== "ativo") return false;
+
+  const renewalValue = cliente?.plano_renova_em || cliente?.plano_expira_em || cliente?.vencimento;
+  if (!renewalValue) return true;
+
+  const renewal = new Date(renewalValue);
+  if (Number.isNaN(renewal.getTime())) return true;
+
+  return Date.now() < renewal.getTime();
+}
+
 function planKey(cliente) {
-  if (!billingService.isPlanActive(cliente)) return "";
+  if (!isCarouselPlanActive(cliente)) return "";
   const id = String(cliente.plano_atual || cliente.plano || "").toLowerCase();
   if (id.includes("essencial")) return "essencial";
   if (id.includes("profissional")) return "profissional";
   if (id.includes("empresarial")) return "empresarial";
   return "";
+}
+
+function carouselLimitForPlanKey(key) {
+  const plan = plansRegistry.getPlan(`i4_${key}`);
+  return Number(plan?.carouselsPerMonth || 0);
 }
 
 function ensureCarouselCycleState(cliente) {
@@ -53,7 +69,7 @@ function ensureCarouselCycleState(cliente) {
 function carouselUsagePayload(cliente) {
   const ciclo = ensureCarouselCycleState(cliente);
   const key = planKey(cliente);
-  const limit = CAROUSEL_PLAN_LIMITS[key] || 0;
+  const limit = carouselLimitForPlanKey(key);
   const used = Object.keys(cliente.carrosseis_criados || {}).length;
   return {
     ciclo,
@@ -152,14 +168,22 @@ function clampScreenCount(value) {
   return Math.max(2, Math.min(10, Math.round(count)));
 }
 
+function clampContentLevel(value) {
+  const level = Number(value || 2);
+  if (!Number.isFinite(level)) return 2;
+  return Math.max(1, Math.min(3, Math.round(level)));
+}
+
 function normalizeBriefing(body = {}) {
   const quantidade = clampScreenCount(body.quantidade_telas || body.quantidade || body.telas);
+  const nivelConteudo = clampContentLevel(body.nivel_conteudo || body.nivelConteudo || body.content_level);
   return {
     briefing: String(body.briefing || body.texto || "").trim(),
     tema: String(body.tema || "").trim(),
     formato: String(body.formato || "carrossel").trim(),
     quantidade,
     quantidade_telas: quantidade,
+    nivel_conteudo: nivelConteudo,
     publico: String(body.publico || body.publico_alvo || "").trim(),
     objetivo: String(body.objetivo || "").trim(),
     estilo_visual: String(body.estilo_visual || body.estiloVisual || "").trim(),
@@ -323,27 +347,62 @@ function statusLabel(status) {
 function publicStatusPayload({ baseDir, whatsapp, carrosselId }) {
   const request = findRequestById({ baseDir, carrosselId });
   assertClientRequest(request, whatsapp);
+
+  return {
+    ok: true,
+    carrossel: publicCarouselSummary(request)
+  };
+}
+
+function publicCarouselSummary(request) {
+  const carrosselId = request.carrossel_id || request.id;
   const ready = READY_STATUSES.has(request.status) && fs.existsSync(request.resultado_path);
   const descricao = ready && fs.existsSync(request.descricao_path)
     ? fs.readFileSync(request.descricao_path, "utf8")
     : "";
+  const stat = fs.existsSync(request.solicitacao_path)
+    ? fs.statSync(request.solicitacao_path)
+    : null;
+  const atualizadoEm = request.atualizado_em || (stat ? stat.mtime.toISOString() : "");
 
   return {
-    ok: true,
-    carrossel: {
-      id: request.carrossel_id || request.id,
-      carrossel_id: request.carrossel_id || request.id,
-      status: request.status,
-      status_label: statusLabel(request.status),
-      ready,
-      ciclo: request.ciclo,
-      criado_em: request.criado_em || "",
-      atualizado_em: request.atualizado_em || "",
-      descricao_instagram: descricao,
-      download_url: ready ? `/empresa/carrosseis/${request.carrossel_id || request.id}/download` : "",
-      quota: request.quota || null
-    }
+    id: carrosselId,
+    carrossel_id: carrosselId,
+    tema: request.briefing?.tema || request.briefing?.briefing || "",
+    quantidade_telas: request.briefing?.quantidade_telas || request.briefing?.quantidade || "",
+    nivel_conteudo: request.briefing?.nivel_conteudo || 2,
+    status: request.status,
+    status_label: statusLabel(request.status),
+    ready,
+    ciclo: request.ciclo,
+    criado_em: request.criado_em || "",
+    atualizado_em: atualizadoEm,
+    descricao_instagram: descricao,
+    download_url: ready ? `/empresa/carrosseis/${carrosselId}/download` : "",
+    quota: request.quota || null
   };
+}
+
+function listClientRequests({ baseDir, whatsapp, limit = 50 }) {
+  const userDir = path.join(baseDir, safeSegment(whatsapp, "sem_whatsapp"));
+  if (!fs.existsSync(userDir)) return [];
+
+  const items = [];
+  for (const cycleEntry of fs.readdirSync(userDir, { withFileTypes: true })) {
+    if (!cycleEntry.isDirectory()) continue;
+    const cycleDir = path.join(userDir, cycleEntry.name);
+    for (const carouselEntry of fs.readdirSync(cycleDir, { withFileTypes: true })) {
+      if (!carouselEntry.isDirectory()) continue;
+      const request = parseRequest(path.join(cycleDir, carouselEntry.name));
+      if (!request) continue;
+      if (String(request.whatsapp || "") !== String(whatsapp || "")) continue;
+      items.push(publicCarouselSummary(request));
+    }
+  }
+
+  return items
+    .sort((a, b) => String(b.criado_em || b.atualizado_em || "").localeCompare(String(a.criado_em || a.atualizado_em || "")))
+    .slice(0, limit);
 }
 
 function downloadForCarousel({ baseDir, whatsapp, carrosselId }) {
@@ -437,6 +496,7 @@ function listBotPending({ baseDir, limit = 5 }) {
           status: request.status,
           criado_em: request.criado_em,
           quantidade_telas: request.briefing?.quantidade_telas || request.briefing?.quantidade || "",
+          nivel_conteudo: request.briefing?.nivel_conteudo || 2,
           tema: request.briefing?.tema || request.briefing?.briefing || "",
           zip_url: `/bot/empresa/carrosseis/${request.carrossel_id || request.id}/zip`
         });
@@ -456,5 +516,7 @@ module.exports = {
   downloadForCarousel,
   updateRequestStatus,
   saveUploadedResult,
-  listBotPending
+  listBotPending,
+  listClientRequests,
+  carouselUsagePayload
 };
