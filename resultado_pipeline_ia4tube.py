@@ -46,6 +46,7 @@ TEMPLATE_MASCOTE_UNIFORME_DIR = BASE_DIR / "template_mascote_uniforme"
 
 OUT_DIR = BASE_DIR / "resultados_prontos"
 OUT_DIR.mkdir(exist_ok=True)
+ALL_IMAGES_DIR = BASE_DIR / "dados" / "pedidos" / "todas imagens"
 
 OPENAI_KEY_FILE = BASE_DIR / "openai_key.txt"
 CREDENTIALS_FILE = BASE_DIR / "credenciais.txt"
@@ -142,6 +143,50 @@ def log(msg: str):
     except UnicodeEncodeError:
         safe = msg.encode("ascii", errors="replace").decode("ascii")
         print(safe, flush=True)
+
+
+def safe_archive_segment(value, fallback="item"):
+    text = str(value or "").strip() or fallback
+    text = re.sub(r"[^0-9A-Za-z_.@+-]+", "_", text).strip("_")
+    return text[:120] or fallback
+
+
+def unique_archive_path(directory: Path, filename: str) -> Path:
+    candidate = directory / filename
+    if not candidate.exists():
+        return candidate
+
+    suffix = candidate.suffix or ".png"
+    stem = candidate.stem
+    for index in range(2, 1000):
+        numbered = directory / f"{stem}_{index}{suffix}"
+        if not numbered.exists():
+            return numbered
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return directory / f"{stem}_{timestamp}{suffix}"
+
+
+def copy_final_image_to_all_images(pedido: dict, pedido_dir: Path, pedido_id: str, final_path: Path):
+    try:
+        if not final_path.exists():
+            log(f"Aviso: resultado final nao encontrado para copia extra: {final_path}")
+            return
+
+        whatsapp = safe_archive_segment(
+            pedido.get("whatsapp") or pedido_dir.parent.parent.name,
+            "sem_whatsapp",
+        )
+        safe_pedido_id = safe_archive_segment(pedido_id or pedido.get("id") or pedido_dir.name, "pedido")
+        ALL_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+        archive_path = unique_archive_path(
+            ALL_IMAGES_DIR,
+            f"{whatsapp}_{safe_pedido_id}_resultado_final.png",
+        )
+        shutil.copy2(final_path, archive_path)
+        log(f"Copia extra salva em: {archive_path}")
+    except Exception as exc:
+        log(f"Aviso: falha ao copiar resultado para todas imagens: {exc}")
 
 
 def load_json(path: Path) -> dict:
@@ -378,6 +423,31 @@ def get_clean_asset_names(order_model: dict, key: str) -> list[str]:
     return names
 
 
+def get_company_client_photo_candidate_names(order_model: dict) -> list[str]:
+    names = get_clean_asset_names(order_model, "fotos")
+    for i in range(1, 21):
+        names.extend([
+            f"foto{i:02d}.png", f"foto{i:02d}.jpg", f"foto{i:02d}.jpeg", f"foto{i:02d}.webp"
+        ])
+    return names
+
+
+def find_company_client_photo_paths(pedido_dir: Path, order_model: dict) -> list[Path]:
+    return find_existing_many(pedido_dir, get_company_client_photo_candidate_names(order_model))
+
+
+def set_company_client_photo_context(order_model: dict, pedido_dir: Path) -> list[Path]:
+    photo_paths = find_company_client_photo_paths(pedido_dir, order_model)
+    order_model["_tem_foto_cliente"] = bool(photo_paths)
+    order_model["_foto_base_obrigatoria"] = bool(photo_paths)
+    order_model["_quantidade_fotos_cliente"] = len(photo_paths)
+    return photo_paths
+
+
+def has_company_client_photos(order_model: dict) -> bool:
+    return bool(order_model.get("_tem_foto_cliente"))
+
+
 def get_company_value(order_model: dict, key: str, *aliases: str) -> str:
     raw = safe_dict(order_model.get("raw"))
     legacy = safe_dict(order_model.get("legacy"))
@@ -443,63 +513,50 @@ def normalize_company_text_items(value) -> list[str]:
     return [item.strip() for item in re.split(r"\r?\n|[,;]", text) if item.strip()]
 
 
-def company_reality_sources(order_model: dict) -> tuple[dict, ...]:
-    current = safe_dict(order_model)
-    raw = safe_dict(current.get("raw"))
-    legacy = safe_dict(current.get("legacy"))
-    fields = safe_dict(current.get("fields"))
-    raw_fields = safe_dict(raw.get("fields"))
+def get_company_characteristics(order_model: dict) -> list[str]:
+    raw = safe_dict(order_model.get("raw"))
+    legacy = safe_dict(order_model.get("legacy"))
+    fields = safe_dict(order_model.get("fields"))
     legacy_fields = safe_dict(legacy.get("fields"))
-    planning = safe_dict(current.get("planejamento_mensal"))
-    raw_planning = safe_dict(raw.get("planejamento_mensal"))
-    legacy_planning = safe_dict(legacy.get("planejamento_mensal"))
-    planning_fields = safe_dict(planning.get("fields"))
-    raw_planning_fields = safe_dict(raw_planning.get("fields"))
-    legacy_planning_fields = safe_dict(legacy_planning.get("fields"))
-
-    return (
-        current,
+    sources = (
         fields,
         safe_dict(fields.get("campos_dinamicos")),
-        planning,
-        planning_fields,
-        safe_dict(planning_fields.get("campos_dinamicos")),
         raw,
-        raw_fields,
-        safe_dict(raw_fields.get("campos_dinamicos")),
-        safe_dict(raw.get("campos_dinamicos")),
-        raw_planning,
-        raw_planning_fields,
-        safe_dict(raw_planning_fields.get("campos_dinamicos")),
         legacy,
         legacy_fields,
         safe_dict(legacy_fields.get("campos_dinamicos")),
-        safe_dict(legacy.get("campos_dinamicos")),
-        legacy_planning,
-        legacy_planning_fields,
-        safe_dict(legacy_planning_fields.get("campos_dinamicos")),
     )
-
-
-def get_company_characteristics(order_model: dict) -> list[str]:
     keys = (
         "caracteristicas_empresa",
         "caracteristicasEmpresa",
         "company_characteristics",
         "companyCharacteristics",
     )
-    items: list[str] = []
 
-    for source in company_reality_sources(order_model):
+    for source in sources:
         for key in keys:
             if key not in source:
                 continue
-            items.extend(normalize_company_text_items(source.get(key)))
+            items = normalize_company_text_items(source.get(key))
+            if items:
+                return list(dict.fromkeys(items))
 
-    return list(dict.fromkeys(item for item in items if item))
+    return []
 
 
 def get_company_important_info(order_model: dict) -> str:
+    raw = safe_dict(order_model.get("raw"))
+    legacy = safe_dict(order_model.get("legacy"))
+    fields = safe_dict(order_model.get("fields"))
+    legacy_fields = safe_dict(legacy.get("fields"))
+    sources = (
+        fields,
+        safe_dict(fields.get("campos_dinamicos")),
+        raw,
+        legacy,
+        legacy_fields,
+        safe_dict(legacy_fields.get("campos_dinamicos")),
+    )
     keys = (
         "informacoes_empresa",
         "informacoes_importantes_empresa",
@@ -507,7 +564,7 @@ def get_company_important_info(order_model: dict) -> str:
         "dados_importantes_empresa",
     )
 
-    for source in company_reality_sources(order_model):
+    for source in sources:
         for key in keys:
             value = normalize_text(source.get(key, "")).strip()
             if value:
@@ -549,14 +606,12 @@ def build_company_important_info_rules(info: str, characteristics=None) -> str:
 
 
 def build_company_important_info_block(order_model: dict) -> str:
-    info = get_company_important_info(order_model)
-    characteristics = get_company_characteristics(order_model)
-    if not info and not characteristics:
-        return ""
-
     return build_prompt_section(
         "CARACTERISTICAS E REGRAS REAIS DA EMPRESA",
-        build_company_important_info_rules(info, characteristics),
+        build_company_important_info_rules(
+            get_company_important_info(order_model),
+            get_company_characteristics(order_model),
+        ),
     )
 
 
@@ -569,6 +624,7 @@ def get_company_visual_style(order_model: dict) -> str:
 
 def build_company_visual_style_lines(order_model: dict) -> list[str]:
     style = get_company_visual_style(order_model)
+    tem_foto_cliente = has_company_client_photos(order_model)
     instructions = {
         "foto_detalhes": [
             "Estilo escolhido: So embelezar a foto.",
@@ -610,7 +666,18 @@ def build_company_visual_style_lines(order_model: dict) -> list[str]:
             "Mesmo no visual agressivo, respeite as cores, energia e identidade visual do logo.",
         ],
     }
-    return instructions[style]
+
+    style_lines = list(instructions[style])
+    if tem_foto_cliente and style in {"leve", "normal"}:
+        style_lines.extend([
+            "Como ha foto enviada pelo cliente, a foto do cliente e a base obrigatoria da arte final.",
+            "Nao substitua a foto por outra imagem inventada.",
+            "Nao crie outra pessoa, outro ambiente, outra fachada, outro produto principal ou outra cena.",
+            "Pode melhorar qualidade, luz, enquadramento, composicao, layout, textos e identidade visual sem trocar a cena da foto.",
+            "A composicao publicitaria deve ser construida a partir da foto enviada, nao no lugar dela.",
+        ])
+
+    return style_lines
 
 
 def format_dna_value(value) -> str:
@@ -790,6 +857,49 @@ def resolve_company_model_image(order_model: dict) -> Path | None:
             return candidate
 
     return None
+
+
+def log_company_reference_counts(refs: list[Path], foto_paths: list[Path], logo_path: Path | None):
+    photo_set = set(foto_paths or [])
+    fotos_enviadas = sum(1 for ref in refs if ref in photo_set)
+    logos_enviados = 1 if logo_path and logo_path in refs else 0
+    outras_referencias = max(0, len(refs) - fotos_enviadas - logos_enviados)
+    log(
+        "contagem_referencias_arte_empresa: "
+        f"fotos_cliente={fotos_enviadas} | "
+        f"logos={logos_enviados} | "
+        f"outras={outras_referencias} | "
+        f"total={len(refs)}"
+    )
+
+
+def create_neutral_logo_canvas_reference(logo_path: Path, temp_dir: Path) -> Path:
+    canvas_size = 1024
+    max_logo_width = 520
+    max_logo_height = 680
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    temp_path = temp_dir / f"{logo_path.stem}_canvas_neutro.png"
+
+    with Image.open(logo_path) as img:
+        img.load()
+        logo = img.convert("RGBA")
+        scale = min(max_logo_width / logo.width, max_logo_height / logo.height)
+        new_size = (
+            max(1, int(round(logo.width * scale))),
+            max(1, int(round(logo.height * scale))),
+        )
+        logo = logo.resize(new_size, Image.LANCZOS)
+
+        canvas = Image.new("RGBA", (canvas_size, canvas_size), (255, 255, 255, 255))
+        x = (canvas_size - logo.width) // 2
+        y = (canvas_size - logo.height) // 2
+        canvas.alpha_composite(logo, (x, y))
+        canvas.convert("RGB").save(temp_path, "PNG")
+
+    log("logo_canvas_neutro=true")
+    log(f"logo_canvas_neutro_path: {temp_path}")
+    log(f"logo_canvas_neutro_dimensoes: {canvas_size}x{canvas_size} | logo={new_size[0]}x{new_size[1]}")
+    return temp_path
 
 
 def build_company_text_lines_from_model(order_model: dict) -> list[str]:
@@ -1014,24 +1124,35 @@ def build_company_reference_images(pedido_dir: Path, order_model: dict, text_ref
     logo_names = get_clean_asset_names(order_model, "logo") + [
         "logo.png", "logo.jpg", "logo.jpeg", "logo.webp"
     ]
-    foto_names = get_clean_asset_names(order_model, "fotos")
-    for i in range(1, 21):
-        foto_names.extend([
-            f"foto{i:02d}.png", f"foto{i:02d}.jpg", f"foto{i:02d}.jpeg", f"foto{i:02d}.webp"
-        ])
+    logo_path = find_existing(pedido_dir, logo_names)
+    foto_paths = find_company_client_photo_paths(pedido_dir, order_model)
+    tem_foto_cliente = bool(foto_paths)
     modelo_existente_names = get_clean_asset_names(order_model, "modelo_existente") + [
         "modelo_existente.png", "modelo_existente.jpg", "modelo_existente.jpeg", "modelo_existente.webp"
     ]
+    referencia_names = get_clean_asset_names(order_model, "referencias")
+    for i in range(1, 21):
+        referencia_names.extend([
+            f"referencia{i:02d}.png", f"referencia{i:02d}.jpg", f"referencia{i:02d}.jpeg", f"referencia{i:02d}.webp"
+        ])
+    referencia_paths = find_existing_many(pedido_dir, referencia_names)
+    modelo_existente_path = find_existing(pedido_dir, modelo_existente_names)
+    modelo_interno_path = resolve_company_model_image(order_model)
+    pedido_layout_path = pedido_dir / "pedido.png"
+
+    log(f"tem_foto_cliente: {str(tem_foto_cliente).lower()}")
+    log(f"foto_base_obrigatoria: {str(tem_foto_cliente).lower()}")
+    logo_count_path = logo_path
+    logo_only_reference = False
 
     if get_company_visual_style(order_model) == "foto_detalhes":
         # Embelezar foto: a primeira imagem enviada precisa ser a foto base.
         # Modelos internos e referencias extras podem induzir a IA a inventar outra cena.
-        foto_paths = find_existing_many(pedido_dir, foto_names)
         if not foto_paths:
             raise RuntimeError("Embelezar foto precisa de uma foto base enviada pelo cliente.")
         for path in foto_paths:
             unique_append(refs, path, seen)
-        unique_append(refs, find_existing(pedido_dir, logo_names), seen)
+        unique_append(refs, logo_path, seen)
         unique_append(refs, find_existing(pedido_dir, modelo_existente_names), seen)
         unique_append(refs, text_ref_path, seen)
 
@@ -1039,40 +1160,58 @@ def build_company_reference_images(pedido_dir: Path, order_model: dict, text_ref
             log(f"Aviso: Foram encontradas {len(refs)} imagens. Enviarei somente as primeiras {MAX_REFERENCIAS}.")
             refs = refs[:MAX_REFERENCIAS]
 
+        log_company_reference_counts(refs, foto_paths, logo_path)
         log("Referencias arte_empresa foto_detalhes:")
         for idx, ref in enumerate(refs, start=1):
             log(f"   {idx:02d}. {ref}")
 
         return refs
 
-    # Ordem intencional para arte_empresa: logo, fotos, referencias do cliente, modelo interno e briefing visual.
-    unique_append(refs, find_existing(pedido_dir, logo_names), seen)
+    if tem_foto_cliente:
+        # Quando ha foto do cliente, ela deve ter prioridade e ir antes de logo/modelos.
+        for path in foto_paths:
+            unique_append(refs, path, seen)
+        unique_append(refs, logo_path, seen)
+    else:
+        # Sem foto do cliente e sem outras referencias do pedido, envia a logo em canvas neutro.
+        logo_ref_path = logo_path
+        logo_only_reference = (
+            logo_path
+            and not referencia_paths
+            and not modelo_existente_path
+            and not modelo_interno_path
+            and not text_ref_path.exists()
+            and not pedido_layout_path.exists()
+        )
+        if logo_only_reference:
+            try:
+                logo_ref_path = create_neutral_logo_canvas_reference(logo_path, text_ref_path.parent)
+                logo_count_path = logo_ref_path
+            except Exception as exc:
+                log(f"Aviso: nao consegui criar canvas neutro da logo ({exc}). Usando logo original.")
+        unique_append(refs, logo_ref_path, seen)
+        if logo_ref_path != logo_path and logo_path:
+            seen.add(logo_path.resolve())
 
-    for path in find_existing_many(pedido_dir, foto_names):
+    for path in referencia_paths:
         unique_append(refs, path, seen)
 
-    referencia_names = get_clean_asset_names(order_model, "referencias")
-    for i in range(1, 21):
-        referencia_names.extend([
-            f"referencia{i:02d}.png", f"referencia{i:02d}.jpg", f"referencia{i:02d}.jpeg", f"referencia{i:02d}.webp"
-        ])
-    for path in find_existing_many(pedido_dir, referencia_names):
-        unique_append(refs, path, seen)
+    unique_append(refs, modelo_existente_path, seen)
 
-    unique_append(refs, find_existing(pedido_dir, modelo_existente_names), seen)
-
-    unique_append(refs, resolve_company_model_image(order_model), seen)
+    unique_append(refs, modelo_interno_path, seen)
 
     unique_append(refs, text_ref_path, seen)
-    unique_append(refs, pedido_dir / "pedido.png", seen)
+    unique_append(refs, pedido_layout_path, seen)
 
-    for p in collect_extra_images(pedido_dir, seen):
-        unique_append(refs, p, seen)
+    if not logo_only_reference:
+        for p in collect_extra_images(pedido_dir, seen):
+            unique_append(refs, p, seen)
 
     if len(refs) > MAX_REFERENCIAS:
         log(f"Aviso: Foram encontradas {len(refs)} imagens. Enviarei somente as primeiras {MAX_REFERENCIAS}.")
         refs = refs[:MAX_REFERENCIAS]
 
+    log_company_reference_counts(refs, foto_paths, logo_count_path)
     log("Referencias arte_empresa:")
     for idx, ref in enumerate(refs, start=1):
         log(f"   {idx:02d}. {ref}")
@@ -2067,6 +2206,30 @@ def load_niche_specific_rules(niche_dir: Path | None) -> str:
     return "\n\n".join(sections).strip()
 
 
+def build_company_client_photo_base_block(order_model: dict) -> str:
+    if not has_company_client_photos(order_model):
+        return ""
+
+    count = safe_int(order_model.get("_quantidade_fotos_cliente", 0), 0)
+    return build_prompt_section(
+        "REGRA PRINCIPAL OBRIGATORIA PARA FOTO DO CLIENTE",
+        "\n".join([
+            f"Este pedido tem {count} foto(s) enviada(s) pelo cliente.",
+            "A arte final deve obrigatoriamente utilizar a(s) foto(s) enviada(s) pelo cliente.",
+            "A foto enviada pelo cliente deve permanecer sendo a base visual da arte final.",
+            "Nao substitua a foto por outra foto inventada.",
+            "Nao crie outra pessoa.",
+            "Nao crie outro ambiente.",
+            "Nao crie outra fachada.",
+            "Nao crie outro produto principal.",
+            "Nao crie outra cena completamente diferente.",
+            "Pode melhorar qualidade, iluminacao, enquadramento, composicao, layout publicitario, textos, identidade visual e acabamento.",
+            "Todas as melhorias devem preservar a foto enviada como cena/base principal.",
+            "Se houver conflito entre criar um conceito novo e preservar a foto, preserve a foto.",
+        ])
+    )
+
+
 def build_company_data_block(order_model: dict) -> str:
     lines = []
     info_lines = without_company_internal_objective_public_lines(order_model, build_company_text_lines_from_model(order_model))
@@ -2081,6 +2244,9 @@ def build_company_data_block(order_model: dict) -> str:
         lines.append(build_prompt_section("DADOS DA EMPRESA", "\n".join(info_lines)))
     if important_info:
         lines.append(important_info)
+    photo_base_block = build_company_client_photo_base_block(order_model)
+    if photo_base_block:
+        lines.append(photo_base_block)
     if internal_objective:
         lines.append(internal_objective)
     if dynamic_lines:
@@ -2121,6 +2287,7 @@ def build_client_data_block(order_model: dict, linhas_texto: list[str]) -> str:
 
 def build_visual_mode_contract(order_model: dict) -> str:
     style = get_company_visual_style(order_model)
+    tem_foto_cliente = has_company_client_photos(order_model)
     common_rules = [
         "O modo visual controla apenas o nivel de transformacao permitido para este pedido.",
         "O nicho/produto continua decidindo linguagem, estetica, estilo e repertorio do segmento.",
@@ -2164,6 +2331,29 @@ def build_visual_mode_contract(order_model: dict) -> str:
         "Aplicar somente limites tecnicos do modo visual informado.",
         "Na duvida, preservar os dados reais e nao inventar informacoes.",
     ])
+    if tem_foto_cliente and style == "leve":
+        selected_rules = [
+            "Modo: Leve com foto do cliente.",
+            "Fazer transformacao leve a partir da foto enviada.",
+            "Organizar melhor a foto e adicionar poucos elementos.",
+            "A foto enviada deve continuar sendo a base visual principal.",
+            "Nao substituir a foto por cena, pessoa, ambiente, fachada ou produto inventado.",
+            "Nao virar campanha, mosaico, vitrine ou anuncio completo.",
+            "Nao criar composicao complexa ou layout muito publicitario.",
+            "Se usar objetivo interno, usar apenas para orientar atmosfera discreta sem trocar a cena da foto.",
+        ]
+    elif tem_foto_cliente and style == "normal":
+        selected_rules = [
+            "Modo: Normal IA4Tube com foto do cliente.",
+            "Pode transformar a foto enviada em peca publicitaria completa.",
+            "Pode criar layout, hierarquia, textos e elementos graficos ao redor da foto enviada.",
+            "A foto enviada deve continuar sendo a base visual principal.",
+            "Nao criar conceito visual que substitua a cena da foto.",
+            "Nao reduzir a dominancia da foto a ponto de trocar o ambiente, fachada, pessoa, produto ou cena principal.",
+            "Nao recriar ambiente diferente, fachada diferente, pessoa diferente ou produto principal diferente.",
+            "Pode organizar produto, servico, oferta, beneficio e CTA com mais forca quando esses dados existirem.",
+            "Deve parecer anuncio pronto para Instagram sem abandonar a foto enviada.",
+        ]
 
     return build_prompt_section(
         "CONTRATO TECNICO DO MODO VISUAL",
@@ -2731,6 +2921,9 @@ def main():
     if not is_company_product(order_model):
         linhas_texto = corrigir_linhas_texto(linhas_texto)
 
+    if is_company_product(order_model):
+        set_company_client_photo_context(order_model, pedido_dir)
+
     prompt_base, prompt_file_usado = load_prompt_imagem(pedido, linhas_texto)
 
     motivo_ajuste = ler_motivo_ajuste(pedido_dir, pedido)
@@ -2815,6 +3008,7 @@ REGRAS DO AJUSTE:
 
     shutil.copy2(out_final_pedido, out_final_geral)
     log(f"✅ Cópia salva em: {out_final_geral}")
+    copy_final_image_to_all_images(pedido, pedido_dir, pedido_id, out_final_pedido)
 
     info = {
         "pedido_id": pedido_id,
@@ -2874,10 +3068,26 @@ REGRAS DO AJUSTE:
 
 
 def _valor_legenda(pedido, *chaves):
-    for chave in chaves:
-        valor = normalize_text(pedido.get(chave) or "").strip()
-        if valor:
-            return valor
+    fields = safe_dict(pedido.get("fields"))
+    legacy = safe_dict(pedido.get("legacy"))
+    legacy_fields = safe_dict(legacy.get("fields"))
+    sources = (
+        pedido,
+        fields,
+        safe_dict(fields.get("campos_dinamicos")),
+        legacy,
+        legacy_fields,
+        safe_dict(legacy_fields.get("campos_dinamicos")),
+    )
+    for source in sources:
+        for chave in chaves:
+            raw_value = source.get(chave)
+            if isinstance(raw_value, (list, dict)):
+                valor = json.dumps(raw_value, ensure_ascii=False)
+            else:
+                valor = normalize_text(raw_value or "").strip()
+            if valor:
+                return valor
     return ""
 
 
@@ -2961,6 +3171,20 @@ def gerar_descricao_instagram(pedido, linhas_texto):
         objetivo = _valor_legenda(pedido, "objetivo", "rodada")
         frase = _valor_legenda(pedido, "frase_foto", "oferta", "cta")
         historia = _valor_legenda(pedido, "historia_empresa")
+        informacoes_empresa = _valor_legenda(
+            pedido,
+            "informacoes_empresa",
+            "informacoes_importantes_empresa",
+            "regras_empresa",
+            "dados_importantes_empresa",
+        )
+        caracteristicas_empresa = normalize_company_text_items(_valor_legenda(
+            pedido,
+            "caracteristicas_empresa",
+            "caracteristicasEmpresa",
+            "company_characteristics",
+            "companyCharacteristics",
+        ))
         whatsapp = _valor_legenda(pedido, "whatsapp_contato", "whatsapp")
         instagram = _valor_legenda(pedido, "instagram")
         patrocinador_real = "sim" if _pedido_eh_patrocinador(pedido) else "nao"
@@ -3032,9 +3256,18 @@ DADOS ESTRUTURADOS DO PEDIDO:
 - Objetivo escolhido: {objetivo}
 - Frase/oferta/CTA: {frase}
 - Historia/dados do cliente: {historia}
+- Caracteristicas marcadas da empresa: {", ".join(caracteristicas_empresa) or "nenhuma"}
+- Informacoes importantes da empresa: {informacoes_empresa or "nenhuma"}
 - WhatsApp: {whatsapp}
 - Instagram: {instagram}
 - Pedido realmente e patrocinador: {patrocinador_real}
+
+REGRAS SOBRE CARACTERISTICAS DA EMPRESA:
+- As caracteristicas marcadas e as informacoes importantes representam regras reais da empresa e tem prioridade sobre criatividade.
+- Pode mencionar uma caracteristica somente se ela estiver marcada ou escrita nas informacoes importantes.
+- Nunca contradiga as regras reais da empresa.
+- Nunca invente caracteristicas permanentes nao informadas, como delivery, estacionamento, Pix, cartao, parcelamento, drive-thru, horario especial ou atendimento 24 horas.
+- So mencione delivery, entrega, receber em casa, app ou termos equivalentes se houver caracteristica marcada ligada a delivery/entrega ou se isso estiver escrito nas informacoes importantes.
 """
 
         response = client.responses.create(
