@@ -10,6 +10,10 @@ from datetime import datetime
 import requests
 from openai import OpenAI
 from PIL import Image, ImageDraw, ImageFont
+from company_characteristics_knowledge import (
+    build_company_characteristics_knowledge_for_order,
+    build_company_characteristics_prompt_block,
+)
 from nicho_knowledge_local import build_local_niche_knowledge_for_order, resolve_local_nicho_id
 
 API_BASE = os.environ.get("IA4TUBE_API_BASE", "https://api.ia4tube.com.br").rstrip("/")
@@ -554,9 +558,16 @@ def build_company_important_info_block(order_model: dict) -> str:
     if not info and not characteristics:
         return ""
 
-    return build_prompt_section(
+    rules_block = build_prompt_section(
         "CARACTERISTICAS E REGRAS REAIS DA EMPRESA",
         build_company_important_info_rules(info, characteristics),
+    )
+    knowledge_block = build_company_characteristics_prompt_block(
+        build_company_characteristics_knowledge_for_order(order_model)
+    )
+
+    return "\n\n".join(
+        block for block in (rules_block, knowledge_block) if str(block or "").strip()
     )
 
 

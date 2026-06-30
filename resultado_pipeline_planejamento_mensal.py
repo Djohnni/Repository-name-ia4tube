@@ -9,6 +9,10 @@ from datetime import datetime
 
 from openai import OpenAI
 
+from company_characteristics_knowledge import (
+    build_company_characteristics_knowledge_for_order,
+    build_company_characteristics_prompt_block,
+)
 from resultado_pipeline_ia4tube import (
     BASE_DIR,
     OUT_DIR,
@@ -210,7 +214,7 @@ def company_reality_prompt_block(pedido):
     characteristics_text = "\n".join(f"- {item}" for item in characteristics) if characteristics else "Nenhuma caracteristica marcada."
     info_text = info or "Nenhuma informacao adicional."
 
-    return f"""
+    rules_block = f"""
 CARACTERISTICAS E REGRAS REAIS DA EMPRESA:
 Caracteristicas marcadas pelo cliente:
 {characteristics_text}
@@ -235,6 +239,13 @@ REGRAS DE USO:
 - Se "Parcelamos no cartao" nao estiver marcado nem escrito nas outras informacoes, nao mencione parcelamento.
 - Essas regras tem prioridade sobre criatividade, nicho, objetivo, briefing, CTA generico e conhecimento do segmento.
 """.strip()
+    knowledge_block = build_company_characteristics_prompt_block(
+        build_company_characteristics_knowledge_for_order(pedido)
+    )
+
+    return "\n\n".join(
+        block for block in (rules_block, knowledge_block) if str(block or "").strip()
+    )
 
 
 def company_important_info_prompt_block(pedido):
