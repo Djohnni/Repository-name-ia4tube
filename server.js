@@ -62,6 +62,10 @@ const CLIENTES_TESTE = [
   "admin"
 ];
 
+const MONTHLY_PLANNING_RESERVED_ROUTE_SEGMENTS = new Set([
+  "calendario"
+]);
+
 // CORS: permite seu site chamar a API
 app.use(cors({
   origin: ["https://ia4tube.com", "https://www.ia4tube.com", "http://127.0.0.1:8080", "http://localhost:8080"],
@@ -128,6 +132,12 @@ function readClientes() {
 
 function writeClientes(obj) {
   fs.writeFileSync(CLIENTES_FILE, JSON.stringify(obj, null, 2), "utf8");
+}
+
+function isMonthlyPlanningReservedRouteSegment(value) {
+  return MONTHLY_PLANNING_RESERVED_ROUTE_SEGMENTS.has(
+    String(value || "").trim().toLowerCase()
+  );
 }
 
 function readMpProcessados() {
@@ -759,6 +769,17 @@ const upload = multer({
 });
 
 const uploadResultado = multer({ storage });
+
+const PEDIDO_UPLOAD_FIELDS = [
+  { name: "escudo1", maxCount: 1 },
+  { name: "escudo2", maxCount: 1 },
+  { name: "mascote", maxCount: 1 },
+  { name: "patrocinadores", maxCount: 20 },
+  { name: "logo", maxCount: 1 },
+  { name: "fotos", maxCount: 20 },
+  { name: "referencias", maxCount: 20 },
+  { name: "modelo_existente", maxCount: 1 }
+];
 
 // ===== ROTAS =====
 
@@ -2692,9 +2713,7 @@ app.post(
 app.post(
   "/empresa/planejamento-mensal/solicitar",
   auth,
-  upload.fields([
-    { name: "fotos", maxCount: 10 }
-  ]),
+  upload.fields(PEDIDO_UPLOAD_FIELDS),
   (req, res) => {
     const whatsapp = req.user.whatsapp;
     const clientes = readClientes();
@@ -2780,7 +2799,95 @@ app.get("/empresa/planejamento-mensal", auth, (req, res) => {
   }
 });
 
-app.get("/empresa/planejamento-mensal/:planningId", auth, (req, res) => {
+function handleMonthlyPlanningCalendarList(req, res) {
+  console.log("[planejamento-mensal][calendario] rota calendario geral", {
+    method: req.method,
+    path: req.originalUrl || req.path
+  });
+
+  const whatsapp = req.user.whatsapp;
+  const clientes = readClientes();
+  const cliente = clientes[whatsapp];
+
+  if (!cliente) {
+    return res.status(404).json({ ok: false, error: "Cliente nao encontrado" });
+  }
+
+  try {
+    return res.json(monthlyPlanningService.listClientPlanningCalendar({
+      baseDir: MONTHLY_PLANNINGS_DIR,
+      whatsapp,
+      pedidosDir: PEDIDOS_DIR
+    }));
+  } catch (error) {
+    console.error("[planejamento-mensal][calendario] erro ao listar", {
+      whatsapp,
+      message: error?.message,
+      stack: error?.stack
+    });
+    return res.status(500).json({
+      ok: false,
+      code: "monthly_planning_calendar_list_error",
+      error: "Nao foi possivel carregar o calendario do Planejamento Mensal agora."
+    });
+  }
+}
+
+function handleMonthlyPlanningCalendarHide(req, res) {
+  console.log("[planejamento-mensal][calendario] rota ocultar calendario", {
+    method: req.method,
+    path: req.originalUrl || req.path
+  });
+
+  const whatsapp = req.user.whatsapp;
+  const clientes = readClientes();
+  const cliente = clientes[whatsapp];
+
+  if (!cliente) {
+    return res.status(404).json({ ok: false, error: "Cliente nao encontrado" });
+  }
+
+  try {
+    return res.json(monthlyPlanningService.hideClientPlanningCalendarItem({
+      baseDir: MONTHLY_PLANNINGS_DIR,
+      whatsapp,
+      itemKey: req.body?.item_key || req.body?.calendar_key || req.body?.key || "",
+      pedidoId: req.body?.pedido_id || "",
+      planningId: req.body?.planning_id || req.body?.planejamento_id || "",
+      planejamentoItemId: req.body?.planejamento_item_id || ""
+    }));
+  } catch (error) {
+    console.error("[planejamento-mensal][calendario] erro ao ocultar", {
+      whatsapp,
+      message: error?.message,
+      stack: error?.stack
+    });
+    return res.status(error?.statusCode || 500).json({
+      ok: false,
+      code: error?.code || "monthly_planning_calendar_hide_error",
+      error: error?.message || "Nao foi possivel remover este item do calendario."
+    });
+  }
+}
+
+app.get("/empresa/calendario-planejamento-mensal", auth, handleMonthlyPlanningCalendarList);
+app.post("/empresa/calendario-planejamento-mensal/ocultar", auth, handleMonthlyPlanningCalendarHide);
+
+app.get("/empresa/planejamento-mensal/calendario", auth, handleMonthlyPlanningCalendarList);
+
+app.post("/empresa/planejamento-mensal/calendario/ocultar", auth, handleMonthlyPlanningCalendarHide);
+
+app.get("/empresa/planejamento-mensal/:planningId", auth, (req, res, next) => {
+  console.log("[planejamento-mensal] rota detalhe planejamento", {
+    method: req.method,
+    path: req.originalUrl || req.path,
+    planningId: req.params.planningId
+  });
+
+  if (isMonthlyPlanningReservedRouteSegment(req.params.planningId)) {
+    return next("route");
+  }
+
   const whatsapp = req.user.whatsapp;
   const clientes = readClientes();
   const cliente = clientes[whatsapp];
@@ -2806,6 +2913,14 @@ app.get("/empresa/planejamento-mensal/:planningId", auth, (req, res) => {
 });
 
 app.post("/empresa/planejamento-mensal/:planningId/cancelar", auth, (req, res) => {
+  if (isMonthlyPlanningReservedRouteSegment(req.params.planningId)) {
+    return res.status(404).json({
+      ok: false,
+      code: "monthly_planning_reserved_route",
+      error: "Rota reservada do Planejamento Mensal."
+    });
+  }
+
   const whatsapp = req.user.whatsapp;
   const clientes = readClientes();
   const cliente = clientes[whatsapp];
@@ -3232,12 +3347,24 @@ function criarPedidoHandler(categoria) {
       });
     }
 
+    const visualStyleNormalization = orderService.normalizeCompanyVisualStyleForUploads({ categoria, fields, files });
+
     let cobrancaEmpresa = null;
     if (isArteEmpresa) {
       cobrancaEmpresa = billingService.resolveCompanyArtCharge(c, {
         custoPedido: custoEfetivoPedido,
         now: new Date()
       });
+
+      if (visualStyleNormalization.converted) {
+        console.info("[pedidos] estilo visual arte_empresa ajustado", {
+          whatsapp,
+          origem_cobranca: cobrancaEmpresa.source || cobrancaEmpresa.code || "indefinida",
+          estilo_original: visualStyleNormalization.from,
+          estilo_final: visualStyleNormalization.to,
+          reason: visualStyleNormalization.reason
+        });
+      }
 
       if (cobrancaEmpresa.allowed !== true) {
         clientes[whatsapp] = c;
@@ -3326,16 +3453,7 @@ function criarPedidoHandler(categoria) {
 app.post(
   "/pedidos",
   auth,
-  upload.fields([
-    { name: "escudo1", maxCount: 1 },
-    { name: "escudo2", maxCount: 1 },
-    { name: "mascote", maxCount: 1 },
-    { name: "patrocinadores", maxCount: 20 },
-    { name: "logo", maxCount: 1 },
-    { name: "fotos", maxCount: 20 },
-    { name: "referencias", maxCount: 20 },
-    { name: "modelo_existente", maxCount: 1 }
-  ]),
+  upload.fields(PEDIDO_UPLOAD_FIELDS),
   (req, res) => {
     const flyer_tipo = (req.body?.flyer_tipo || "").toLowerCase();
     const productFromRegistry = productsRegistry.resolveProductFromRequestBody(req.body);
@@ -3360,32 +3478,14 @@ app.post(
 app.post(
   "/mascotes",
   auth,
-  upload.fields([
-    { name: "escudo1", maxCount: 1 },
-    { name: "escudo2", maxCount: 1 },
-    { name: "mascote", maxCount: 1 },
-    { name: "patrocinadores", maxCount: 20 },
-    { name: "logo", maxCount: 1 },
-    { name: "fotos", maxCount: 20 },
-    { name: "referencias", maxCount: 20 },
-    { name: "modelo_existente", maxCount: 1 }
-  ]),
+  upload.fields(PEDIDO_UPLOAD_FIELDS),
   criarPedidoHandler("mascote")
 );
 
 app.post(
   "/resultado_do_jogo",
   auth,
-  upload.fields([
-    { name: "escudo1", maxCount: 1 },
-    { name: "escudo2", maxCount: 1 },
-    { name: "mascote", maxCount: 1 },
-    { name: "patrocinadores", maxCount: 20 },
-    { name: "logo", maxCount: 1 },
-    { name: "fotos", maxCount: 20 },
-    { name: "referencias", maxCount: 20 },
-    { name: "modelo_existente", maxCount: 1 }
-  ]),
+  upload.fields(PEDIDO_UPLOAD_FIELDS),
   criarPedidoHandler("resultado")
 );
 
@@ -5234,6 +5334,8 @@ app.use((err, req, res, next) => {
   console.error("[api] erro nao tratado", {
     path: req.path,
     method: req.method,
+    code: err?.code,
+    field: err?.field,
     message: err?.message,
     stack: err?.stack
   });
