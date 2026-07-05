@@ -49,12 +49,15 @@ import br.com.ia4tube.app.data.models.BillingPixResult
 import br.com.ia4tube.app.ui.components.ScreenScaffold
 
 private val planExampleAssets = listOf(
-    "exemplo_plano_1.jpeg",
-    "exemplo_plano_2.jpeg",
-    "exemplo_plano_3.jpeg",
-    "exemplo_plano_4.jpeg",
-    "exemplo_plano_5.jpeg",
-    "exemplo_plano_6.jpeg"
+    "combo_example_01.webp",
+    "combo_example_02.webp",
+    "combo_example_04.webp",
+    "combo_example_05.webp",
+    "combo_example_06.webp",
+    "combo_example_07.webp",
+    "combo_example_08.webp",
+    "combo_example_09.webp",
+    "combo_example_10.webp"
 )
 
 @Composable
@@ -102,7 +105,7 @@ fun PlansScreen(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "Compre 1 arte avulsa ou escolha um plano mensal com beneficios completos.",
+                        text = "Compre 1 arte avulsa ou escolha um combo mensal com beneficios completos.",
                         color = secondaryText,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -139,7 +142,7 @@ fun PlansScreen(
             )
 
             Text(
-                text = "Planos iA4tube",
+                text = "Combos iA4tube",
                 color = primaryText,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.ExtraBold,
@@ -150,7 +153,7 @@ fun PlansScreen(
                 planId = "i4_essencial",
                 name = "i4 Essencial",
                 price = "R$ 39,90",
-                arts = "6 artes para postar por mês",
+                arts = "8 artes para postar por mês",
                 benefit = "3 Materiais Gráficos da Empresa por mês",
                 description = "Inclui:",
                 options = listOf(
@@ -170,7 +173,7 @@ fun PlansScreen(
                 planId = "i4_profissional",
                 name = "i4 Profissional",
                 price = "R$ 79,90",
-                arts = "16 artes para postar por mês",
+                arts = "20 artes para postar por mês",
                 benefit = "5 Materiais Gráficos da Empresa por mês",
                 description = "Inclui:",
                 options = listOf(
@@ -191,7 +194,7 @@ fun PlansScreen(
                 planId = "i4_empresarial",
                 name = "i4 Empresarial",
                 price = "R$ 149,90",
-                arts = "36 artes para postar por mês",
+                arts = "40 artes para postar por mês",
                 benefit = "Todos os Materiais Gráficos Gerais liberados",
                 description = "Inclui:",
                 options = listOf(
@@ -230,7 +233,7 @@ private fun PixPaymentDialog(
         decodeQrCodeBase64(pix.qrCodeBase64)
     }
     val title = when {
-        pix.planName.isNotBlank() -> "Pix do ${pix.planName}"
+        pix.planName.isNotBlank() -> "Pix do combo ${pix.planName}"
         pix.tipo == "arte_avulsa_pix" || pix.purchaseId.isNotBlank() -> "Pix da arte avulsa"
         else -> "Pix para adicionar saldo"
     }
@@ -336,12 +339,12 @@ private fun StandaloneArtCard(
                 fontWeight = FontWeight.ExtraBold
             )
             Text(
-                text = "Quer criar sem assinatura? Compre uma arte pronta para postar.",
+                text = "Quer criar só uma arte? Compre uma arte pronta para postar.",
                 color = secondaryText,
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = "1 arte por R$ 1,99",
+                text = "1 arte por R$ 5,99",
                 color = accent,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.ExtraBold
@@ -364,7 +367,7 @@ private fun StandaloneArtCard(
                     )
                 } else {
                     Text(
-                        text = "Comprar 1 arte por R$ 1,99",
+                        text = "Comprar 1 arte por R$ 5,99",
                         fontWeight = FontWeight.ExtraBold
                     )
                 }
@@ -482,7 +485,7 @@ private fun PlanCard(
                     )
                 } else {
                     Text(
-                        text = "Assinar",
+                        text = "Comprar combo",
                         fontWeight = FontWeight.ExtraBold
                     )
                 }
@@ -510,7 +513,7 @@ private fun PlanExamplesSection(
             fontWeight = FontWeight.ExtraBold
         )
         Text(
-            text = "Quando os arquivos JPEG estiverem no app, eles aparecem aqui automaticamente.",
+            text = "Veja alguns exemplos comerciais criados para diferentes segmentos.",
             color = secondaryText,
             style = MaterialTheme.typography.bodyMedium
         )
@@ -557,7 +560,7 @@ private fun PlanExampleCard(
 
     Card(
         modifier = modifier
-            .aspectRatio(0.78f)
+            .aspectRatio(2f / 3f)
             .border(1.dp, accent.copy(alpha = 0.28f), RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = cardColor),
@@ -568,7 +571,7 @@ private fun PlanExampleCard(
                 bitmap = bitmap,
                 contentDescription = assetName,
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Fit
             )
         } else {
             Box(

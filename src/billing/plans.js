@@ -3,7 +3,7 @@ const PLANS = {
     id: "i4_essencial",
     name: "i4 Essencial",
     price: 39.90,
-    artsPerMonth: 6,
+    artsPerMonth: 8,
     graphicMaterialsGeneralPerMonth: 3,
     graphicMaterialsNichePerMonth: 0,
     carouselsPerMonth: 1,
@@ -13,7 +13,7 @@ const PLANS = {
     id: "i4_profissional",
     name: "i4 Profissional",
     price: 79.90,
-    artsPerMonth: 16,
+    artsPerMonth: 20,
     graphicMaterialsGeneralPerMonth: 5,
     graphicMaterialsNichePerMonth: 1,
     carouselsPerMonth: 2,
@@ -23,7 +23,7 @@ const PLANS = {
     id: "i4_empresarial",
     name: "i4 Empresarial",
     price: 149.90,
-    artsPerMonth: 36,
+    artsPerMonth: 40,
     graphicMaterialsGeneralPerMonth: "all",
     graphicMaterialsNichePerMonth: 3,
     carouselsPerMonth: 4,
@@ -39,9 +39,9 @@ const BALANCE_PACKAGES = {
 };
 
 const SINGLE_ART_PURCHASE = {
-  id: "arte_avulsa_199",
-  title: "Arte avulsa IA4Tube - R$1,99",
-  amount: 1.99,
+  id: "arte_avulsa_599",
+  title: "Arte avulsa IA4Tube - R$5,99",
+  amount: 5.99,
   quantity: 1
 };
 
