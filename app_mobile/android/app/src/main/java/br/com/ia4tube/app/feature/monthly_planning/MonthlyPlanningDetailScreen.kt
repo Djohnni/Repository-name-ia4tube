@@ -28,8 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -101,7 +99,10 @@ fun MonthlyPlanningDetailScreen(
                     posts = planning.posts,
                     onOpenOrder = onOpenOrder
                 )
-                MonthlyPlanningDetailTab.Calendar -> MonthlyPlanningCalendar(planning.posts)
+                MonthlyPlanningDetailTab.Calendar -> MonthlyPlanningCalendar(
+                    posts = planning.posts,
+                    onOpenOrder = onOpenOrder
+                )
             }
 
             Spacer(modifier = Modifier.height(18.dp))
@@ -181,11 +182,24 @@ private fun MonthlyPlanningCalendar(posts: List<MonthlyPlanningPost>) {
 }
 
 @Composable
+private fun MonthlyPlanningCalendar(
+    posts: List<MonthlyPlanningPost>,
+    onOpenOrder: (String) -> Unit
+) {
+    MonthlyPlanningCalendarList(
+        title = "Calendário mensal",
+        items = posts.map { it.toCalendarListItem() },
+        loading = false,
+        emptyText = "Nenhuma postagem planejada.",
+        onOpenOrder = onOpenOrder
+    )
+}
+
+@Composable
 private fun MonthlyPlanningPostCard(
     post: MonthlyPlanningPost,
     onOpenOrder: (String) -> Unit
 ) {
-    val clipboardManager = LocalClipboardManager.current
     val canOpenOrder = post.imageReady && post.pedidoId.isNotBlank()
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -215,31 +229,12 @@ private fun MonthlyPlanningPostCard(
                 },
                 fontWeight = FontWeight.SemiBold
             )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedButton(
-                    modifier = Modifier.weight(1f),
-                    enabled = canOpenOrder,
-                    onClick = { onOpenOrder(post.pedidoId) }
-                ) {
-                    Text("Ver arte", maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                OutlinedButton(
-                    modifier = Modifier.weight(1f),
-                    enabled = canOpenOrder,
-                    onClick = { onOpenOrder(post.pedidoId) }
-                ) {
-                    Text("Baixar", maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-            }
             OutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
-                enabled = post.caption.isNotBlank(),
-                onClick = { clipboardManager.setText(AnnotatedString(post.caption)) }
+                enabled = canOpenOrder,
+                onClick = { onOpenOrder(post.pedidoId) }
             ) {
-                Text("Copiar legenda")
+                Text("Ver arte", maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }

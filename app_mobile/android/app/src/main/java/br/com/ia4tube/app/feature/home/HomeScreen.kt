@@ -62,10 +62,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Warning
@@ -73,7 +71,6 @@ import br.com.ia4tube.app.R
 import br.com.ia4tube.app.core.camera.CameraImageStore
 import br.com.ia4tube.app.data.models.OrderSummary
 import br.com.ia4tube.app.feature.orders.OrderListFilter
-import br.com.ia4tube.app.ui.components.HelpHintText
 import br.com.ia4tube.app.ui.components.ScreenScaffold
 import br.com.ia4tube.app.ui.text.asString
 import androidx.lifecycle.Lifecycle
@@ -105,6 +102,7 @@ fun HomeScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraImageStore = remember { CameraImageStore(context) }
     var showPhotoSourceDialog by remember { mutableStateOf(false) }
+    var showIconHelpDialog by remember { mutableStateOf(false) }
     var selectedHelp by remember { mutableStateOf<HomeHelpItem?>(null) }
     var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { saved ->
@@ -151,8 +149,6 @@ fun HomeScreen(
                 .padding(top = 14.dp),
                 verticalArrangement = Arrangement.Top
             ) {
-                HelpHintText(modifier = Modifier.fillMaxWidth())
-                Spacer(modifier = Modifier.height(12.dp))
                 FuturisticHomePanel(
                     state = state,
                     palette = homePalette,
@@ -161,13 +157,6 @@ fun HomeScreen(
                     onOpenOrders = onOpenOrders,
                     onOpenPlans = onOpenPlans,
                     onCreateArtEmpresa = onCreateArtEmpresa,
-                    onCameraClick = {
-                        if (isLoggedIn) {
-                            showPhotoSourceDialog = true
-                        } else {
-                            onCameraAuthRequired()
-                        }
-                    },
                     onCarouselClick = {
                         val remaining = state.carrosseisRestantes
                         if (remaining != null && remaining <= 0) {
@@ -184,6 +173,7 @@ fun HomeScreen(
                     onCompanyProfile = onCompanyProfile,
                     onSupport = onSupport,
                     onLogout = onLogout,
+                    onIconHelpClick = { showIconHelpDialog = true },
                     onHelpSelected = { selectedHelp = it }
                 )
 
@@ -233,6 +223,12 @@ fun HomeScreen(
             onDismiss = { selectedHelp = null }
         )
     }
+
+    if (showIconHelpDialog) {
+        QuickIconHelpDialog(
+            onDismiss = { showIconHelpDialog = false }
+        )
+    }
 }
 
 enum class PremiumHomeTheme(val label: String) {
@@ -264,8 +260,8 @@ private enum class HomeHelpItem(
     ),
     CreateArt(
         "\uD83C\uDFA8",
-        "Criar arte",
-        "Crie uma arte profissional em menos de 2 minutos. A iA4tube usa um especialista no seu ramo para criar a imagem e a descri\u00e7\u00e3o pronta para postar."
+        "Várias fotos",
+        "Crie uma arte profissional usando várias fotos ao mesmo tempo. A iA4tube usa um especialista no seu ramo para criar a imagem e a descri\u00e7\u00e3o pronta para postar."
     ),
     Camera(
         "\uD83D\uDCF7",
@@ -343,6 +339,188 @@ private fun HomeHelpDialog(
 }
 
 @Composable
+private fun QuickIconHelpDialog(
+    onDismiss: () -> Unit
+) {
+    val primaryIcon = MaterialTheme.colorScheme.primary
+    val secondaryIcon = MaterialTheme.colorScheme.secondary
+    val tertiaryIcon = MaterialTheme.colorScheme.tertiary
+    val iconBackground = MaterialTheme.colorScheme.surfaceVariant
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "O que faz cada ícone?",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                QuickIconHelpRow(
+                    icon = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.List,
+                            contentDescription = null,
+                            tint = primaryIcon,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    },
+                    title = "Meus pedidos",
+                    description = "Veja artes criadas e status."
+                )
+                QuickIconHelpRow(
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.CheckCircle,
+                            contentDescription = null,
+                            tint = secondaryIcon,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    },
+                    title = "Plano",
+                    description = "Veja créditos e planos disponíveis."
+                )
+                QuickIconHelpRow(
+                    icon = { HeadsetGlyph(primaryIcon, Modifier.size(24.dp)) },
+                    title = "Suporte",
+                    description = "Fale com a equipe de ajuda."
+                )
+                QuickIconHelpRow(
+                    icon = {
+                        Text(
+                            text = "?",
+                            color = primaryIcon,
+                            fontSize = 22.sp,
+                            lineHeight = 22.sp,
+                            fontWeight = FontWeight.Black,
+                            textAlign = TextAlign.Center,
+                            maxLines = 1
+                        )
+                    },
+                    title = "Ajuda",
+                    description = "Mostra o que cada ícone faz."
+                )
+                QuickIconHelpRow(
+                    icon = {
+                        GoldenPlusGlyph(
+                            color = primaryIcon,
+                            glow = primaryIcon,
+                            modifier = Modifier.size(26.dp)
+                        )
+                    },
+                    title = "Planejamento",
+                    description = "Organiza posts do mês."
+                )
+                QuickIconHelpRow(
+                    icon = { CompanyGlyph(tertiaryIcon, Modifier.size(26.dp)) },
+                    title = "Mat. Impresso",
+                    description = "Crie materiais para impressão."
+                )
+                QuickIconHelpRow(
+                    icon = { CarouselGlyph(secondaryIcon, iconBackground, Modifier.size(26.dp)) },
+                    title = "Post Deslizante",
+                    description = "Crie carrosséis para postar."
+                )
+                QuickIconHelpRow(
+                    icon = { PhotoLibraryGlyph(tertiaryIcon, iconBackground, Modifier.size(26.dp)) },
+                    title = "Várias fotos",
+                    description = "Crie arte com várias fotos."
+                )
+            }
+        },
+        confirmButton = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                TextButton(onClick = onDismiss) {
+                    Text("Fechar")
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun QuickIconHelpRow(
+    icon: @Composable () -> Unit,
+    title: String,
+    description: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(38.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.64f)),
+            contentAlignment = Alignment.Center
+        ) {
+            icon()
+        }
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+private fun QuickIconHelpButton(
+    palette: PremiumHomePalette,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(28.dp)
+            .clip(CircleShape)
+            .background(Color(0xFF050505).copy(alpha = 0.90f))
+            .border(1.2.dp, palette.primaryBorder.copy(alpha = 0.88f), CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "?",
+            color = palette.primaryBorder,
+            fontSize = 16.sp,
+            lineHeight = 16.sp,
+            fontWeight = FontWeight.Black,
+            textAlign = TextAlign.Center,
+            maxLines = 1
+        )
+    }
+}
+
+@Composable
 private fun HomeHelpButton(
     palette: PremiumHomePalette,
     onClick: () -> Unit,
@@ -350,33 +528,6 @@ private fun HomeHelpButton(
     size: Dp = 22.dp,
     touchSize: Dp = size
 ) {
-    val textSize = (size.value * 0.64f).sp
-    Box(
-        modifier = modifier
-            .zIndex(4f)
-            .size(touchSize)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(size)
-                .clip(CircleShape)
-                .background(Color(0xFF050505).copy(alpha = 0.96f))
-                .border(1.7.dp, palette.primaryBorder.copy(alpha = 0.96f), CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "?",
-                color = palette.primaryBorder,
-                fontSize = textSize,
-                lineHeight = textSize,
-                fontWeight = FontWeight.Black,
-                textAlign = TextAlign.Center,
-                maxLines = 1
-            )
-        }
-    }
 }
 
 data class PremiumHomePalette(
@@ -554,12 +705,12 @@ private fun FuturisticHomePanel(
     onOpenOrders: (OrderListFilter) -> Unit,
     onOpenPlans: () -> Unit,
     onCreateArtEmpresa: () -> Unit,
-    onCameraClick: () -> Unit,
     onCarouselClick: () -> Unit,
     onMonthlyPlanningClick: () -> Unit,
     onCompanyProfile: () -> Unit,
     onSupport: () -> Unit,
     onLogout: () -> Unit,
+    onIconHelpClick: () -> Unit,
     onHelpSelected: (HomeHelpItem) -> Unit
 ) {
     val normalizedPlanStatus = state.planoStatus.trim().lowercase()
@@ -663,26 +814,31 @@ private fun FuturisticHomePanel(
                     onHelpClick = { onHelpSelected(HomeHelpItem.CurrentPlan) },
                     onClick = onOpenPlans
                 )
-                OrbitActionCircle(
-                    title = stringResource(R.string.home_open_support),
-                    value = "",
-                    accent = palette.haloSecondary,
-                    palette = palette,
-                    compact = true,
-                    customIcon = { HeadsetGlyph(palette.haloSecondary, Modifier.size(30.dp)) },
-                    onHelpClick = { onHelpSelected(HomeHelpItem.Support) },
-                    onClick = onSupport
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    OrbitActionCircle(
+                        title = stringResource(R.string.home_open_support),
+                        value = "",
+                        accent = palette.haloSecondary,
+                        palette = palette,
+                        compact = true,
+                        customIcon = { HeadsetGlyph(palette.haloSecondary, Modifier.size(30.dp)) },
+                        onHelpClick = { onHelpSelected(HomeHelpItem.Support) },
+                        onClick = onSupport
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.weight(1f))
 
             PrimaryCreateArtAction(
                 palette = palette,
-                onClick = onCreateArtEmpresa,
-                onCameraClick = onCameraClick,
-                onCarouselClick = onCarouselClick,
                 onMonthlyPlanningClick = onMonthlyPlanningClick,
+                onCreateArtClick = onCreateArtEmpresa,
+                onIconHelpClick = onIconHelpClick,
+                onCarouselClick = onCarouselClick,
                 onCompanyProfile = onCompanyProfile,
                 carouselRemainingText = carouselRemainingText(state.carrosseisRestantes),
                 onLogout = onLogout,
@@ -1080,10 +1236,10 @@ private fun QuickCircleAction(
 @Composable
 private fun PrimaryCreateArtAction(
     palette: PremiumHomePalette,
-    onClick: () -> Unit,
-    onCameraClick: () -> Unit,
-    onCarouselClick: () -> Unit,
     onMonthlyPlanningClick: () -> Unit,
+    onCreateArtClick: () -> Unit,
+    onIconHelpClick: () -> Unit,
+    onCarouselClick: () -> Unit,
     onCompanyProfile: () -> Unit,
     carouselRemainingText: String?,
     onLogout: () -> Unit,
@@ -1114,11 +1270,11 @@ private fun PrimaryCreateArtAction(
                         )
                     )
                     .border(2.4.dp, palette.primaryBorder.copy(alpha = 0.92f), CircleShape)
-                    .clickable(onClick = onClick)
+                    .clickable(onClick = onMonthlyPlanningClick)
             )
             HomeHelpButton(
                 palette = palette,
-                onClick = { onHelpSelected(HomeHelpItem.CreateArt) },
+                onClick = { onHelpSelected(HomeHelpItem.MonthlyPlanning) },
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .offset(x = 28.dp, y = 28.dp),
@@ -1131,7 +1287,7 @@ private fun PrimaryCreateArtAction(
                     modifier = Modifier.size(92.dp)
                 )
                 Text(
-                    text = "Criar arte",
+                    text = "Criar",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.ExtraBold,
                     color = palette.metricNumber,
@@ -1147,11 +1303,15 @@ private fun PrimaryCreateArtAction(
         ) {
             HomeToolButton(
                 palette = palette,
-                label = stringResource(R.string.home_take_or_choose_photo),
-                onHelpClick = { onHelpSelected(HomeHelpItem.Camera) },
-                onClick = onCameraClick,
+                label = "Várias fotos",
+                onHelpClick = { onHelpSelected(HomeHelpItem.CreateArt) },
+                onClick = onCreateArtClick,
                 icon = {
-                    CameraGlyph(palette.primaryBorder, palette.cameraBackground, Modifier.size(42.dp))
+                    PhotoLibraryGlyph(
+                        color = palette.primaryBorder,
+                        background = palette.cameraBackground,
+                        modifier = Modifier.size(42.dp)
+                    )
                 }
             )
             HomeToolButton(
@@ -1181,12 +1341,18 @@ private fun PrimaryCreateArtAction(
             )
             HomeToolButton(
                 palette = palette,
-                label = "Planejamento",
-                subtitle = "Junho: 4/20 prontas",
-                onHelpClick = { onHelpSelected(HomeHelpItem.MonthlyPlanning) },
-                onClick = onMonthlyPlanningClick,
+                label = "Ajuda",
+                onClick = onIconHelpClick,
                 icon = {
-                    CalendarGlyph(palette.primaryBorder, palette.cameraBackground, Modifier.size(42.dp))
+                    Text(
+                        text = "?",
+                        color = palette.primaryBorder,
+                        fontSize = 38.sp,
+                        lineHeight = 38.sp,
+                        fontWeight = FontWeight.Black,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1
+                    )
                 }
             )
         }
@@ -1453,6 +1619,60 @@ private fun CarouselGlyph(color: Color, background: Color, modifier: Modifier = 
             end = Offset(size.width * 0.76f, size.height * 0.70f),
             strokeWidth = size.minDimension * 0.055f,
             cap = StrokeCap.Round
+        )
+    }
+}
+
+@Composable
+private fun PhotoLibraryGlyph(color: Color, background: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier = modifier) {
+        val stroke = Stroke(width = size.minDimension * 0.065f, cap = StrokeCap.Round)
+        val corner = CornerRadius(size.width * 0.08f, size.width * 0.08f)
+
+        drawRoundRect(
+            color = color.copy(alpha = 0.38f),
+            topLeft = Offset(size.width * 0.10f, size.height * 0.20f),
+            size = Size(size.width * 0.58f, size.height * 0.56f),
+            cornerRadius = corner,
+            style = stroke
+        )
+        drawRoundRect(
+            color = color.copy(alpha = 0.62f),
+            topLeft = Offset(size.width * 0.20f, size.height * 0.14f),
+            size = Size(size.width * 0.58f, size.height * 0.56f),
+            cornerRadius = corner,
+            style = stroke
+        )
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(size.width * 0.30f, size.height * 0.24f),
+            size = Size(size.width * 0.58f, size.height * 0.56f),
+            cornerRadius = corner,
+            style = stroke
+        )
+        drawCircle(
+            color = color,
+            radius = size.minDimension * 0.055f,
+            center = Offset(size.width * 0.48f, size.height * 0.40f)
+        )
+        drawLine(
+            color = color,
+            start = Offset(size.width * 0.38f, size.height * 0.68f),
+            end = Offset(size.width * 0.56f, size.height * 0.54f),
+            strokeWidth = size.minDimension * 0.055f,
+            cap = StrokeCap.Round
+        )
+        drawLine(
+            color = color,
+            start = Offset(size.width * 0.56f, size.height * 0.54f),
+            end = Offset(size.width * 0.80f, size.height * 0.72f),
+            strokeWidth = size.minDimension * 0.055f,
+            cap = StrokeCap.Round
+        )
+        drawCircle(
+            color = background.copy(alpha = 0.78f),
+            radius = size.minDimension * 0.045f,
+            center = Offset(size.width * 0.48f, size.height * 0.40f)
         )
     }
 }

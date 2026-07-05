@@ -1,5 +1,8 @@
 package br.com.ia4tube.app.navigation
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +50,7 @@ import br.com.ia4tube.app.domain.usecase.LoadOrderInfoUseCase
 import br.com.ia4tube.app.domain.usecase.LoadPaymentInfoUseCase
 import br.com.ia4tube.app.domain.usecase.ListCarouselsUseCase
 import br.com.ia4tube.app.domain.usecase.ListCompanyGraphicMaterialsUseCase
+import br.com.ia4tube.app.domain.usecase.ListMonthlyPlanningsUseCase
 import br.com.ia4tube.app.domain.usecase.ListOrdersUseCase
 import br.com.ia4tube.app.domain.usecase.ListSupportMessagesUseCase
 import br.com.ia4tube.app.domain.usecase.LoginUseCase
@@ -395,7 +399,7 @@ fun IA4TubeNavHost(
                 },
                 onSupport = {
                     MobileAnalytics.track("mobile_suporte_abriu", tela = "home")
-                    navigateProtected(Routes.Support)
+                    openWhatsAppSupport(context)
                 },
                 premiumTheme = premiumHomeTheme,
                 onPremiumThemeSelected = { premiumHomeThemeName = it.name },
@@ -456,13 +460,19 @@ fun IA4TubeNavHost(
                     )
                 }
                 val viewModel: MonthlyPlanningViewModel = viewModel(
-                    factory = MonthlyPlanningViewModelFactory(repository, companyProfileStore)
+                    factory = MonthlyPlanningViewModelFactory(
+                        repository,
+                        companyProfileStore
+                    )
                 )
                 MonthlyPlanningScreen(
                     viewModel = viewModel,
                     onBack = { navController.popBackStack() },
                     onOpenDetail = { planningId ->
                         navController.navigate(Routes.monthlyPlanningDetail(planningId))
+                    },
+                    onOpenOrder = { pedidoId ->
+                        navigateProtected(Routes.orderDetail(pedidoId))
                     }
                 )
             }
@@ -483,7 +493,10 @@ fun IA4TubeNavHost(
                 }
             } else {
                 val viewModel: MonthlyPlanningViewModel = viewModel(
-                    factory = MonthlyPlanningViewModelFactory(repository, companyProfileStore)
+                    factory = MonthlyPlanningViewModelFactory(
+                        repository,
+                        companyProfileStore
+                    )
                 )
                 MonthlyPlanningDetailScreen(
                     planningId = planningId,
@@ -641,7 +654,10 @@ fun IA4TubeNavHost(
                     MobileAnalytics.track("mobile_meus_pedidos_abriu", tela = "meus_pedidos")
                 }
                 val viewModel: OrdersViewModel = viewModel(
-                    factory = OrdersViewModelFactory(ListOrdersUseCase(repository))
+                    factory = OrdersViewModelFactory(
+                        listOrders = ListOrdersUseCase(repository),
+                        listMonthlyPlannings = ListMonthlyPlanningsUseCase(repository)
+                    )
                 )
                 OrdersScreen(
                     viewModel = viewModel,
@@ -714,6 +730,28 @@ private fun shouldUsePremiumShell(route: String?): Boolean {
 }
 
 private const val PENDING_CAMERA_ACTION = "__camera__"
+private const val WHATSAPP_SUPPORT_URL = "https://wa.me/554791049079"
+
+private fun openWhatsAppSupport(context: Context) {
+    val uri = Uri.parse(WHATSAPP_SUPPORT_URL)
+    if (openSupportUri(context, uri, "com.whatsapp")) return
+    if (openSupportUri(context, uri, "com.whatsapp.w4b")) return
+    openSupportUri(context, uri, null)
+}
+
+private fun openSupportUri(context: Context, uri: Uri, packageName: String?): Boolean {
+    val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        packageName?.let(::setPackage)
+    }
+
+    return try {
+        context.startActivity(intent)
+        true
+    } catch (_: Exception) {
+        false
+    }
+}
 
 private fun PremiumHomePalette.toAppColorScheme(base: ColorScheme): ColorScheme {
     val accent = when (screenBackground) {

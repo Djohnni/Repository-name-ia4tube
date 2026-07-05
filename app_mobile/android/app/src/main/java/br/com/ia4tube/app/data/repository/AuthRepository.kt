@@ -14,8 +14,10 @@ import br.com.ia4tube.app.data.models.FootballOrderRequest
 import br.com.ia4tube.app.data.models.LoginResponse
 import br.com.ia4tube.app.data.models.MeResponse
 import br.com.ia4tube.app.data.models.MonthlyPlanningDetailDto
+import br.com.ia4tube.app.data.models.MonthlyPlanningPostDto
 import br.com.ia4tube.app.data.models.MonthlyPlanningRequest
 import br.com.ia4tube.app.data.models.MonthlyPlanningRequestResponse
+import br.com.ia4tube.app.data.models.MonthlyPlanningRescheduleRequest
 import br.com.ia4tube.app.data.models.MonthlyPlanningSummaryDto
 import br.com.ia4tube.app.data.models.OrderInfo
 import br.com.ia4tube.app.data.models.OrderSummary
@@ -74,6 +76,24 @@ class AuthRepository(
         val token = sessionStore.getToken()
         if (token.isBlank()) return ApiResult.Failure(SESSION_EXPIRED_MESSAGE)
         return apiClient.planejamentoMensalDetalhe(token, planningId)
+    }
+
+    suspend fun calendarioPlanejamentoMensal(): ApiResult<List<MonthlyPlanningPostDto>> {
+        val token = sessionStore.getToken()
+        if (token.isBlank()) return ApiResult.Failure(SESSION_EXPIRED_MESSAGE)
+        return apiClient.calendarioPlanejamentoMensal(token)
+    }
+
+    suspend fun ocultarItemCalendarioPlanejamento(itemKey: String): ApiResult<Unit> {
+        val token = sessionStore.getToken()
+        if (token.isBlank()) return ApiResult.Failure(SESSION_EXPIRED_MESSAGE)
+        return apiClient.ocultarItemCalendarioPlanejamento(token, itemKey)
+    }
+
+    suspend fun reagendarItemCalendarioPlanejamento(request: MonthlyPlanningRescheduleRequest): ApiResult<MonthlyPlanningPostDto> {
+        val token = sessionStore.getToken()
+        if (token.isBlank()) return ApiResult.Failure(SESSION_EXPIRED_MESSAGE)
+        return apiClient.reagendarItemCalendarioPlanejamento(token, request)
     }
 
     suspend fun solicitarPlanejamentoMensal(request: MonthlyPlanningRequest): ApiResult<MonthlyPlanningRequestResponse> {

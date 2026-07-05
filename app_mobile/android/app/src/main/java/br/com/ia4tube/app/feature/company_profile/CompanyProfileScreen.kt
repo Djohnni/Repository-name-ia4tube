@@ -713,7 +713,7 @@ private fun GraphicMaterialRow(
 }
 
 @Composable
-private fun DefaultLogoUploadCard(
+fun DefaultLogoUploadCard(
     logoUri: String,
     onSelectLogo: () -> Unit,
     onRemoveLogo: () -> Unit
@@ -789,7 +789,7 @@ private fun DefaultLogoUploadCard(
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
-private fun CompanyProfileRamoSearchField(
+fun CompanyProfileRamoSearchField(
     value: String,
     onValueChange: (String) -> Unit,
     onRamoSelected: (String) -> Unit,

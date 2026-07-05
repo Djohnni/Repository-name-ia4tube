@@ -145,7 +145,7 @@ fun OrdersScreen(
                                     Text(error.asString(), color = MaterialTheme.colorScheme.error)
                                 }
                             }
-                            items(filteredOrders, key = { it.id }) { pedido ->
+                            items(filteredOrders, key = { it.listKey() }) { pedido ->
                                 OrderSummaryCard(
                                     pedido = pedido,
                                     onClick = {
@@ -424,4 +424,12 @@ private fun formatBrazilDateLabel(date: Date): String {
 private fun isSameDay(first: Calendar, second: Calendar): Boolean {
     return first.get(Calendar.YEAR) == second.get(Calendar.YEAR) &&
         first.get(Calendar.DAY_OF_YEAR) == second.get(Calendar.DAY_OF_YEAR)
+}
+
+private fun OrderSummary.listKey(): String {
+    return if (isMonthlyPlanning) {
+        "planning:${planningId.ifBlank { id }}"
+    } else {
+        "order:$id"
+    }
 }

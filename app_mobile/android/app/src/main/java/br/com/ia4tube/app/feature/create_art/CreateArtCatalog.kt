@@ -17,6 +17,11 @@ data class DynamicObjectiveField(
     val placeholder: String = ""
 )
 
+data class CompanyCharacteristic(
+    val id: String,
+    val label: String
+)
+
 object CreateArtCatalog {
     private val blockedRamoKeys = setOf(
         "funeraria",
@@ -605,6 +610,62 @@ object CreateArtCatalog {
         CreateArtObjective(id = "atrair_clientes", label = "Quero atrair mais clientes", fields = "clientes"),
         CreateArtObjective(id = "receber_mensagens", label = "Quero receber mais mensagens", fields = "mensagens"),
         CreateArtObjective(id = "destacar_empresa", label = "Quero destacar minha empresa", fields = "empresa")
+    )
+
+    private val caracteristicasGerais = listOf(
+        CompanyCharacteristic(id = "aceita_pix", label = "Aceitamos Pix"),
+        CompanyCharacteristic(id = "parcela_cartao", label = "Parcelamos no cartão"),
+        CompanyCharacteristic(id = "agendamento", label = "Atendimento por agendamento"),
+        CompanyCharacteristic(id = "estacionamento", label = "Estacionamento"),
+        CompanyCharacteristic(id = "atendimento_24h", label = "Atendimento 24 horas"),
+        CompanyCharacteristic(id = "domingos", label = "Atendimento aos domingos"),
+        CompanyCharacteristic(id = "retirada_local", label = "Retirada no local"),
+        CompanyCharacteristic(id = "atendimento_online", label = "Atendimento online")
+    )
+
+    private val caracteristicasPorCategoria = mapOf(
+        "alimentacao" to listOf(
+            CompanyCharacteristic(id = "tem_delivery", label = "Temos delivery"),
+            CompanyCharacteristic(id = "retirada_balcao", label = "Retirada no balcão"),
+            CompanyCharacteristic(id = "drive_thru", label = "Drive-thru"),
+            CompanyCharacteristic(id = "aceita_encomendas", label = "Aceitamos encomendas"),
+            CompanyCharacteristic(id = "area_infantil", label = "Área infantil")
+        ),
+        "saude" to listOf(
+            CompanyCharacteristic(id = "agendamento", label = "Atendimento por agendamento"),
+            CompanyCharacteristic(id = "urgencia", label = "Atendimento de urgência"),
+            CompanyCharacteristic(id = "convenios", label = "Convênios"),
+            CompanyCharacteristic(id = "estacionamento", label = "Estacionamento"),
+            CompanyCharacteristic(id = "avaliacao_gratuita", label = "Avaliação gratuita")
+        ),
+        "beleza" to listOf(
+            CompanyCharacteristic(id = "agendamento", label = "Atendimento por agendamento"),
+            CompanyCharacteristic(id = "avaliacao_gratuita", label = "Avaliação gratuita"),
+            CompanyCharacteristic(id = "procedimentos_esteticos", label = "Procedimentos estéticos"),
+            CompanyCharacteristic(id = "atendimento_feminino", label = "Atendimento feminino"),
+            CompanyCharacteristic(id = "atendimento_masculino", label = "Atendimento masculino")
+        ),
+        "varejo" to listOf(
+            CompanyCharacteristic(id = "troca_facilitada", label = "Troca facilitada"),
+            CompanyCharacteristic(id = "provador", label = "Provador"),
+            CompanyCharacteristic(id = "parcela_cartao", label = "Parcelamos no cartão"),
+            CompanyCharacteristic(id = "entrega_local", label = "Entrega local"),
+            CompanyCharacteristic(id = "retirada_loja", label = "Retirada na loja")
+        ),
+        "automotivo" to listOf(
+            CompanyCharacteristic(id = "agendamento", label = "Atendimento por agendamento"),
+            CompanyCharacteristic(id = "orcamento", label = "Orçamento"),
+            CompanyCharacteristic(id = "retirada_local", label = "Retirada no local"),
+            CompanyCharacteristic(id = "garantia_servico", label = "Garantia do serviço"),
+            CompanyCharacteristic(id = "estacionamento", label = "Estacionamento")
+        ),
+        "servicos_profissionais" to listOf(
+            CompanyCharacteristic(id = "atendimento_online", label = "Atendimento online"),
+            CompanyCharacteristic(id = "agendamento", label = "Atendimento por agendamento"),
+            CompanyCharacteristic(id = "orcamento", label = "Orçamento"),
+            CompanyCharacteristic(id = "visita_tecnica", label = "Visita técnica"),
+            CompanyCharacteristic(id = "contrato_servico", label = "Contrato de serviço")
+        )
     )
 
     private val ramoCategorias = mapOf(
@@ -1420,6 +1481,14 @@ object CreateArtCatalog {
         return (objetivosPorNicho[ramoKey].orEmpty() +
             objetivosPorCategoria[category].orEmpty() +
             objetivosGerais).distinctBy { it.id }
+    }
+
+    fun characteristicsForRamo(ramo: String): List<CompanyCharacteristic> {
+        if (isBlockedRamo(ramo)) return emptyList()
+
+        val category = categoryForRamo(ramo)
+        return (caracteristicasPorCategoria[category].orEmpty() + caracteristicasGerais)
+            .distinctBy { it.id }
     }
 
     fun dynamicFieldsForObjective(objective: CreateArtObjective?): List<DynamicObjectiveField> {

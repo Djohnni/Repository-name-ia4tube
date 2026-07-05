@@ -21,7 +21,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -54,12 +53,11 @@ import br.com.ia4tube.app.core.share.ShareImageStore
 import br.com.ia4tube.app.data.api.PreviewUrlBuilder
 import br.com.ia4tube.app.data.models.OrderInfo
 import br.com.ia4tube.app.data.models.PaymentInfo
+import br.com.ia4tube.app.ui.components.EstimatedCreationProgressCard
 import br.com.ia4tube.app.ui.components.ScreenScaffold
 import br.com.ia4tube.app.ui.text.UiText
 import br.com.ia4tube.app.ui.text.asString
 import java.text.Normalizer
-import kotlinx.coroutines.delay
-import kotlin.math.pow
 
 @Composable
 fun OrderDetailScreen(
@@ -893,72 +891,16 @@ private fun OrderPreviewImage(
 @Composable
 private fun CreatingPreviewProgressCard(info: OrderInfo, polling: Boolean) {
     val hasError = info.status.equals("erro", ignoreCase = true)
-    val startTimeMs = remember(info.id) { System.currentTimeMillis() }
-    var progress by remember(info.id) { mutableStateOf(0.12f) }
-
-    LaunchedEffect(info.id, polling, hasError) {
-        while (polling && !hasError && progress < 0.92f) {
-            delay(1000)
-            val elapsedMs = System.currentTimeMillis() - startTimeMs
-            progress = estimatedCreationProgress(elapsedMs)
-        }
-    }
-
-    val percent = if (hasError) 0 else (progress * 100).toInt().coerceIn(12, 92)
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = if (hasError) {
-                    stringResource(R.string.order_processing_error)
-                } else {
-                    stringResource(R.string.order_creation_progress_title)
-                },
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = if (hasError) {
-                    stringResource(R.string.order_status_error_check)
-                } else {
-                    stringResource(R.string.order_creation_progress_subtitle)
-                },
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            if (!hasError) {
-                Spacer(modifier = Modifier.height(18.dp))
-                Text(
-                    text = stringResource(R.string.order_creation_progress_percent, percent),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = stringResource(R.string.order_creation_progress_explanation),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        }
-    }
-}
-
-private fun estimatedCreationProgress(elapsedMs: Long): Float {
-    val elapsedSeconds = elapsedMs / 1000f
-    val targetSeconds = 105f
-    val normalized = (elapsedSeconds / targetSeconds).coerceIn(0f, 1f)
-    val eased = 1f - (1f - normalized).pow(2.4f)
-    return (0.12f + eased * 0.80f).coerceIn(0.12f, 0.92f)
+    EstimatedCreationProgressCard(
+        progressKey = info.id,
+        running = polling,
+        hasError = hasError,
+        title = stringResource(R.string.order_creation_progress_title),
+        subtitle = stringResource(R.string.order_creation_progress_subtitle),
+        explanation = stringResource(R.string.order_creation_progress_explanation),
+        errorTitle = stringResource(R.string.order_processing_error),
+        errorSubtitle = stringResource(R.string.order_status_error_check)
+    )
 }
 
 @Composable

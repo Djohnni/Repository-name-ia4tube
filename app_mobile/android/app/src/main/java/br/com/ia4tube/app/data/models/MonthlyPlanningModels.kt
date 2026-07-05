@@ -4,6 +4,9 @@ data class MonthlyPlanningRequest(
     val quantidadeReservada: Int,
     val nomeEmpresa: String,
     val ramo: String,
+    val caracteristicasEmpresa: List<String> = emptyList(),
+    val informacoesEmpresa: String = "",
+    val logo: UploadFile? = null,
     val fotos: List<MonthlyPlanningPhotoInput> = emptyList()
 )
 
@@ -15,6 +18,7 @@ data class MonthlyPlanningPhotoInput(
 data class MonthlyPlanningRequestResponse(
     val planningId: String,
     val ciclo: String,
+    val createdAt: String = "",
     val status: String,
     val statusLabel: String,
     val quantidadeReservada: Int,
@@ -28,6 +32,7 @@ data class MonthlyPlanningSummaryDto(
     val title: String,
     val status: String,
     val cycle: String,
+    val createdAt: String,
     val totalPosts: Int,
     val readyPosts: Int,
     val productionPosts: Int,
@@ -38,6 +43,8 @@ data class MonthlyPlanningSummaryDto(
 data class MonthlyPlanningPostDto(
     val number: Int,
     val itemId: String,
+    val planningId: String = "",
+    val planejamentoItemId: String = "",
     val date: String,
     val time: String,
     val theme: String,
@@ -46,7 +53,17 @@ data class MonthlyPlanningPostDto(
     val statusLabel: String,
     val caption: String,
     val pedidoId: String,
-    val imageReady: Boolean
+    val imageReady: Boolean,
+    val imageText: String = ""
+)
+
+data class MonthlyPlanningRescheduleRequest(
+    val itemKey: String,
+    val planningId: String = "",
+    val planejamentoItemId: String = "",
+    val pedidoId: String = "",
+    val date: String,
+    val time: String = ""
 )
 
 data class MonthlyPlanningDetailDto(

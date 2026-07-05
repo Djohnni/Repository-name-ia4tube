@@ -4,12 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import br.com.ia4tube.app.data.models.ApiResult
+import br.com.ia4tube.app.data.models.MonthlyPlanningSummaryDto
 import br.com.ia4tube.app.data.models.OrderSummary
+import br.com.ia4tube.app.domain.usecase.ListMonthlyPlanningsUseCase
 import br.com.ia4tube.app.domain.usecase.ListOrdersUseCase
 import br.com.ia4tube.app.R
 import br.com.ia4tube.app.ui.text.UiText
 import br.com.ia4tube.app.ui.text.toUiTextOrNull
 import br.com.ia4tube.app.ui.text.uiText
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +27,8 @@ data class OrdersUiState(
 )
 
 class OrdersViewModel(
-    private val listOrders: ListOrdersUseCase
+    private val listOrders: ListOrdersUseCase,
+    private val listMonthlyPlannings: ListMonthlyPlanningsUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(OrdersUiState())
     val uiState: StateFlow<OrdersUiState> = _uiState.asStateFlow()
@@ -51,19 +55,38 @@ class OrdersViewModel(
                     error = null
                 )
             }
-            when (val result = listOrders()) {
-                is ApiResult.Success -> _uiState.update {
+            val ordersDeferred = async { listOrders() }
+            val planningsDeferred = async { listMonthlyPlannings() }
+            val ordersResult = ordersDeferred.await()
+            val planningsResult = planningsDeferred.await()
+            val pedidos = mergeOrdersAndPlannings(
+                orders = ordersResult.valueOrEmpty(),
+                plannings = planningsResult.valueOrEmpty()
+            )
+            val error = ordersResult.failureMessage()
+                ?: planningsResult.failureMessage()
+
+            when {
+                pedidos.isNotEmpty() -> _uiState.update {
                     it.copy(
                         loading = false,
                         refreshing = false,
-                        pedidos = result.value
+                        pedidos = pedidos,
+                        error = error?.toUiTextOrNull()
                     )
                 }
-                is ApiResult.Failure -> _uiState.update {
+                error != null -> _uiState.update {
                     it.copy(
                         loading = false,
                         refreshing = false,
-                        error = result.message.toUiTextOrNull() ?: uiText(R.string.orders_load_error)
+                        error = error.toUiTextOrNull() ?: uiText(R.string.orders_load_error)
+                    )
+                }
+                else -> _uiState.update {
+                    it.copy(
+                        loading = false,
+                        refreshing = false,
+                        pedidos = emptyList()
                     )
                 }
             }
@@ -71,11 +94,68 @@ class OrdersViewModel(
     }
 }
 
+private fun <T> ApiResult<List<T>>.valueOrEmpty(): List<T> {
+    return when (this) {
+        is ApiResult.Success -> value
+        is ApiResult.Failure -> emptyList()
+    }
+}
+
+private fun ApiResult<*>.failureMessage(): String? {
+    return when (this) {
+        is ApiResult.Success<*> -> null
+        is ApiResult.Failure -> message
+    }
+}
+
+private fun mergeOrdersAndPlannings(
+    orders: List<OrderSummary>,
+    plannings: List<MonthlyPlanningSummaryDto>
+): List<OrderSummary> {
+    val byKey = LinkedHashMap<String, OrderSummary>()
+    plannings.map { it.toOrderSummary() }.forEach { planning ->
+        byKey[planning.listKey()] = planning
+    }
+    orders.forEach { order ->
+        if (order.isMonthlyPlanning && byKey.containsKey(order.listKey())) return@forEach
+        byKey[order.listKey()] = order
+    }
+    return byKey.values.toList()
+}
+
+private fun MonthlyPlanningSummaryDto.toOrderSummary(): OrderSummary {
+    return OrderSummary(
+        id = id,
+        tipo = "Planejamento Mensal",
+        status = status,
+        imagemPronta = totalPosts > 0 && readyPosts >= totalPosts,
+        pagamentoPendente = false,
+        createdAt = createdAt,
+        isMonthlyPlanning = true,
+        planningId = id,
+        title = title.ifBlank { "Planejamento Mensal" },
+        totalPosts = totalPosts,
+        readyPosts = readyPosts,
+        productionPosts = productionPosts,
+        plannedPosts = plannedPosts,
+        errorPosts = errorPosts
+    )
+}
+
+private fun OrderSummary.listKey(): String {
+    return if (isMonthlyPlanning) {
+        "planning:${planningId.ifBlank { id }}"
+    } else {
+        "order:$id"
+    }
+}
+
 class OrdersViewModelFactory(
-    private val listOrders: ListOrdersUseCase
+    private val listOrders: ListOrdersUseCase,
+    private val listMonthlyPlannings: ListMonthlyPlanningsUseCase
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         @Suppress("UNCHECKED_CAST")
-        return OrdersViewModel(listOrders) as T
+        return OrdersViewModel(listOrders, listMonthlyPlannings) as T
     }
 }

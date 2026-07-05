@@ -30,6 +30,7 @@ import br.com.ia4tube.app.data.models.MonthlyPlanningDetailDto
 import br.com.ia4tube.app.data.models.MonthlyPlanningPostDto
 import br.com.ia4tube.app.data.models.MonthlyPlanningRequest
 import br.com.ia4tube.app.data.models.MonthlyPlanningRequestResponse
+import br.com.ia4tube.app.data.models.MonthlyPlanningRescheduleRequest
 import br.com.ia4tube.app.data.models.MonthlyPlanningSummaryDto
 import br.com.ia4tube.app.data.models.OrderInfo
 import br.com.ia4tube.app.data.models.OrderSummary
@@ -264,6 +265,61 @@ class IA4TubeApiClient(
         }
     }
 
+    suspend fun calendarioPlanejamentoMensal(token: String): ApiResult<List<MonthlyPlanningPostDto>> = withContext(Dispatchers.IO) {
+        val request = Request.Builder()
+            .url("${AppConfig.apiBase}/empresa/calendario-planejamento-mensal")
+            .header("Authorization", "Bearer $token")
+            .get()
+            .build()
+
+        executeJson(request) { json ->
+            val postsJson = json.optJSONArray("postagens")
+                ?: json.optJSONArray("itens")
+                ?: JSONArray()
+            buildList {
+                for (index in 0 until postsJson.length()) {
+                    val item = postsJson.optJSONObject(index) ?: continue
+                    add(monthlyPlanningPostFromJson(item, index + 1))
+                }
+            }
+        }
+    }
+
+    suspend fun ocultarItemCalendarioPlanejamento(token: String, itemKey: String): ApiResult<Unit> = withContext(Dispatchers.IO) {
+        val bodyJson = JSONObject()
+            .put("item_key", itemKey)
+        val request = Request.Builder()
+            .url("${AppConfig.apiBase}/empresa/calendario-planejamento-mensal/ocultar")
+            .header("Authorization", "Bearer $token")
+            .post(bodyJson.toString().toRequestBody(JSON))
+            .build()
+
+        executeJson(request) { Unit }
+    }
+
+    suspend fun reagendarItemCalendarioPlanejamento(
+        token: String,
+        requestData: MonthlyPlanningRescheduleRequest
+    ): ApiResult<MonthlyPlanningPostDto> = withContext(Dispatchers.IO) {
+        val bodyJson = JSONObject()
+            .put("item_key", requestData.itemKey)
+            .put("planning_id", requestData.planningId)
+            .put("planejamento_item_id", requestData.planejamentoItemId)
+            .put("pedido_id", requestData.pedidoId)
+            .put("data", requestData.date)
+            .put("horario", requestData.time)
+        val request = Request.Builder()
+            .url("${AppConfig.apiBase}/empresa/calendario-planejamento-mensal/reagendar")
+            .header("Authorization", "Bearer $token")
+            .post(bodyJson.toString().toRequestBody(JSON))
+            .build()
+
+        executeJson(request) { json ->
+            val item = json.optJSONObject("postagem") ?: json
+            monthlyPlanningPostFromJson(item, 1)
+        }
+    }
+
     suspend fun solicitarPlanejamentoMensal(
         token: String,
         requestData: MonthlyPlanningRequest
@@ -273,12 +329,19 @@ class IA4TubeApiClient(
             .addFormDataPart("quantidade_reservada", requestData.quantidadeReservada.toString())
             .addFormDataPart("nome_empresa", requestData.nomeEmpresa)
             .addFormDataPart("ramo", requestData.ramo)
+            .addFormDataPart("caracteristicas_empresa", JSONArray(requestData.caracteristicasEmpresa).toString())
+            .addFormDataPart("informacoes_empresa", requestData.informacoesEmpresa)
             .addFormDataPart("orientacoes_fotos", monthlyPlanningPhotoOrientationsJson(requestData))
 
         requestData.fotos.forEach { photo ->
             val foto = photo.file
             val body = foto.bytes.toRequestBody(foto.contentType.toMediaTypeOrNull())
             multipartBuilder.addFormDataPart("fotos", foto.fileName, body)
+        }
+
+        requestData.logo?.let { logo ->
+            val body = logo.bytes.toRequestBody(logo.contentType.toMediaTypeOrNull())
+            multipartBuilder.addFormDataPart("logo", logo.fileName, body)
         }
 
         val request = Request.Builder()
@@ -289,14 +352,16 @@ class IA4TubeApiClient(
 
         logMultipart(
             url = request.url.toString(),
-            fields = listOf("quantidade_reservada", "nome_empresa", "ramo", "orientacoes_fotos", "fotos"),
-            files = requestData.fotos.map { it.file }
+            fields = listOf("quantidade_reservada", "nome_empresa", "ramo", "caracteristicas_empresa", "informacoes_empresa", "orientacoes_fotos", "fotos", "logo"),
+            files = requestData.fotos.map { it.file } + listOfNotNull(requestData.logo)
         )
 
         executeJson(request) { json ->
             MonthlyPlanningRequestResponse(
                 planningId = json.optString("planejamento_id"),
                 ciclo = json.optString("ciclo"),
+                createdAt = json.optString("criado_em")
+                    .ifBlank { json.optString("created_at") },
                 status = json.optString("status"),
                 statusLabel = json.optString("status_label").ifBlank { json.optString("status") },
                 quantidadeReservada = json.optInt("quantidade_reservada", requestData.quantidadeReservada),
@@ -1199,6 +1264,8 @@ class IA4TubeApiClient(
                 title = item.optString("titulo").ifBlank { "Planejamento Mensal" },
                 status = item.optString("status_label").ifBlank { item.optString("status") },
                 cycle = item.optString("ciclo"),
+                createdAt = item.optString("criado_em")
+                    .ifBlank { item.optString("created_at") },
                 totalPosts = total,
                 readyPosts = ready,
                 productionPosts = item.optInt("em_producao", 0),
@@ -1210,17 +1277,52 @@ class IA4TubeApiClient(
         private fun monthlyPlanningPostFromJson(item: JSONObject, fallbackNumber: Int): MonthlyPlanningPostDto {
             return MonthlyPlanningPostDto(
                 number = item.optInt("ordem", fallbackNumber),
-                itemId = item.optString("planejamento_item_id").ifBlank { item.optString("id") },
-                date = item.optString("data_sugerida"),
-                time = item.optString("horario_sugerido"),
-                theme = item.optString("tema"),
+                itemId = item.optString("calendar_key")
+                    .ifBlank { item.optString("item_key") }
+                    .ifBlank { item.optString("planejamento_item_id") }
+                    .ifBlank { item.optString("id") },
+                planningId = item.optString("planning_id")
+                    .ifBlank { item.optString("planejamento_id") },
+                planejamentoItemId = item.optString("planejamento_item_id")
+                    .ifBlank { item.optString("item_id") }
+                    .ifBlank { item.optString("id") },
+                date = item.optString("data_sugerida").ifBlank { item.optString("data") },
+                time = item.optString("horario_sugerido").ifBlank { item.optString("horario") },
+                theme = item.optString("tema").ifBlank { item.optString("titulo") },
                 objective = item.optString("objetivo").ifBlank { item.optString("objetivo_postagem") },
                 status = item.optString("status"),
                 statusLabel = item.optString("status_label").ifBlank { item.optString("status") },
-                caption = item.optString("legenda").ifBlank { item.optString("briefing_arte") },
+                caption = item.optString("legenda").ifBlank { item.optString("descricao_instagram") },
                 pedidoId = item.optString("pedido_id"),
-                imageReady = item.optBoolean("imagem_pronta", false)
+                imageReady = item.optBoolean("imagem_pronta", false),
+                imageText = monthlyPlanningImageTextFromJson(item)
             )
+        }
+
+        private fun monthlyPlanningImageTextFromJson(item: JSONObject): String {
+            val direct = item.optString("texto_obrigatorio_imagem")
+                .ifBlank { item.optString("frase_foto") }
+                .ifBlank { item.optString("frase_na_foto") }
+                .ifBlank { item.optString("escrita_imagem") }
+                .ifBlank { item.optString("texto_imagem") }
+            if (direct.isNotBlank()) return direct.trim()
+
+            val orientation = item.optString("orientacao_cliente")
+                .ifBlank { item.optString("direcionamento_cliente") }
+                .ifBlank { item.optString("orientacao") }
+
+            return imageTextFromOrientation(orientation)
+        }
+
+        private fun imageTextFromOrientation(orientation: String): String {
+            val marker = "Escrita que deve aparecer na imagem"
+            return orientation
+                .lineSequence()
+                .map { it.trim() }
+                .firstOrNull { it.startsWith(marker, ignoreCase = true) }
+                ?.substringAfter(":", "")
+                ?.trim()
+                .orEmpty()
         }
 
         private fun fileNameFromDisposition(disposition: String): String {
