@@ -98,6 +98,8 @@ class IA4TubeApiClient(
                 description = json.optString("descricao"),
                 urlVideo = json.optString("url_video"),
                 thumbnail = json.optString("thumbnail"),
+                autoplay = json.optBoolean("autoplay", true),
+                jaVisto = json.optBoolean("ja_visto", false),
                 durationSeconds = json.optInt("duracao", 0),
                 version = json.optString("versao"),
                 fallback = json.optString("fallback")
@@ -392,7 +394,11 @@ class IA4TubeApiClient(
                 quantidadeReservada = json.optInt("quantidade_reservada", requestData.quantidadeReservada),
                 artesDesteCiclo = json.optInt("artes_deste_ciclo", 0),
                 reservadasNoPlanejamento = json.optInt("reservadas_no_planejamento", 0),
-                livresParaCriarArte = json.optInt("livres_para_criar_arte", 0)
+                livresParaCriarArte = json.optInt("livres_para_criar_arte", 0),
+                cobrancaOrigem = json.optString("cobranca_origem"),
+                tipoCompra = json.optString("tipo_compra"),
+                valorCobrado = json.optDouble("valor_cobrado", 0.0),
+                arteGratis = json.optBoolean("arte_gratis", false)
             )
         }
     }

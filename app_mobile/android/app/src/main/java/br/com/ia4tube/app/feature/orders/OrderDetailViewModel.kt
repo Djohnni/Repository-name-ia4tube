@@ -222,7 +222,7 @@ class OrderDetailViewModel(
 
     fun onMarketingVideoStarted() {
         val video = _uiState.value.marketingVideo ?: return
-        trackMarketingVideo("mobile_video_marketing_iniciado", video)
+        trackMarketingVideo("mobile_video_marketing_iniciado", video, flushNow = true)
     }
 
     fun onMarketingVideoQuartile(percent: Int, watchedSeconds: Long) {
