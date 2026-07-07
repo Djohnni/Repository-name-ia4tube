@@ -80,5 +80,11 @@ data class OrderInfo(
     val podeBaixar: Boolean,
     val podePedirAjuste: Boolean,
     val downloadBloqueado: Boolean = false,
-    val mensagemDownloadBloqueado: String = ""
+    val mensagemDownloadBloqueado: String = "",
+    val cobrancaOrigem: String = "",
+    val tipoCompra: String = "",
+    val valorCobrado: Double = 0.0,
+    val origemPromocional: String = "",
+    val marketingContext: String = "",
+    val arteGratis: Boolean = false
 )

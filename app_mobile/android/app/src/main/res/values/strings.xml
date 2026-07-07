@@ -124,6 +124,11 @@
     <string name="order_creation_progress_percent">%1$d%%</string>
     <string name="order_creation_progress_explanation">Aqui chegará sua imagem pronta. Quando ela estiver disponível, você poderá baixar ou compartilhar no Instagram, WhatsApp e outras redes sociais.</string>
     <string name="order_art_still_creating">Sua arte ainda está sendo criada.</string>
+    <string name="order_marketing_video_title">Enquanto sua primeira arte fica pronta</string>
+    <string name="order_marketing_video_waiting">Sua arte continua sendo criada em segundo plano.</string>
+    <string name="order_marketing_video_finished_waiting">Vídeo finalizado. Estamos terminando sua arte.</string>
+    <string name="order_marketing_video_ready_message">Sua arte ficou pronta.</string>
+    <string name="order_marketing_video_ready_button">✅ Sua arte está pronta! Ver agora</string>
     <string name="order_ready_image_explanation">Também disponibilizamos uma descrição pronta para você copiar e usar na publicação, se desejar.</string>
     <string name="order_adjustment_explanation">Encontrou algum erro ou deseja alterar algo? Toque em Solicitar Ajuste e peça a alteração desejada.</string>
     <string name="order_preview_title">Imagem pronta</string>

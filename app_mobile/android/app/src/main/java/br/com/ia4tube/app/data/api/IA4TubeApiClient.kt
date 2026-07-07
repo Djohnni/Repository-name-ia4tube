@@ -25,6 +25,7 @@ import br.com.ia4tube.app.data.models.DownloadedFile
 import br.com.ia4tube.app.data.models.DownloadedImage
 import br.com.ia4tube.app.data.models.FootballOrderRequest
 import br.com.ia4tube.app.data.models.LoginResponse
+import br.com.ia4tube.app.data.models.MarketingVideo
 import br.com.ia4tube.app.data.models.MeResponse
 import br.com.ia4tube.app.data.models.MonthlyPlanningDetailDto
 import br.com.ia4tube.app.data.models.MonthlyPlanningPostDto
@@ -76,6 +77,30 @@ class IA4TubeApiClient(
                 playStoreUrl = json.optString("play_store_url").ifBlank {
                     "https://play.google.com/store/apps/details?id=com.ia4tube.app"
                 }
+            )
+        }
+    }
+
+    suspend fun marketingVideo(token: String, context: String): ApiResult<MarketingVideo> = withContext(Dispatchers.IO) {
+        val encodedContext = URLEncoder.encode(context, StandardCharsets.UTF_8.name())
+        val request = Request.Builder()
+            .url("${AppConfig.apiBase}/marketing/video?context=$encodedContext")
+            .header("Authorization", "Bearer $token")
+            .get()
+            .build()
+
+        executeJson(request) { json ->
+            MarketingVideo(
+                active = json.optBoolean("ativo", false),
+                id = json.optString("id"),
+                context = json.optString("context").ifBlank { json.optString("contexto") },
+                title = json.optString("titulo"),
+                description = json.optString("descricao"),
+                urlVideo = json.optString("url_video"),
+                thumbnail = json.optString("thumbnail"),
+                durationSeconds = json.optInt("duracao", 0),
+                version = json.optString("versao"),
+                fallback = json.optString("fallback")
             )
         }
     }
@@ -404,7 +429,13 @@ class IA4TubeApiClient(
                 podeBaixar = json.optBoolean("pode_baixar", false),
                 podePedirAjuste = json.optBoolean("pode_pedir_ajuste", false),
                 downloadBloqueado = json.optBoolean("download_bloqueado", false),
-                mensagemDownloadBloqueado = json.optString("mensagem_download_bloqueado")
+                mensagemDownloadBloqueado = json.optString("mensagem_download_bloqueado"),
+                cobrancaOrigem = json.optString("cobranca_origem"),
+                tipoCompra = json.optString("tipo_compra"),
+                valorCobrado = json.optDouble("valor_cobrado", 0.0),
+                origemPromocional = json.optString("origem_promocional"),
+                marketingContext = json.optString("marketing_context"),
+                arteGratis = json.optBoolean("arte_gratis", false)
             )
         }
     }
@@ -651,11 +682,14 @@ class IA4TubeApiClient(
         executeJson(request) { json -> billingPixFromJson(json) }
     }
 
-    suspend fun criarArteAvulsaPix(token: String): ApiResult<BillingPixResult> = withContext(Dispatchers.IO) {
+    suspend fun criarArteAvulsaPix(token: String, quantidade: Int = 1): ApiResult<BillingPixResult> = withContext(Dispatchers.IO) {
+        val bodyJson = JSONObject()
+            .put("quantidade", quantidade.coerceAtLeast(1))
+
         val request = Request.Builder()
             .url("${AppConfig.apiBase}/billing/arte-avulsa/pix")
             .header("Authorization", "Bearer $token")
-            .post(ByteArray(0).toRequestBody(null))
+            .post(bodyJson.toString().toRequestBody(JSON))
             .build()
 
         executeJson(request) { json -> billingPixFromJson(json) }

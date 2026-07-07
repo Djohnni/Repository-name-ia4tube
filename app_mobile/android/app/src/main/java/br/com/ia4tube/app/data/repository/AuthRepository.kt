@@ -12,6 +12,7 @@ import br.com.ia4tube.app.data.models.CreateOrderResponse
 import br.com.ia4tube.app.data.models.DownloadedImage
 import br.com.ia4tube.app.data.models.FootballOrderRequest
 import br.com.ia4tube.app.data.models.LoginResponse
+import br.com.ia4tube.app.data.models.MarketingVideo
 import br.com.ia4tube.app.data.models.MeResponse
 import br.com.ia4tube.app.data.models.MonthlyPlanningDetailDto
 import br.com.ia4tube.app.data.models.MonthlyPlanningPostDto
@@ -108,6 +109,12 @@ class AuthRepository(
         return apiClient.pedidoInfo(token, pedidoId)
     }
 
+    suspend fun marketingVideo(context: String): ApiResult<MarketingVideo> {
+        val token = sessionStore.getToken()
+        if (token.isBlank()) return ApiResult.Failure(SESSION_EXPIRED_MESSAGE)
+        return apiClient.marketingVideo(token, context)
+    }
+
     suspend fun aprovarPedido(pedidoId: String): ApiResult<Unit> {
         val token = sessionStore.getToken()
         if (token.isBlank()) return ApiResult.Failure(SESSION_EXPIRED_MESSAGE)
@@ -144,10 +151,10 @@ class AuthRepository(
         return apiClient.criarSaldoPix(token, pacote)
     }
 
-    suspend fun criarArteAvulsaPix(): ApiResult<BillingPixResult> {
+    suspend fun criarArteAvulsaPix(quantidade: Int = 1): ApiResult<BillingPixResult> {
         val token = sessionStore.getToken()
         if (token.isBlank()) return ApiResult.Failure(SESSION_EXPIRED_MESSAGE)
-        return apiClient.criarArteAvulsaPix(token)
+        return apiClient.criarArteAvulsaPix(token, quantidade)
     }
 
     suspend fun criarPlanoPix(planId: String): ApiResult<BillingPixResult> {
