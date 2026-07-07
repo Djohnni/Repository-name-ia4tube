@@ -5404,6 +5404,67 @@ body.visitanteNaoLogado .visitanteWelcomeCallout{
   background:linear-gradient(135deg, #2ecc71, #1b9b51);
 }
 
+.cleanMarketingVideo{
+  display:none;
+  margin:12px auto 14px;
+  max-width:520px;
+  text-align:left;
+  border-radius:22px;
+  overflow:hidden;
+  background:#111827;
+  color:#f8fafc;
+  border:1px solid rgba(218,165,32,.45);
+  box-shadow:0 18px 36px rgba(15,23,42,.18);
+}
+
+.cleanMarketingVideo.is-active{
+  display:block;
+}
+
+.cleanMarketingVideo video{
+  display:block;
+  width:100%;
+  background:#020617;
+  aspect-ratio:16/9;
+}
+
+.cleanMarketingVideoBody{
+  padding:14px;
+}
+
+.cleanMarketingVideoTitle{
+  margin:0;
+  color:#f8d77a;
+  font-size:16px;
+  font-weight:950;
+}
+
+.cleanMarketingVideoDescription,
+.cleanMarketingVideoStatus{
+  margin:6px 0 0;
+  color:#d1d5db;
+  font-size:13px;
+  font-weight:800;
+  line-height:1.35;
+}
+
+.cleanMarketingVideoReady{
+  display:none;
+  width:100%;
+  margin-top:12px;
+  border:0;
+  border-radius:14px;
+  padding:12px 14px;
+  background:linear-gradient(135deg,#d4af37,#f5d77b);
+  color:#111827;
+  font-weight:950;
+  cursor:pointer;
+}
+
+.cleanMarketingVideoReady.is-visible{
+  display:block;
+}
+
 .legacyOrderFormArea{
   display:none !important;
 }
@@ -10083,6 +10144,7 @@ function resetCleanFormAfterSend(form){
 
 const cleanProductProgressTimers = new WeakMap();
 const cleanProductResultWatchers = new Map();
+const cleanMarketingVideoStates = new Map();
 const IA4_ACTIVE_ORDERS_KEY = "ia4tube_pedidos_ativos";
 const IA4_ACTIVE_ORDER_MAX_AGE = 48 * 60 * 60 * 1000;
 
@@ -10304,6 +10366,183 @@ function cancelarProgressoNoProduto(form){
   restaurarImagemOriginalDoProduto(form);
 }
 
+async function carregarMarketingVideo(contexto = "primeira_arte_gratis"){
+  const r = await fetch(`${API_BASE}/marketing/video?context=${encodeURIComponent(contexto)}`, {
+    headers:{ "Authorization": "Bearer " + token }
+  });
+  const data = await r.json();
+  if(!r.ok || !data?.ok || data.ativo !== true || !data.url_video){
+    throw new Error(data?.error || "video_indisponivel");
+  }
+  return data;
+}
+
+function trackMarketingVideo(eventName, video, pedidoId, extra = {}){
+  ia4Track(eventName, {
+    pedido_id: pedidoId || "",
+    video_id: video?.id || "",
+    versao: video?.versao || "",
+    contexto: video?.contexto || video?.context || "primeira_arte_gratis",
+    ...extra
+  });
+}
+
+function removerMarketingVideo(pedidoId){
+  const state = cleanMarketingVideoStates.get(pedidoId);
+  if(!state) return;
+  try{ state.videoEl?.pause(); }catch(e){}
+  state.wrap?.remove();
+  cleanMarketingVideoStates.delete(pedidoId);
+}
+
+function marcarMarketingVideoArtePronta(pedidoId, form){
+  const state = cleanMarketingVideoStates.get(pedidoId);
+  if(!state) return;
+  state.ready = true;
+  if(state.statusEl){
+    state.statusEl.textContent = "Sua arte ficou pronta. Você pode abrir agora ou continuar assistindo.";
+  }
+  if(state.readyBtn){
+    state.readyBtn.classList.add("is-visible");
+    state.readyBtn.textContent = "✅ Sua arte está pronta! Ver agora";
+  }
+  trackMarketingVideo("video_marketing_arte_pronta", state.video, pedidoId, {
+    tempo_assistido_segundos: Math.round((state.videoEl?.currentTime || 0))
+  });
+}
+
+function renderMarketingVideoNoPedido(form, pedidoId, video){
+  if(!form || !pedidoId || !video?.url_video) return;
+  if(cleanMarketingVideoStates.has(pedidoId)) return;
+
+  const boxEl = form.querySelector("[data-clean-result-box]");
+  if(!boxEl) return;
+
+  boxEl.style.display = "block";
+
+  const wrap = document.createElement("div");
+  wrap.className = "cleanMarketingVideo is-active";
+  wrap.dataset.marketingVideoPedido = pedidoId;
+
+  const videoEl = document.createElement("video");
+  videoEl.muted = true;
+  videoEl.autoplay = true;
+  videoEl.playsInline = true;
+  videoEl.controls = true;
+  videoEl.preload = "metadata";
+  videoEl.src = video.url_video;
+  if(video.thumbnail) videoEl.poster = video.thumbnail;
+
+  const body = document.createElement("div");
+  body.className = "cleanMarketingVideoBody";
+
+  const title = document.createElement("p");
+  title.className = "cleanMarketingVideoTitle";
+  title.textContent = video.titulo || "Enquanto sua primeira arte fica pronta...";
+
+  const description = document.createElement("p");
+  description.className = "cleanMarketingVideoDescription";
+  description.textContent = video.descricao || "Veja como a iA4Tube pode ajudar seu negócio.";
+
+  const status = document.createElement("p");
+  status.className = "cleanMarketingVideoStatus";
+  status.textContent = "Sua arte continua sendo criada em segundo plano.";
+
+  const readyBtn = document.createElement("button");
+  readyBtn.type = "button";
+  readyBtn.className = "cleanMarketingVideoReady";
+  readyBtn.textContent = "Sua arte está pronta! Ver agora";
+  readyBtn.addEventListener("click", () => {
+    trackMarketingVideo("video_marketing_ver_arte", video, pedidoId, {
+      tempo_assistido_segundos: Math.round(videoEl.currentTime || 0)
+    });
+    abrirPedidoDireto(pedidoId);
+  });
+
+  body.appendChild(title);
+  body.appendChild(description);
+  body.appendChild(status);
+  body.appendChild(readyBtn);
+  wrap.appendChild(videoEl);
+  wrap.appendChild(body);
+  boxEl.prepend(wrap);
+
+  const state = {
+    video,
+    wrap,
+    videoEl,
+    statusEl: status,
+    readyBtn,
+    quartiles: new Set(),
+    startedAt: Date.now(),
+    ready: false
+  };
+  cleanMarketingVideoStates.set(pedidoId, state);
+
+  videoEl.addEventListener("play", () => {
+    trackMarketingVideo("video_marketing_iniciado", video, pedidoId);
+  }, { once:true });
+
+  videoEl.addEventListener("timeupdate", () => {
+    const duration = Number(videoEl.duration || video.duracao || 0);
+    if(!duration || !Number.isFinite(duration)) return;
+    const percent = Math.min(100, Math.floor((Number(videoEl.currentTime || 0) / duration) * 100));
+    [25, 50, 75, 100].forEach(mark => {
+      if(percent >= mark && !state.quartiles.has(mark)){
+        state.quartiles.add(mark);
+        trackMarketingVideo(`video_marketing_${mark}`, video, pedidoId, {
+          percentual: mark,
+          tempo_assistido_segundos: Math.round(videoEl.currentTime || 0)
+        });
+      }
+    });
+  });
+
+  videoEl.addEventListener("ended", () => {
+    if(!state.quartiles.has(100)){
+      state.quartiles.add(100);
+      trackMarketingVideo("video_marketing_100", video, pedidoId, {
+        percentual: 100,
+        tempo_assistido_segundos: Math.round(videoEl.currentTime || 0)
+      });
+    }
+    if(!state.ready && status){
+      status.textContent = "Vídeo finalizado. Estamos terminando sua arte...";
+    }
+  });
+
+  videoEl.addEventListener("error", () => {
+    trackMarketingVideo("video_marketing_erro", video, pedidoId);
+    removerMarketingVideo(pedidoId);
+  }, { once:true });
+
+  videoEl.play().catch(() => {
+    trackMarketingVideo("video_marketing_erro_autoplay", video, pedidoId);
+    removerMarketingVideo(pedidoId);
+  });
+}
+
+async function iniciarMarketingVideoPrimeiraArte(form, pedidoId, cobrancaOrigem = ""){
+  if(!form || !pedidoId) return;
+  const origem = String(cobrancaOrigem || "").toLowerCase();
+  if(origem !== "arte_gratis") return;
+  if(cleanMarketingVideoStates.has(pedidoId)) return;
+
+  try{
+    const video = await carregarMarketingVideo("primeira_arte_gratis");
+    renderMarketingVideoNoPedido(form, pedidoId, video);
+  }catch(e){}
+}
+
+window.addEventListener("pagehide", () => {
+  cleanMarketingVideoStates.forEach((state, pedidoId) => {
+    if(state?.ready) return;
+    trackMarketingVideo("video_marketing_abandonou", state.video, pedidoId, {
+      tempo_assistido_segundos: Math.round(state.videoEl?.currentTime || 0)
+    });
+  });
+});
+
 async function acompanharResultadoClean(pedidoId, form){
   if(pedidoId && cleanProductResultWatchers.has(pedidoId)) return;
 
@@ -10324,9 +10563,14 @@ async function acompanharResultadoClean(pedidoId, form){
       });
       const data = await r.json();
 
+      if(data.ok && data.cobranca_origem === "arte_gratis"){
+        iniciarMarketingVideoPrimeiraArte(form, pedidoId, data.cobranca_origem);
+      }
+
       if(data.ok && data.imagem_pronta){
         clearInterval(timer);
         cleanProductResultWatchers.delete(pedidoId);
+        marcarMarketingVideoArtePronta(pedidoId, form);
         finalizarProgressoNoProduto(form, pedidoId);
         const previewUrl = `${API_BASE}/pedidos/${pedidoId}/preview?ts=${Date.now()}`;
         if(statusElLocal) statusElLocal.textContent = "Confira sua arte antes de baixar";
@@ -10404,6 +10648,9 @@ function restaurarPedidosAtivos(pedidos){
     const state = cleanProductProgressTimers.get(form);
     if(state?.pedidoId !== pedido.id){
       iniciarProgressoNoProduto(form, pedido.id, ativo.criado_em);
+    }
+    if(pedido.cobranca_origem === "arte_gratis"){
+      iniciarMarketingVideoPrimeiraArte(form, pedido.id, pedido.cobranca_origem);
     }
 
     acompanharResultadoClean(pedido.id, form);
@@ -10569,6 +10816,9 @@ async function submitCleanProductForm(e){
       }
       atualizarTopoProducao([{ id: out.pedido_id || "novo", status: "processando" }]);
       iniciarProgressoNoProduto(form, out.pedido_id || "novo");
+      if(out.pedido_id && out.cobranca_origem === "arte_gratis"){
+        iniciarMarketingVideoPrimeiraArte(form, out.pedido_id, out.cobranca_origem);
+      }
       mostrarAvisoPedido();
 
       ia4Track("pedido_concluido", {
