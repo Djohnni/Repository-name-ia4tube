@@ -6799,6 +6799,8 @@ async function entrarComGoogle(response){
 
     if(typeof acao === "function"){
       setTimeout(()=>acao(), 250);
+    }else if(typeof ia4ContinuarIntencaoLandingAposAuth === "function"){
+      setTimeout(()=>ia4ContinuarIntencaoLandingAposAuth(), 250);
     }
 
   }catch(e){
@@ -11476,6 +11478,168 @@ let fluxoEscudo3dCadastro = false;
 let escudo3dCadastroFile = null;
 let saldoPixAtual = null;
 
+const IA4_LANDING_INTENT_KEY = "ia4tube_landing_intent";
+const IA4_LANDING_INTENT_MAX_AGE = 30 * 60 * 1000;
+
+function ia4NormalizarParametroLanding(value){
+  return String(value || "").trim().toLowerCase();
+}
+
+function ia4LerParametrosLandingAtual(){
+  try{
+    const params = new URLSearchParams(window.location.search || "");
+    const origem = ia4NormalizarParametroLanding(params.get("origem"));
+    const acao = ia4NormalizarParametroLanding(params.get("acao"));
+
+    if(!origem || !acao) return null;
+    if(!origem.startsWith("site-")) return null;
+    if(!["primeira-arte", "entrar"].includes(acao)) return null;
+
+    return { origem, acao, criado_em: Date.now() };
+  }catch(e){
+    return null;
+  }
+}
+
+function ia4SalvarIntencaoLanding(intent){
+  if(!intent) return;
+  try{
+    sessionStorage.setItem(IA4_LANDING_INTENT_KEY, JSON.stringify({
+      origem: intent.origem || "",
+      acao: intent.acao || "",
+      criado_em: Date.now()
+    }));
+  }catch(e){}
+}
+
+function ia4ObterIntencaoLandingSalva(){
+  try{
+    const raw = sessionStorage.getItem(IA4_LANDING_INTENT_KEY);
+    if(!raw) return null;
+
+    const intent = JSON.parse(raw);
+    const criadoEm = Number(intent?.criado_em || 0);
+    if(!criadoEm || Date.now() - criadoEm > IA4_LANDING_INTENT_MAX_AGE){
+      sessionStorage.removeItem(IA4_LANDING_INTENT_KEY);
+      return null;
+    }
+
+    if(intent?.acao !== "primeira-arte") return null;
+    return intent;
+  }catch(e){
+    return null;
+  }
+}
+
+function ia4LimparIntencaoLanding(){
+  try{
+    sessionStorage.removeItem(IA4_LANDING_INTENT_KEY);
+  }catch(e){}
+}
+
+function ia4PrepararFluxoArteEmpresaLanding(){
+  const product = PRODUCTS.arte_empresa || {};
+
+  selectorStage?.classList.add("open");
+  activateCleanProductBlock("arte_empresa");
+
+  if(selectedProductInput) selectedProductInput.value = "arte_empresa";
+  if(flyerTipoInput) flyerTipoInput.value = product.flyerTipo || "arte_empresa";
+
+  document.body.classList.add("modeChosen", "mode-flyer");
+  document.body.classList.remove("mode-result", "mode-proximo-jogo");
+
+  document.querySelector(".categoryChoiceRow")?.style.setProperty("display", "none", "important");
+  document.querySelector(".categoryMiniRow")?.style.setProperty("display", "none", "important");
+
+  return document.querySelector('[data-product-form="arte_empresa"]') || getCleanProductFormByProductId("arte_empresa");
+}
+
+async function ia4AtualizarMensagemPrimeiraArteGratis(form){
+  if(!form) return;
+
+  if(!token){
+    setCleanProductMsg(form, "Você está no fluxo da primeira arte grátis. Preencha os dados da empresa para continuar.");
+    return;
+  }
+
+  try{
+    const r = await fetch(`${API_BASE}/billing/free-art/status`, {
+      headers:{ "Authorization": "Bearer " + token },
+      cache:"no-store"
+    });
+    const data = await r.json().catch(()=>({}));
+
+    if(!r.ok || !data.ok){
+      setCleanProductMsg(form, "Preencha os dados da empresa para continuar.");
+      return;
+    }
+
+    if(data.arte_gratis_disponivel === true){
+      setCleanProductMsg(form, "Primeira arte grátis disponível. Preencha os dados da empresa para continuar.");
+      return;
+    }
+
+    if(data.arte_gratis_usada === true){
+      setCleanProductMsg(form, "Você já utilizou a primeira arte grátis. Você ainda pode criar uma arte avulsa por R$5,99 ou usar um combo.", true);
+      return;
+    }
+
+    if(data.arte_gratis_bloqueada_ip === true){
+      setCleanProductMsg(form, data.arte_gratis_mensagem_bloqueio || "A primeira arte grátis não está disponível nesta rede. Você ainda pode continuar com arte avulsa ou combo.", true);
+      return;
+    }
+
+    setCleanProductMsg(form, "A primeira arte grátis não está disponível para esta conta. Você ainda pode continuar com arte avulsa ou combo.", true);
+  }catch(e){
+    setCleanProductMsg(form, "Preencha os dados da empresa para continuar.");
+  }
+}
+
+function ia4AbrirFluxoPrimeiraArteGratisLanding(intent = {}, options = {}){
+  ia4SalvarIntencaoLanding({ ...intent, acao: "primeira-arte" });
+
+  const form = ia4PrepararFluxoArteEmpresaLanding();
+  ia4AtualizarMensagemPrimeiraArteGratis(form);
+
+  const delay = options.afterAuth ? 180 : 420;
+  setTimeout(()=>scrollToCleanProductBlock("arte_empresa"), delay);
+
+  ia4Track("site_landing_primeira_arte", {
+    origem: intent.origem || "site",
+    logado: !!token
+  });
+}
+
+function ia4ExecutarIntencaoLanding(intent = null, options = {}){
+  const entrada = intent || ia4LerParametrosLandingAtual();
+  if(!entrada) return false;
+
+  if(entrada.acao === "primeira-arte"){
+    ia4AbrirFluxoPrimeiraArteGratisLanding(entrada, options);
+    return true;
+  }
+
+  if(entrada.acao === "entrar"){
+    if(token){
+      destacarMeusPedidos();
+    }else{
+      abrirLoginVisitanteModal();
+    }
+    return true;
+  }
+
+  return false;
+}
+
+function ia4ContinuarIntencaoLandingAposAuth(){
+  const intent = ia4ObterIntencaoLandingSalva();
+  if(!intent) return false;
+
+  ia4AbrirFluxoPrimeiraArteGratisLanding(intent, { afterAuth:true });
+  return true;
+}
+
 const SALDO_PIX_LABELS = {
   arte_avulsa_599: "R$5,99",
   saldo_800: "R$8,00",
@@ -12114,6 +12278,8 @@ if(modoCadastro){
 
       if(typeof acao === "function"){
         acao();
+      }else if(typeof ia4ContinuarIntencaoLandingAposAuth === "function"){
+        ia4ContinuarIntencaoLandingAposAuth();
       }
     }, 250);
 
@@ -15441,6 +15607,8 @@ bannerJogadorEscudoLink?.addEventListener("click", (e)=>{
 });
 
 setTimeout(()=>window.scrollTo({ top:0, behavior:"auto" }), 180);
+
+setTimeout(()=>ia4ExecutarIntencaoLanding(), 520);
 
 function destacarMeusPedidos(){
   const btn = document.getElementById("btnMeusPedidos");

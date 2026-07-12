@@ -3,277 +3,969 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>O Mascote — Login</title>
+<meta name="description" content="Crie posts profissionais para sua empresa com IA. Envie sua logo, fotos e objetivo. A primeira arte no iA4Tube é grátis." />
+<meta name="theme-color" content="#f8f5ef" />
+<meta property="og:title" content="iA4Tube | Posts profissionais para empresas com IA" />
+<meta property="og:description" content="Sua primeira arte é grátis. Envie logo, fotos e objetivo; acompanhe, aprove e baixe pelo app." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://ia4tube.com/" />
+<meta property="og:image" content="https://ia4tube.com/todas%20imagens/resultado_final.raw.jpeg" />
+<link rel="canonical" href="https://ia4tube.com/" />
+<title>iA4Tube | Posts profissionais para empresas com IA</title>
 
 <style>
+:root{
+  --paper:#f8f5ef;
+  --paper-strong:#fffdf8;
+  --ink:#182033;
+  --muted:#5b6475;
+  --line:#e4ddcf;
+  --teal:#0f766e;
+  --teal-dark:#0b4f4a;
+  --gold:#c58a2d;
+  --coral:#d8573a;
+  --navy:#17324d;
+  --white:#ffffff;
+  --shadow:0 18px 45px rgba(24,32,51,.13);
+}
+
+*{box-sizing:border-box}
+
+html{
+  scroll-behavior:smooth;
+}
+
 body{
-  font-family:Arial,Helvetica,sans-serif;
-  background:#0b0f19;
-  color:#fff;
   margin:0;
+  font-family:Inter,Arial,Helvetica,sans-serif;
+  color:var(--ink);
+  background:var(--paper);
+  line-height:1.5;
+}
+
+img{
+  display:block;
+  max-width:100%;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+.site-header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:rgba(248,245,239,.94);
+  border-bottom:1px solid var(--line);
+  backdrop-filter:blur(14px);
+}
+
+.header-inner{
+  width:calc(100% - 32px);
+  max-width:1160px;
+  margin:0 auto;
+  min-height:72px;
   display:flex;
-  min-height:100vh;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+
+.brand-mark{
+  width:54px;
+  height:54px;
+  display:flex;
   align-items:center;
   justify-content:center;
-  padding:24px
-}
-
-.card{
-  width:100%;
-  max-width:420px;
-  background:#121a2a;
-  border:1px solid #23304d;
-  border-radius:14px;
-  padding:22px
-}
-
-h1{margin:0 0 6px;font-size:22px}
-p{margin:0 0 18px;opacity:.85}
-label{display:block;margin:10px 0 6px;font-size:13px;opacity:.9}
-
-input{
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  border:1px solid #2b3a5e;
-  background:#0b1222;
-  color:#fff;
-  outline:none
-}
-
-input:focus{border-color:#4f7cff}
-
-button{
-  width:100%;
-  margin-top:14px;
-  padding:12px;
-  border:0;
-  border-radius:10px;
-  background:#4f7cff;
-  color:#fff;
-  font-weight:700;
-  cursor:pointer
-}
-
-button:disabled{opacity:.6;cursor:not-allowed}
-
-.msg{margin-top:12px;font-size:13px;line-height:1.35}
-.err{color:#ff8b8b}
-.ok{color:#86ffb1}
-.row{display:flex;gap:10px}
-.hint{font-size:12px;opacity:.75;margin-top:6px}
-.authVisitanteBody{
-  padding:18px;
-  background:#f8fafc;
-  color:#111827;
-}
-
-.authPromoBox{
-  background:linear-gradient(180deg,#ecfdf3,#ffffff);
-  border:1px solid #bbf7d0;
-  border-radius:18px;
-  padding:16px;
-  text-align:center;
-  margin-bottom:14px;
-}
-
-.authPromoBox h2{
-  margin:0;
-  font-size:24px;
+  border:1px solid #d8c9aa;
+  border-radius:8px;
+  background:linear-gradient(135deg,#fff7e8,#e1f2ee);
+  color:var(--teal-dark);
   font-weight:950;
-  color:#14532d;
+  font-size:20px;
+  box-shadow:0 10px 24px rgba(24,32,51,.08);
 }
 
-.authPromoBox p{
-  margin:8px 0 0;
-  color:#334155;
+.brand-name{
+  display:flex;
+  flex-direction:column;
+  line-height:1.1;
+}
+
+.brand-name strong{
+  font-size:18px;
+  font-weight:900;
+}
+
+.brand-name span{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+}
+
+.nav-links{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:18px;
+  color:var(--muted);
+  font-size:14px;
   font-weight:800;
+}
+
+.nav-links a:hover{
+  color:var(--teal-dark);
+}
+
+.nav-login{
+  min-height:40px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 10px;
+  color:var(--teal-dark);
+}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:48px;
+  padding:0 20px;
+  border:1px solid transparent;
+  border-radius:8px;
+  font-weight:900;
+  text-align:center;
+  cursor:pointer;
+  transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
+}
+
+.btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 24px rgba(15,118,110,.18);
+}
+
+.btn-primary{
+  background:var(--teal);
+  color:var(--white);
+}
+
+.btn-secondary{
+  background:var(--white);
+  color:var(--teal-dark);
+  border-color:#b9ddd8;
+}
+
+.btn-gold{
+  background:#fff4dc;
+  color:#6d450c;
+  border-color:#eed3a2;
+}
+
+.section{
+  padding:78px 0;
+}
+
+.section-tight{
+  padding:56px 0;
+}
+
+.container{
+  width:calc(100% - 32px);
+  max-width:1160px;
+  margin:0 auto;
+}
+
+.hero{
+  padding:54px 0 48px;
+  background:
+    linear-gradient(135deg,rgba(15,118,110,.12),rgba(197,138,45,.10) 45%,rgba(216,87,58,.10)),
+    var(--paper);
+}
+
+.hero-grid{
+  width:calc(100% - 32px);
+  max-width:1160px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:minmax(0,1.02fr) minmax(320px,.82fr);
+  align-items:center;
+  gap:48px;
+}
+
+.hero-grid > *,
+.examples-grid > *,
+.app-grid > *{
+  min-width:0;
+}
+
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  min-height:34px;
+  padding:0 12px;
+  border:1px solid #d5c7a9;
+  border-radius:999px;
+  background:#fff7e8;
+  color:#745017;
+  font-weight:900;
+  font-size:13px;
+}
+
+h1{
+  max-width:740px;
+  margin:18px 0 18px;
+  font-size:54px;
+  line-height:1.02;
+  font-weight:950;
+}
+
+.hero-copy{
+  max-width:660px;
+  margin:0 0 28px;
+  color:#3f4859;
+  font-size:20px;
+}
+
+.hero-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin:0 0 22px;
+}
+
+.trust-row{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  max-width:680px;
+}
+
+.trust-item{
+  min-height:76px;
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:rgba(255,255,255,.72);
+}
+
+.trust-item strong{
+  display:block;
+  font-size:15px;
+}
+
+.trust-item span{
+  color:var(--muted);
+  font-size:13px;
+}
+
+.hero-visual{
+  position:relative;
+  min-height:520px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.phone-frame{
+  width:390px;
+  max-width:100%;
+  padding:12px;
+  border:1px solid #d7d0c3;
+  border-radius:8px;
+  background:#fffdf8;
+  box-shadow:var(--shadow);
+  transform:rotate(1.5deg);
+}
+
+.phone-frame img{
+  width:100%;
+  height:auto;
+  aspect-ratio:4/5;
+  object-fit:cover;
+  border-radius:6px;
+}
+
+.floating-note{
+  position:absolute;
+  left:0;
+  bottom:34px;
+  width:210px;
+  padding:14px;
+  border-radius:8px;
+  background:var(--navy);
+  color:var(--white);
+  box-shadow:var(--shadow);
+}
+
+.floating-note strong{
+  display:block;
+  font-size:24px;
+}
+
+.floating-note span{
+  display:block;
+  color:#dfe9f2;
+  font-size:13px;
+}
+
+.section-title{
+  max-width:760px;
+  margin:0 0 28px;
+}
+
+.section-title h2{
+  margin:0 0 10px;
+  font-size:36px;
+  line-height:1.12;
+}
+
+.section-title p{
+  margin:0;
+  color:var(--muted);
+  font-size:18px;
+}
+
+.steps{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+}
+
+.step{
+  min-height:210px;
+  padding:22px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:var(--paper-strong);
+}
+
+.step-number{
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:8px;
+  background:#e5f4f1;
+  color:var(--teal-dark);
+  font-weight:950;
+}
+
+.step h3,.benefit h3,.plan h3,.faq-item h3{
+  margin:18px 0 8px;
+  font-size:21px;
+}
+
+.step p,.benefit p,.plan p,.faq-item p{
+  margin:0;
+  color:var(--muted);
+}
+
+.examples-band{
+  background:#ede7dc;
+}
+
+.examples-grid{
+  display:grid;
+  grid-template-columns:.9fr 1.1fr;
+  align-items:center;
+  gap:36px;
+}
+
+.example-shot{
+  border:1px solid #d4cabc;
+  border-radius:8px;
+  background:var(--white);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+.example-shot img{
+  width:100%;
+  max-height:640px;
+  object-fit:cover;
+}
+
+.benefits{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+
+.benefit{
+  padding:18px;
+  border:1px solid #d7cfc0;
+  border-radius:8px;
+  background:#fffaf0;
+}
+
+.pricing{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:16px;
+}
+
+.plan{
+  padding:22px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:var(--paper-strong);
+}
+
+.plan-featured{
+  border-color:#9ccfc8;
+  box-shadow:0 14px 34px rgba(15,118,110,.12);
+}
+
+.price{
+  margin:14px 0 12px;
+  font-size:34px;
+  font-weight:950;
+  color:var(--teal-dark);
+}
+
+.price small{
+  font-size:14px;
+  color:var(--muted);
+}
+
+.plan ul{
+  margin:0 0 20px;
+  padding:0 0 0 18px;
+  color:#3f4859;
+}
+
+.app-band{
+  background:var(--navy);
+  color:var(--white);
+}
+
+.app-grid{
+  display:grid;
+  grid-template-columns:1fr .8fr;
+  gap:28px;
+  align-items:center;
+}
+
+.app-band p{
+  color:#dce7f1;
+}
+
+.app-points{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+.app-point{
+  min-height:72px;
+  padding:14px;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:8px;
+  background:rgba(255,255,255,.08);
+  font-weight:800;
+}
+
+.faq{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+
+.faq-item{
+  padding:20px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:var(--paper-strong);
+}
+
+.final-cta{
+  text-align:center;
+  background:#fffaf0;
+}
+
+.final-cta h2{
+  max-width:780px;
+  margin:0 auto 12px;
+  font-size:38px;
+  line-height:1.12;
+}
+
+.final-cta p{
+  max-width:680px;
+  margin:0 auto 24px;
+  color:var(--muted);
+  font-size:18px;
+}
+
+.site-footer{
+  padding:30px 0;
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  background:var(--paper);
   font-size:14px;
 }
 
-.authPreco{
-  margin-top:10px;
-  font-size:18px;
-  font-weight:950;
+.footer-inner{
+  width:calc(100% - 32px);
+  max-width:1160px;
+  margin:0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
 }
 
-.authPreco .old{
-  color:#64748b;
-  text-decoration:line-through;
-  margin-right:8px;
+.footer-links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:14px;
 }
 
-.authPreco .new{
-  color:#16a34a;
-  font-size:28px;
+.sr-only{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
 }
 
-.authVisitanteBody label{
-  color:#334155 !important;
-  font-weight:900;
-  font-size:13px;
-  margin-top:10px;
+@media (max-width:900px){
+  .header-inner{
+    min-height:auto;
+    padding:12px 0;
+    align-items:flex-start;
+  }
+
+  .nav-links{
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .nav-links a:not(.btn):not(.nav-login){
+    display:none;
+  }
+
+  .hero{
+    padding:28px 0 20px;
+  }
+
+  .hero-grid,.examples-grid,.app-grid{
+    grid-template-columns:1fr;
+    gap:24px;
+  }
+
+  h1{
+    font-size:38px;
+  }
+
+  .hero-copy{
+    font-size:17px;
+  }
+
+  .steps,.pricing,.faq,.benefits,.app-points{
+    grid-template-columns:1fr;
+  }
+
+  .trust-row{
+    grid-template-columns:1fr;
+  }
+
+  .hero-visual{
+    min-height:auto;
+  }
+
+  .phone-frame{
+    width:280px;
+    max-width:100%;
+  }
+
+  .phone-frame img{
+    height:260px;
+    aspect-ratio:auto;
+    object-position:top;
+  }
+
+  .floating-note{
+    left:12px;
+    bottom:12px;
+  }
+
+  .section{
+    padding:58px 0;
+  }
+
+  .footer-inner{
+    flex-direction:column;
+    align-items:flex-start;
+  }
 }
 
-.authVisitanteBody input{
-  width:100%;
-  margin-top:6px;
-  background:#fff !important;
-  color:#111827 !important;
-  border:1px solid #d1d5db !important;
-  box-shadow:none !important;
-}
+@media (max-width:520px){
+  .header-inner{
+    width:calc(100% - 24px);
+    gap:10px;
+  }
 
-.authVisitanteMsg{
-  margin-top:10px;
-  font-size:13px;
-  font-weight:800;
-  color:#64748b;
-  text-align:center;
-}
+  .brand{
+    gap:8px;
+  }
 
-.authVisitanteMsg.err{
-  color:#dc2626;
-}
+  .brand-mark{
+    width:48px;
+    height:48px;
+    font-size:18px;
+  }
 
-.authVisitanteMsg.ok{
-  color:#16a34a;
-}
+  .brand-name strong{
+    font-size:16px;
+  }
 
+  .brand-name span{
+    display:none;
+  }
+
+  .nav-links{
+    gap:8px;
+  }
+
+  .nav-login{
+    min-height:42px;
+    padding:0 6px;
+    font-size:13px;
+  }
+
+  .btn{
+    width:100%;
+  }
+
+  .nav-links .btn{
+    width:auto;
+    min-height:42px;
+    padding:0 10px;
+    font-size:13px;
+  }
+
+  .hero-actions{
+    width:100%;
+  }
+
+  h1{
+    font-size:31px;
+  }
+
+  .hero-copy{
+    font-size:16px;
+  }
+
+  .trust-row{
+    display:none;
+  }
+
+  .section-title h2,.final-cta h2{
+    font-size:29px;
+  }
+
+  .hero-visual{
+    min-height:auto;
+  }
+
+  .phone-frame{
+    transform:none;
+    width:230px;
+    max-width:100%;
+  }
+
+  .phone-frame img{
+    height:220px;
+  }
+
+  .floating-note{
+    position:static;
+    width:100%;
+    margin-top:12px;
+  }
+}
 </style>
-
 </head>
+
 <body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="#top" aria-label="Ir para o início">
+      <span class="brand-mark" aria-hidden="true">iA4</span>
+      <span class="brand-name">
+        <strong>iA4Tube</strong>
+        <span>Artes profissionais com IA</span>
+      </span>
+    </a>
 
-<div class="card">
-  <h1 id="titulo">Entrar</h1>
-<button type="button" onclick="toggleMode()" style="margin-bottom:10px;background:#23304d">Criar conta</button>
-  <p>Acesse sua conta pelo WhatsApp e senha.</p>
+    <nav class="nav-links" aria-label="Navegação principal">
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#exemplos">Exemplos</a>
+      <a href="#precos">Preços</a>
+      <a href="#app">Aplicativo</a>
+      <a class="nav-login" href="app.html?origem=site-home&acao=entrar">Entrar</a>
+      <a class="btn btn-primary" href="app.html?origem=site-home&acao=primeira-arte">Criar grátis</a>
+    </nav>
+  </div>
+</header>
 
-  <form id="loginForm">
+<main id="top">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow">Primeira arte grátis para empresas</span>
+        <h1 id="hero-title">iA4Tube cria posts profissionais para sua empresa com IA</h1>
+        <p class="hero-copy">Envie sua logo, fotos e objetivo. A iA4Tube prepara uma arte pronta para postar, com acompanhamento pelo site e continuidade pelo aplicativo.</p>
 
-<label for="nome_time" id="label_nome" style="display:none">Nome do time</label>
-<input id="nome_time" placeholder="Nome do seu time" style="display:none" />
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="app.html?origem=site-home&acao=primeira-arte">Criar minha primeira arte grátis</a>
+          <a class="btn btn-secondary" href="#como-funciona">Ver como funciona</a>
+        </div>
 
-    <label for="whatsapp">WhatsApp (somente números)</label>
-    <input id="whatsapp" inputmode="numeric" autocomplete="username" placeholder="15991120599" required />
+        <div class="trust-row" aria-label="Benefícios principais">
+          <div class="trust-item">
+            <strong>Sem aprender design</strong>
+            <span>Você informa o objetivo e envia os materiais.</span>
+          </div>
+          <div class="trust-item">
+            <strong>Pronta para postar</strong>
+            <span>Ideal para Instagram, WhatsApp e Facebook.</span>
+          </div>
+          <div class="trust-item">
+            <strong>Ajuste incluso</strong>
+            <span>Se precisar, solicite correção no pedido.</span>
+          </div>
+        </div>
+      </div>
 
-    <label for="senha">Senha</label>
-    <input id="senha" type="password" autocomplete="current-password" placeholder="••••••••" required />
+      <div class="hero-visual" aria-label="Exemplo de arte gerada para empresa">
+        <div class="phone-frame">
+          <img src="todas%20imagens/resultado_final.raw.jpeg" alt="Exemplo de post profissional criado para uma empresa de saúde" width="1024" height="1536" />
+        </div>
+        <div class="floating-note">
+          <strong>R$ 0</strong>
+          <span>para testar a primeira arte da sua empresa</span>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <button id="btn" type="submit">Entrar</button>
+  <section class="section" id="como-funciona">
+    <div class="container">
+      <div class="section-title">
+        <h2>Da ideia ao post em três passos</h2>
+        <p>O site foi pensado para a primeira experiência. Depois que você entende o valor, o app ajuda a acompanhar, aprovar, baixar e continuar criando.</p>
+      </div>
 
-    <div class="msg" id="msg"></div>
-    <div class="hint">Dica: se der erro, confirme seu número e sua senha.</div>
+      <div class="steps">
+        <article class="step">
+          <div class="step-number">1</div>
+          <h3>Envie seus materiais</h3>
+          <p>Informe o ramo da empresa, nome, objetivo da arte e envie logo, foto ou referência visual.</p>
+        </article>
 
-  </form>
-</div>
+        <article class="step">
+          <div class="step-number">2</div>
+          <h3>Receba a arte pronta</h3>
+          <p>A iA4Tube organiza a mensagem, visual e formato para entregar uma arte profissional para postagem.</p>
+        </article>
 
-<script>
+        <article class="step">
+          <div class="step-number">3</div>
+          <h3>Continue pelo app</h3>
+          <p>Acompanhe pedidos, aprove, baixe, compartilhe e crie novas artes com mais rapidez no aplicativo.</p>
+        </article>
+      </div>
+    </div>
+  </section>
 
-const API_BASE = "https://api.omascote.com.br";
+  <section class="section examples-band" id="exemplos">
+    <div class="container examples-grid">
+      <div class="example-shot">
+        <img loading="lazy" src="todas%20imagens/resultado_final.raw.jpeg" alt="Arte profissional criada para divulgar uma empresa" width="1024" height="1536" />
+      </div>
 
-// Agora a página principal sempre abre o app
-window.location.replace("app.html");
+      <div>
+        <div class="section-title">
+          <h2>Visual de campanha sem depender de designer todo dia</h2>
+          <p>A iA4Tube ajuda negócios locais a transformar fotos, logo e informações em artes para divulgar ofertas, serviços, datas e novidades.</p>
+        </div>
 
-let modoCadastro = false;
+        <div class="benefits">
+          <article class="benefit">
+            <h3>Para vender melhor</h3>
+            <p>Crie chamadas para orçamento, promoções, serviços e campanhas sazonais.</p>
+          </article>
+          <article class="benefit">
+            <h3>Para postar mais</h3>
+            <p>Mantenha frequência nas redes sem começar toda arte do zero.</p>
+          </article>
+          <article class="benefit">
+            <h3>Para manter padrão</h3>
+            <p>Use logo, cores, fotos e objetivos da empresa como base para novas criações.</p>
+          </article>
+          <article class="benefit">
+            <h3>Para acompanhar fácil</h3>
+            <p>Receba status, aprove, baixe e continue criando pelo aplicativo.</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
 
-function toggleMode(){
-  modoCadastro = !modoCadastro;
+  <section class="section" id="precos">
+    <div class="container">
+      <div class="section-title">
+        <h2>Comece grátis e evolua quando fizer sentido</h2>
+        <p>O primeiro objetivo é você ver uma arte pronta da sua empresa. Depois, escolha entre arte avulsa ou combos mensais.</p>
+      </div>
 
-  document.getElementById("titulo").textContent = modoCadastro ? "Criar conta" : "Entrar";
-  document.getElementById("label_nome").style.display = modoCadastro ? "block" : "none";
-  document.getElementById("nome_time").style.display = modoCadastro ? "block" : "none";
-  document.getElementById("btn").textContent = modoCadastro ? "Criar conta" : "Entrar";
-}
+      <div class="pricing">
+        <article class="plan plan-featured">
+          <h3>Primeira experiência</h3>
+          <div class="price">Grátis</div>
+          <ul>
+            <li>Primeira arte para testar</li>
+            <li>Conta criada para acompanhar</li>
+            <li>Entrada ideal para conhecer o produto</li>
+          </ul>
+          <a class="btn btn-primary" href="app.html?origem=site-precos&acao=primeira-arte">Criar minha primeira arte grátis</a>
+        </article>
 
-const form = document.getElementById("loginForm");
-const msgEl = document.getElementById("msg");
-const btn = document.getElementById("btn");
+        <article class="plan">
+          <h3>Arte avulsa</h3>
+          <div class="price">R$ 5,99</div>
+          <ul>
+            <li>Para pedidos pontuais</li>
+            <li>Pagamento por arte</li>
+            <li>Bom para testar novas campanhas</li>
+          </ul>
+          <a class="btn btn-secondary" href="app.html?origem=site-precos&acao=arte-avulsa">Criar arte avulsa</a>
+        </article>
 
-function setMsg(text, type){
-  msgEl.textContent = text || "";
-  msgEl.className = "msg " + (type || "");
-}
+        <article class="plan">
+          <h3>i4 Essencial</h3>
+          <div class="price">R$ 39,90 <small>/mês</small></div>
+          <ul>
+            <li>8 artes por mês</li>
+            <li>3 materiais gráficos da empresa por mês</li>
+            <li>1 carrossel por mês</li>
+          </ul>
+          <a class="btn btn-gold" href="app.html?origem=site-precos&acao=combos">Ver combo</a>
+        </article>
 
-function onlyDigits(s){
-  return (s||"").replace(/\D+/g,"");
-}
+        <article class="plan">
+          <h3>i4 Profissional</h3>
+          <div class="price">R$ 79,90 <small>/mês</small></div>
+          <ul>
+            <li>20 artes por mês</li>
+            <li>5 materiais gráficos da empresa por mês</li>
+            <li>2 carrosséis por mês</li>
+          </ul>
+          <a class="btn btn-gold" href="app.html?origem=site-precos&acao=combos">Ver combo</a>
+        </article>
 
-form.addEventListener("submit", async (e) => {
+        <article class="plan">
+          <h3>i4 Empresarial</h3>
+          <div class="price">R$ 149,90 <small>/mês</small></div>
+          <ul>
+            <li>40 artes por mês</li>
+            <li>Materiais gráficos gerais liberados</li>
+            <li>4 carrosséis por mês</li>
+          </ul>
+          <a class="btn btn-gold" href="app.html?origem=site-precos&acao=combos">Ver combo</a>
+        </article>
+      </div>
+    </div>
+  </section>
 
-  e.preventDefault();
-  setMsg("", "");
+  <section class="section app-band" id="app">
+    <div class="container app-grid">
+      <div>
+        <div class="section-title">
+          <h2>O site inicia. O app ajuda você a continuar.</h2>
+          <p>Depois da primeira arte, o aplicativo é o melhor lugar para acompanhar pedidos, receber notificações, aprovar, baixar e criar as próximas peças.</p>
+        </div>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="https://play.google.com/store/apps/details?id=com.ia4tube.app" target="_blank" rel="noopener">Baixar na Google Play</a>
+          <a class="btn btn-secondary" href="app.html?origem=site-app&acao=entrar">Entrar pelo site</a>
+        </div>
+      </div>
 
-  const whatsapp = onlyDigits(document.getElementById("whatsapp").value);
-  const senha = document.getElementById("senha").value;
+      <div class="app-points" aria-label="Motivos para usar o aplicativo">
+        <div class="app-point">Receber aviso quando a arte ficar pronta</div>
+        <div class="app-point">Aprovar, baixar e compartilhar</div>
+        <div class="app-point">Criar novas artes com menos etapas</div>
+        <div class="app-point">Acompanhar histórico e suporte</div>
+      </div>
+    </div>
+  </section>
 
-  if (!whatsapp || whatsapp.length < 10) {
-    setMsg("Digite um WhatsApp válido (somente números).", "err");
-    return;
-  }
+  <section class="section" id="confianca">
+    <div class="container">
+      <div class="section-title">
+        <h2>Antes de pagar, você pode testar</h2>
+        <p>A primeira experiência reduz o risco: você envia os dados principais, recebe uma arte e decide se quer continuar.</p>
+      </div>
 
-  if (!senha || senha.length < 3) {
-    setMsg("Digite sua senha.", "err");
-    return;
-  }
+      <div class="faq">
+        <article class="faq-item">
+          <h3>Preciso saber design?</h3>
+          <p>Não. Você informa o que quer comunicar e envia logo, foto ou referência. A iA4Tube organiza a arte.</p>
+        </article>
+        <article class="faq-item">
+          <h3>Vou pagar antes de testar?</h3>
+          <p>A primeira arte é a entrada gratuita. Depois você pode usar arte avulsa ou escolher um combo.</p>
+        </article>
+        <article class="faq-item">
+          <h3>Posso pedir ajuste?</h3>
+          <p>Sim. O fluxo de pedido permite solicitar ajuste quando a arte precisar de correção.</p>
+        </article>
+        <article class="faq-item">
+          <h3>Por que instalar o app?</h3>
+          <p>Porque ele facilita notificações, acompanhamento, aprovação, download e novas criações pelo celular.</p>
+        </article>
+      </div>
+    </div>
+  </section>
 
-  btn.disabled = true;
-  btn.textContent = "Entrando...";
+  <section class="section final-cta">
+    <div class="container">
+      <h2>Crie agora a primeira arte da sua empresa</h2>
+      <p>Leva poucos minutos para enviar as informações iniciais. A partir daí, você acompanha o pedido e pode continuar pelo aplicativo.</p>
+      <div class="hero-actions" style="justify-content:center">
+        <a class="btn btn-primary" href="app.html?origem=site-final&acao=primeira-arte">Criar minha primeira arte grátis</a>
+        <a class="btn btn-secondary" href="https://play.google.com/store/apps/details?id=com.ia4tube.app" target="_blank" rel="noopener">Ver aplicativo</a>
+      </div>
+    </div>
+  </section>
+</main>
 
-  try {
-
-    const url = modoCadastro ? "/auth/register" : "/auth/login";
-
-const r = await fetch(`${API_BASE}${url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(modoCadastro
-  ? { nome_time: document.getElementById("nome_time").value, whatsapp, senha }
-  : { whatsapp, senha }
-)
-    });
-
-    const data = await r.json().catch(() => ({}));
-
-    if (!r.ok || !data.ok) {
-      setMsg(
-  data.error ||
-  (modoCadastro
-    ? "Não foi possível criar a conta. Tente outro número."
-    : "Não foi possível entrar. Verifique seus dados."
-  ),
-  "err"
-);
-      btn.disabled = false;
-      btn.textContent = "Entrar";
-      return;
-    }
-
-    // salva token e dados básicos
-    localStorage.setItem("omascote_token", data.token);
-    localStorage.setItem("omascote_nome_time", data.nome_time || "");
-    localStorage.setItem("omascote_plano", String(data.plano ?? ""));
-    localStorage.setItem("omascote_usados", String(data.usados_no_ciclo ?? ""));
-
-    setMsg(modoCadastro ? "Conta criada com sucesso! Entrando no sistema…" : "Login realizado! Indo para o painel…", "ok");
-
-    setTimeout(() => window.location.href = "app.html", 400);
-
-  } catch (err) {
-
-    setMsg("Erro de rede. Tente novamente.", "err");
-    btn.disabled = false;
-    btn.textContent = "Entrar";
-
-  }
-
-});
-
-</script>
-
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>iA4Tube - Artes profissionais com IA para empresas</span>
+    <div class="footer-links">
+      <a href="app.html?origem=site-footer&acao=entrar">Entrar</a>
+      <a href="https://play.google.com/store/apps/details?id=com.ia4tube.app" target="_blank" rel="noopener">Google Play</a>
+      <a href="#confianca">Dúvidas</a>
+    </div>
+  </div>
+</footer>
 </body>
 </html>
-
-
-
