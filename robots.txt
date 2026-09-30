@@ -6,4 +6,4 @@ Disallow: /painel
 Disallow: /admin
 Disallow: /api
 
-Sitemap: https://omascote.com.br/sitemap.xml
+Sitemap: https://ia4tube.com/sitemap.xml
