@@ -393,11 +393,10 @@
     renderPhotos();
   }
 
-  function safeRemoteUrl(raw, whatsappOnly = false) {
+  function safeRemoteUrl(raw) {
     try {
       const url = new URL(raw);
       if (url.protocol !== 'https:') return null;
-      if (whatsappOnly && !['wa.me', 'api.whatsapp.com', 'web.whatsapp.com'].includes(url.hostname)) return null;
       return url.href;
     } catch { return null; }
   }
@@ -446,14 +445,9 @@
       }
       completed = true;
       $('success-message').hidden = false;
-      $('order-reference').textContent = photos.length ? 'Fotos salvas. Envie a mensagem no WhatsApp.' : 'Envie a mensagem no WhatsApp.';
-      const whatsappUrl = safeRemoteUrl(result.whatsappUrl, true);
-      $('success-whatsapp').hidden = !whatsappUrl;
-      if (whatsappUrl) $('success-whatsapp').href = whatsappUrl;
-      let emailUrl = null;
-      try { const url = new URL(result.emailUrl); if (url.protocol === 'mailto:') emailUrl = url.href; } catch { /* No email destination. */ }
-      $('success-email').hidden = !emailUrl;
-      if (emailUrl) $('success-email').href = emailUrl;
+      $('order-reference').textContent = photos.length
+        ? 'Suas escolhas e fotos foram enviadas à iA4tube.'
+        : 'Suas escolhas foram enviadas à iA4tube.';
       const receiptUrl = safeRemoteUrl(result.receiptUrl);
       $('receipt-link').hidden = !receiptUrl;
       if (receiptUrl) $('receipt-link').href = receiptUrl;

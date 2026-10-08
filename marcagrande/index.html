@@ -10,7 +10,7 @@
   <link rel="icon" type="image/png" href="./assets/logo-iA4tube.png">
   <link rel="stylesheet" href="./styles.css?v=20261008-preview">
   <script src="./config.js?v=20261008-precos" defer></script>
-  <script src="./app.js?v=20261008-preview" defer></script>
+  <script src="./app.js?v=20261008-envio-direto" defer></script>
 </head>
 <body>
   <div class="page-shell">
@@ -82,15 +82,13 @@
           </div>
         </div>
 
-        <p class="privacy-line">Fotos e contato para preparar seu conteúdo. <button type="button" class="text-button" id="open-privacy">Privacidade</button></p>
+        <p class="privacy-line">Fotos para criar. WhatsApp para entregar. <button type="button" class="text-button" id="open-privacy">Privacidade</button></p>
 
         <p class="form-message" id="form-message" role="alert" tabindex="-1" hidden></p>
         <section class="success-message" id="success-message" tabindex="-1" hidden>
           <span class="success-check" aria-hidden="true">✓</span>
-          <h2>Pedido pronto!</h2>
+          <h2>Pedido recebido!</h2>
           <p id="order-reference"></p>
-          <a class="success-link" id="success-whatsapp" hidden target="_blank" rel="noopener noreferrer">Enviar no WhatsApp <span aria-hidden="true">↗</span></a>
-          <a class="success-link" id="success-email" hidden>Enviar por e-mail <span aria-hidden="true">↗</span></a>
           <a class="text-button" id="receipt-link" hidden target="_blank" rel="noopener noreferrer">Ver pedido</a>
         </section>
       </form>
@@ -105,10 +103,9 @@
   <dialog class="privacy-dialog" id="privacy-dialog" aria-labelledby="privacy-title">
     <button class="dialog-close" type="button" id="close-privacy" aria-label="Fechar privacidade">×</button>
     <h2 id="privacy-title">Seus dados</h2>
-    <p>Usamos seu contato, suas escolhas e as fotos enviadas para atender ao seu pedido e preparar o conteúdo da sua empresa.</p>
+    <p>Suas escolhas e fotos são enviadas diretamente à iA4tube para produzir o conteúdo da sua empresa. Usamos seu WhatsApp para falar sobre o pedido e entregar o material.</p>
     <p>As fotos só são enviadas ao clicar em Enviar. Use imagens que você tem autorização para compartilhar.</p>
-    <p>As fotos ficam privadas. O link permite acessar o pedido por 30 dias; depois, expira e os arquivos entram em exclusão automática. Quem tiver o link poderá acessar as fotos durante esse prazo.</p>
-    <p>Ao confirmar a mensagem no WhatsApp, você envia o link do pedido para a iA4tube. Compartilhe esse link apenas com quem deve receber suas fotos.</p>
+    <p>As fotos ficam privadas e são recebidas no computador de produção da iA4tube. O link do pedido permite acessar os arquivos online por 30 dias; depois, expira e esses arquivos online entram em exclusão automática. Isso não apaga as cópias usadas na produção. Compartilhe esse link apenas com quem deve acessar suas fotos.</p>
     <p>Seu contato e suas escolhas ficam salvos neste navegador para você continuar depois. Você pode apagar esse rascunho a qualquer momento.</p>
     <button class="clear-draft" id="clear-draft" type="button">Apagar rascunho deste navegador</button>
   </dialog>
