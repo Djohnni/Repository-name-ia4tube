@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#ff580f">
+  <meta name="description" content="Marca Grande, por iA4tube. Escolha o conteúdo da sua empresa.">
+  <title>Marca Grande · iA4tube</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23ff580f'/%3E%3Cpath d='M17 45V19h7l8 13 8-13h7v26h-8V32l-7 10-7-10v13Z' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./config.js" defer></script>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="header">
+      <div class="identity" aria-label="Marca Grande, por iA4tube">
+        <span class="wordmark" aria-hidden="true">iA4<span>tube</span></span>
+        <span class="identity-rule" aria-hidden="true"></span>
+        <h1>Marca Grande</h1>
+      </div>
+      <span class="month" id="month">Outubro 2026</span>
+    </header>
+
+    <main>
+      <section class="gallery-section" aria-label="Escolha suas postagens">
+        <div class="gallery" id="gallery" aria-label="Postagens disponíveis" tabindex="0"></div>
+        <nav class="gallery-nav" aria-label="Navegar pelas postagens">
+          <button class="round-button" id="previous" type="button" aria-label="Postagens anteriores">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg>
+          </button>
+          <span id="page-number" aria-live="polite" aria-atomic="true">1 / 2</span>
+          <button class="round-button" id="next" type="button" aria-label="Próximas postagens">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg>
+          </button>
+        </nav>
+      </section>
+
+      <form id="order-form" novalidate>
+        <div class="honeypot" aria-hidden="true"><label for="website">Website</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
+        <section class="upload-section" aria-labelledby="photos-title">
+          <div class="upload-heading">
+            <h2 id="photos-title">Suas fotos <span>(opcional)</span></h2>
+            <button class="text-button" type="button" id="upload-details">Ver limites</button>
+          </div>
+          <div class="photo-list" id="photo-list">
+            <button type="button" class="upload-button" id="add-photos">
+              <span class="upload-plus" aria-hidden="true">+</span>
+              <span>Adicionar fotos</span>
+            </button>
+          </div>
+          <input id="photos" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple tabindex="-1" aria-label="Adicionar fotos da sua empresa">
+          <p class="upload-limits" id="upload-limits" hidden>JPG, PNG ou WebP · Até 12 fotos · 10 MB por foto · 24 MB no total.</p>
+          <p class="field-error" id="photos-error" role="alert" hidden></p>
+        </section>
+
+        <div class="contact-fields">
+          <div class="field">
+            <label for="company">Empresa</label>
+            <input id="company" name="company" autocomplete="organization" maxlength="100" placeholder="Nome da sua empresa" required aria-describedby="company-error">
+            <p class="field-error" id="company-error" hidden></p>
+          </div>
+          <div class="field">
+            <label for="whatsapp">WhatsApp</label>
+            <input id="whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" maxlength="24" placeholder="(00) 00000-0000" required aria-describedby="whatsapp-error">
+            <p class="field-error" id="whatsapp-error" hidden></p>
+          </div>
+        </div>
+
+        <p class="privacy-line">Fotos e contato para preparar seu conteúdo. <button type="button" class="text-button" id="open-privacy">Privacidade</button></p>
+
+        <div class="summary-spacer">
+          <div class="summary" id="summary">
+            <div class="summary-content" aria-live="polite" aria-atomic="true">
+              <svg class="summary-icon" viewBox="0 0 32 36" aria-hidden="true"><path d="M7 2h14l8 8v23H3V2h4Zm14 0v9h8M9 18h13M9 24h10"/></svg>
+              <p id="selection-summary">Escolha suas postagens</p>
+              <span class="summary-divider" aria-hidden="true"></span>
+              <p class="price" id="price">A combinar</p>
+            </div>
+            <button class="send-button" type="submit" id="send-button"><span>Enviar</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></button>
+          </div>
+        </div>
+        <p class="form-message" id="form-message" role="alert" tabindex="-1" hidden></p>
+        <section class="success-message" id="success-message" tabindex="-1" hidden>
+          <span class="success-check" aria-hidden="true">✓</span>
+          <h2>Pedido pronto!</h2>
+          <p id="order-reference"></p>
+          <a class="success-link" id="success-whatsapp" hidden target="_blank" rel="noopener noreferrer">Enviar no WhatsApp <span aria-hidden="true">↗</span></a>
+          <a class="success-link" id="success-email" hidden>Enviar por e-mail <span aria-hidden="true">↗</span></a>
+          <a class="text-button" id="receipt-link" hidden target="_blank" rel="noopener noreferrer">Ver pedido</a>
+        </section>
+      </form>
+    </main>
+    <footer><span>Marca Grande</span><span>por iA4tube</span></footer>
+  </div>
+
+  <dialog class="preview-dialog" id="preview-dialog" aria-label="Prévia da postagem">
+    <button class="dialog-close" type="button" id="close-preview" aria-label="Fechar prévia">×</button>
+    <div id="preview-content"></div>
+  </dialog>
+  <dialog class="privacy-dialog" id="privacy-dialog" aria-labelledby="privacy-title">
+    <button class="dialog-close" type="button" id="close-privacy" aria-label="Fechar privacidade">×</button>
+    <h2 id="privacy-title">Seus dados</h2>
+    <p>Usamos seu contato, suas escolhas e as fotos enviadas para atender ao seu pedido e preparar o conteúdo da sua empresa.</p>
+    <p>As fotos só são enviadas ao clicar em Enviar. Use imagens que você tem autorização para compartilhar.</p>
+    <p>As fotos ficam privadas. O link permite acessar o pedido por 30 dias; depois, expira e os arquivos entram em exclusão automática. Quem tiver o link poderá acessar as fotos durante esse prazo.</p>
+    <p>Ao confirmar a mensagem no WhatsApp, você envia o link do pedido para a iA4tube. Compartilhe esse link apenas com quem deve receber suas fotos.</p>
+    <p>Seu contato e suas escolhas ficam salvos neste navegador para você continuar depois. Você pode apagar esse rascunho a qualquer momento.</p>
+    <button class="clear-draft" id="clear-draft" type="button">Apagar rascunho deste navegador</button>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <noscript><p class="noscript">Ative o JavaScript no navegador para escolher e enviar suas postagens.</p></noscript>
+</body>
+</html>
