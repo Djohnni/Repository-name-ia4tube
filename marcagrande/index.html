@@ -7,21 +7,35 @@
   <meta name="theme-color" content="#ff580f">
   <meta name="description" content="Marca Grande, por iA4tube. Escolha o conteúdo da sua empresa.">
   <title>Marca Grande · iA4tube</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23ff580f'/%3E%3Cpath d='M17 45V19h7l8 13 8-13h7v26h-8V32l-7 10-7-10v13Z' fill='white'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="icon" type="image/png" href="./assets/logo-iA4tube.png">
+  <link rel="stylesheet" href="./styles.css?v=20261008-preview">
   <script src="./config.js?v=20261008-precos" defer></script>
-  <script src="./app.js?v=20261008-precos" defer></script>
+  <script src="./app.js?v=20261008-preview" defer></script>
 </head>
 <body>
   <div class="page-shell">
     <header class="header">
       <div class="identity" aria-label="Marca Grande, por iA4tube">
-        <span class="wordmark" aria-hidden="true">iA4<span>tube</span></span>
+        <span class="wordmark" aria-hidden="true"><img class="brand-icon" src="./assets/logo-iA4tube.png" width="46" height="46" alt=""><span class="brand-name">iA<span class="brand-four">4</span>tube<span class="brand-dot">.</span></span></span>
         <span class="identity-rule" aria-hidden="true"></span>
         <h1>Marca Grande</h1>
       </div>
       <span class="month" id="month">Outubro 2026</span>
     </header>
+
+    <div class="summary-bar">
+      <div class="summary" id="summary">
+        <div class="summary-content" aria-live="polite" aria-atomic="true">
+          <div class="summary-selection">
+            <svg class="summary-icon" viewBox="0 0 32 36" aria-hidden="true"><path d="M7 2h14l8 8v23H3V2h4Zm14 0v9h8M9 18h13M9 24h10"/></svg>
+            <p id="selection-summary">Escolha suas postagens</p>
+          </div>
+          <span class="summary-divider" aria-hidden="true"></span>
+          <p class="price" id="price">R$ 0,00</p>
+        </div>
+        <button class="send-button" type="submit" form="order-form" id="send-button"><span>Enviar</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></button>
+      </div>
+    </div>
 
     <main>
       <section class="gallery-section" aria-label="Escolha suas postagens">
@@ -70,17 +84,6 @@
 
         <p class="privacy-line">Fotos e contato para preparar seu conteúdo. <button type="button" class="text-button" id="open-privacy">Privacidade</button></p>
 
-        <div class="summary-spacer">
-          <div class="summary" id="summary">
-            <div class="summary-content" aria-live="polite" aria-atomic="true">
-              <svg class="summary-icon" viewBox="0 0 32 36" aria-hidden="true"><path d="M7 2h14l8 8v23H3V2h4Zm14 0v9h8M9 18h13M9 24h10"/></svg>
-              <p id="selection-summary">Escolha suas postagens</p>
-              <span class="summary-divider" aria-hidden="true"></span>
-              <p class="price" id="price">R$ 0,00</p>
-            </div>
-            <button class="send-button" type="submit" id="send-button"><span>Enviar</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></button>
-          </div>
-        </div>
         <p class="form-message" id="form-message" role="alert" tabindex="-1" hidden></p>
         <section class="success-message" id="success-message" tabindex="-1" hidden>
           <span class="success-check" aria-hidden="true">✓</span>
