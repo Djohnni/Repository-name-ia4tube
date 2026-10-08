@@ -2,7 +2,7 @@
 window.MARCA_GRANDE_CONFIG = Object.freeze({
   campaignId: 'hamburgueria-outubro-2026',
   month: 'Outubro 2026',
-  prices: { imageCents: null, videoCents: null },
+  prices: { imageCents: 1000, videoCents: 2000 },
   recipientWhatsApp: '554791049079',
   submitEndpoint: 'https://marcagrande-pedidos-wshgj6ugza-uc.a.run.app/orders',
   posts: [

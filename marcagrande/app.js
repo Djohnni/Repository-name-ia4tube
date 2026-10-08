@@ -68,7 +68,6 @@
 
   function totalCents() {
     const selected = selections();
-    if (!selected.length) return null;
     let total = 0;
     for (const item of selected) {
       const value = config.prices?.[`${item.format}Cents`];
