@@ -8,7 +8,10 @@ window.MARCA_GRANDE_CONFIG = Object.freeze({
   styles: [
     { id: 'pop', name: 'Pop', cover: './assets/01.webp' },
     { id: 'brasa', name: 'Brasa', cover: './assets/09.webp' },
-    { id: 'gourmet', name: 'Gourmet', cover: './assets/17.webp' }
+    { id: 'gourmet', name: 'Gourmet', cover: './assets/17.webp' },
+    { id: 'neon-urbano', name: 'Neon Urbano', cover: './assets/25.webp' },
+    { id: 'diner-retro', name: 'Diner Retrô', cover: './assets/33.webp' },
+    { id: 'artesanal', name: 'Artesanal', cover: './assets/41.webp' }
   ],
   posts: [
     { id: '01', styleId: 'pop', date: '09 OUT', title: 'Sextou: bora?', image: './assets/01.webp', video: './assets/01.mp4' },
@@ -34,6 +37,30 @@ window.MARCA_GRANDE_CONFIG = Object.freeze({
     { id: '21', styleId: 'gourmet', date: '19 OUT', title: 'Atenção. Informação. Acolhimento', image: './assets/21.webp', video: null },
     { id: '22', styleId: 'gourmet', date: '23 OUT', title: 'Sextou. Escolha a companhia', image: './assets/22.webp', video: null },
     { id: '23', styleId: 'gourmet', date: '30 OUT', title: 'Sextou com um toque de mistério', image: './assets/23.webp', video: null },
-    { id: '24', styleId: 'gourmet', date: '31 OUT', title: 'Apetite para uma noite de histórias', image: './assets/24.webp', video: null }
+    { id: '24', styleId: 'gourmet', date: '31 OUT', title: 'Apetite para uma noite de histórias', image: './assets/24.webp', video: null },
+    { id: '25', styleId: 'neon-urbano', date: '09 OUT', title: 'Sextou. Modo encontro', image: './assets/25.webp', video: null },
+    { id: '26', styleId: 'neon-urbano', date: '12 OUT', title: 'Mais presença. Mais memórias', image: './assets/26.webp', video: null },
+    { id: '27', styleId: 'neon-urbano', date: '15 OUT', title: 'Ideias que acendem caminhos', image: './assets/27.webp', video: null },
+    { id: '28', styleId: 'neon-urbano', date: '16 OUT', title: 'O futuro passa pela mesa', image: './assets/28.webp', video: null },
+    { id: '29', styleId: 'neon-urbano', date: '19 OUT', title: 'Cuidar merece atenção', image: './assets/29.webp', video: null },
+    { id: '30', styleId: 'neon-urbano', date: '23 OUT', title: 'Sextou. Sai do online', image: './assets/30.webp', video: null },
+    { id: '31', styleId: 'neon-urbano', date: '30 OUT', title: 'Sextou com um mistério', image: './assets/31.webp', video: null },
+    { id: '32', styleId: 'neon-urbano', date: '31 OUT', title: 'Arrepio ou apetite?', image: './assets/32.webp', video: null },
+    { id: '33', styleId: 'diner-retro', date: '09 OUT', title: 'Sextou no capricho', image: './assets/33.webp', video: null },
+    { id: '34', styleId: 'diner-retro', date: '12 OUT', title: 'As melhores histórias começam juntos', image: './assets/34.webp', video: null },
+    { id: '35', styleId: 'diner-retro', date: '15 OUT', title: 'Uma boa lição fica para sempre', image: './assets/35.webp', video: null },
+    { id: '36', styleId: 'diner-retro', date: '16 OUT', title: 'Comida boa merece respeito', image: './assets/36.webp', video: null },
+    { id: '37', styleId: 'diner-retro', date: '19 OUT', title: 'Cuidado nunca sai de moda', image: './assets/37.webp', video: null },
+    { id: '38', styleId: 'diner-retro', date: '23 OUT', title: 'Sextou. Puxa uma cadeira', image: './assets/38.webp', video: null },
+    { id: '39', styleId: 'diner-retro', date: '30 OUT', title: 'Sextou. Cadê a turma?', image: './assets/39.webp', video: null },
+    { id: '40', styleId: 'diner-retro', date: '31 OUT', title: 'Gostosuras com um toque de susto', image: './assets/40.webp', video: null },
+    { id: '41', styleId: 'artesanal', date: '09 OUT', title: 'Sextou. Vem sem pressa', image: './assets/41.webp', video: null },
+    { id: '42', styleId: 'artesanal', date: '12 OUT', title: 'Afeto que vira lembrança', image: './assets/42.webp', video: null },
+    { id: '43', styleId: 'artesanal', date: '15 OUT', title: 'Ensinar é deixar raízes', image: './assets/43.webp', video: null },
+    { id: '44', styleId: 'artesanal', date: '16 OUT', title: 'Valor em cada alimento', image: './assets/44.webp', video: null },
+    { id: '45', styleId: 'artesanal', date: '19 OUT', title: 'Cuidar é um gesto de afeto', image: './assets/45.webp', video: null },
+    { id: '46', styleId: 'artesanal', date: '23 OUT', title: 'Sextou. Mais tempo juntos', image: './assets/46.webp', video: null },
+    { id: '47', styleId: 'artesanal', date: '30 OUT', title: 'Sextou. Só não vale sumir', image: './assets/47.webp', video: null },
+    { id: '48', styleId: 'artesanal', date: '31 OUT', title: 'Um pouco de mistério. Muito apetite', image: './assets/48.webp', video: null }
   ]
 });
