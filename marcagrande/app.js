@@ -10,6 +10,9 @@
   const maxTotalBytes = 24 * 1024 * 1024;
   const state = new Map(config.posts.map((post) => [post.id, { selected: false, format: 'image' }]));
   const cards = new Map();
+  const styles = config.styles;
+  const styleButtons = new Map();
+  let activeStyle = styles[0].id;
   const photos = [];
   const gallery = $('gallery');
   let toastTimer;
@@ -42,6 +45,7 @@
       if (!draft || typeof draft !== 'object') return;
       if (typeof draft.company === 'string') $('company').value = draft.company.slice(0, 100);
       if (typeof draft.whatsapp === 'string') $('whatsapp').value = draft.whatsapp.slice(0, 24);
+      if (styles.some((style) => style.id === draft.activeStyle)) activeStyle = draft.activeStyle;
       if (Array.isArray(draft.selections)) {
         draft.selections.forEach((item) => {
           if (item && state.has(item.id) && ['image', 'video'].includes(item.format)) {
@@ -61,6 +65,7 @@
       localStorage.setItem(storageKey, JSON.stringify({
         company: $('company').value,
         whatsapp: $('whatsapp').value,
+        activeStyle,
         selections: selections()
       }));
     } catch { /* Storage is optional. */ }
@@ -105,6 +110,57 @@
     $('price').textContent = total === null ? 'A combinar' : new Intl.NumberFormat('pt-BR', {
       style: 'currency', currency: 'BRL'
     }).format(total / 100);
+    styleButtons.forEach(({ button, count }, id) => {
+      const selectedCount = config.posts.filter((post) => post.styleId === id && state.get(post.id).selected).length;
+      const style = styles.find((item) => item.id === id);
+      count.textContent = selectedCount;
+      count.hidden = !selectedCount;
+      button.setAttribute('aria-label', `${style.name}${selectedCount ? `, ${selectedCount} selecionada${selectedCount === 1 ? '' : 's'}` : ''}`);
+    });
+  }
+
+  function showStyle(id, persist = true) {
+    if (busy || !styleButtons.has(id)) return;
+    activeStyle = id;
+    pauseVideos();
+    cards.forEach((card) => {
+      card.article.hidden = card.post.styleId !== activeStyle;
+      if (card.video) {
+        card.video.hidden = true;
+        card.preview.hidden = false;
+      }
+    });
+    styleButtons.forEach(({ button }, styleId) => button.setAttribute('aria-pressed', String(styleId === activeStyle)));
+    gallery.setAttribute('aria-label', `Postagens ${styles.find((style) => style.id === activeStyle).name}`);
+    gallery.scrollTo({ left: 0, behavior: 'instant' });
+    renderPagination();
+    if (persist) saveDraft();
+  }
+
+  function buildStyles() {
+    const fragment = document.createDocumentFragment();
+    styles.forEach((style) => {
+      const button = element('button', 'style-option');
+      button.type = 'button';
+      button.dataset.style = style.id;
+      button.setAttribute('aria-controls', 'gallery');
+      const cover = element('img', 'style-cover');
+      cover.src = style.cover;
+      cover.alt = '';
+      cover.width = 52;
+      cover.height = 64;
+      const name = element('span', 'style-name', style.name);
+      const count = element('span', 'style-count');
+      count.setAttribute('aria-hidden', 'true');
+      const check = element('span', 'style-check');
+      check.setAttribute('aria-hidden', 'true');
+      check.append(icon('m5 12 4 4L19 6'));
+      button.append(cover, name, count, check);
+      button.addEventListener('click', () => showStyle(style.id));
+      styleButtons.set(style.id, { button, count });
+      fragment.append(button);
+    });
+    $('style-options').append(fragment);
   }
 
   function updateCard(id) {
@@ -178,13 +234,15 @@
     const fragment = document.createDocumentFragment();
     config.posts.forEach((post, index) => {
       const article = element('article', 'post-card');
-      article.setAttribute('aria-label', `${post.date}: ${post.title}`);
+      const styleName = styles.find((style) => style.id === post.styleId).name;
+      article.dataset.postId = post.id;
+      article.setAttribute('aria-label', `${styleName}, ${post.date}: ${post.title}`);
       const top = element('div', 'card-top');
       const date = element('span', 'post-date', post.date);
       const label = element('label', 'select-label');
       const checkbox = element('input');
       checkbox.type = 'checkbox';
-      checkbox.setAttribute('aria-label', `Selecionar ${post.title}, ${post.date}`);
+      checkbox.setAttribute('aria-label', `Selecionar ${post.title}, ${post.date}, ${styleName}`);
       const mark = element('span', 'selection-mark');
       mark.setAttribute('aria-hidden', 'true');
       mark.append(icon('m5 12 4 4L19 6'));
@@ -268,7 +326,7 @@
     const columns = Number.parseInt(getComputedStyle(document.documentElement).getPropertyValue('--columns'), 10) || 1;
     const gap = Number.parseFloat(getComputedStyle(gallery).columnGap) || 0;
     const step = gallery.clientWidth + gap;
-    const pages = Math.max(1, Math.ceil(config.posts.length / columns));
+    const pages = Math.max(1, Math.ceil(config.posts.filter((post) => post.styleId === activeStyle).length / columns));
     const page = Math.min(pages - 1, Math.round(gallery.scrollLeft / step));
     return { columns, step, pages, page };
   }
@@ -371,7 +429,7 @@
     setFieldError('whatsapp', phoneError);
     if (!selections().length) {
       formError('Escolha pelo menos uma postagem.');
-      cards.values().next().value?.checkbox.focus();
+      [...cards.values()].find((card) => card.post.styleId === activeStyle)?.checkbox.focus();
       valid = false;
     } else if (companyError || phoneError) {
       $(companyError ? 'company' : 'whatsapp').focus();
@@ -390,6 +448,7 @@
       card.checkbox.disabled = value;
       card.buttons.forEach((button) => { button.disabled = value; });
     });
+    styleButtons.forEach(({ button }) => { button.disabled = value; });
     renderPhotos();
   }
 
@@ -467,7 +526,9 @@
 
   $('month').textContent = config.month;
   readDraft();
+  buildStyles();
   buildGallery();
+  showStyle(activeStyle, false);
   renderSummary();
   renderPagination();
   $('previous').addEventListener('click', () => navigate(-1));
