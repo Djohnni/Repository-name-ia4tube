@@ -7,6 +7,7 @@
   const storageKey = `ia4tube:marca-grande:${config.campaignId}:draft:v1`;
   const maxFiles = 12;
   const maxFileBytes = 10 * 1024 * 1024;
+  const maxLogoBytes = 5 * 1024 * 1024;
   const maxTotalBytes = 24 * 1024 * 1024;
   const state = new Map(config.posts.map((post) => [post.id, { selected: false, format: 'image' }]));
   const cards = new Map();
@@ -14,6 +15,8 @@
   const styleButtons = new Map();
   let activeStyle = styles[0].id;
   const photos = [];
+  let logo = null;
+  let preparingFiles = false;
   const gallery = $('gallery');
   let toastTimer;
   let busy = false;
@@ -349,6 +352,100 @@
     $('photos-error').hidden = !message;
   }
 
+  function setLogoError(message) {
+    $('logo-error').textContent = message;
+    $('logo-error').hidden = !message;
+    $('logo').setAttribute('aria-invalid', String(Boolean(message)));
+    $('add-logo').setAttribute('aria-invalid', String(Boolean(message)));
+  }
+
+  function renderLogo() {
+    $('logo-list').querySelectorAll('.logo-thumb').forEach((node) => node.remove());
+    $('logo-button-label').textContent = logo ? 'Trocar logo' : 'Adicionar logo';
+    $('add-logo').disabled = busy || preparingFiles;
+    if (!logo) return;
+    const figure = element('figure', 'photo-thumb logo-thumb');
+    const image = element('img');
+    image.src = logo.url;
+    image.alt = `Logo da empresa: ${logo.file.name}`;
+    const remove = element('button', 'remove-photo', '×');
+    remove.type = 'button';
+    remove.disabled = busy || preparingFiles;
+    remove.setAttribute('aria-label', 'Remover logo');
+    remove.addEventListener('click', () => {
+      if (busy || preparingFiles) return;
+      URL.revokeObjectURL(logo.url);
+      logo = null;
+      clearCompletion();
+      renderLogo();
+      setLogoError('');
+      $('add-logo').focus();
+    });
+    figure.append(image, remove);
+    $('logo-list').append(figure);
+  }
+
+  function setPreparingFiles(value) {
+    preparingFiles = value;
+    ['logo', 'photos', 'clear-draft'].forEach((id) => { $(id).disabled = busy || value; });
+    $('send-button').disabled = busy || completed || value;
+    renderLogo();
+    renderPhotos();
+  }
+
+  async function prepareImage(originalFile, isLogo = false) {
+    let file = originalFile;
+    const allowedType = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type);
+    if ((!allowedType && file.type !== '') || !/\.(jpe?g|png|webp)$/i.test(file.name)) {
+      throw new Error(isLogo ? 'Use um logo JPG, PNG ou WebP.' : 'Use fotos JPG, PNG ou WebP.');
+    }
+    if (!file.size || file.size > (isLogo ? maxLogoBytes : maxFileBytes)) {
+      throw new Error(isLogo ? 'O logo pode ter até 5 MB.' : 'Cada foto pode ter até 10 MB.');
+    }
+    if (!file.type) {
+      const extension = file.name.split('.').pop().toLowerCase();
+      const type = extension === 'png' ? 'image/png' : extension === 'webp' ? 'image/webp' : 'image/jpeg';
+      file = new File([file], file.name, { type, lastModified: file.lastModified });
+    }
+    const signature = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+    const matches = (bytes, offset = 0) => bytes.every((byte, index) => signature[offset + index] === byte);
+    const actualType = matches([137, 80, 78, 71, 13, 10, 26, 10]) ? 'image/png'
+      : matches([255, 216, 255]) ? 'image/jpeg'
+      : matches([82, 73, 70, 70]) && matches([87, 69, 66, 80], 8) ? 'image/webp' : null;
+    if (actualType !== file.type) {
+      throw new Error(isLogo ? 'Não foi possível abrir esse logo. Escolha outra imagem.' : 'Não foi possível abrir uma das fotos. Escolha outra imagem.');
+    }
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+    image.src = url;
+    try {
+      await image.decode();
+      if (!image.naturalWidth || !image.naturalHeight) throw new Error();
+    } catch {
+      URL.revokeObjectURL(url);
+      throw new Error(isLogo ? 'Não foi possível abrir esse logo. Escolha outra imagem.' : 'Não foi possível abrir uma das fotos. Escolha outra imagem.');
+    }
+    return { file, url };
+  }
+
+  async function addLogo(file) {
+    if (!file || busy || preparingFiles) return;
+    setPreparingFiles(true);
+    try {
+      const nextLogo = await prepareImage(file, true);
+      if (logo) URL.revokeObjectURL(logo.url);
+      logo = nextLogo;
+      clearCompletion();
+      setLogoError('');
+      $('form-message').hidden = true;
+    } catch (error) {
+      setLogoError(error.message);
+    } finally {
+      $('logo').value = '';
+      setPreparingFiles(false);
+    }
+  }
+
   function renderPhotos() {
     $('photo-list').querySelectorAll('.photo-thumb').forEach((node) => node.remove());
     photos.forEach((photo) => {
@@ -358,10 +455,10 @@
       image.alt = photo.file.name;
       const remove = element('button', 'remove-photo', '×');
       remove.type = 'button';
-      remove.disabled = busy;
+      remove.disabled = busy || preparingFiles;
       remove.setAttribute('aria-label', `Remover ${photo.file.name}`);
       remove.addEventListener('click', () => {
-        if (busy) return;
+        if (busy || preparingFiles) return;
         URL.revokeObjectURL(photo.url);
         photos.splice(photos.indexOf(photo), 1);
         clearCompletion();
@@ -372,32 +469,31 @@
       figure.append(image, remove);
       $('photo-list').append(figure);
     });
-    $('add-photos').disabled = busy || photos.length >= maxFiles;
+    $('add-photos').disabled = busy || preparingFiles || photos.length >= maxFiles;
     $('add-photos').setAttribute('aria-label', photos.length >= maxFiles ? 'Limite de 12 fotos atingido' : 'Adicionar fotos da sua empresa');
   }
 
-  function addPhotos(files) {
+  async function addPhotos(files) {
+    if (busy || preparingFiles || !files.length) return;
+    setPreparingFiles(true);
     const errors = [];
-    for (const originalFile of files) {
-      let file = originalFile;
-      if (photos.some((photo) => photo.file.name === file.name && photo.file.size === file.size && photo.file.lastModified === file.lastModified)) continue;
-      const allowedType = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type);
-      const allowedExtension = /\.(jpe?g|png|webp)$/i.test(file.name);
-      if ((!allowedType && file.type !== '') || !allowedExtension) { errors.push('Use fotos JPG, PNG ou WebP.'); continue; }
-      if (!file.type) {
-        const extension = file.name.split('.').pop().toLowerCase();
-        const type = extension === 'png' ? 'image/png' : extension === 'webp' ? 'image/webp' : 'image/jpeg';
-        file = new File([file], file.name, { type, lastModified: file.lastModified });
+    let changed = false;
+    try {
+      for (const file of files) {
+        if (photos.some((photo) => photo.file.name === file.name && photo.file.size === file.size && photo.file.lastModified === file.lastModified)) continue;
+        if (photos.length >= maxFiles) { errors.push('Você pode enviar até 12 fotos.'); break; }
+        if (photos.reduce((total, photo) => total + photo.file.size, 0) + file.size > maxTotalBytes) { errors.push('As fotos juntas podem ter até 24 MB.'); continue; }
+        try {
+          photos.push(await prepareImage(file));
+          changed = true;
+        } catch (error) { errors.push(error.message); }
       }
-      if (!file.size || file.size > maxFileBytes) { errors.push('Cada foto pode ter até 10 MB.'); continue; }
-      if (photos.length >= maxFiles) { errors.push('Você pode enviar até 12 fotos.'); break; }
-      if (photos.reduce((total, photo) => total + photo.file.size, 0) + file.size > maxTotalBytes) { errors.push('As fotos juntas podem ter até 24 MB.'); continue; }
-      photos.push({ file, url: URL.createObjectURL(file) });
+      if (changed) clearCompletion();
+      setPhotoError([...new Set(errors)].join(' '));
+    } finally {
+      $('photos').value = '';
+      setPreparingFiles(false);
     }
-    clearCompletion();
-    renderPhotos();
-    setPhotoError([...new Set(errors)].join(' '));
-    $('photos').value = '';
   }
 
   function phoneDigits() {
@@ -427,9 +523,13 @@
     const phoneError = phone.length < 12 || phone.length > 15 || !/^[+\d\s().-]+$/.test(rawPhone) ? 'Informe um WhatsApp válido, com DDD.' : '';
     setFieldError('company', companyError);
     setFieldError('whatsapp', phoneError);
+    setLogoError(logo ? '' : 'Adicione o logo da empresa.');
     if (!selections().length) {
       formError('Escolha pelo menos uma postagem.');
       [...cards.values()].find((card) => card.post.styleId === activeStyle)?.checkbox.focus();
+      valid = false;
+    } else if (!logo) {
+      $('add-logo').focus();
       valid = false;
     } else if (companyError || phoneError) {
       $(companyError ? 'company' : 'whatsapp').focus();
@@ -441,15 +541,16 @@
   function setBusy(value) {
     busy = value;
     $('order-form').setAttribute('aria-busy', String(value));
-    $('send-button').disabled = value || completed;
+    $('send-button').disabled = value || completed || preparingFiles;
     $('send-button').querySelector('span').textContent = value ? 'Enviando…' : completed ? 'Pronto' : 'Enviar';
-    ['company', 'whatsapp', 'photos'].forEach((id) => { $(id).disabled = value; });
+    ['company', 'whatsapp', 'photos', 'logo', 'clear-draft'].forEach((id) => { $(id).disabled = value; });
     cards.forEach((card) => {
       card.checkbox.disabled = value;
       card.buttons.forEach((button) => { button.disabled = value; });
     });
     styleButtons.forEach(({ button }) => { button.disabled = value; });
     renderPhotos();
+    renderLogo();
   }
 
   function safeRemoteUrl(raw) {
@@ -462,7 +563,7 @@
 
   async function sendOrder(event) {
     event.preventDefault();
-    if (busy || completed) return;
+    if (busy || completed || preparingFiles) return;
     $('form-message').hidden = true;
     if (!validate()) return;
     if (!config.submitEndpoint) {
@@ -470,6 +571,7 @@
       return;
     }
     const data = {
+      schemaVersion: 2,
       campaignId: config.campaignId,
       company: $('company').value.trim(),
       whatsapp: phoneDigits(),
@@ -479,6 +581,7 @@
     const body = new FormData();
     body.append('data', JSON.stringify(data));
     body.append('website', $('website').value);
+    body.append('logo', logo.file, logo.file.name);
     photos.forEach((photo) => body.append('photos', photo.file, photo.file.name));
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 60000);
@@ -505,8 +608,8 @@
       completed = true;
       $('success-message').hidden = false;
       $('order-reference').textContent = photos.length
-        ? 'Suas escolhas e fotos foram enviadas à iA4tube.'
-        : 'Suas escolhas foram enviadas à iA4tube.';
+        ? 'Suas escolhas, logo e fotos foram enviados à iA4tube.'
+        : 'Suas escolhas e logo foram enviados à iA4tube.';
       const receiptUrl = safeRemoteUrl(result.receiptUrl);
       $('receipt-link').hidden = !receiptUrl;
       if (receiptUrl) $('receipt-link').href = receiptUrl;
@@ -552,7 +655,9 @@
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) pauseVideos();
   });
-  $('add-photos').addEventListener('click', () => $('photos').click());
+  $('add-logo').addEventListener('click', () => { if (!busy && !preparingFiles) $('logo').click(); });
+  $('logo').addEventListener('change', () => addLogo($('logo').files[0]));
+  $('add-photos').addEventListener('click', () => { if (!busy && !preparingFiles) $('photos').click(); });
   $('photos').addEventListener('change', () => addPhotos([...$('photos').files]));
   $('upload-details').setAttribute('aria-expanded', 'false');
   $('upload-details').setAttribute('aria-controls', 'upload-limits');
@@ -580,22 +685,31 @@
     if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
   }));
   $('clear-draft').addEventListener('click', () => {
-    if (busy) return;
+    if (busy || preparingFiles) return;
     try { localStorage.removeItem(storageKey); } catch { /* Optional storage. */ }
     state.forEach((item, id) => { item.selected = false; item.format = 'image'; updateCard(id); });
     $('company').value = '';
     $('whatsapp').value = '';
     photos.forEach((photo) => URL.revokeObjectURL(photo.url));
     photos.length = 0;
+    if (logo) URL.revokeObjectURL(logo.url);
+    logo = null;
+    $('logo').value = '';
+    $('photos').value = '';
+    renderLogo();
     renderPhotos();
     renderSummary();
     clearCompletion();
     setFieldError('company', '');
     setFieldError('whatsapp', '');
     setPhotoError('');
+    setLogoError('');
     $('form-message').hidden = true;
     $('privacy-dialog').close();
     toast('Rascunho apagado');
   });
-  window.addEventListener('beforeunload', () => photos.forEach((photo) => URL.revokeObjectURL(photo.url)));
+  window.addEventListener('beforeunload', () => {
+    photos.forEach((photo) => URL.revokeObjectURL(photo.url));
+    if (logo) URL.revokeObjectURL(logo.url);
+  });
 })();

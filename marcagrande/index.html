@@ -8,9 +8,9 @@
   <meta name="description" content="Marca Grande, por iA4tube. Escolha o conteúdo da sua empresa.">
   <title>Marca Grande · iA4tube</title>
   <link rel="icon" type="image/png" href="./assets/logo-iA4tube.png">
-  <link rel="stylesheet" href="./styles.css?v=20261008-seis-estilos">
-  <script src="./config.js?v=20261008-seis-estilos" defer></script>
-  <script src="./app.js?v=20261008-seis-estilos" defer></script>
+  <link rel="stylesheet" href="./styles.css?v=20261009-logo">
+  <script src="./config.js?v=20261009-logo" defer></script>
+  <script src="./app.js?v=20261009-logo" defer></script>
 </head>
 <body>
   <div class="page-shell">
@@ -57,6 +57,21 @@
 
       <form id="order-form" novalidate>
         <div class="honeypot" aria-hidden="true"><label for="website">Website</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
+        <section class="upload-section logo-section" aria-labelledby="logo-title">
+          <div class="upload-heading">
+            <h2 id="logo-title">Logo da empresa</h2>
+            <span class="logo-hint">Em todas as artes</span>
+          </div>
+          <div class="logo-list" id="logo-list">
+            <button type="button" class="upload-button" id="add-logo" aria-describedby="logo-error">
+              <span class="upload-plus" aria-hidden="true">+</span>
+              <span id="logo-button-label">Adicionar logo</span>
+            </button>
+          </div>
+          <input id="logo" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" tabindex="-1" aria-label="Logo da empresa" aria-required="true" aria-describedby="logo-error">
+          <p class="upload-limits">JPG, PNG ou WebP · Até 5 MB.</p>
+          <p class="field-error" id="logo-error" role="alert" hidden></p>
+        </section>
         <section class="upload-section" aria-labelledby="photos-title">
           <div class="upload-heading">
             <h2 id="photos-title">Suas fotos <span>(opcional)</span></h2>
@@ -86,7 +101,7 @@
           </div>
         </div>
 
-        <p class="privacy-line">Fotos para criar. WhatsApp para entregar. <button type="button" class="text-button" id="open-privacy">Privacidade</button></p>
+        <p class="privacy-line">Sua marca e fotos para criar. WhatsApp para entregar. <button type="button" class="text-button" id="open-privacy">Privacidade</button></p>
 
         <p class="form-message" id="form-message" role="alert" tabindex="-1" hidden></p>
         <section class="success-message" id="success-message" tabindex="-1" hidden>
@@ -107,10 +122,10 @@
   <dialog class="privacy-dialog" id="privacy-dialog" aria-labelledby="privacy-title">
     <button class="dialog-close" type="button" id="close-privacy" aria-label="Fechar privacidade">×</button>
     <h2 id="privacy-title">Seus dados</h2>
-    <p>Suas escolhas e fotos são enviadas diretamente à iA4tube para produzir o conteúdo da sua empresa. Usamos seu WhatsApp para falar sobre o pedido e entregar o material.</p>
-    <p>As fotos só são enviadas ao clicar em Enviar. Use imagens que você tem autorização para compartilhar.</p>
-    <p>As fotos ficam privadas e são recebidas no computador de produção da iA4tube. O link do pedido permite acessar os arquivos online por 30 dias; depois, expira e esses arquivos online entram em exclusão automática. Isso não apaga as cópias usadas na produção. Compartilhe esse link apenas com quem deve acessar suas fotos.</p>
-    <p>Seu contato e suas escolhas ficam salvos neste navegador para você continuar depois. Você pode apagar esse rascunho a qualquer momento.</p>
+    <p>Suas escolhas, logo e fotos são enviados diretamente à iA4tube para produzir o conteúdo da sua empresa. Usamos inteligência artificial para identificar os produtos nas fotos e criar o material. Seu WhatsApp é usado para falar sobre o pedido e fazer a entrega.</p>
+    <p>O logo e as fotos só são enviados ao clicar em Enviar. Use imagens que você tem autorização para compartilhar.</p>
+    <p>Seus arquivos ficam privados e são recebidos no computador de produção da iA4tube. O link do pedido permite acessar os arquivos online por 30 dias; depois, expira e esses arquivos online entram em exclusão automática. Isso não apaga as cópias usadas na produção. Compartilhe esse link apenas com quem deve acessar seus arquivos.</p>
+    <p>Seu contato e suas escolhas ficam salvos neste navegador para você continuar depois. O logo e as fotos precisam ser adicionados novamente ao reabrir a página. Você pode apagar esse rascunho a qualquer momento.</p>
     <button class="clear-draft" id="clear-draft" type="button">Apagar rascunho deste navegador</button>
   </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
