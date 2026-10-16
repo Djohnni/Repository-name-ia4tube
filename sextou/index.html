@@ -4,141 +4,58 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f3ec">
-  <meta name="description" content="Um vídeo de Sextou personalizado para a sua hamburgueria ou pizzaria. Envie sua logo e receba o material pelo WhatsApp com a iA4tube empresas.">
-  <title>Seu vídeo de Sextou · iA4tube empresas</title>
+  <meta name="description" content="Seu vídeo de Sextou com a sua marca por R$ 19,90. Envie nome, logo e uma foto opcional. Receba no WhatsApp.">
+  <title>Vídeo Sextou · iA4tube</title>
   <link rel="canonical" href="https://ia4tube.com/sextou/">
   <link rel="icon" type="image/png" href="/site-publico/logo-iA4tube.png">
-  <link rel="stylesheet" href="./sextou.css?v=20261016-1">
-  <script id="sextou-config" type="application/json">{"campaignId":"sextou-classico-v1","productName":"Vídeo Sextou personalizado","priceCents":2000,"submitEndpoint":"https://marcagrande-pedidos-wshgj6ugza-uc.a.run.app/orders","recipientWhatsApp":"554791049079"}</script>
-  <script src="./app.js?v=20261016-1" defer></script>
+  <link rel="stylesheet" href="./sextou.css?v=20261016-2">
+  <script id="sextou-config" type="application/json">{"campaignId":"sextou-classico-v1","productName":"Vídeo Sextou personalizado","priceCents":1990,"submitEndpoint":"https://marcagrande-pedidos-wshgj6ugza-uc.a.run.app/orders","recipientWhatsApp":"554791049079"}</script>
+  <script src="./app.js?v=20261016-2" defer></script>
 </head>
 <body>
-  <a class="skip-link" href="#pedido">Ir para o pedido</a>
-  <header class="site-header page-width">
-    <a class="brand" href="/" aria-label="iA4tube empresas — início">
-      <img src="/site-publico/logo-iA4tube.png" alt="" width="48" height="48">
-      <span><span class="brand-name">iA4tube</span><span class="brand-caption">empresas</span></span>
-    </a>
-    <a class="header-link" href="#pedido">Personalizar meu vídeo <span aria-hidden="true">↗</span></a>
-  </header>
-
-  <main class="page-width">
-    <section class="intro" aria-labelledby="page-title">
-      <p class="eyebrow"><span aria-hidden="true"></span> Para hamburguerias e pizzarias</p>
-      <h1 id="page-title">Seu vídeo de <em>Sextou.</em><br>Com a sua marca.</h1>
-      <p class="intro-copy">A sexta pede uma divulgação de dar água na boca. Envie sua logo, personalize seu pedido e receba o vídeo pronto pelo WhatsApp.</p>
+  <main class="page">
+    <header class="header"><a class="brand" href="/" aria-label="iA4tube — início"><img src="/site-publico/logo-iA4tube.png" width="32" height="32" alt=""><span>iA4tube</span></a><span class="product-name">Vídeo Sextou</span></header>
+    <section class="product" aria-label="Vídeo Sextou de exemplo">
+      <video controls autoplay muted loop playsinline preload="metadata" poster="./produto.png" aria-label="Exemplo do vídeo Sextou"><source src="./produto.mp4" type="video/mp4"></video>
+      <div class="offer"><h1>Com a sua marca.</h1><strong id="price">R$ 19,90</strong></div>
     </section>
-
-    <div class="order-layout">
-      <section class="example-section" aria-labelledby="example-title">
-        <div class="section-heading"><h2 id="example-title">É esse estilo. Com a sua identidade.</h2><span class="example-label">Exemplo real</span></div>
-        <div class="example-frame" id="example-frame">
-          <iframe src="https://www.instagram.com/reel/DejyjGUx62k/embed/" title="Exemplo original de vídeo Sextou da iA4tube empresas" loading="lazy" allow="encrypted-media; fullscreen" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    <section id="pedido" aria-label="Personalizar vídeo">
+      <form id="order-form" novalidate>
+        <div hidden><label for="website">Website</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
+        <fieldset id="form-fields">
+          <legend class="sr-only">Dados da empresa</legend>
+          <label for="company">Nome da empresa</label>
+          <input id="company" name="company" type="text" maxlength="100" autocomplete="organization" required aria-describedby="company-error">
+          <p class="error" id="company-error" hidden></p>
+          <div hidden><input id="whatsapp" name="whatsapp" type="hidden"><p id="whatsapp-error" hidden></p><input type="radio" name="businessType" value="auto" checked><input type="radio" name="businessType" value="hamburgueria"><input type="radio" name="businessType" value="pizzaria"></div>
+        </fieldset>
+        <div class="field">
+          <label for="logo">Logo da empresa</label>
+          <div class="upload" id="logo-box"><input id="logo" name="logo" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" aria-required="true" aria-describedby="logo-error"><span aria-hidden="true" class="plus">+</span><span id="logo-label">Adicionar logo</span><img id="logo-preview" alt="Logo selecionada" hidden></div>
+          <p class="filename" id="logo-name" hidden></p><p class="error" id="logo-error" hidden></p>
         </div>
-        <a class="example-fallback" href="https://www.instagram.com/ia4tube_empresas/reel/DejyjGUx62k/" target="_blank" rel="noopener noreferrer">Ver o exemplo original no Instagram <span aria-hidden="true">↗</span></a>
-        <ul class="delivery-specs" aria-label="O que você recebe">
-          <li><strong>10 segundos</strong><span>de vídeo personalizado</span></li>
-          <li><strong>Vertical · 720p</strong><span>arquivo MP4</span></li>
-          <li><strong>A sua marca</strong><span>integrada à composição</span></li>
-        </ul>
-        <p class="example-note">A imagem é adaptada à sua empresa. O vídeo tem animação suave, sem narração ou música. O exemplo mostra o estilo; cada personalização tem seu próprio resultado.</p>
-      </section>
-
-      <section class="order-card" id="pedido" aria-labelledby="order-title">
-        <div class="order-heading">
-          <div><p class="eyebrow small">Vamos dar a sua cara?</p><h2 id="order-title">Personalize seu vídeo</h2></div>
-          <div class="product-price"><strong id="price">R$ 20,00</strong><span>por vídeo</span></div>
+        <div class="field">
+          <div class="label-row"><label for="photo">Foto do produto <span>opcional</span></label><button class="text-button" id="remove-photo" type="button" hidden>Remover</button></div>
+          <div class="upload" id="photo-box"><input id="photo" name="photos" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" aria-describedby="photo-error"><span aria-hidden="true" class="plus">+</span><span id="photo-label">Adicionar foto</span><img id="photo-preview" alt="Foto selecionada" hidden></div>
+          <p class="filename" id="photo-name" hidden></p><p class="error" id="photo-error" hidden></p>
         </div>
-
-        <form id="order-form" novalidate>
-          <div class="honeypot" aria-hidden="true"><label for="website">Website</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
-          <fieldset class="form-fields" id="form-fields">
-            <legend class="visually-hidden">Dados para personalizar o vídeo</legend>
-            <div class="field">
-              <label for="company">Nome da empresa <span class="required">*</span></label>
-              <input id="company" name="company" type="text" maxlength="100" autocomplete="organization" placeholder="Como sua marca deve aparecer" required aria-describedby="company-error">
-              <p class="field-error" id="company-error" hidden></p>
-            </div>
-            <fieldset class="business-type field">
-              <legend>Seu estabelecimento</legend>
-              <div class="segmented-options">
-                <label><input type="radio" name="businessType" value="hamburgueria" checked><span>Hamburgueria</span></label>
-                <label><input type="radio" name="businessType" value="pizzaria"><span>Pizzaria</span></label>
-              </div>
-            </fieldset>
-            <div class="field">
-              <label for="whatsapp">WhatsApp para receber <span class="required">*</span></label>
-              <input id="whatsapp" name="whatsapp" type="tel" maxlength="24" inputmode="tel" autocomplete="tel" placeholder="(47) 99999-9999" required aria-describedby="whatsapp-help whatsapp-error">
-              <p class="field-help" id="whatsapp-help">É por aqui que você receberá seu vídeo pronto.</p>
-              <p class="field-error" id="whatsapp-error" hidden></p>
-            </div>
-          </fieldset>
-
-          <div class="uploads">
-            <div class="field upload-field">
-              <label class="field-label" for="logo">Logo da empresa <span class="required">*</span></label>
-              <div class="upload-box" id="logo-box">
-                <input id="logo" name="logo" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" aria-required="true" aria-describedby="logo-help logo-error">
-                <span class="upload-symbol" aria-hidden="true">↑</span>
-                <span class="upload-copy"><strong id="logo-label">Escolher a logo</strong><span id="logo-help">JPG, PNG ou WebP · Até 5 MB</span></span>
-                <img class="file-preview" id="logo-preview" alt="Prévia da logo selecionada" hidden>
-              </div>
-              <p class="file-name" id="logo-name" hidden></p>
-              <p class="field-error" id="logo-error" hidden></p>
-            </div>
-            <div class="field upload-field">
-              <div class="field-label-row"><label class="field-label" for="photo">Foto do seu produto <span class="optional">opcional</span></label><button class="text-button" id="remove-photo" type="button" hidden>Remover</button></div>
-              <div class="upload-box" id="photo-box">
-                <input id="photo" name="photos" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" aria-describedby="photo-help photo-error">
-                <span class="upload-symbol" aria-hidden="true">+</span>
-                <span class="upload-copy"><strong id="photo-label">Adicionar foto do lanche ou da pizza</strong><span id="photo-help">JPG, PNG ou WebP · Até 10 MB</span></span>
-                <img class="file-preview" id="photo-preview" alt="Prévia da foto selecionada" hidden>
-              </div>
-              <p class="file-name" id="photo-name" hidden></p>
-              <p class="field-help">Sem foto? Criamos uma composição ilustrativa para o seu tipo de negócio.</p>
-              <p class="field-error" id="photo-error" hidden></p>
-            </div>
-          </div>
-
-          <fieldset class="date-options" id="date-options">
-            <legend class="visually-hidden">Data na arte</legend>
-            <label class="date-toggle"><input id="include-date" type="checkbox"><span>Quero uma data na arte <span class="optional">opcional</span></span></label>
-            <p class="field-help" id="date-default-help">Sem data, você pode usar em qualquer sexta.</p>
-            <div id="date-field" class="field" hidden><label for="event-date">Escolha uma sexta-feira</label><input id="event-date" type="date" aria-describedby="date-help event-date-error"><p class="field-help" id="date-help">Essa data aparecerá no vídeo.</p><p class="field-error" id="event-date-error" hidden></p></div>
-          </fieldset>
-
-          <div class="order-summary"><span>Texto do vídeo</span><strong>SEXTOU!</strong><p>O trabalho acabou. O sabor começou.</p></div>
-          <p class="form-message" id="form-message" role="alert" tabindex="-1" hidden></p>
-          <p class="restore-message" id="restore-message" role="status" hidden></p>
-          <button class="submit-button" id="submit-button" type="submit"><span id="submit-label">Enviar pedido e continuar no WhatsApp</span><span aria-hidden="true">↗</span></button>
-          <p class="submit-explanation">Primeiro salvamos seu pedido. Depois, você confirma a mensagem no WhatsApp e combina os próximos passos.</p>
-          <p class="privacy-note">Seus dados e arquivos serão usados para atender este pedido. <a href="/politica-de-privacidade/" target="_blank" rel="noopener">Política de privacidade</a>.</p>
-        </form>
-
-        <section class="receipt" id="receipt" aria-labelledby="receipt-title" tabindex="-1" hidden>
-          <span class="receipt-check" aria-hidden="true">✓</span>
-          <p class="eyebrow small">Tudo guardado</p>
-          <h2 id="receipt-title">Seu pedido foi salvo!</h2>
-          <p>Agora envie a mensagem no WhatsApp para confirmar o recebimento e combinar os próximos passos.</p>
-          <dl class="receipt-details"><div><dt>Pedido</dt><dd id="receipt-number"></dd></div><div><dt>Empresa</dt><dd id="receipt-company"></dd></div><div><dt>Produto</dt><dd>Vídeo Sextou personalizado</dd></div><div><dt>Valor</dt><dd id="receipt-price"></dd></div></dl>
-          <p class="receipt-delivery">Você receberá seu vídeo pronto pelo WhatsApp.</p>
-          <a class="submit-button" id="whatsapp-link" target="_blank" rel="noopener noreferrer"><span>Continuar no WhatsApp</span><span aria-hidden="true">↗</span></a>
-          <p class="field-help">Se não abriu automaticamente, toque no botão acima. O pedido já está salvo — não precisa enviar outro.</p>
-          <button type="button" class="copy-button" id="copy-message">Copiar mensagem</button>
-          <p id="copy-status" class="field-help" role="status"></p>
-          <details class="message-details"><summary>Ver mensagem e resumo do pedido</summary><textarea id="saved-message" readonly rows="10" aria-label="Mensagem para copiar e enviar no WhatsApp"></textarea></details>
-          <a class="receipt-link" id="receipt-link" target="_blank" rel="noopener noreferrer" hidden>Ver comprovante do pedido</a>
-          <button class="new-order" type="button" id="new-order">Fazer outro pedido</button>
-        </section>
-        <noscript><p class="form-message">Ative o JavaScript do navegador para salvar seu pedido antes de continuar no WhatsApp.</p></noscript>
+        <fieldset id="date-options" hidden><input id="include-date" type="checkbox"><p id="date-default-help"></p><div id="date-field" hidden><input id="event-date" type="date"><p id="event-date-error" hidden></p></div></fieldset>
+        <p class="error notice" id="form-message" role="alert" tabindex="-1" hidden></p><p class="notice" id="restore-message" role="status" hidden></p>
+        <button class="primary" id="submit-button" type="submit"><span id="submit-label">Enviar pedido</span><span aria-hidden="true">↗</span></button>
+        <p class="delivery">Receba seu vídeo no WhatsApp.</p>
+      </form>
+      <section id="receipt" aria-labelledby="receipt-title" tabindex="-1" hidden>
+        <h2 id="receipt-title">Pedido salvo ✓</h2>
+        <dl><div><dt>Pedido</dt><dd id="receipt-number"></dd></div><div><dt>Empresa</dt><dd id="receipt-company"></dd></div><div><dt>Valor</dt><dd id="receipt-price"></dd></div></dl>
+        <a class="primary" id="whatsapp-link" target="_blank" rel="noopener noreferrer">Continuar no WhatsApp ↗</a>
+        <p class="delivery">Envie a mensagem para combinar a entrega.</p>
+        <button class="secondary" type="button" id="copy-message">Copiar mensagem</button><p id="copy-status" class="notice" role="status"></p>
+        <details class="message-details"><summary>Ver mensagem</summary><textarea id="saved-message" readonly rows="8" aria-label="Mensagem para copiar e enviar no WhatsApp"></textarea></details>
+        <a id="receipt-link" target="_blank" rel="noopener noreferrer" hidden>Ver pedido</a><button class="new-order" type="button" id="new-order">Novo pedido</button>
       </section>
-    </div>
-
-    <section class="how-it-works" aria-labelledby="how-title">
-      <h2 id="how-title">Da sua marca para a próxima sexta.</h2>
-      <ol><li><span>01</span><div><h3>Você personaliza</h3><p>Nome, logo e, se quiser, uma foto do seu produto.</p></div></li><li><span>02</span><div><h3>Confirma no WhatsApp</h3><p>O pedido já vai identificado, com os seus dados salvos.</p></div></li><li><span>03</span><div><h3>Recebe o vídeo pronto</h3><p>Combinamos os próximos passos e entregamos pelo WhatsApp.</p></div></li></ol>
+      <noscript>Ative o JavaScript para enviar o pedido.</noscript>
     </section>
+    <footer><a href="/politica-de-privacidade/" target="_blank" rel="noopener">Privacidade</a></footer>
   </main>
-  <footer class="site-footer page-width"><span>iA4tube empresas</span><a href="/politica-de-privacidade/">Privacidade</a><a href="https://www.instagram.com/ia4tube_empresas/" target="_blank" rel="noopener noreferrer">Instagram ↗</a></footer>
 </body>
 </html>

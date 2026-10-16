@@ -20,6 +20,12 @@ test('optional date and pizza are preserved independently', () => {
   assert.equal(buildData({ ...input, date: '2026-10-23' }).sextou.date, null);
 });
 
+test('minimal three-field form leaves contact for WhatsApp and segment for image references', () => {
+  const data = buildData({company: 'Minha empresa'});
+  assert.equal(data.whatsapp, null);
+  assert.deepEqual(data.sextou, {businessType: 'auto', date: null, copyId: 'trabalho-sabor'});
+});
+
 test('Friday validation checks the calendar instead of accepting normalized invalid dates', () => {
   assert.equal(isFriday('2026-10-16'), true);
   assert.equal(isFriday('2026-10-23'), true);

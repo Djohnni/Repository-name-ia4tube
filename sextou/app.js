@@ -30,9 +30,9 @@
       schemaVersion: 2,
       campaignId: CAMPAIGN,
       company: values.company.trim(),
-      whatsapp: normalizePhone(values.whatsapp),
+      whatsapp: values.whatsapp ? normalizePhone(values.whatsapp) : null,
       selections: [{ id: '93', format: 'video' }],
-      sextou: { businessType: values.businessType, date: values.includeDate ? values.date : null, copyId: 'trabalho-sabor' }
+      sextou: { businessType: values.businessType || 'auto', date: values.includeDate ? values.date : null, copyId: 'trabalho-sabor' }
     };
   }
 
@@ -55,7 +55,7 @@
   }
 
   function fallbackMessage(orderId, data) {
-    const kind = data.sextou.businessType === 'pizzaria' ? 'pizzaria' : 'hamburgueria';
+    const kind = data.sextou.businessType === 'auto' ? 'personalização conforme a marca e o produto' : data.sextou.businessType === 'pizzaria' ? 'pizzaria' : 'hamburgueria';
     const date = data.sextou.date ? `data ${data.sextou.date.split('-').reverse().join('/')}` : 'sem data na arte';
     return `Olá! Enviei esse pedido pelo site da iA4tube Empresas.\n\nPedido: ${orderId}\nProduto: Vídeo Sextou personalizado\nEstabelecimento: ${data.company}\nResumo: ${kind}; ${date}; SEXTOU! O trabalho acabou. O sabor começou.\n\nGostaria de confirmar o recebimento e combinar os próximos passos.`;
   }
@@ -187,7 +187,7 @@
   function applyValues(data) {
     $('company').value = typeof data.company === 'string' ? data.company.slice(0, 100) : '';
     $('whatsapp').value = typeof data.whatsapp === 'string' ? data.whatsapp.slice(0, 24) : '';
-    const kind = data.businessType === 'pizzaria' ? 'pizzaria' : 'hamburgueria';
+    const kind = ['pizzaria', 'hamburgueria'].includes(data.businessType) ? data.businessType : 'auto';
     document.querySelector(`input[name="businessType"][value="${kind}"]`).checked = true;
     $('include-date').checked = data.includeDate === true;
     $('event-date').value = typeof data.date === 'string' ? data.date : '';
@@ -250,7 +250,7 @@
     $('remove-photo').disabled = busy || Boolean(pending);
     $('submit-button').disabled = busy || preparing > 0 || Boolean(receipt);
     $('new-order').disabled = busy;
-    $('submit-label').textContent = busy ? 'Salvando seu pedido…' : pending ? 'Tentar novamente com o mesmo pedido' : 'Enviar pedido e continuar no WhatsApp';
+    $('submit-label').textContent = busy ? 'Salvando…' : pending ? 'Tentar novamente' : 'Enviar pedido';
   }
 
   function updateFile(kind) {
@@ -259,7 +259,7 @@
     $(`${kind}-preview`).hidden = !file;
     $(`${kind}-name`).hidden = !file;
     $(`${kind}-name`).textContent = file ? file.name : '';
-    $(`${kind}-label`).textContent = file ? 'Arquivo selecionado · trocar' : kind === 'logo' ? 'Escolher a logo' : 'Adicionar foto do lanche ou da pizza';
+    $(`${kind}-label`).textContent = file ? 'Trocar imagem' : kind === 'logo' ? 'Adicionar logo' : 'Adicionar foto';
     if (file) {
       previewUrls[kind] = URL.createObjectURL(file);
       $(`${kind}-preview`).src = previewUrls[kind];
@@ -332,7 +332,7 @@
     const phone = normalizePhone(data.whatsapp);
     const errors = {
       company: data.company.trim().length < 2 ? 'Informe o nome da empresa.' : '',
-      whatsapp: !/^[+\d\s().-]+$/.test(data.whatsapp) || phone.length < 12 || phone.length > 15 ? 'Informe um WhatsApp com DDD. Exemplo: (47) 99999-9999.' : '',
+      whatsapp: data.whatsapp && (!/^[+\d\s().-]+$/.test(data.whatsapp) || phone.length < 12 || phone.length > 15) ? 'Confira o WhatsApp deste pedido anterior.' : '',
       logo: files.logo ? '' : 'Adicione a logo da sua empresa.',
       photo: '',
       'event-date': data.includeDate && !isFriday(data.date) ? 'Escolha uma data que caia em uma sexta-feira.' : ''
@@ -502,7 +502,7 @@
           pending = null;
           storageRemove(STORAGE_KEY);
           await forgetFiles(oldKey);
-          throw new Error(response.status === 413 ? 'O envio ultrapassou o limite. Use uma logo de até 5 MB e uma foto de até 10 MB.' : 'O pedido não foi salvo. Confira o nome, WhatsApp, imagens e a data escolhida e tente novamente.');
+          throw new Error(response.status === 413 ? 'Use uma logo de até 5 MB e uma foto de até 10 MB.' : 'O pedido não foi salvo. Confira o nome e as imagens e tente novamente.');
         }
         throw new Error('Não foi possível confirmar o recebimento agora. Tente novamente: usaremos o mesmo pedido para evitar duplicidade.');
       }
