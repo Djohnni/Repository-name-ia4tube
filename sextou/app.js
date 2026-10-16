@@ -14,6 +14,14 @@
   const TYPES = ['image/jpeg', 'image/png', 'image/webp'];
   const money = (cents) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100);
 
+  function durationChoice(data) {
+    return [10, 20].includes(data.durationSeconds) ? String(data.durationSeconds) : 'legacy';
+  }
+
+  function priceForDuration(duration, prices = { 10: 1990, 20: 2990 }, legacyPrice = 1990) {
+    return duration === undefined ? legacyPrice : prices[duration];
+  }
+
   function normalizePhone(value) {
     const digits = String(value).replace(/\D/g, '');
     return digits.length === 10 || digits.length === 11 ? `55${digits}` : digits;
@@ -26,13 +34,16 @@
   }
 
   function buildData(values) {
+    // Never add duration to a recovered old draft: retries must keep their exact payload.
+    const duration = Object.prototype.hasOwnProperty.call(values, 'durationSeconds');
+    if (duration && ![10, 20].includes(values.durationSeconds)) throw new Error('Escolha 10 ou 20 segundos.');
     return {
       schemaVersion: 2,
       campaignId: CAMPAIGN,
       company: values.company.trim(),
       whatsapp: values.whatsapp ? normalizePhone(values.whatsapp) : null,
       selections: [{ id: '93', format: 'video' }],
-      sextou: { businessType: values.businessType || 'auto', date: values.includeDate ? values.date : null, copyId: 'trabalho-sabor' }
+      sextou: { businessType: values.businessType || 'auto', date: values.includeDate ? values.date : null, copyId: 'trabalho-sabor', ...(duration ? { durationSeconds: values.durationSeconds } : {}) }
     };
   }
 
@@ -57,7 +68,8 @@
   function fallbackMessage(orderId, data) {
     const kind = data.sextou.businessType === 'auto' ? 'personalização conforme a marca e o produto' : data.sextou.businessType === 'pizzaria' ? 'pizzaria' : 'hamburgueria';
     const date = data.sextou.date ? `data ${data.sextou.date.split('-').reverse().join('/')}` : 'sem data na arte';
-    return `Olá! Enviei esse pedido pelo site da iA4tube Empresas.\n\nPedido: ${orderId}\nProduto: Vídeo Sextou personalizado\nEstabelecimento: ${data.company}\nResumo: ${kind}; ${date}; SEXTOU! O trabalho acabou. O sabor começou.\n\nGostaria de confirmar o recebimento e combinar os próximos passos.`;
+    const duration = data.sextou.durationSeconds || 20;
+    return `Olá! Enviei esse pedido pelo site da iA4tube Empresas.\n\nPedido: ${orderId}\nProduto: Vídeo Sextou personalizado · ${duration} segundos\nEstabelecimento: ${data.company}\nResumo: ${kind}; ${date}; SEXTOU! O trabalho acabou. O sabor começou.\n\nGostaria de confirmar o recebimento e combinar os próximos passos.`;
   }
 
   function normalizeReceipt(result, data, endpoint) {
@@ -67,6 +79,7 @@
     return {
       orderId: result.orderId,
       company: data.company,
+      durationSeconds: data.sextou.durationSeconds || 20,
       totalCents: Number.isSafeInteger(result.totalCents) && result.totalCents >= 0 ? result.totalCents : null,
       whatsappMessage: message,
       whatsappUrl: safeWhatsAppUrl(result.whatsappUrl, message),
@@ -103,7 +116,7 @@
 
   // Pure helpers can be tested without a browser or any network request.
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { normalizePhone, isFriday, buildData, safeWhatsAppUrl, safeReceiptUrl, fallbackMessage, normalizeReceipt, createOrderLock };
+    module.exports = { normalizePhone, isFriday, buildData, safeWhatsAppUrl, safeReceiptUrl, fallbackMessage, normalizeReceipt, createOrderLock, durationChoice, priceForDuration };
   }
   if (typeof document === 'undefined') return;
 
@@ -175,12 +188,14 @@
   }
 
   function values() {
+    const duration = document.querySelector('input[name="durationSeconds"]:checked').value;
     return {
       company: $('company').value,
       whatsapp: $('whatsapp').value,
       businessType: document.querySelector('input[name="businessType"]:checked').value,
       includeDate: $('include-date').checked,
-      date: $('event-date').value
+      date: $('event-date').value,
+      ...(duration === 'legacy' ? {} : { durationSeconds: Number(duration) })
     };
   }
 
@@ -191,7 +206,15 @@
     document.querySelector(`input[name="businessType"][value="${kind}"]`).checked = true;
     $('include-date').checked = data.includeDate === true;
     $('event-date').value = typeof data.date === 'string' ? data.date : '';
+    document.querySelector(`input[name="durationSeconds"][value="${durationChoice(data)}"]`).checked = true;
+    updateDuration();
     toggleDate();
+  }
+
+  function updateDuration() {
+    const duration = values().durationSeconds;
+    $('legacy-duration-choice').hidden = duration !== undefined;
+    $('price').textContent = money(priceForDuration(duration, config.durationPricesCents, config.priceCents));
   }
 
   function saveDraft() {
@@ -355,7 +378,10 @@
     $('receipt').hidden = false;
     $('receipt-number').textContent = saved.orderId;
     $('receipt-company').textContent = saved.company;
+    $('receipt-duration-row').hidden = ![10, 20].includes(saved.durationSeconds);
+    $('receipt-duration').textContent = [10, 20].includes(saved.durationSeconds) ? `${saved.durationSeconds} segundos` : '';
     $('receipt-price').textContent = saved.totalCents === null ? 'Consulte no WhatsApp' : money(saved.totalCents);
+    $('price').textContent = saved.totalCents === null ? 'Pedido salvo' : money(saved.totalCents);
     $('whatsapp-link').href = safeWhatsAppUrl(saved.whatsappUrl, saved.whatsappMessage);
     $('saved-message').value = saved.whatsappMessage;
     const link = safeReceiptUrl(saved.receiptUrl, config.submitEndpoint);
@@ -531,12 +557,13 @@
     }
   }
 
-  $('price').textContent = money(config.priceCents);
+  updateDuration();
   $('order-form').addEventListener('submit', submitOrder);
   $('company').addEventListener('input', saveDraft);
   $('whatsapp').addEventListener('input', saveDraft);
   $('event-date').addEventListener('change', saveDraft);
   document.querySelectorAll('input[name="businessType"]').forEach((input) => input.addEventListener('change', saveDraft));
+  document.querySelectorAll('input[name="durationSeconds"]').forEach((input) => input.addEventListener('change', () => { updateDuration(); saveDraft(); }));
   $('include-date').addEventListener('change', () => { toggleDate(); saveDraft(); });
   $('logo').addEventListener('change', () => chooseFile('logo'));
   $('photo').addEventListener('change', () => chooseFile('photo'));
@@ -585,6 +612,7 @@
         for (const kind of ['logo', 'photo']) { files[kind] = backup?.files[kind] || null; updateFile(kind); fieldError(kind, ''); }
         ['company', 'whatsapp', 'event-date'].forEach((id) => fieldError(id, ''));
         toggleDate();
+        updateDuration();
         saveDraft();
         if (backup) await forgetFiles(backup.key);
         if (oldPendingKey) await forgetFiles(oldPendingKey);

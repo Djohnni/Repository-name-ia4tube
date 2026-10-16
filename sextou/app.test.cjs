@@ -3,7 +3,8 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 const fs = require('node:fs');
 const path = require('node:path');
-const { normalizePhone, isFriday, buildData, safeWhatsAppUrl, safeReceiptUrl, fallbackMessage, normalizeReceipt, createOrderLock } = require('./app.js');
+const vm = require('node:vm');
+const { normalizePhone, isFriday, buildData, safeWhatsAppUrl, safeReceiptUrl, fallbackMessage, normalizeReceipt, createOrderLock, durationChoice, priceForDuration } = require('./app.js');
 const endpoint = 'https://marcagrande-pedidos-wshgj6ugza-uc.a.run.app/orders';
 const input = { company: '  TESTE LOCAL  ', whatsapp: '(47) 99999-9999', businessType: 'hamburgueria', includeDate: false, date: '' };
 
@@ -24,6 +25,35 @@ test('minimal three-field form leaves contact for WhatsApp and segment for image
   const data = buildData({company: 'Minha empresa'});
   assert.equal(data.whatsapp, null);
   assert.deepEqual(data.sextou, {businessType: 'auto', date: null, copyId: 'trabalho-sabor'});
+});
+
+test('new 10/20-second selections send an integer duration and the correct displayed price', () => {
+  for (const [durationSeconds, price] of [[10, 1990], [20, 2990]]) {
+    const data = buildData({ ...input, durationSeconds });
+    assert.equal(data.sextou.durationSeconds, durationSeconds);
+    assert.equal(durationChoice(data.sextou), String(durationSeconds));
+    assert.equal(priceForDuration(durationSeconds), price);
+    const message = fallbackMessage('duration-test', data);
+    assert.match(message, new RegExp(`${durationSeconds} segundos`));
+    const receipt = normalizeReceipt({ orderId: 'duration-test', totalCents: price }, data, endpoint);
+    assert.equal(receipt.durationSeconds, durationSeconds);
+    assert.equal(receipt.totalCents, price);
+  }
+});
+
+test('old drafts keep the missing duration rather than changing a saved retry payload', () => {
+  const data = buildData(input);
+  assert.equal(Object.hasOwn(data.sextou, 'durationSeconds'), false);
+  assert.equal(durationChoice(input), 'legacy');
+  assert.equal(priceForDuration(undefined), 1990);
+  assert.equal(normalizeReceipt({ orderId: 'legacy-order', totalCents: 1990 }, data, endpoint).durationSeconds, 20);
+  assert.match(fallbackMessage('legacy-order', data), /20 segundos/);
+});
+
+test('invalid explicit durations are not silently charged as another option', () => {
+  for (const durationSeconds of [null, undefined, '10', '20', 4, 8, 15, 30, 10.5, true]) {
+    assert.throws(() => buildData({ ...input, durationSeconds }), /10 ou 20 segundos/);
+  }
 });
 
 test('Friday validation checks the calendar instead of accepting normalized invalid dates', () => {
@@ -88,7 +118,13 @@ test('HTML has all referenced IDs, unique IDs, required assets and a configured 
   assert.equal(ids.length, new Set(ids).size, 'duplicate HTML IDs');
   for (const match of js.matchAll(/\$\('([^']+)'\)/g)) assert.ok(ids.includes(match[1]), `missing #${match[1]}`);
   assert.ok(fs.existsSync(path.join(__dirname, '../site-publico/logo-iA4tube.png')));
-  assert.match(html, /Vídeo Sextou · 20s/);
+  assert.match(html, /Duração do vídeo/);
+  assert.match(html, /name="durationSeconds" value="10" checked/);
+  assert.match(html, /name="durationSeconds" value="20"/);
+  assert.match(html, /R\$ 19,90/);
+  assert.match(html, /R\$ 29,90/);
+  assert.match(html, /20s repete a animação de 10s/);
+  assert.match(html, /animação do modelo anterior/);
   assert.match(html, /<video controls loop playsinline/);
   for (const file of ['produto-burgao.png','produto-burgao-20s.mp4']) {
     assert.ok(html.includes('./'+file));
@@ -100,6 +136,7 @@ test('HTML has all referenced IDs, unique IDs, required assets and a configured 
   assert.equal(config.recipientWhatsApp, '554791049079');
   assert.equal(config.campaignId, 'sextou-classico-v1');
   assert.equal(Number.isSafeInteger(config.priceCents), true);
+  assert.deepEqual(config.durationPricesCents, {10:1990,20:2990});
   assert.match(html, /politica-de-privacidade/);
 });
 
@@ -193,4 +230,91 @@ test('two pre-opened tabs re-read a saved receipt under the lock without a secon
   assert.equal(await running, 'same-saved-id');
   assert.equal(await second(submit), 'same-saved-id');
   assert.equal(posts, 1);
+});
+
+// Lightweight DOM contract checks: no browser, network or submitted orders.
+async function formHarness(stored = {}) {
+  const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+  const storage = memoryStorage();
+  for (const [key, value] of Object.entries(stored)) storage.setItem(key, JSON.stringify(value));
+  const element = (extra = {}) => ({ value: '', hidden: false, disabled: false, textContent: '', listeners: {},
+    addEventListener(type, listener) { this.listeners[type] = listener; }, setAttribute() {}, removeAttribute() {},
+    focus() {}, scrollIntoView() {}, ...extra });
+  const nodes = Object.fromEntries([...html.matchAll(/\bid="([^"]+)"/g)].map((match) => [match[1], element()]));
+  nodes['sextou-config'].textContent = html.match(/<script id="sextou-config"[^>]*>(.*?)<\/script>/s)[1];
+  nodes['include-date'].checked = false;
+  const groups = { durationSeconds: ['10', '20', 'legacy'], businessType: ['auto', 'hamburgueria', 'pizzaria'] };
+  for (const name of Object.keys(groups)) {
+    const radios = groups[name].map((value, index) => element({ value, _checked: index === 0 }));
+    for (const radio of radios) Object.defineProperty(radio, 'checked', {
+      get: () => radio._checked,
+      set: (checked) => { if (checked) for (const item of radios) item._checked = false; radio._checked = checked; }
+    });
+    groups[name] = radios;
+  }
+  const document = { getElementById: (id) => nodes[id],
+    querySelectorAll: (selector) => groups[selector.match(/name="([^"]+)"/)[1]],
+    querySelector(selector) {
+      const group = this.querySelectorAll(selector);
+      const value = selector.match(/value="([^"]+)"/);
+      return group.find((radio) => value ? radio.value === value[1] : radio.checked);
+    }
+  };
+  const context = { document, localStorage: storage, sessionStorage: memoryStorage(), navigator: {},
+    window: { addEventListener() {} }, URL, Intl, Date, Uint8Array, setTimeout, clearTimeout,
+    crypto: require('node:crypto').webcrypto };
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, 'app.js'), 'utf8'), context);
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  return { nodes, groups, storage, select(value) {
+    const radio = groups.durationSeconds.find((item) => item.value === value);
+    radio.checked = true;
+    radio.listeners.change();
+  } };
+}
+
+test('fresh form defaults to 10s and switching to 20s updates price and saved draft', async () => {
+  const ui = await formHarness();
+  assert.equal(ui.groups.durationSeconds.find((item) => item.checked).value, '10');
+  assert.match(ui.nodes.price.textContent, /19,90/);
+  assert.equal(ui.nodes['legacy-duration-choice'].hidden, true);
+  ui.select('20');
+  assert.match(ui.nodes.price.textContent, /29,90/);
+  assert.equal(JSON.parse(ui.storage.getItem('ia4tube:sextou:draft:v1')).durationSeconds, 20);
+  ui.select('10');
+  assert.match(ui.nodes.price.textContent, /19,90/);
+  assert.equal(JSON.parse(ui.storage.getItem('ia4tube:sextou:draft:v1')).durationSeconds, 10);
+});
+
+test('restored legacy draft keeps old terms until the customer explicitly changes the duration', async () => {
+  const ui = await formHarness({ 'ia4tube:sextou:draft:v1': input });
+  assert.equal(ui.groups.durationSeconds.find((item) => item.checked).value, 'legacy');
+  assert.equal(ui.nodes['legacy-duration-choice'].hidden, false);
+  assert.match(ui.nodes.price.textContent, /19,90/);
+  ui.nodes.company.listeners.input();
+  assert.equal(Object.hasOwn(JSON.parse(ui.storage.getItem('ia4tube:sextou:draft:v1')), 'durationSeconds'), false);
+  ui.select('20');
+  assert.equal(ui.nodes['legacy-duration-choice'].hidden, true);
+  assert.match(ui.nodes.price.textContent, /29,90/);
+});
+
+test('pending legacy retries remain locked and preserve their exact request and idempotency key', async () => {
+  const key = 'a'.repeat(64);
+  const record = { status: 'pending', key, data: buildData(input), fileInfo: { logo: { sha256: 'original-logo', name: 'logo.png' }, photo: null } };
+  const ui = await formHarness({ 'ia4tube:sextou:order:v1': record });
+  assert.equal(ui.groups.durationSeconds.find((item) => item.checked).value, 'legacy');
+  assert.equal(ui.nodes['form-fields'].disabled, true);
+  assert.equal(ui.nodes['submit-label'].textContent, 'Tentar novamente');
+  assert.match(ui.nodes.price.textContent, /19,90/);
+  assert.deepEqual(JSON.parse(ui.storage.getItem('ia4tube:sextou:order:v1')), record);
+});
+
+test('saved 20s receipt restores server total and duration without creating another request', async () => {
+  const saved = normalizeReceipt({ orderId: 'saved-20s', totalCents: 2990 }, buildData({ ...input, durationSeconds: 20 }), endpoint);
+  const ui = await formHarness({ 'ia4tube:sextou:order:v1': { status: 'saved', key: 'a'.repeat(64), receipt: saved } });
+  assert.equal(ui.nodes['order-form'].hidden, true);
+  assert.equal(ui.nodes['receipt-duration-row'].hidden, false);
+  assert.equal(ui.nodes['receipt-duration'].textContent, '20 segundos');
+  assert.match(ui.nodes['receipt-price'].textContent, /29,90/);
+  assert.match(ui.nodes.price.textContent, /29,90/);
 });
