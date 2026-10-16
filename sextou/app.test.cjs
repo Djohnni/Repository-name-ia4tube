@@ -88,6 +88,13 @@ test('HTML has all referenced IDs, unique IDs, required assets and a configured 
   assert.equal(ids.length, new Set(ids).size, 'duplicate HTML IDs');
   for (const match of js.matchAll(/\$\('([^']+)'\)/g)) assert.ok(ids.includes(match[1]), `missing #${match[1]}`);
   assert.ok(fs.existsSync(path.join(__dirname, '../site-publico/logo-iA4tube.png')));
+  assert.match(html, /Vídeo Sextou · 20s/);
+  assert.match(html, /<video controls loop playsinline/);
+  for (const file of ['produto-burgao.png','produto-burgao-20s.mp4']) {
+    assert.ok(html.includes('./'+file));
+    assert.ok(fs.existsSync(path.join(__dirname,file)));
+  }
+  assert.doesNotMatch(html, /\b(?:autoplay|muted)\b/);
   const config = JSON.parse(html.match(/<script id="sextou-config"[^>]*>(.*?)<\/script>/s)[1]);
   assert.equal(config.submitEndpoint, endpoint);
   assert.equal(config.recipientWhatsApp, '554791049079');
