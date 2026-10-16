@@ -515,8 +515,9 @@
       if (receiptPersisted) { pending = null; storageRemove(DRAFT_KEY); }
       showReceipt(saved, true);
       if (receiptPersisted) await forgetFiles(oldKey);
-      // Opening a chat does not send its message. The customer confirms inside WhatsApp.
-      window.open(saved.whatsappUrl, '_blank', 'noopener,noreferrer');
+      // Same-tab navigation avoids popup blockers after the asynchronous save.
+      // Opening the chat still leaves sending its message to the customer.
+      window.location.assign(saved.whatsappUrl);
       });
     } catch (error) {
       formError(error.name === 'AbortError' ? 'O envio demorou e não conseguimos confirmar o recebimento. Tente novamente: a mesma identificação será usada, sem criar outro pedido.'
