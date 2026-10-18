@@ -83,7 +83,7 @@ function renderFeed(items,key) {
     const article = document.createElement('article');
     article.className = 'video-card';article.dataset.id = item.id;
     article.setAttribute('aria-label',`${item.label}: ${item.title}`);
-    article.innerHTML = `<video src="${esc(mediaPath(item.video))}" poster="${esc(mediaPath(item.poster))}" muted loop playsinline preload="metadata" aria-label="Vídeo ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle play-toggle" aria-label="Pausar vídeo">${icon('pause')}</button><button class="circle model-info" aria-label="Detalhes deste modelo">${icon('info')}</button></div><div class="video-info"><a href="#perfil" class="creator-label">iA4tube<span>${icon('check')}</span></a><div class="model-kicker">${esc(item.label)}</div><h2>${esc(item.title)}</h2><p class="caption">${esc(item.kind)}</p><div class="offer-row"><div class="offer-price"><small>${item.orderEnabled ? 'a partir de' : 'referência visual'}</small><strong>${item.orderEnabled ? money(prices['10']) : 'Em breve'}</strong></div><button class="make-button">${item.orderEnabled ? 'Fazer o meu' : 'Ver detalhes'} ${icon('arrow-up-right')}</button></div><p class="example-label"><i></i>Exemplo · ${esc(item.duration)}s</p></div>`;
+    article.innerHTML = `<video src="${esc(mediaPath(item.video))}" poster="${esc(mediaPath(item.poster))}" muted loop playsinline preload="metadata" aria-label="Vídeo ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle play-toggle" aria-label="Pausar vídeo">${icon('pause')}</button><button class="circle model-info" aria-label="Detalhes deste modelo">${icon('info')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>${item.orderEnabled ? 'a partir de' : 'referência visual'}</small><strong>${item.orderEnabled ? money(prices['10']) : 'Em breve'}</strong></div><button class="make-button">${item.orderEnabled ? 'Fazer meu pedido' : 'Ver detalhes'} ${icon('arrow-up-right')}</button></div></div>`;
     article.querySelector('.creator-action').addEventListener('click',() => location.hash = 'perfil');
     article.querySelector('.sound-toggle').addEventListener('click',() => {soundEnabled = !soundEnabled;syncSound();toast(soundEnabled ? 'Som ativado' : 'Som desativado');});
     article.querySelector('.play-toggle').addEventListener('click',togglePlay);
@@ -98,7 +98,6 @@ function renderFeed(items,key) {
   }
   cards = [...feed.querySelectorAll('.video-card')];videos = cards.map(card => card.querySelector('video'));
   document.querySelector('#previous').disabled = true;document.querySelector('#next').disabled = cards.length < 2;
-  document.querySelector('#swipe-hint').hidden = cards.length < 2;
   if (!cards.length) {
     document.querySelector('#position').innerHTML = '00 <span>/ 00</span>';
     feed.innerHTML = '<div class="empty-feed"><span class="eyebrow">SEM VÍDEOS EM DESTAQUE</span><h2>A próxima inspiração<br>está chegando.</h2><p>Os modelos anteriores continuam no perfil.</p><a class="primary-action" href="#perfil">Ver perfil da iA4tube</a></div>';
@@ -109,7 +108,6 @@ function renderFeed(items,key) {
 function goTo(index) {
   if (index < 0 || index >= cards.length) return;
   cards[index].scrollIntoView({block:'start',behavior:reduceMotion ? 'instant' : 'smooth'});
-  document.querySelector('#swipe-hint').classList.add('dismissed');
 }
 document.querySelector('#previous').addEventListener('click',() => goTo(activeIndex - 1));
 document.querySelector('#next').addEventListener('click',() => goTo(activeIndex + 1));
@@ -119,8 +117,6 @@ feed.addEventListener('keydown',event => {
   if (event.key === 'ArrowUp') {event.preventDefault();goTo(activeIndex - 1);}
   if (event.key === ' ') {event.preventDefault();togglePlay();}
 });
-feed.addEventListener('scroll',() => document.querySelector('#swipe-hint').classList.add('dismissed'),{passive:true});
-setTimeout(() => document.querySelector('#swipe-hint').classList.add('dismissed'),4300);
 
 function openPersonalize(item) {
   if (!data) return;
