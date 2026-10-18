@@ -16,12 +16,12 @@ const fixture = {
   video:'./media/example.mp4',poster:'./media/example.png',duration:10,orderEnabled:true,
 };
 
-function renderCard(item = fixture) {
+function renderCard(item = fixture,videoOnly = false) {
   const construction = app.match(/const article = document\.createElement\('article'\);[\s\S]*?article\.innerHTML = \x60[\s\S]*?\x60;/)?.[0];
   assert.ok(construction,'The actual article template must remain testable.');
   const article = {dataset:{},attributes:{},setAttribute(name,value){this.attributes[name] = value;}};
   runInNewContext(construction,{
-    item,creator:catalog.creator,prices:catalog.prices,
+    item,creator:catalog.creator,prices:catalog.prices,videoOnly,
     esc:escapeHtml,mediaPath:value => value,
     money:cents => 'R$ ' + (cents / 100).toFixed(2).replace('.',','),
     icon:name => '<svg aria-hidden="true" data-icon="' + escapeHtml(name) + '"></svg>',
@@ -42,18 +42,21 @@ test('feed overlay has no model title, description, creator label or example bad
   assert.equal(text.replace('a partir de','').replace('R$ 19,90','').replace('Fazer meu pedido','').trim(),'');
 });
 
-test('four lateral controls remain avatar, sound, play and model information',() => {
+test('five lateral controls retain avatar, sound, play, information and interface toggle',() => {
   const {innerHTML} = renderCard();
   const actions = innerHTML.match(/<div class="video-actions">([\s\S]*?)<\/div>/)?.[1];
   assert.ok(actions,'Lateral actions are retained.');
   const buttons = [...actions.matchAll(/<button\b[\s\S]*?<\/button>/g)].map(match => match[0]);
-  assert.equal(buttons.length,4);
-  ['creator-action','sound-toggle','play-toggle','model-info'].forEach((className,index) => {
+  assert.equal(buttons.length,5);
+  ['creator-action','sound-toggle','play-toggle','model-info','interface-toggle'].forEach((className,index) => {
     assert.match(buttons[index],new RegExp('class="[^"]*\\b' + className + '\\b'));
     assert.match(buttons[index],/aria-label="[^"]+"/);
   });
   assert.match(buttons[0],/<img\b/);
-  assert.equal([...innerHTML.matchAll(/<button\b/g)].length,5,'Only the four controls and order CTA are present.');
+  assert.match(buttons[4],/aria-label="Ocultar interface"/);
+  assert.match(buttons[4],/aria-pressed="false"/);
+  assert.match(buttons[4],/data-icon="eye-off"/);
+  assert.equal([...innerHTML.matchAll(/<button\b/g)].length,6,'Only the five controls and order CTA are present.');
 });
 
 test('price and Fazer meu pedido are the only offer line, for all seven models',() => {

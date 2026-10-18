@@ -7,6 +7,23 @@
 @media(max-height:720px) and (min-width:701px){.video-info{bottom:20px;left:17px;right:17px}.video-info h2{font-size:23px}.video-info .caption{font-size:10px;margin-bottom:12px}.creator-label{margin-bottom:8px;font-size:10px}.offer-price strong{font-size:18px}.make-button{font-size:11px;padding:11px 13px}.video-actions{bottom:205px}.example-label{font-size:8px;margin-top:9px}.sidebar-intro{margin-top:32px}.sidebar-intro p{font-size:18px}.feed-top{padding-top:19px}.preview-chip{right:12px;top:22px;font-size:7px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}.swipe-hint{display:none}}
 /* Keep the video clear: side controls and a single price/action row. */
+/* Preserve the player's size and playback while hiding only the website UI. */
+body.video-only .sidebar,
+body.video-only .desktop-heading,
+body.video-only .feed-top,
+body.video-only .feed-controls,
+body.video-only .mobile-nav,
+body.video-only .video-info,
+body.video-only .video-shade,
+body.video-only .video-progress,
+body.video-only .center-pause,
+body.video-only .video-actions > :not(.interface-toggle),
+body.video-only .skip-link,
+body.video-only #toast {
+  visibility: hidden;
+  pointer-events: none;
+}
+.interface-toggle[aria-pressed="true"] { border-color: #ffffff80; }
 .video-actions { bottom: 100px; }
 .video-shade {
   background: linear-gradient(180deg, #0007 0%, transparent 16%, transparent 65%, #0006 86%, #000d 100%);

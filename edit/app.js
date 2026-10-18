@@ -11,6 +11,8 @@ const paths = {
   muted:'<path d="m11 5-6 4H2v6h3l6 4zM16 9l6 6M16 15l6-6"/>',
   message:'<path d="M21 11.5a8.5 8.5 0 0 1-12.7 7.4L3 21l1.9-5.3A8.5 8.5 0 1 1 21 11.5Z"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/>',
+  eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+  'eye-off':'<path d="m3 3 18 18M10.6 5.1 12 5c6.5 0 10 7 10 7a19 19 0 0 1-3 4M6.2 6.2A20 20 0 0 0 2 12s3.5 7 10 7a12 12 0 0 0 5.8-1.8M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
 };
 const icon = name => `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.info}</svg>`;
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -29,9 +31,27 @@ let catalog = [],daily = [],cards = [],videos = [],playlist = [];
 let creator = {name:'iA4tube',avatar:'./assets/logo.png'},prices = {},data = null;
 let activeIndex = 0,soundEnabled = false,userPaused = reduceMotion,routeIsProfile = false;
 let progressFrame = 0,toastTimer,playlistKey = '';
+let videoOnly = false;
 const order = createOrderController({dialog:personalize,money,toast,onBusy:playback});
 
 function activeCard() {return cards[activeIndex];}
+function syncInterface() {
+  document.body.classList.toggle('video-only',videoOnly);
+  document.querySelectorAll('.interface-toggle').forEach(button => {
+    const label = videoOnly ? 'Mostrar interface' : 'Ocultar interface';
+    button.innerHTML = icon(videoOnly ? 'eye' : 'eye-off');
+    button.setAttribute('aria-label',label);
+    button.setAttribute('title',label);
+    button.setAttribute('aria-pressed',String(videoOnly));
+  });
+}
+function setVideoOnly(value) {
+  videoOnly = Boolean(value);
+  syncInterface();
+}
+addEventListener('keydown',event => {
+  if (event.key === 'Escape' && videoOnly) setVideoOnly(false);
+});
 function canPlay() {return !routeIsProfile && !document.hidden && !personalize.open && !about.open && !userPaused;}
 function syncPlayButton(card) {
   if (!card) return;
@@ -83,10 +103,11 @@ function renderFeed(items,key) {
     const article = document.createElement('article');
     article.className = 'video-card';article.dataset.id = item.id;
     article.setAttribute('aria-label',`${item.label}: ${item.title}`);
-    article.innerHTML = `<video src="${esc(mediaPath(item.video))}" poster="${esc(mediaPath(item.poster))}" muted loop playsinline preload="metadata" aria-label="Vídeo ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle play-toggle" aria-label="Pausar vídeo">${icon('pause')}</button><button class="circle model-info" aria-label="Detalhes deste modelo">${icon('info')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>${item.orderEnabled ? 'a partir de' : 'referência visual'}</small><strong>${item.orderEnabled ? money(prices['10']) : 'Em breve'}</strong></div><button class="make-button">${item.orderEnabled ? 'Fazer meu pedido' : 'Ver detalhes'} ${icon('arrow-up-right')}</button></div></div>`;
+    article.innerHTML = `<video src="${esc(mediaPath(item.video))}" poster="${esc(mediaPath(item.poster))}" muted loop playsinline preload="metadata" aria-label="Vídeo ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle play-toggle" aria-label="Pausar vídeo">${icon('pause')}</button><button class="circle model-info" aria-label="Detalhes deste modelo">${icon('info')}</button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>${item.orderEnabled ? 'a partir de' : 'referência visual'}</small><strong>${item.orderEnabled ? money(prices['10']) : 'Em breve'}</strong></div><button class="make-button">${item.orderEnabled ? 'Fazer meu pedido' : 'Ver detalhes'} ${icon('arrow-up-right')}</button></div></div>`;
     article.querySelector('.creator-action').addEventListener('click',() => location.hash = 'perfil');
     article.querySelector('.sound-toggle').addEventListener('click',() => {soundEnabled = !soundEnabled;syncSound();toast(soundEnabled ? 'Som ativado' : 'Som desativado');});
     article.querySelector('.play-toggle').addEventListener('click',togglePlay);
+    article.querySelector('.interface-toggle').addEventListener('click',() => setVideoOnly(!videoOnly));
     article.querySelector('video').addEventListener('click',togglePlay);
     article.querySelector('.make-button').addEventListener('click',() => openPersonalize(item));
     article.querySelector('.model-info').addEventListener('click',() => openPersonalize(item));
@@ -103,7 +124,7 @@ function renderFeed(items,key) {
     feed.innerHTML = '<div class="empty-feed"><span class="eyebrow">SEM VÍDEOS EM DESTAQUE</span><h2>A próxima inspiração<br>está chegando.</h2><p>Os modelos anteriores continuam no perfil.</p><a class="primary-action" href="#perfil">Ver perfil da iA4tube</a></div>';
   }
   feed.scrollTo({top:0,behavior:'instant'});
-  cards.forEach(card => observer.observe(card));syncSound();activate(0);tick();
+  cards.forEach(card => observer.observe(card));syncSound();syncInterface();activate(0);tick();
 }
 function goTo(index) {
   if (index < 0 || index >= cards.length) return;
@@ -157,6 +178,7 @@ function renderProfile() {
 }
 function route() {
   routeIsProfile = location.hash === '#perfil';
+  if (routeIsProfile) setVideoOnly(false);
   document.querySelector('#feed-view').hidden = routeIsProfile;
   document.querySelector('#profile-view').hidden = !routeIsProfile;
   document.querySelectorAll('[data-nav]').forEach(link => {if (link.dataset.nav === (routeIsProfile ? 'profile' : 'feed')) link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});
