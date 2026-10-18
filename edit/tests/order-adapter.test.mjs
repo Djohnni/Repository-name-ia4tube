@@ -1,0 +1,171 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile,stat,readdir} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {fileURLToPath} from 'node:url';
+import {buildMultipartOrder,idempotencyKey,normalizeReceipt,safeWhatsAppUrl,SUBMIT_ENDPOINT} from '../order-adapter.js';
+import {fingerprintPayload,getOrCreateRequestId,resetSavedAttempt} from '../order.js';
+
+const id = 'b142f07c-6fb2-4b99-842f-b12817c88df3';
+const orderId = 'd7f5c088-ece8-4e54-90c3-05ca6f9730e5';
+const requestId = '0c521fbc-a903-44b8-af74-37cbda3c1371';
+const bytes = Buffer.from([137,80,78,71,13,10,26,10,0,255,123]);
+const payload = {
+  videoId:id,videoVersion:2,company:'Empresa de teste',durationSeconds:10,consent:true,
+  logo:{name:'logo original.png',mime:'image/png',data:bytes.toString('base64')},
+  photo:{name:'produto original.jpg',mime:'image/jpeg',data:Buffer.from([255,216,0,128,255,217]).toString('base64')},
+};
+const message = 'Olá! Enviei meu pedido.\nPedido: ' + orderId;
+const wa = text => 'https://wa.me/554791049079?text=' + encodeURIComponent(text);
+const response = {orderId,status:'awaiting_authorization',totalCents:1990,whatsappMessage:message,whatsappUrl:wa(message)};
+const memoryStorage = () => {
+  const values = new Map();
+  return {getItem:key => values.get(key) ?? null,setItem:(key,value) => values.set(key,String(value)),removeItem:key => values.delete(key)};
+};
+
+test('fixed public endpoint and exact multipart contract',() => {
+  assert.equal(SUBMIT_ENDPOINT,'https://marcagrande-pedidos-wshgj6ugza-uc.a.run.app/orders');
+  const form = buildMultipartOrder({...payload,creativeTemplate:'client-cannot-choose',price:1});
+  assert.deepEqual([...form.keys()],['data','logo','photos']);
+  assert.deepEqual(JSON.parse(form.get('data')),{
+    schemaVersion:2,campaignId:'sextou-classico-v1',company:payload.company,whatsapp:null,
+    selections:[{id:'93',format:'video'}],
+    sextou:{businessType:'auto',date:null,copyId:'trabalho-sabor',durationSeconds:10},
+    showcase:{videoId:id,videoVersion:2},
+  });
+});
+test('uploads preserve exact file bytes, names and MIME',async () => {
+  const form = buildMultipartOrder(payload);
+  assert.equal(form.get('logo').name,payload.logo.name);
+  assert.equal(form.get('logo').type,'image/png');
+  assert.deepEqual(Buffer.from(await form.get('logo').arrayBuffer()),bytes);
+  assert.equal(form.get('photos').name,payload.photo.name);
+  assert.deepEqual(Buffer.from(await form.get('photos').arrayBuffer()),Buffer.from(payload.photo.data,'base64'));
+});
+test('photo is optional and 20s keeps the same selected model',() => {
+  const form = buildMultipartOrder({...payload,photo:null,durationSeconds:20});
+  assert.deepEqual([...form.keys()],['data','logo']);
+  const data = JSON.parse(form.get('data'));
+  assert.equal(data.sextou.durationSeconds,20);
+  assert.deepEqual(data.showcase,{videoId:id,videoVersion:2});
+});
+test('invalid form data is rejected before network',() => {
+  for (const patch of [
+    {company:''},{company:'x'.repeat(101)},{durationSeconds:6},{videoId:'unknown'},
+    {videoVersion:0},{videoVersion:2.5},{consent:false},{logo:null},
+    {logo:{...payload.logo,mime:'text/html'}},{logo:{...payload.logo,data:'invalid!'}},
+    {logo:{...payload.logo,name:'../logo.png'}},
+  ]) assert.throws(() => buildMultipartOrder({...payload,...patch}));
+});
+test('100-character company is valid and surrounding whitespace is trimmed',() => {
+  assert.equal(JSON.parse(buildMultipartOrder({...payload,company:'  '+'x'.repeat(100)+'  '}).get('data')).company.length,100);
+});
+test('idempotency key is the stable SHA256 of the request UUID',async () => {
+  const key = await idempotencyKey(requestId);
+  assert.match(key,/^[a-f0-9]{64}$/);
+  assert.equal(key,createHash('sha256').update(requestId).digest('hex'));
+  assert.equal(await idempotencyKey(requestId),key);
+  await assert.rejects(() => idempotencyKey('not-a-request-id'));
+});
+test('same fingerprint reuses request ID; changed file/model creates another',async () => {
+  const storage = memoryStorage();
+  const fingerprint = await fingerprintPayload(payload);
+  const first = getOrCreateRequestId(fingerprint,storage);
+  assert.equal(getOrCreateRequestId(fingerprint,storage),first);
+  const otherModel = await fingerprintPayload({...payload,videoVersion:3});
+  assert.notEqual(getOrCreateRequestId(otherModel,storage),first);
+  const otherFile = await fingerprintPayload({...payload,logo:{...payload.logo,data:'AQID'}});
+  assert.notEqual(getOrCreateRequestId(otherFile,storage),first);
+});
+test('Fazer outro pedido creates a new attempt only after a saved receipt',async () => {
+  const storage = memoryStorage();
+  const fingerprint = await fingerprintPayload(payload);
+  const first = getOrCreateRequestId(fingerprint,storage);
+  assert.throws(() => resetSavedAttempt({fingerprint,requestId:first},storage));
+  assert.equal(getOrCreateRequestId(fingerprint,storage),first);
+  resetSavedAttempt({orderId,status:'awaiting_authorization',fingerprint,requestId:first},storage);
+  assert.notEqual(getOrCreateRequestId(fingerprint,storage),first);
+});
+test('old receipt cannot remove a newer tab attempt',async () => {
+  const storage = memoryStorage();
+  const fingerprint = await fingerprintPayload(payload);
+  const newer = getOrCreateRequestId(fingerprint,storage);
+  resetSavedAttempt({orderId,status:'awaiting_authorization',fingerprint,requestId},storage);
+  assert.equal(getOrCreateRequestId(fingerprint,storage),newer);
+});
+test('valid receipt retains order ID, API price, message and WhatsApp URL',() => {
+  const result = normalizeReceipt(response,payload);
+  assert.equal(result.orderId,orderId);
+  assert.equal(result.totalCents,1990);
+  assert.equal(result.message,message);
+  assert.equal(new URL(result.whatsappUrl).searchParams.get('text'),message);
+  assert.equal(new URL(safeWhatsAppUrl(result.whatsappUrl,message,orderId)).pathname,'/554791049079');
+});
+test('WhatsApp only accepts exact recipient and matching order message',() => {
+  for (const url of [
+    'http://wa.me/554791049079?text='+encodeURIComponent(message),
+    'https://wa.me/5500000000000?text='+encodeURIComponent(message),
+    'https://wa.me.evil.example/554791049079?text='+encodeURIComponent(message),
+    'https://user:pass@wa.me/554791049079?text='+encodeURIComponent(message),
+    wa(message)+'#other',wa(message)+'&next=other',wa(message)+'&text=other',wa('wrong order'),
+    'javascript:alert(1)','/relative',
+  ]) assert.throws(() => safeWhatsAppUrl(url,message,orderId));
+  assert.throws(() => safeWhatsAppUrl(wa('unrelated'),'unrelated',orderId));
+});
+test('unsafe WhatsApp URL never discards a confirmed save or copy message',() => {
+  const result = normalizeReceipt({...response,whatsappUrl:'https://evil.example/'},payload);
+  assert.equal(result.orderId,orderId);
+  assert.equal(result.whatsappUrl,'');
+  assert.equal(result.message,message);
+});
+test('missing WhatsApp text falls back to message with confirmed order ID',() => {
+  const result = normalizeReceipt({...response,whatsappMessage:null,message:'saved'},payload);
+  assert.equal(result.orderId,orderId);
+  assert.match(result.message,new RegExp(orderId));
+  assert.match(result.message,/iA4tube/);
+  assert.equal(result.whatsappUrl,'');
+});
+test('unconfirmed response cannot unlock success',() => {
+  for (const patch of [{orderId:''},{status:'processing'},{totalCents:-1},{totalCents:19.9}]) {
+    assert.throws(() => normalizeReceipt({...response,...patch},payload));
+  }
+});
+test('static catalog preserves 2 existing and 5 new published entries',async () => {
+  const catalog = JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
+  assert.equal(catalog.catalog.length,7);
+  assert.equal(new Set(catalog.catalog.map(item => item.id)).size,7);
+  assert.deepEqual(catalog.prices,{'10':1990,'20':2990});
+  assert.equal(catalog.catalog.filter(item => item.creativeTemplate).length,5);
+  for (const existing of ['4bb25879-a745-4577-812a-5a94286e324c','7503ea91-b4f7-41eb-9869-be10f23df935']) {
+    assert.equal(catalog.catalog.find(item => item.id === existing)?.version,3);
+  }
+  assert.equal(catalog.dailySelection.mode,'featured');
+  assert.equal(catalog.dailySelection.videoIds.length,7);
+  assert.ok(catalog.catalog.every(item => item.status === 'published' && item.orderEnabled));
+  assert.ok(!Object.hasOwn(catalog,'csrfToken'));
+});
+test('all catalog media/avatar paths resolve inside edit and exist',async () => {
+  const catalog = JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
+  for (const item of catalog.catalog) {
+    for (const type of ['poster','video']) {
+      assert.match(item[type],/^\.\/media\/[a-f0-9-]{36}\.(png|mp4)$/);
+      const actual = await stat(new URL('../'+item[type].slice(2),import.meta.url));
+      assert.ok(actual.size > 100000);
+      assert.equal(new URL(item[type],'https://ia4tube.com/edit/').pathname.startsWith('/edit/media/'),true);
+    }
+  }
+  assert.equal((await readdir(new URL('../media/',import.meta.url))).length,14);
+  assert.ok((await stat(new URL('../assets/logo.png',import.meta.url))).size > 0);
+});
+test('public entry files contain no local/admin/token/test marker dependencies',async () => {
+  for (const name of ['index.html','app.js','order.js','order-adapter.js','catalog.json','styles.css']) {
+    const source = await readFile(new URL('../'+name,import.meta.url),'utf8');
+    assert.doesNotMatch(source,/127\.0\.0\.1|localhost|X-Vitrine-Token|csrfToken|\/admin|\[teste-criativo:/i,name);
+  }
+  const html = await readFile(new URL('../index.html',import.meta.url),'utf8');
+  assert.match(html,/maxlength="100"/);
+  assert.match(html,/https:\/\/ia4tube\.com\/politica-de-privacidade\//);
+  const app = await readFile(new URL('../app.js',import.meta.url),'utf8');
+  assert.match(app,/fetch\('\.\/catalog\.json'/);
+  assert.doesNotMatch(app,/new Date\(|Date\.now\(/); // featured list must not expire tomorrow.
+});

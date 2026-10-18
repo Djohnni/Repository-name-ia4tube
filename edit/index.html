@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b0b0e">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="Vídeos personalizados com a logo e o produto da sua empresa.">
+  <title>Em destaque · iA4tube</title>
+  <link rel="icon" href="./assets/logo.png">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#feed">Ir para os vídeos</a>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#hoje" aria-label="iA4tube — vídeos em destaque"><img src="./assets/logo.png" alt="" width="38" height="38"><span>iA4tube<small>EMPRESAS</small></span></a>
+      <nav class="desktop-nav" aria-label="Navegação principal">
+        <a href="#hoje" data-nav="feed"><span data-icon="home"></span>Em destaque<span class="nav-dot"></span></a>
+        <a href="#perfil" data-nav="profile"><span data-icon="user"></span>Perfil da iA4tube</a>
+      </nav>
+      <div class="sidebar-intro"><span class="eyebrow">VIU. GOSTOU. É SEU.</span><p>O próximo vídeo<br>pode ter <em>sua marca.</em></p></div>
+      <div class="sidebar-bottom"><span class="preview-badge"><i></i> COM A SUA MARCA</span><p>Escolha e personalize.<br>Receba seu vídeo pelo WhatsApp.</p><a href="https://ia4tube.com/politica-de-privacidade/" target="_blank" rel="noopener noreferrer">Privacidade ↗</a></div>
+    </aside>
+    <main class="main-content">
+      <section id="feed-view" aria-label="Vídeos do dia">
+        <header class="desktop-heading"><span>VÍDEOS EM DESTAQUE</span><p>Seu próximo anúncio está aqui.</p></header>
+        <div class="stage">
+          <div class="feed-top"><a href="#hoje" class="mobile-brand" aria-label="iA4tube"><img src="./assets/logo.png" alt=""></a><span class="feed-tab">Em destaque</span><button class="preview-chip" id="preview-info" aria-label="Como funciona">COMO FUNCIONA</button></div>
+          <div id="feed" class="feed" tabindex="0" aria-label="Deslize para trocar de vídeo"></div>
+          <div class="video-progress" aria-hidden="true"><span id="progress"></span></div>
+          <div class="swipe-hint" id="swipe-hint"><span data-icon="chevron-up"></span>Deslize para descobrir</div>
+        </div>
+        <div class="feed-controls" aria-label="Trocar vídeo"><span id="position">00 <span>/ 00</span></span><button id="previous" class="circle" aria-label="Vídeo anterior"><span data-icon="chevron-up"></span></button><button id="next" class="circle" aria-label="Próximo vídeo"><span data-icon="chevron-down"></span></button><small>Role para<br>explorar</small></div>
+      </section>
+      <section id="profile-view" class="profile-view" hidden aria-labelledby="profile-title">
+        <header class="profile-top"><button id="back-feed" class="plain-button"><span data-icon="arrow-left"></span>Voltar aos vídeos</button></header>
+        <div class="profile-hero"><div class="profile-avatar"><img src="./assets/logo.png" alt="Logo da iA4tube"></div><span class="eyebrow">UM VÍDEO. A SUA IDENTIDADE.</span><h1 id="profile-title">iA4tube</h1><p>Escolha o vídeo.<br>Deixe com a cara da sua empresa.</p><div class="profile-facts"><span><strong id="catalog-count">0</strong> vídeos</span><span><strong id="orderable-count">0</strong> personalizáveis</span></div><a href="#hoje" class="profile-today"><span data-icon="play"></span>Ver vídeos em destaque</a></div>
+        <div class="profile-catalog-heading"><h2>Todos os vídeos</h2><span>Os outros modelos ficam aqui.</span></div>
+        <div id="profile-grid" class="profile-grid"></div>
+        <p class="profile-disclaimer">Os vídeos anteriores continuam aqui. Escolha seu modelo e personalize com sua marca.</p>
+      </section>
+    </main>
+    <nav class="mobile-nav" aria-label="Navegação no celular"><a href="#hoje" data-nav="feed"><span data-icon="home"></span>Em destaque</a><a href="#perfil" data-nav="profile"><span data-icon="user"></span>Perfil</a></nav>
+  </div>
+  <dialog id="personalize-dialog" class="sheet" aria-labelledby="sheet-title">
+    <button class="close-dialog circle" aria-label="Fechar"><span data-icon="close"></span></button>
+    <span class="eyebrow">COM A SUA IDENTIDADE</span><h2 id="sheet-title">Gostou? Faça o seu.</h2>
+    <div class="chosen-model"><img id="chosen-poster" alt=""><div><span id="chosen-kicker" class="model-kicker"></span><h3 id="chosen-title"></h3><p id="chosen-phrase"></p></div></div>
+    <p class="preview-note" id="model-note"></p>
+    <form id="order-form">
+      <label class="order-field">Nome da empresa<input id="order-company" name="company" autocomplete="organization" minlength="2" maxlength="100" required placeholder="Como aparecerá no vídeo"></label>
+      <label class="order-field">Logo da empresa<input id="order-logo" type="file" name="logo" accept="image/png,image/jpeg,image/webp" required><small>PNG, JPG ou WebP · até 5 MB</small></label>
+      <label class="order-field">Foto do produto <span class="optional">opcional</span><input id="order-photo" type="file" name="photo" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG ou WebP · até 10 MB</small></label>
+      <fieldset class="duration-field"><legend>Duração do vídeo</legend><div class="price-options"><label><input type="radio" name="duration" value="10" checked><span>10 segundos</span><strong id="price-10">—</strong></label><label><input type="radio" name="duration" value="20"><span>20 segundos</span><strong id="price-20">—</strong></label></div></fieldset>
+      <p class="order-explanation">A versão de 20s repete a animação de 10s. Você recebe o vídeo pelo WhatsApp.</p>
+      <label class="consent-line"><input id="order-consent" type="checkbox" required><span>Tenho autorização para usar as imagens e concordo em enviá-las para personalizar este pedido.</span></label>
+      <p id="order-error" class="form-error" role="alert" hidden></p>
+      <button type="submit" id="send-order" class="primary-action">Salvar pedido e ir para o WhatsApp <span data-icon="arrow-up-right"></span></button>
+      <p class="order-local-note">Seu pedido será salvo antes de abrir o WhatsApp. Combine a confirmação e os próximos passos com a iA4tube.</p>
+    </form>
+    <section id="order-success" class="order-success" aria-live="polite" hidden><span class="success-mark" data-icon="check"></span><h3>Pedido salvo!</h3><p id="saved-order-id"></p><p>Confirme o recebimento e os próximos passos pelo WhatsApp.</p><a id="whatsapp-link" class="primary-action" rel="noopener noreferrer">Continuar no WhatsApp <span data-icon="message"></span></a><button id="copy-message" class="secondary-action" type="button">Copiar mensagem</button><textarea id="saved-message" aria-label="Mensagem do pedido" readonly rows="6" hidden></textarea><p class="order-local-note">Se o WhatsApp não abrir, o pedido continua salvo. Use o botão acima ou copie a mensagem.</p><button id="new-order" class="secondary-action" type="button">Fazer outro pedido</button><p class="order-local-note">O pedido acima e seus arquivos continuam preservados. Esta opção permite iniciar uma nova compra, mesmo com os mesmos dados.</p></section>
+    <p id="display-only-note" class="preview-note" hidden>Este vídeo é apenas uma referência visual. A personalização ainda não foi habilitada para ele.</p>
+  </dialog>
+  <dialog id="about-dialog" class="sheet about-sheet" aria-labelledby="about-title"><button class="close-dialog circle" aria-label="Fechar"><span data-icon="close"></span></button><span class="eyebrow">COMO FUNCIONA</span><h2 id="about-title">Uma nova forma de escolher.</h2><p>Deslize pelos vídeos em destaque. No perfil, você encontra também os modelos anteriores.</p><p>“Fazer o meu” salva seu pedido antes de abrir o WhatsApp. Depois, envie a mensagem para confirmar os próximos passos.</p><p class="preview-note">Você recebe o vídeo pelo WhatsApp. A produção começa após a confirmação do pedido.</p><button class="primary-action close-about">Entendi, vamos ver <span data-icon="arrow-up-right"></span></button></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <noscript><p class="no-script">Ative o JavaScript para assistir à prévia dos vídeos.</p></noscript>
+</body>
+</html>
