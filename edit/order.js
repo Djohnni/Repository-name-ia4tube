@@ -1,5 +1,6 @@
-import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261019-products';
+import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261019-price';
 import { createProductsForm } from './products-form.js?v=20261019-products';
+import { normalizeProductPrice } from './optional-price.js?v=20261019-price';
 
 const ATTEMPT_PREFIX = 'ia4tube.edit.attempt.v1.';
 const RECEIPT_KEY = 'ia4tube.edit.receipt.v1';
@@ -116,6 +117,10 @@ export function createOrderController({dialog,money,toast,onBusy}) {
       const payload = products.isEnabled()
         ? {videoId:item.id,videoVersion:item.version,company,logo,consent:true,...await products.payload()}
         : {videoId:item.id,videoVersion:item.version,company,durationSeconds,logo,photo,consent:true};
+      if (!products.isEnabled()) {
+        const productPrice = normalizeProductPrice(document.querySelector('#order-product-price').value);
+        if (productPrice) payload.productPrice = productPrice;
+      }
       const fingerprint = await fingerprintPayload(payload);
       let requestId;
       try {

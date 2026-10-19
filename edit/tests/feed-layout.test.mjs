@@ -88,10 +88,10 @@ test('removed swipe hint leaves no DOM selector that can break navigation',() =>
   assert.match(app,/article\.querySelector\('\.creator-action'\)\.addEventListener\('click',\(\) => location\.hash = 'perfil'\)/);
 });
 
-test('legacy form stays intact when the isolated products section is removed',() => {
+test('legacy form stays intact apart from isolated products and optional-price fields',() => {
   const form = page.match(/<form id="order-form">[\s\S]*?<\/form>/)?.[0];
   assert.ok(form);
-  const legacy = form.replace(/      <fieldset id="products-options"[\s\S]*?      <\/fieldset>\r?\n/,'').replace(/ data-single-product/g,'');
+  const legacy = form.replace(/      <fieldset id="products-options"[\s\S]*?      <\/fieldset>\r?\n/,'').replace(/      <label[^\n]*id="order-product-price"[^\n]*\r?\n/,'').replace(/ data-single-product/g,'');
   assert.equal(digest(legacy),'2a55a61ece259903033a54ef10ae2076a3e6e9934fc8700791908688a1b8cb5f');
   assert.match(form,/name="duration" value="10" checked/);
   assert.match(form,/name="duration" value="20"/);
