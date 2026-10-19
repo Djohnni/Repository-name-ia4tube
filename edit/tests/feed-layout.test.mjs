@@ -95,8 +95,18 @@ test('order form remains byte-identical apart from line endings',() => {
   assert.match(form,/name="duration" value="20"/);
 });
 
-test('catalog, versions, media references and prices are unchanged',() => {
-  assert.equal(digest(catalogSource),'1bf55daed8fe8a351ad7a79c40a427c33b1bd57deae6715c458d7cf8cfd3c56f');
+test('archiving weekend cards preserves every model, media reference and price',() => {
+  const original = structuredClone(catalog);
+  const weekendIds = ['4bb25879-a745-4577-812a-5a94286e324c','7503ea91-b4f7-41eb-9869-be10f23df935'];
+  for (const id of weekendIds) {
+    const item = original.catalog.find(row => row.id === id);
+    assert.equal(item.status,'archived');
+    assert.equal(item.featuredDate,null);
+    item.status = 'published';
+    item.featuredDate = '2026-10-18';
+  }
+  original.dailySelection.videoIds.unshift(...weekendIds);
+  assert.equal(digest(JSON.stringify(original,null,2)+'\n'),'1bf55daed8fe8a351ad7a79c40a427c33b1bd57deae6715c458d7cf8cfd3c56f');
   assert.deepEqual(catalog.prices,{'10':1990,'20':2990});
   assert.equal(catalog.catalog.filter(item => item.creativeTemplate).length,5);
   assert.equal(catalog.catalog.filter(item => !item.creativeTemplate).length,2);

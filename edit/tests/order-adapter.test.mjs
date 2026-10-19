@@ -130,7 +130,7 @@ test('unconfirmed response cannot unlock success',() => {
     assert.throws(() => normalizeReceipt({...response,...patch},payload));
   }
 });
-test('static catalog preserves 2 existing and 5 new published entries',async () => {
+test('static catalog keeps 2 weekend entries archived and 5 neutral entries published',async () => {
   const catalog = JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
   assert.equal(catalog.catalog.length,7);
   assert.equal(new Set(catalog.catalog.map(item => item.id)).size,7);
@@ -140,8 +140,12 @@ test('static catalog preserves 2 existing and 5 new published entries',async () 
     assert.equal(catalog.catalog.find(item => item.id === existing)?.version,3);
   }
   assert.equal(catalog.dailySelection.mode,'featured');
-  assert.equal(catalog.dailySelection.videoIds.length,7);
-  assert.ok(catalog.catalog.every(item => item.status === 'published' && item.orderEnabled));
+  const visible = catalog.catalog.filter(item => item.status === 'published');
+  assert.equal(visible.length,5);
+  assert.deepEqual(catalog.dailySelection.videoIds,visible.map(item => item.id));
+  assert.ok(visible.every(item => item.creativeTemplate && item.orderEnabled));
+  assert.ok(visible.every(item => !/sextou|sabadou/i.test([item.label,item.title,item.phrase].join(' '))));
+  assert.equal(catalog.catalog.filter(item => item.status === 'archived').length,2);
   assert.ok(!Object.hasOwn(catalog,'csrfToken'));
 });
 test('all catalog media/avatar paths resolve inside edit and exist',async () => {
