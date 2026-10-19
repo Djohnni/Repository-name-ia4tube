@@ -22,6 +22,7 @@ function renderCard(item = fixture,videoOnly = false) {
   const article = {dataset:{},attributes:{},setAttribute(name,value){this.attributes[name] = value;}};
   runInNewContext(construction,{
     item,creator:catalog.creator,prices:catalog.prices,videoOnly,
+    startingPrice:row => row.recipe === 'produtos' ? catalog.productsPrices['2'] : catalog.prices['10'],
     esc:escapeHtml,mediaPath:value => value,
     money:cents => 'R$ ' + (cents / 100).toFixed(2).replace('.',','),
     icon:name => '<svg aria-hidden="true" data-icon="' + escapeHtml(name) + '"></svg>',
@@ -59,13 +60,13 @@ test('five lateral controls retain avatar, sound, play, information and interfac
   assert.equal([...innerHTML.matchAll(/<button\b/g)].length,6,'Only the five controls and order CTA are present.');
 });
 
-test('price and Fazer meu pedido are the only offer line, for all seven models',() => {
-  assert.equal(catalog.catalog.length,7);
+test('each model keeps only its correct starting price and order action',() => {
+  assert.equal(catalog.catalog.length,8);
   for (const item of catalog.catalog) {
     const {innerHTML} = renderCard(item);
     assert.equal([...innerHTML.matchAll(/class="offer-row"/g)].length,1);
     assert.equal([...innerHTML.matchAll(/class="offer-price"/g)].length,1);
-    assert.match(innerHTML,/<strong>R\$ 19,90<\/strong>/);
+    assert.ok(innerHTML.includes('<strong>' + (item.recipe === 'produtos' ? 'R$ 38,00' : 'R$ 19,90') + '</strong>'));
     const cta = innerHTML.match(/<button class="make-button">([\s\S]*?)<\/button>/)?.[1];
     assert.equal(visibleText(cta || ''),'Fazer meu pedido');
   }
@@ -87,16 +88,20 @@ test('removed swipe hint leaves no DOM selector that can break navigation',() =>
   assert.match(app,/article\.querySelector\('\.creator-action'\)\.addEventListener\('click',\(\) => location\.hash = 'perfil'\)/);
 });
 
-test('order form remains byte-identical apart from line endings',() => {
+test('legacy form stays intact when the isolated products section is removed',() => {
   const form = page.match(/<form id="order-form">[\s\S]*?<\/form>/)?.[0];
   assert.ok(form);
-  assert.equal(digest(form),'2a55a61ece259903033a54ef10ae2076a3e6e9934fc8700791908688a1b8cb5f');
+  const legacy = form.replace(/      <fieldset id="products-options"[\s\S]*?      <\/fieldset>\r?\n/,'').replace(/ data-single-product/g,'');
+  assert.equal(digest(legacy),'2a55a61ece259903033a54ef10ae2076a3e6e9934fc8700791908688a1b8cb5f');
   assert.match(form,/name="duration" value="10" checked/);
   assert.match(form,/name="duration" value="20"/);
 });
 
 test('archiving weekend cards preserves every model, media reference and price',() => {
   const original = structuredClone(catalog);
+  original.catalog = original.catalog.filter(row => row.recipe !== 'produtos');
+  original.dailySelection.videoIds = original.dailySelection.videoIds.filter(id => id !== '2830b796-2375-49e8-8e97-9a731c115252');
+  delete original.productsPrices;
   const weekendIds = ['4bb25879-a745-4577-812a-5a94286e324c','7503ea91-b4f7-41eb-9869-be10f23df935'];
   for (const id of weekendIds) {
     const item = original.catalog.find(row => row.id === id);
@@ -109,7 +114,7 @@ test('archiving weekend cards preserves every model, media reference and price',
   assert.equal(digest(JSON.stringify(original,null,2)+'\n'),'1bf55daed8fe8a351ad7a79c40a427c33b1bd57deae6715c458d7cf8cfd3c56f');
   assert.deepEqual(catalog.prices,{'10':1990,'20':2990});
   assert.equal(catalog.catalog.filter(item => item.creativeTemplate).length,5);
-  assert.equal(catalog.catalog.filter(item => !item.creativeTemplate).length,2);
+  assert.equal(catalog.catalog.filter(item => !item.creativeTemplate && item.recipe !== 'produtos').length,2);
 });
 
 test('top navigation, profile and model details remain available',() => {

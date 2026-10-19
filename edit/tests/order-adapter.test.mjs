@@ -130,10 +130,10 @@ test('unconfirmed response cannot unlock success',() => {
     assert.throws(() => normalizeReceipt({...response,...patch},payload));
   }
 });
-test('static catalog keeps 2 weekend entries archived and 5 neutral entries published',async () => {
+test('catalog preserves existing models and appends the product video last',async () => {
   const catalog = JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
-  assert.equal(catalog.catalog.length,7);
-  assert.equal(new Set(catalog.catalog.map(item => item.id)).size,7);
+  assert.equal(catalog.catalog.length,8);
+  assert.equal(new Set(catalog.catalog.map(item => item.id)).size,8);
   assert.deepEqual(catalog.prices,{'10':1990,'20':2990});
   assert.equal(catalog.catalog.filter(item => item.creativeTemplate).length,5);
   for (const existing of ['4bb25879-a745-4577-812a-5a94286e324c','7503ea91-b4f7-41eb-9869-be10f23df935']) {
@@ -141,9 +141,11 @@ test('static catalog keeps 2 weekend entries archived and 5 neutral entries publ
   }
   assert.equal(catalog.dailySelection.mode,'featured');
   const visible = catalog.catalog.filter(item => item.status === 'published');
-  assert.equal(visible.length,5);
+  assert.equal(visible.length,6);
   assert.deepEqual(catalog.dailySelection.videoIds,visible.map(item => item.id));
-  assert.ok(visible.every(item => item.creativeTemplate && item.orderEnabled));
+  assert.ok(visible.slice(0,5).every(item => item.creativeTemplate && item.orderEnabled));
+  assert.equal(visible.at(-1).recipe,'produtos');
+  assert.deepEqual(catalog.productsPrices,{'2':3800,'4':4800,'6':5800,'8':6800});
   assert.ok(visible.every(item => !/sextou|sabadou/i.test([item.label,item.title,item.phrase].join(' '))));
   assert.equal(catalog.catalog.filter(item => item.status === 'archived').length,2);
   assert.ok(!Object.hasOwn(catalog,'csrfToken'));
@@ -152,13 +154,13 @@ test('all catalog media/avatar paths resolve inside edit and exist',async () => 
   const catalog = JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
   for (const item of catalog.catalog) {
     for (const type of ['poster','video']) {
-      assert.match(item[type],/^\.\/media\/[a-f0-9-]{36}\.(png|mp4)$/);
+      assert.match(item[type],/^\.\/media\/(?:[a-f0-9-]{36}|produtos-cardapio)\.(png|mp4)$/);
       const actual = await stat(new URL('../'+item[type].slice(2),import.meta.url));
       assert.ok(actual.size > 100000);
       assert.equal(new URL(item[type],'https://ia4tube.com/edit/').pathname.startsWith('/edit/media/'),true);
     }
   }
-  assert.equal((await readdir(new URL('../media/',import.meta.url))).length,14);
+  assert.equal((await readdir(new URL('../media/',import.meta.url))).length,16);
   assert.ok((await stat(new URL('../assets/logo.png',import.meta.url))).size > 0);
 });
 test('public entry files contain no local/admin/token/test marker dependencies',async () => {

@@ -135,6 +135,23 @@
       "creatorId": "ia4tube",
       "phrase": "COMUNICADO OFICIAL\nHOJE EU NÃO COZINHO.",
       "orderEnabled": true
+    },
+    {
+      "id": "2830b796-2375-49e8-8e97-9a731c115252",
+      "version": 1,
+      "title": "Vídeo de produtos",
+      "label": "Vídeo de produtos",
+      "kind": "Seus produtos em um só vídeo.",
+      "note": "Escolha 2, 4, 6 ou 8 fotos. Abertura, narração, música e encerramento incluídos. O exemplo mostra 5 produtos.",
+      "phrase": "Seus produtos em um só vídeo.",
+      "recipe": "produtos",
+      "status": "published",
+      "featuredDate": null,
+      "duration": 31,
+      "poster": "./media/produtos-cardapio.png",
+      "video": "./media/produtos-cardapio.mp4",
+      "creatorId": "ia4tube",
+      "orderEnabled": true
     }
   ],
   "dailySelection": {
@@ -145,9 +162,11 @@
       "d90dda14-dd61-4526-8882-50d4952b0359",
       "cc2ff272-4fbf-404c-b5a0-3a5ece29b15d",
       "15e9b9a7-c367-4724-90b5-d3c202641def",
-      "af9ba4d1-2fb3-43cd-90f2-2a4cb5c8a7e0"
+      "af9ba4d1-2fb3-43cd-90f2-2a4cb5c8a7e0",
+      "2830b796-2375-49e8-8e97-9a731c115252"
     ]
   },
+  "productsPrices": {"2": 3800, "4": 4800, "6": 5800, "8": 6800},
   "prices": {
     "10": 1990,
     "20": 2990

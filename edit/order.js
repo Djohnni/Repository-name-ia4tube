@@ -1,4 +1,5 @@
-import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js';
+import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261019-products';
+import { createProductsForm } from './products-form.js?v=20261019-products';
 
 const ATTEMPT_PREFIX = 'ia4tube.edit.attempt.v1.';
 const RECEIPT_KEY = 'ia4tube.edit.receipt.v1';
@@ -47,10 +48,12 @@ export function createOrderController({dialog,money,toast,onBusy}) {
   const messageBox = document.querySelector('#saved-message');
   let item = null,config = null,busy = false,receipt = null;
   const initialSubmitLabel = submit.innerHTML;
+  const products = createProductsForm({form,money,readUpload});
 
   function setBusy(value) {
     busy = value;
     [...form.elements].forEach(control => control.disabled = value);
+    products.sync(value);
     dialog.querySelector('.close-dialog').disabled = value;
     submit.innerHTML = value ? 'Salvando seu pedido…' : initialSubmitLabel;
     form.setAttribute('aria-busy',String(value));onBusy();
@@ -77,10 +80,11 @@ export function createOrderController({dialog,money,toast,onBusy}) {
     item = nextItem;config = nextConfig;receipt = null;
     document.querySelector('#sheet-title').textContent = 'Gostou? Faça o seu.';
     errorBox.hidden = true;success.hidden = true;messageBox.hidden = true;
-    const enabled = item.orderEnabled === true && ['sextou','sabadou'].includes(item.recipe);
+    const enabled = item.orderEnabled === true && ['sextou','sabadou','produtos'].includes(item.recipe);
+    products.open(item.recipe === 'produtos');
     form.hidden = !enabled;displayOnly.hidden = enabled;
     for (const seconds of [10,20]) document.querySelector(`#price-${seconds}`).textContent = money(config.prices?.[String(seconds)]);
-    if (enabled && [10,20].some(seconds => !Number.isSafeInteger(config.prices?.[String(seconds)]))) {
+    if (enabled && item.recipe !== 'produtos' && [10,20].some(seconds => !Number.isSafeInteger(config.prices?.[String(seconds)]))) {
       form.hidden = true;displayOnly.hidden = false;displayOnly.textContent = 'O preço deste modelo precisa ser conferido no programa antes de receber pedidos.';
     } else displayOnly.textContent = 'Este vídeo é apenas uma referência visual. A personalização ainda não foi habilitada para ele.';
   }
@@ -102,14 +106,16 @@ export function createOrderController({dialog,money,toast,onBusy}) {
       const company = document.querySelector('#order-company').value.trim();
       const durationSeconds = Number(form.querySelector('[name="duration"]:checked')?.value);
       if (company.length < 2 || company.length > 100) throw new Error('Preencha o nome da empresa com 2 a 100 caracteres.');
-      if (![10,20].includes(durationSeconds)) throw new Error('Escolha 10 ou 20 segundos.');
+      if (!products.isEnabled() && ![10,20].includes(durationSeconds)) throw new Error('Escolha 10 ou 20 segundos.');
       if (!document.querySelector('#order-consent').checked) throw new Error('Confirme a autorização para usar as imagens.');
       const [logo,photo] = await Promise.all([
         readUpload(document.querySelector('#order-logo').files[0],5 * 1024 * 1024,'Logo'),
-        readUpload(document.querySelector('#order-photo').files[0],10 * 1024 * 1024,'Foto do produto'),
+        products.isEnabled() ? null : readUpload(document.querySelector('#order-photo').files[0],10 * 1024 * 1024,'Foto do produto'),
       ]);
       if (!logo) throw new Error('Adicione o logo da empresa.');
-      const payload = {videoId:item.id,videoVersion:item.version,company,durationSeconds,logo,photo,consent:true};
+      const payload = products.isEnabled()
+        ? {videoId:item.id,videoVersion:item.version,company,logo,consent:true,...await products.payload()}
+        : {videoId:item.id,videoVersion:item.version,company,durationSeconds,logo,photo,consent:true};
       const fingerprint = await fingerprintPayload(payload);
       let requestId;
       try {

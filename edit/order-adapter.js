@@ -21,9 +21,23 @@ export function buildMultipartOrder(payload) {
   const company = typeof payload?.company === 'string' ? payload.company.trim() : '';
   if (company.length < 2 || company.length > 100) throw new Error('Preencha o nome da empresa com 2 a 100 caracteres.');
   if (!UUID_V4.test(payload.videoId || '') || !Number.isSafeInteger(payload.videoVersion) || payload.videoVersion < 1) throw new Error('Escolha novamente um modelo disponível.');
-  if (![10,20].includes(payload.durationSeconds)) throw new Error('Escolha 10 ou 20 segundos.');
+  const products = payload.productsVideo;
+  if (!products && ![10,20].includes(payload.durationSeconds)) throw new Error('Escolha 10 ou 20 segundos.');
   if (payload.consent !== true) throw new Error('Confirme a autorização para usar as imagens.');
   const form = new FormData();
+  if (products) {
+    if (![2,4,6,8].includes(products.packageCount) || !Array.isArray(products.items) || products.items.length !== products.packageCount || !Array.isArray(payload.photos) || payload.photos.length !== products.packageCount) throw new Error('Confira a quantidade de produtos do pacote escolhido.');
+    form.append('data',JSON.stringify({schemaVersion:2,campaignId:'produtos-cardapio-v1',company,whatsapp:null,
+      selections:[{id:'93',format:'video'}],productsVideo:products,showcase:{videoId:payload.videoId,videoVersion:payload.videoVersion}}));
+    form.append('logo',uploadBlob(payload.logo,5 * 1024 * 1024,'Logo'),payload.logo.name);
+    let total = 0;
+    payload.photos.forEach((photo,index) => {
+      const blob = uploadBlob(photo,10 * 1024 * 1024,`Foto do produto ${index + 1}`);total += blob.size;
+      form.append('photos',blob,photo.name);
+    });
+    if (total > 24 * 1024 * 1024) throw new Error('As fotos dos produtos juntas devem ter até 24 MB.');
+    return form;
+  }
   form.append('data',JSON.stringify({
     schemaVersion:2,
     campaignId:'sextou-classico-v1',
@@ -65,7 +79,7 @@ export function normalizeReceipt(result,payload) {
     'Olá! Enviei esse pedido pelo site da iA4tube Empresas.',
     '',
     'Pedido: ' + result.orderId,
-    'Produto: Vídeo personalizado · ' + payload.durationSeconds + ' segundos',
+    'Produto: ' + (payload.productsVideo ? `Vídeo de produtos · ${payload.productsVideo.packageCount} imagens` : 'Vídeo personalizado · ' + payload.durationSeconds + ' segundos'),
     'Estabelecimento: ' + payload.company,
     '',
     'Gostaria de confirmar o recebimento e combinar os próximos passos.',

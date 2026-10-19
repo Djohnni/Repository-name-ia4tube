@@ -1,4 +1,4 @@
-import { createOrderController } from './order.js';
+import { createOrderController } from './order.js?v=20261019-products';
 
 const paths = {
   home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
@@ -17,6 +17,7 @@ const paths = {
 const icon = name => `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.info}</svg>`;
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money = cents => Number.isSafeInteger(cents) ? (cents / 100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : 'Consulte';
+const startingPrice = item => item.recipe === 'produtos' ? data.productsPrices?.['2'] : prices['10'];
 const mediaPath = value => {
   try {const url = new URL(value,location.href);return url.origin === location.origin && !url.username && !url.password ? url.pathname + url.search : '';}
   catch {return '';}
@@ -103,7 +104,7 @@ function renderFeed(items,key) {
     const article = document.createElement('article');
     article.className = 'video-card';article.dataset.id = item.id;
     article.setAttribute('aria-label',`${item.label}: ${item.title}`);
-    article.innerHTML = `<video src="${esc(mediaPath(item.video))}" poster="${esc(mediaPath(item.poster))}" muted loop playsinline preload="metadata" aria-label="Vídeo ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle play-toggle" aria-label="Pausar vídeo">${icon('pause')}</button><button class="circle model-info" aria-label="Detalhes deste modelo">${icon('info')}</button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>${item.orderEnabled ? 'a partir de' : 'referência visual'}</small><strong>${item.orderEnabled ? money(prices['10']) : 'Em breve'}</strong></div><button class="make-button">${item.orderEnabled ? 'Fazer meu pedido' : 'Ver detalhes'} ${icon('arrow-up-right')}</button></div></div>`;
+    article.innerHTML = `<video src="${esc(mediaPath(item.video))}" poster="${esc(mediaPath(item.poster))}" muted loop playsinline preload="metadata" aria-label="Vídeo ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle play-toggle" aria-label="Pausar vídeo">${icon('pause')}</button><button class="circle model-info" aria-label="Detalhes deste modelo">${icon('info')}</button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>${item.orderEnabled ? 'a partir de' : 'referência visual'}</small><strong>${item.orderEnabled ? money(startingPrice(item)) : 'Em breve'}</strong></div><button class="make-button">${item.orderEnabled ? 'Fazer meu pedido' : 'Ver detalhes'} ${icon('arrow-up-right')}</button></div></div>`;
     article.querySelector('.creator-action').addEventListener('click',() => location.hash = 'perfil');
     article.querySelector('.sound-toggle').addEventListener('click',() => {soundEnabled = !soundEnabled;syncSound();toast(soundEnabled ? 'Som ativado' : 'Som desativado');});
     article.querySelector('.play-toggle').addEventListener('click',togglePlay);
@@ -146,7 +147,7 @@ function openPersonalize(item) {
   document.querySelector('#chosen-title').textContent = item.title;
   document.querySelector('#chosen-kicker').textContent = item.label;
   const phrase = item.phrase || (item.recipe === 'sextou' ? 'SEXTOU' : item.recipe === 'sabadou' ? item.copyLabel || item.label : 'Referência visual');
-  document.querySelector('#chosen-phrase').textContent = `Frase do modelo: ${phrase}`;
+  document.querySelector('#chosen-phrase').textContent = item.recipe === 'produtos' ? phrase : `Frase do modelo: ${phrase}`;
   document.querySelector('#model-note').textContent = item.note || (item.orderEnabled ? 'O vídeo será personalizado com o modelo de produção vinculado a esta referência.' : 'Somente referência visual; não disponível para pedidos.');
   order.open(item,data);personalize.showModal();playback();
 }

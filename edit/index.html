@@ -8,8 +8,8 @@
   <meta name="description" content="Vídeos personalizados com a logo e o produto da sua empresa.">
   <title>Em destaque · iA4tube</title>
   <link rel="icon" href="./assets/logo.png">
-  <link rel="stylesheet" href="./styles.css?v=20261018-video-only">
-  <script type="module" src="./app.js?v=20261018-video-only"></script>
+  <link rel="stylesheet" href="./styles.css?v=20261019-products">
+  <script type="module" src="./app.js?v=20261019-products"></script>
 </head>
 <body>
   <a class="skip-link" href="#feed">Ir para os vídeos</a>
@@ -51,9 +51,29 @@
     <form id="order-form">
       <label class="order-field">Nome da empresa<input id="order-company" name="company" autocomplete="organization" minlength="2" maxlength="100" required placeholder="Como aparecerá no vídeo"></label>
       <label class="order-field">Logo da empresa<input id="order-logo" type="file" name="logo" accept="image/png,image/jpeg,image/webp" required><small>PNG, JPG ou WebP · até 5 MB</small></label>
-      <label class="order-field">Foto do produto <span class="optional">opcional</span><input id="order-photo" type="file" name="photo" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG ou WebP · até 10 MB</small></label>
-      <fieldset class="duration-field"><legend>Duração do vídeo</legend><div class="price-options"><label><input type="radio" name="duration" value="10" checked><span>10 segundos</span><strong id="price-10">—</strong></label><label><input type="radio" name="duration" value="20"><span>20 segundos</span><strong id="price-20">—</strong></label></div></fieldset>
-      <p class="order-explanation">A versão de 20s repete a animação de 10s. Você recebe o vídeo pelo WhatsApp.</p>
+      <label class="order-field" data-single-product>Foto do produto <span class="optional">opcional</span><input id="order-photo" type="file" name="photo" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG ou WebP · até 10 MB</small></label>
+      <fieldset class="duration-field" data-single-product><legend>Duração do vídeo</legend><div class="price-options"><label><input type="radio" name="duration" value="10" checked><span>10 segundos</span><strong id="price-10">—</strong></label><label><input type="radio" name="duration" value="20"><span>20 segundos</span><strong id="price-20">—</strong></label></div></fieldset>
+      <p class="order-explanation" data-single-product>A versão de 20s repete a animação de 10s. Você recebe o vídeo pelo WhatsApp.</p>
+      <fieldset id="products-options" class="products-options" hidden disabled>
+        <legend>Quantas imagens de produtos?</legend>
+        <div class="price-options product-packages">
+          <label><input type="radio" name="packageCount" value="2" checked><span>2 imagens</span><strong>R$ 38,00</strong></label>
+          <label><input type="radio" name="packageCount" value="4"><span>4 imagens</span><strong>R$ 48,00</strong></label>
+          <label><input type="radio" name="packageCount" value="6"><span>6 imagens</span><strong>R$ 58,00</strong></label>
+          <label><input type="radio" name="packageCount" value="8"><span>8 imagens</span><strong>R$ 68,00</strong></label>
+        </div>
+        <p class="order-explanation">Um único vídeo com seus produtos, narração, música, abertura e encerramento. Receba pelo WhatsApp.</p>
+        <label class="order-field">Tipo de empresa<input id="products-branch" maxlength="100" value="HAMBURGUERIA" required placeholder="Ex.: PIZZARIA"></label>
+        <label class="order-field">Frase da abertura<input id="products-opening" maxlength="60" value="CONFIRA NOSSAS OFERTAS!" required></label>
+        <details class="product-extra"><summary>Contato no encerramento · opcional</summary>
+          <label class="order-field">WhatsApp da empresa<input id="products-whatsapp" type="tel" maxlength="40" placeholder="DDD + número"></label>
+          <label class="order-field">Instagram<input id="products-instagram" maxlength="80" placeholder="@suaempresa"></label>
+          <label class="order-field">Endereço<input id="products-location" maxlength="120"></label>
+        </details>
+        <div id="products-list"></div>
+        <p class="order-local-note">PNG, JPG ou WebP · até 10 MB por foto e 24 MB no total. A logo é enviada separadamente e não conta como imagem de produto.</p>
+        <p class="products-total">Total <strong id="products-price">R$ 38,00</strong></p>
+      </fieldset>
       <label class="consent-line"><input id="order-consent" type="checkbox" required><span>Tenho autorização para usar as imagens e concordo em enviá-las para personalizar este pedido.</span></label>
       <p id="order-error" class="form-error" role="alert" hidden></p>
       <button type="submit" id="send-order" class="primary-action">Salvar pedido e ir para o WhatsApp <span data-icon="arrow-up-right"></span></button>
