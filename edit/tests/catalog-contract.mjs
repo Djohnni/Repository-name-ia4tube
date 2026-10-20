@@ -43,3 +43,13 @@ export const PIZZA_EXAMPLES = [
     'A FOME PERDEU.','Pizza · A fome perdeu','pizza-jogo'],
 ];
 export const PRE_PIZZA_CATALOG_SHA256 = '6336aaf9a2c3e4d074a219eda79e08f4493ad7746e8de906b5543e841fd63cc6';
+
+export const COMBO_EXAMPLES = [
+  ['b260ffc1-953c-480f-ad89-e6ad9253636d','minimalista-premium-v1',2100,
+    'MENOS PAPO. MAIS SABOR.','Combo · Menos papo. Mais sabor','combo-minimalista'],
+  ['a1a42dba-b196-43b6-82cb-816868721523','diner-retro-v1',2400,
+    'CLÁSSICO DE RESPEITO.','Combo · Clássico de respeito','combo-retro'],
+  ['d3fb329a-b67c-4554-8e94-74b715e6197b','dia-de-jogo-v1',2400,
+    'A FOME PERDEU.','Combo · A fome perdeu','combo-jogo'],
+];
+export const PRE_COMBO_CATALOG_SHA256 = '99fadfc31228ddc415a3ac163ea9bf7011c7dfe5255167511a7610e4567400d0';

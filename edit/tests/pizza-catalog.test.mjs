@@ -2,24 +2,25 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile,readdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-import {PIZZA_EXAMPLES,NEW_MODELS,LEGACY_IDS,PRE_PIZZA_CATALOG_SHA256} from './catalog-contract.mjs';
+import {PIZZA_EXAMPLES,COMBO_EXAMPLES,NEW_MODELS,LEGACY_IDS,PRE_PIZZA_CATALOG_SHA256} from './catalog-contract.mjs';
 import {buildMultipartOrder} from '../order-adapter.js';
 
 const data=JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
 const before=JSON.parse(await readFile(new URL('./fixtures/catalog-pre-pizza.json',import.meta.url),'utf8'));
 const pizzaIds=PIZZA_EXAMPLES.map(row=>row[0]);
+const comboIds=COMBO_EXAMPLES.map(row=>row[0]);
 
 test('checkpoint pins all previous twenty-four cards and unchanged catalog metadata exactly',()=>{
   assert.equal(before.catalog.length,24);
   assert.equal(createHash('sha256').update(JSON.stringify(before)).digest('hex'),PRE_PIZZA_CATALOG_SHA256);
   assert.deepEqual(before.catalog.map(item=>item.id),[...LEGACY_IDS,...NEW_MODELS.map(row=>row[0])]);
   assert.deepEqual(data.catalog.slice(0,24),before.catalog);
-  assert.deepEqual(data.catalog.slice(24).map(item=>item.id),pizzaIds);
+  assert.deepEqual(data.catalog.slice(24,27).map(item=>item.id),pizzaIds);
   const previous=structuredClone(data);
   previous.catalog=previous.catalog.slice(0,24);
-  previous.dailySelection.videoIds=previous.dailySelection.videoIds.filter(id=>!pizzaIds.includes(id));
-  assert.deepEqual(previous,before,'Only the three appended cards and their daily-selection IDs may differ.');
-  assert.deepEqual(data.dailySelection.videoIds,[...before.dailySelection.videoIds,...pizzaIds]);
+  previous.dailySelection.videoIds=previous.dailySelection.videoIds.filter(id=>!pizzaIds.includes(id)&&!comboIds.includes(id));
+  assert.deepEqual(previous,before,'Only the six exact example cards and their daily-selection IDs may differ.');
+  assert.deepEqual(data.dailySelection.videoIds,[...before.dailySelection.videoIds,...pizzaIds,...comboIds]);
 });
 
 test('pizza cards have exact new snapshots and reuse the same recipes, phrases and prices',()=>{

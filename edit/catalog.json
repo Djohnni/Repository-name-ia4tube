@@ -596,6 +596,72 @@
       "prices": {
         "10": 2400
       }
+    },
+    {
+      "title": "Combo · Menos papo. Mais sabor",
+      "label": "Combo · Menos papo. Mais sabor",
+      "kind": "Personalizado com sua logo e produto.",
+      "note": "Exemplo de combo com marca fictícia. Envie a foto do lanche ou do combo completo junto. Vídeo de 10 segundos; preço na arte é opcional.",
+      "video": "./media/combos-20261020/combo-minimalista.mp4",
+      "poster": "./media/combos-20261020/combo-minimalista.png",
+      "duration": 10,
+      "recipe": "sextou",
+      "copyId": "trabalho-sabor",
+      "status": "published",
+      "featuredDate": "2026-10-20",
+      "creativeTemplate": "minimalista-premium-v1",
+      "id": "b260ffc1-953c-480f-ad89-e6ad9253636d",
+      "version": 1,
+      "creatorId": "ia4tube",
+      "phrase": "MENOS PAPO. MAIS SABOR.",
+      "orderEnabled": true,
+      "prices": {
+        "10": 2100
+      }
+    },
+    {
+      "title": "Combo · Clássico de respeito",
+      "label": "Combo · Clássico de respeito",
+      "kind": "Personalizado com sua logo e produto.",
+      "note": "Exemplo de combo com marca fictícia. Envie a foto do lanche ou do combo completo junto. Vídeo de 10 segundos; preço na arte é opcional.",
+      "video": "./media/combos-20261020/combo-retro.mp4",
+      "poster": "./media/combos-20261020/combo-retro.png",
+      "duration": 10,
+      "recipe": "sextou",
+      "copyId": "trabalho-sabor",
+      "status": "published",
+      "featuredDate": "2026-10-20",
+      "creativeTemplate": "diner-retro-v1",
+      "id": "a1a42dba-b196-43b6-82cb-816868721523",
+      "version": 1,
+      "creatorId": "ia4tube",
+      "phrase": "CLÁSSICO DE RESPEITO.",
+      "orderEnabled": true,
+      "prices": {
+        "10": 2400
+      }
+    },
+    {
+      "title": "Combo · A fome perdeu",
+      "label": "Combo · A fome perdeu",
+      "kind": "Personalizado com sua logo e produto.",
+      "note": "Exemplo de combo com marca fictícia. Envie a foto do lanche ou do combo completo junto. Vídeo de 10 segundos; preço na arte é opcional.",
+      "video": "./media/combos-20261020/combo-jogo.mp4",
+      "poster": "./media/combos-20261020/combo-jogo.png",
+      "duration": 10,
+      "recipe": "sextou",
+      "copyId": "trabalho-sabor",
+      "status": "published",
+      "featuredDate": "2026-10-20",
+      "creativeTemplate": "dia-de-jogo-v1",
+      "id": "d3fb329a-b67c-4554-8e94-74b715e6197b",
+      "version": 1,
+      "creatorId": "ia4tube",
+      "phrase": "A FOME PERDEU.",
+      "orderEnabled": true,
+      "prices": {
+        "10": 2400
+      }
     }
   ],
   "dailySelection": {
@@ -626,7 +692,10 @@
       "cfcc6a78-9112-4058-b1c3-f39174dcc1ed",
       "0a38a604-2858-4395-a980-9977e130ce2c",
       "53b147d4-23c8-447b-9b03-aee70a57693d",
-      "088347f6-b7c6-4ad4-bc01-3608edfc3277"
+      "088347f6-b7c6-4ad4-bc01-3608edfc3277",
+      "b260ffc1-953c-480f-ad89-e6ad9253636d",
+      "a1a42dba-b196-43b6-82cb-816868721523",
+      "d3fb329a-b67c-4554-8e94-74b715e6197b"
     ]
   },
   "productsPrices": {
