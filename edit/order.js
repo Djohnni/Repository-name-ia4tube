@@ -1,4 +1,5 @@
-import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261019-price';
+import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261020-styles';
+import { createModelOptions } from './model-options.js?v=20261020-styles';
 import { createProductsForm } from './products-form.js?v=20261019-products';
 import { normalizeProductPrice } from './optional-price.js?v=20261019-price';
 
@@ -50,11 +51,13 @@ export function createOrderController({dialog,money,toast,onBusy}) {
   let item = null,config = null,busy = false,receipt = null;
   const initialSubmitLabel = submit.innerHTML;
   const products = createProductsForm({form,money,readUpload});
+  const modelOptions = createModelOptions(form,money);
 
   function setBusy(value) {
     busy = value;
     [...form.elements].forEach(control => control.disabled = value);
     products.sync(value);
+    modelOptions.sync(value);
     dialog.querySelector('.close-dialog').disabled = value;
     submit.innerHTML = value ? 'Salvando seu pedido…' : initialSubmitLabel;
     form.setAttribute('aria-busy',String(value));onBusy();
@@ -84,8 +87,8 @@ export function createOrderController({dialog,money,toast,onBusy}) {
     const enabled = item.orderEnabled === true && ['sextou','sabadou','produtos'].includes(item.recipe);
     products.open(item.recipe === 'produtos');
     form.hidden = !enabled;displayOnly.hidden = enabled;
-    for (const seconds of [10,20]) document.querySelector(`#price-${seconds}`).textContent = money(config.prices?.[String(seconds)]);
-    if (enabled && item.recipe !== 'produtos' && [10,20].some(seconds => !Number.isSafeInteger(config.prices?.[String(seconds)]))) {
+    const invalidPrice = modelOptions.open(item,config);
+    if (enabled && invalidPrice) {
       form.hidden = true;displayOnly.hidden = false;displayOnly.textContent = 'O preço deste modelo precisa ser conferido no programa antes de receber pedidos.';
     } else displayOnly.textContent = 'Este vídeo é apenas uma referência visual. A personalização ainda não foi habilitada para ele.';
   }
@@ -120,6 +123,8 @@ export function createOrderController({dialog,money,toast,onBusy}) {
       if (!products.isEnabled()) {
         const productPrice = normalizeProductPrice(document.querySelector('#order-product-price').value);
         if (productPrice) payload.productPrice = productPrice;
+        const animal = modelOptions.animal();
+        if (animal) payload.animal = animal;
       }
       const fingerprint = await fingerprintPayload(payload);
       let requestId;

@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {buildMultipartOrder,idempotencyKey,normalizeReceipt,safeWhatsAppUrl,SUBMIT_ENDPOINT} from '../order-adapter.js';
 import {fingerprintPayload,getOrCreateRequestId,resetSavedAttempt} from '../order.js';
+import {LEGACY_IDS,LEGACY_CATALOG_SHA256,legacyItems,NEW_MODELS} from './catalog-contract.mjs';
 
 const id = 'b142f07c-6fb2-4b99-842f-b12817c88df3';
 const orderId = 'd7f5c088-ece8-4e54-90c3-05ca6f9730e5';
@@ -130,21 +131,26 @@ test('unconfirmed response cannot unlock success',() => {
     assert.throws(() => normalizeReceipt({...response,...patch},payload));
   }
 });
-test('catalog preserves existing models and appends the product video last',async () => {
+test('catalog preserves all eight exact legacy entries before the sixteen additions',async () => {
   const catalog = JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
-  assert.equal(catalog.catalog.length,8);
-  assert.equal(new Set(catalog.catalog.map(item => item.id)).size,8);
+  assert.equal(catalog.catalog.length,24);
+  assert.equal(new Set(catalog.catalog.map(item => item.id)).size,24);
+  const legacy = legacyItems(catalog);
+  assert.equal(legacy.length,8);
+  assert.deepEqual(catalog.catalog.slice(0,8).map(item=>item.id),LEGACY_IDS);
+  assert.equal(createHash('sha256').update(JSON.stringify(legacy)).digest('hex'),LEGACY_CATALOG_SHA256);
   assert.deepEqual(catalog.prices,{'10':1990,'20':2990});
-  assert.equal(catalog.catalog.filter(item => item.creativeTemplate).length,5);
+  assert.equal(legacy.filter(item => item.creativeTemplate).length,5);
   for (const existing of ['4bb25879-a745-4577-812a-5a94286e324c','7503ea91-b4f7-41eb-9869-be10f23df935']) {
     assert.equal(catalog.catalog.find(item => item.id === existing)?.version,3);
   }
   assert.equal(catalog.dailySelection.mode,'featured');
   const visible = catalog.catalog.filter(item => item.status === 'published');
-  assert.equal(visible.length,6);
+  assert.equal(visible.length,22);
   assert.deepEqual(catalog.dailySelection.videoIds,visible.map(item => item.id));
   assert.ok(visible.slice(0,5).every(item => item.creativeTemplate && item.orderEnabled));
-  assert.equal(visible.at(-1).recipe,'produtos');
+  assert.equal(legacy.at(-1).recipe,'produtos');
+  assert.deepEqual(visible.slice(6).map(item=>item.id),NEW_MODELS.map(row=>row[0]));
   assert.deepEqual(catalog.productsPrices,{'2':3800,'4':4800,'6':5800,'8':6800});
   assert.ok(visible.every(item => !/sextou|sabadou/i.test([item.label,item.title,item.phrase].join(' '))));
   assert.equal(catalog.catalog.filter(item => item.status === 'archived').length,2);
@@ -154,13 +160,22 @@ test('all catalog media/avatar paths resolve inside edit and exist',async () => 
   const catalog = JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
   for (const item of catalog.catalog) {
     for (const type of ['poster','video']) {
-      assert.match(item[type],/^\.\/media\/(?:[a-f0-9-]{36}|produtos-cardapio)\.(png|mp4)$/);
+      if(LEGACY_IDS.includes(item.id)) {
+        assert.match(item[type],/^\.\/media\/(?:[a-f0-9-]{36}|produtos-cardapio)\.(png|mp4)$/);
+      } else {
+        const model=NEW_MODELS.find(row=>row[0]===item.id);
+        assert.ok(model,'Only approved new media identifiers are allowed');
+        assert.equal(item[type],`./media/novos-20261020/${model[1]}.${type==='poster'?'png':'mp4'}`);
+      }
       const actual = await stat(new URL('../'+item[type].slice(2),import.meta.url));
       assert.ok(actual.size > 100000);
       assert.equal(new URL(item[type],'https://ia4tube.com/edit/').pathname.startsWith('/edit/media/'),true);
     }
   }
-  assert.equal((await readdir(new URL('../media/',import.meta.url))).length,16);
+  const rootMedia=await readdir(new URL('../media/',import.meta.url));
+  assert.equal(rootMedia.filter(name=>name!=='novos-20261020').length,16);
+  assert.deepEqual(rootMedia.filter(name=>name==='novos-20261020'),['novos-20261020']);
+  assert.equal((await readdir(new URL('../media/novos-20261020/',import.meta.url))).length,32);
   assert.ok((await stat(new URL('../assets/logo.png',import.meta.url))).size > 0);
 });
 test('public entry files contain no local/admin/token/test marker dependencies',async () => {

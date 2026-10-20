@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {runInNewContext} from 'node:vm';
+import {LEGACY_IDS,legacyItems} from './catalog-contract.mjs';
 
 const app = await readFile(new URL('../app.js',import.meta.url),'utf8');
 const page = await readFile(new URL('../index.html',import.meta.url),'utf8');
@@ -22,7 +23,8 @@ function renderCard(item = fixture,videoOnly = false) {
   const article = {dataset:{},attributes:{},setAttribute(name,value){this.attributes[name] = value;}};
   runInNewContext(construction,{
     item,creator:catalog.creator,prices:catalog.prices,videoOnly,
-    startingPrice:row => row.recipe === 'produtos' ? catalog.productsPrices['2'] : catalog.prices['10'],
+    startingPrice:runInNewContext(app.match(/const startingPrice = [^\n]+/)[0] + '\nstartingPrice',
+      {data:catalog,prices:catalog.prices},{timeout:1000}),
     esc:escapeHtml,mediaPath:value => value,
     money:cents => 'R$ ' + (cents / 100).toFixed(2).replace('.',','),
     icon:name => '<svg aria-hidden="true" data-icon="' + escapeHtml(name) + '"></svg>',
@@ -61,12 +63,13 @@ test('five lateral controls retain avatar, sound, play, information and interfac
 });
 
 test('each model keeps only its correct starting price and order action',() => {
-  assert.equal(catalog.catalog.length,8);
+  assert.equal(catalog.catalog.length,24);
   for (const item of catalog.catalog) {
     const {innerHTML} = renderCard(item);
     assert.equal([...innerHTML.matchAll(/class="offer-row"/g)].length,1);
     assert.equal([...innerHTML.matchAll(/class="offer-price"/g)].length,1);
-    assert.ok(innerHTML.includes('<strong>' + (item.recipe === 'produtos' ? 'R$ 38,00' : 'R$ 19,90') + '</strong>'));
+    const expectedCents = item.recipe === 'produtos' ? 3800 : item.prices?.['10'] ?? 1990;
+    assert.ok(innerHTML.includes('<strong>R$ ' + (expectedCents / 100).toFixed(2).replace('.',',') + '</strong>'));
     const cta = innerHTML.match(/<button class="make-button">([\s\S]*?)<\/button>/)?.[1];
     assert.equal(visibleText(cta || ''),'Fazer meu pedido');
   }
@@ -99,8 +102,9 @@ test('legacy form stays intact apart from isolated products and optional-price f
 
 test('archiving weekend cards preserves every model, media reference and price',() => {
   const original = structuredClone(catalog);
-  original.catalog = original.catalog.filter(row => row.recipe !== 'produtos');
-  original.dailySelection.videoIds = original.dailySelection.videoIds.filter(id => id !== '2830b796-2375-49e8-8e97-9a731c115252');
+  original.catalog = legacyItems(original).filter(row => row.recipe !== 'produtos');
+  original.dailySelection.videoIds = original.dailySelection.videoIds.filter(id => LEGACY_IDS.includes(id) && id !== '2830b796-2375-49e8-8e97-9a731c115252');
+  original.dailySelection.date = '2026-10-18';
   delete original.productsPrices;
   const weekendIds = ['4bb25879-a745-4577-812a-5a94286e324c','7503ea91-b4f7-41eb-9869-be10f23df935'];
   for (const id of weekendIds) {
@@ -113,8 +117,8 @@ test('archiving weekend cards preserves every model, media reference and price',
   original.dailySelection.videoIds.unshift(...weekendIds);
   assert.equal(digest(JSON.stringify(original,null,2)+'\n'),'1bf55daed8fe8a351ad7a79c40a427c33b1bd57deae6715c458d7cf8cfd3c56f');
   assert.deepEqual(catalog.prices,{'10':1990,'20':2990});
-  assert.equal(catalog.catalog.filter(item => item.creativeTemplate).length,5);
-  assert.equal(catalog.catalog.filter(item => !item.creativeTemplate && item.recipe !== 'produtos').length,2);
+  assert.equal(legacyItems(catalog).filter(item => item.creativeTemplate).length,5);
+  assert.equal(legacyItems(catalog).filter(item => !item.creativeTemplate && item.recipe !== 'produtos').length,2);
 });
 
 test('top navigation, profile and model details remain available',() => {

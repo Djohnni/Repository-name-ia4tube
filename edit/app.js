@@ -1,4 +1,4 @@
-import { createOrderController } from './order.js?v=20261019-price';
+import { createOrderController } from './order.js?v=20261020-styles';
 
 const paths = {
   home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
@@ -17,7 +17,7 @@ const paths = {
 const icon = name => `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.info}</svg>`;
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money = cents => Number.isSafeInteger(cents) ? (cents / 100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : 'Consulte';
-const startingPrice = item => item.recipe === 'produtos' ? data.productsPrices?.['2'] : prices['10'];
+const startingPrice = item => item.recipe === 'produtos' ? data.productsPrices?.['2'] : (item.prices?.['10'] ?? prices['10']);
 const mediaPath = value => {
   try {const url = new URL(value,location.href);return url.origin === location.origin && !url.username && !url.password ? url.pathname + url.search : '';}
   catch {return '';}

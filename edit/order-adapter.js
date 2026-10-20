@@ -50,6 +50,7 @@ export function buildMultipartOrder(payload) {
     sextou:{businessType:'auto',date:null,copyId:'trabalho-sabor',durationSeconds:payload.durationSeconds},
     showcase:{videoId:payload.videoId,videoVersion:payload.videoVersion},
     ...(productPrice ? {productPrice} : {}),
+    ...(payload.animal ? {animal:payload.animal} : {}),
   }));
   form.append('logo',uploadBlob(payload.logo,5 * 1024 * 1024,'Logo'),payload.logo.name);
   if (payload.photo) form.append('photos',uploadBlob(payload.photo,10 * 1024 * 1024,'Foto do produto'),payload.photo.name);
