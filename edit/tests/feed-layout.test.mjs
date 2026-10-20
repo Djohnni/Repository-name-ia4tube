@@ -63,7 +63,7 @@ test('five lateral controls retain avatar, sound, play, information and interfac
 });
 
 test('each model keeps only its correct starting price and order action',() => {
-  assert.equal(catalog.catalog.length,24);
+  assert.equal(catalog.catalog.length,27);
   for (const item of catalog.catalog) {
     const {innerHTML} = renderCard(item);
     assert.equal([...innerHTML.matchAll(/class="offer-row"/g)].length,1);

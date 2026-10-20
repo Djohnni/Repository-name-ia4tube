@@ -530,6 +530,72 @@
       "prices": {
         "10": 2200
       }
+    },
+    {
+      "title": "Pizza · Menos papo. Mais sabor",
+      "label": "Pizza · Menos papo. Mais sabor",
+      "kind": "Personalizado com sua logo e produto.",
+      "note": "Exemplo de pizza com marca fictícia. Vídeo de 10 segundos com sua logo e produto. Preço na arte é opcional.",
+      "video": "./media/pizzas-20261020/pizza-minimalista.mp4",
+      "poster": "./media/pizzas-20261020/pizza-minimalista.png",
+      "duration": 10,
+      "recipe": "sextou",
+      "copyId": "trabalho-sabor",
+      "status": "published",
+      "featuredDate": "2026-10-20",
+      "creativeTemplate": "minimalista-premium-v1",
+      "id": "0a38a604-2858-4395-a980-9977e130ce2c",
+      "version": 1,
+      "creatorId": "ia4tube",
+      "phrase": "MENOS PAPO. MAIS SABOR.",
+      "orderEnabled": true,
+      "prices": {
+        "10": 2100
+      }
+    },
+    {
+      "title": "Pizza · Clássico de respeito",
+      "label": "Pizza · Clássico de respeito",
+      "kind": "Personalizado com sua logo e produto.",
+      "note": "Exemplo de pizza com marca fictícia. Vídeo de 10 segundos com sua logo e produto. Preço na arte é opcional.",
+      "video": "./media/pizzas-20261020/pizza-retro.mp4",
+      "poster": "./media/pizzas-20261020/pizza-retro.png",
+      "duration": 10,
+      "recipe": "sextou",
+      "copyId": "trabalho-sabor",
+      "status": "published",
+      "featuredDate": "2026-10-20",
+      "creativeTemplate": "diner-retro-v1",
+      "id": "53b147d4-23c8-447b-9b03-aee70a57693d",
+      "version": 1,
+      "creatorId": "ia4tube",
+      "phrase": "CLÁSSICO DE RESPEITO.",
+      "orderEnabled": true,
+      "prices": {
+        "10": 2400
+      }
+    },
+    {
+      "title": "Pizza · A fome perdeu",
+      "label": "Pizza · A fome perdeu",
+      "kind": "Personalizado com sua logo e produto.",
+      "note": "Exemplo de pizza com marca fictícia. Vídeo de 10 segundos com sua logo e produto. Preço na arte é opcional.",
+      "video": "./media/pizzas-20261020/pizza-jogo.mp4",
+      "poster": "./media/pizzas-20261020/pizza-jogo.png",
+      "duration": 10,
+      "recipe": "sextou",
+      "copyId": "trabalho-sabor",
+      "status": "published",
+      "featuredDate": "2026-10-20",
+      "creativeTemplate": "dia-de-jogo-v1",
+      "id": "088347f6-b7c6-4ad4-bc01-3608edfc3277",
+      "version": 1,
+      "creatorId": "ia4tube",
+      "phrase": "A FOME PERDEU.",
+      "orderEnabled": true,
+      "prices": {
+        "10": 2400
+      }
     }
   ],
   "dailySelection": {
@@ -557,7 +623,10 @@
       "d4678eac-46a2-4de6-9c99-f66b14c7edae",
       "2aab4aaa-d06e-457f-867e-2ec621f82407",
       "c65c2636-723e-4e7a-9aae-01b0aae7d26c",
-      "cfcc6a78-9112-4058-b1c3-f39174dcc1ed"
+      "cfcc6a78-9112-4058-b1c3-f39174dcc1ed",
+      "0a38a604-2858-4395-a980-9977e130ce2c",
+      "53b147d4-23c8-447b-9b03-aee70a57693d",
+      "088347f6-b7c6-4ad4-bc01-3608edfc3277"
     ]
   },
   "productsPrices": {

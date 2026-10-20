@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile,readdir} from 'node:fs/promises';
-import {NEW_MODELS,LEGACY_IDS} from './catalog-contract.mjs';
+import {NEW_MODELS,LEGACY_IDS,PIZZA_EXAMPLES} from './catalog-contract.mjs';
 
 const data=JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
-const additions=data.catalog.filter(item=>!LEGACY_IDS.includes(item.id));
+const additions=data.catalog.filter(item=>!LEGACY_IDS.includes(item.id)
+  && !PIZZA_EXAMPLES.some(row=>row[0]===item.id));
 const animals={capivara:'Capivara',preguica:'Bicho-preguiça',gato:'Gato',cachorro:'Cachorro',
   leao:'Leão',tigre:'Tigre',urso:'Urso',panda:'Panda',raposa:'Raposa',coelho:'Coelho'};
 

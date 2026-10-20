@@ -32,3 +32,14 @@ export const NEW_MODELS = [
   ['c65c2636-723e-4e7a-9aae-01b0aae7d26c','mundo-massinha-v1',2700,'FOME DE DIVERSÃO.'],
   ['cfcc6a78-9112-4058-b1c3-f39174dcc1ed','depois-do-voto-v1',2200,'DEPOIS DO VOTO, BORA DE LANCHE.'],
 ];
+
+// Separate example identities; existing recipes and their price/phrase stay fixed.
+export const PIZZA_EXAMPLES = [
+  ['0a38a604-2858-4395-a980-9977e130ce2c','minimalista-premium-v1',2100,
+    'MENOS PAPO. MAIS SABOR.','Pizza · Menos papo. Mais sabor','pizza-minimalista'],
+  ['53b147d4-23c8-447b-9b03-aee70a57693d','diner-retro-v1',2400,
+    'CLÁSSICO DE RESPEITO.','Pizza · Clássico de respeito','pizza-retro'],
+  ['088347f6-b7c6-4ad4-bc01-3608edfc3277','dia-de-jogo-v1',2400,
+    'A FOME PERDEU.','Pizza · A fome perdeu','pizza-jogo'],
+];
+export const PRE_PIZZA_CATALOG_SHA256 = '6336aaf9a2c3e4d074a219eda79e08f4493ad7746e8de906b5543e841fd63cc6';
