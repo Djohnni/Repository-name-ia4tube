@@ -6,6 +6,7 @@ import {fileURLToPath} from 'node:url';
 import {buildMultipartOrder,idempotencyKey,normalizeReceipt,safeWhatsAppUrl,SUBMIT_ENDPOINT} from '../order-adapter.js';
 import {fingerprintPayload,getOrCreateRequestId,confirmSavedAttempt} from '../order.js';
 import {LEGACY_IDS,LEGACY_CATALOG_SHA256,legacyItems,NEW_MODELS,PIZZA_EXAMPLES,COMBO_EXAMPLES} from './catalog-contract.mjs';
+import {NATIVE_MEDIA,nativeMediaPath,restorePriorMediaForHistory} from './native-media-contract.mjs';
 
 const id = 'b142f07c-6fb2-4b99-842f-b12817c88df3';
 const orderId = 'd7f5c088-ece8-4e54-90c3-05ca6f9730e5';
@@ -138,7 +139,7 @@ test('catalog preserves eight exact legacy entries followed by sixteen recipes, 
   const legacy = legacyItems(catalog);
   assert.equal(legacy.length,8);
   assert.deepEqual(catalog.catalog.slice(0,8).map(item=>item.id),LEGACY_IDS);
-  assert.equal(createHash('sha256').update(JSON.stringify(legacy)).digest('hex'),LEGACY_CATALOG_SHA256);
+  assert.equal(createHash('sha256').update(JSON.stringify(restorePriorMediaForHistory(legacy))).digest('hex'),LEGACY_CATALOG_SHA256);
   assert.deepEqual(catalog.prices,{'10':1990,'20':2990});
   assert.equal(legacy.filter(item => item.creativeTemplate).length,5);
   for (const existing of ['4bb25879-a745-4577-812a-5a94286e324c','7503ea91-b4f7-41eb-9869-be10f23df935']) {
@@ -162,7 +163,9 @@ test('all catalog media/avatar paths resolve inside edit and exist',async () => 
   const catalog = JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
   for (const item of catalog.catalog) {
     for (const type of ['poster','video']) {
-      if(LEGACY_IDS.includes(item.id)) {
+      if(NATIVE_MEDIA.some(row=>row.id===item.id)) {
+        assert.equal(item[type],nativeMediaPath(NATIVE_MEDIA.find(row=>row.id===item.id),type));
+      } else if(LEGACY_IDS.includes(item.id)) {
         assert.match(item[type],/^\.\/media\/(?:[a-f0-9-]{36}|produtos-cardapio)\.(png|mp4)$/);
       } else if(PIZZA_EXAMPLES.some(row=>row[0]===item.id)) {
         const example=PIZZA_EXAMPLES.find(row=>row[0]===item.id);
@@ -181,7 +184,7 @@ test('all catalog media/avatar paths resolve inside edit and exist',async () => 
     }
   }
   const rootMedia=await readdir(new URL('../media/',import.meta.url));
-  const additionDirectories=['combos-20261020','novos-20261020','pizzas-20261020'];
+  const additionDirectories=['audio-api-20261021','combos-20261020','novos-20261020','pizzas-20261020'];
   assert.equal(rootMedia.filter(name=>!additionDirectories.includes(name)).length,16);
   assert.deepEqual(rootMedia.filter(name=>additionDirectories.includes(name)).sort(),additionDirectories);
   assert.equal((await readdir(new URL('../media/novos-20261020/',import.meta.url))).length,32);

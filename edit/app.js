@@ -1,4 +1,5 @@
 import { createOrderController } from './order.js?v=20261021-upload';
+import { createPlaybackAudio } from './playback-audio.js?v=20261021-native-sound';
 
 const paths = {
   home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
@@ -30,9 +31,10 @@ const progress = document.querySelector('#progress');
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let catalog = [],daily = [],cards = [],videos = [],playlist = [];
 let creator = {name:'iA4tube',avatar:'./assets/logo.png'},prices = {},data = null;
-let activeIndex = 0,soundEnabled = false,userPaused = reduceMotion,routeIsProfile = false;
+let activeIndex = 0,soundEnabled = true,userPaused = reduceMotion,routeIsProfile = false;
 let progressFrame = 0,toastTimer,playlistKey = '';
 let videoOnly = false;
+const playbackAudio = createPlaybackAudio({onChange:syncSound});
 const order = createOrderController({dialog:personalize,money,toast,onBusy:playback});
 
 function activeCard() {return cards[activeIndex];}
@@ -62,13 +64,18 @@ function syncPlayButton(card) {
   button.innerHTML = icon(paused ? 'play' : 'pause');
   button.setAttribute('aria-label',paused ? 'Reproduzir vídeo' : 'Pausar vídeo');
 }
-function syncSound() {
+function syncSound(state = playbackAudio.getState()) {
+  soundEnabled = state.audible;
   videos.forEach(video => video.muted = !soundEnabled);
   document.querySelectorAll('.sound-toggle').forEach(button => {
-    button.innerHTML = icon(soundEnabled ? 'sound' : 'muted');
+    button.innerHTML = icon(soundEnabled ? 'sound' : 'muted') + (state.enabled && state.blocked ? '<span class="sound-hint">Toque para ouvir</span>' : '');
     button.setAttribute('aria-label',soundEnabled ? 'Desativar som' : 'Ativar som');
     button.setAttribute('aria-pressed',String(soundEnabled));
   });
+}
+function toggleSound() {
+  playbackAudio.setEnabled(!playbackAudio.getState().audible);
+  playback();
 }
 function tick() {
   cancelAnimationFrame(progressFrame);
@@ -77,9 +84,13 @@ function tick() {
   if (video && !video.paused && canPlay()) progressFrame = requestAnimationFrame(tick);
 }
 function playback() {
-  videos.forEach((video,index) => {if (index !== activeIndex || !canPlay()) video.pause();});
+  videos.forEach((video,index) => {if (index !== activeIndex || !canPlay()) {playbackAudio.cancel(video);video.pause();}});
   const video = videos[activeIndex];
-  if (video && canPlay()) video.play().then(tick).catch(() => syncPlayButton(activeCard()));
+  if (video && canPlay()) playbackAudio.play(video,{
+    isCurrent:() => videos[activeIndex] === video && canPlay(),
+    onPlaying:tick,
+    onError:() => syncPlayButton(activeCard()),
+  });
   tick();
 }
 function togglePlay() {if (!videos[activeIndex]) return;userPaused = !videos[activeIndex].paused;playback();}
@@ -98,7 +109,7 @@ const observer = new IntersectionObserver(entries => {
 
 function renderFeed(items,key) {
   if (playlistKey === key) return;
-  observer.disconnect();videos.forEach(video => video.pause());cancelAnimationFrame(progressFrame);
+  observer.disconnect();videos.forEach(video => {playbackAudio.cancel(video);video.pause();});cancelAnimationFrame(progressFrame);
   playlist = items;playlistKey = key;activeIndex = 0;feed.replaceChildren();
   for (const item of items) {
     const article = document.createElement('article');
@@ -106,7 +117,7 @@ function renderFeed(items,key) {
     article.setAttribute('aria-label',`${item.label}: ${item.title}`);
     article.innerHTML = `<video src="${esc(mediaPath(item.video))}" poster="${esc(mediaPath(item.poster))}" muted loop playsinline preload="metadata" aria-label="Vídeo ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle play-toggle" aria-label="Pausar vídeo">${icon('pause')}</button><button class="circle model-info" aria-label="Detalhes deste modelo">${icon('info')}</button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>${item.orderEnabled ? 'a partir de' : 'referência visual'}</small><strong>${item.orderEnabled ? money(startingPrice(item)) : 'Em breve'}</strong></div><button class="make-button">${item.orderEnabled ? 'Fazer meu pedido' : 'Ver detalhes'} ${icon('arrow-up-right')}</button></div></div>`;
     article.querySelector('.creator-action').addEventListener('click',() => location.hash = 'perfil');
-    article.querySelector('.sound-toggle').addEventListener('click',() => {soundEnabled = !soundEnabled;syncSound();toast(soundEnabled ? 'Som ativado' : 'Som desativado');});
+    article.querySelector('.sound-toggle').addEventListener('click',toggleSound);
     article.querySelector('.play-toggle').addEventListener('click',togglePlay);
     article.querySelector('.interface-toggle').addEventListener('click',() => setVideoOnly(!videoOnly));
     article.querySelector('video').addEventListener('click',togglePlay);

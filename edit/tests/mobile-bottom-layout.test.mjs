@@ -60,5 +60,5 @@ test('mobile overlay change does not resize the player or alter the order form',
 });
 
 test('stylesheet URL is versioned for the mobile layout update',() => {
-  assert.match(page,/<link rel="stylesheet" href="\.\/styles\.css\?v=20261021-mobile-layout">/);
+  assert.match(page,/<link rel="stylesheet" href="\.\/styles\.css\?v=20261021-native-sound">/);
 });

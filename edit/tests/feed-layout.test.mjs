@@ -4,6 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {runInNewContext} from 'node:vm';
 import {LEGACY_IDS,legacyItems} from './catalog-contract.mjs';
+import {restorePriorMediaForHistory} from './native-media-contract.mjs';
 
 const app = await readFile(new URL('../app.js',import.meta.url),'utf8');
 const page = await readFile(new URL('../index.html',import.meta.url),'utf8');
@@ -102,7 +103,7 @@ test('legacy form stays intact apart from isolated products and optional-price f
 
 test('archiving weekend cards preserves every model, media reference and price',() => {
   const original = structuredClone(catalog);
-  original.catalog = legacyItems(original).filter(row => row.recipe !== 'produtos');
+  original.catalog = restorePriorMediaForHistory(legacyItems(original).filter(row => row.recipe !== 'produtos'));
   original.dailySelection.videoIds = original.dailySelection.videoIds.filter(id => LEGACY_IDS.includes(id) && id !== '2830b796-2375-49e8-8e97-9a731c115252');
   original.dailySelection.date = '2026-10-18';
   delete original.productsPrices;
