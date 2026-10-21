@@ -4,7 +4,8 @@ import {getOrCreateRequestId,confirmSavedAttempt} from '../order.js';
 
 const fingerprint = 'a'.repeat(64);
 const otherFingerprint = 'b'.repeat(64);
-const attemptKey = 'ia4tube.edit.attempt.v1.' + fingerprint;
+const attemptKey = 'ia4tube.edit.attempt.v2.' + fingerprint;
+const legacyAttemptKey = 'ia4tube.edit.attempt.v1.' + fingerprint;
 const pendingKey = 'ia4tube.edit.pending.v1.' + fingerprint;
 const legacyId = '0c521fbc-a903-44b8-af74-37cbda3c1371';
 const receipt = requestId => ({orderId:'18a1bdb1-0079-4ab3-8a35-ceafda305919',
@@ -63,18 +64,35 @@ test('replaying an old receipt cannot clear a newer pending request in the same 
   assert.equal(getOrCreateRequestId(fingerprint,global,tab),second);
 });
 
-test('legacy UUID with a known Gastro receipt retires only that completed attempt',()=>{
-  const global = memoryStorage([[attemptKey,legacyId],['unrelated-setting','preserve']]);
+test('known legacy receipt allows a new purchase while preserving historical storage',()=>{
+  const global = memoryStorage([[legacyAttemptKey,legacyId],['unrelated-setting','preserve']]);
   const tab = memoryStorage();
   confirmSavedAttempt(receipt(legacyId),global,tab);
   assert.notEqual(getOrCreateRequestId(fingerprint,global,tab),legacyId);
+  assert.equal(global.getItem(legacyAttemptKey),legacyId);
   assert.equal(global.getItem('unrelated-setting'),'preserve');
 });
 
-test('legacy UUID without a confirmed receipt stays available for recovery',()=>{
-  const global = memoryStorage([[attemptKey,legacyId]]), tab = memoryStorage();
+test('legacy UUID without an explicit tab pending attempt cannot replay a historical order',()=>{
+  const global = memoryStorage([[legacyAttemptKey,legacyId]]), tab = memoryStorage();
+  const current=getOrCreateRequestId(fingerprint,global,tab);
+  assert.notEqual(current,legacyId);
+  assert.equal(global.getItem(legacyAttemptKey),legacyId);
+  assert.equal(global.getItem(attemptKey),current);
+  assert.equal(tab.getItem(pendingKey),current);
+});
+
+test('explicit per-tab pending request from the previous version remains retryable',()=>{
+  const global = memoryStorage([[legacyAttemptKey,legacyId]]), tab = memoryStorage([[pendingKey,legacyId]]);
   assert.equal(getOrCreateRequestId(fingerprint,global,tab),legacyId);
   assert.equal(tab.getItem(pendingKey),legacyId);
+  assert.equal(global.getItem(legacyAttemptKey),legacyId);
+  confirmSavedAttempt(receipt(legacyId),global,tab);
+  assert.equal(tab.getItem(pendingKey),null);
+  const next=getOrCreateRequestId(fingerprint,global,tab);
+  assert.notEqual(next,legacyId);
+  assert.equal(global.getItem(legacyAttemptKey),legacyId);
+  assert.equal(global.getItem(attemptKey),next);
 });
 
 test('missing or invalid confirmation never retires a pending attempt',()=>{

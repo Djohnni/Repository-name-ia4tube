@@ -3,7 +3,10 @@ import { createModelOptions } from './model-options.js?v=20261020-styles';
 import { createProductsForm } from './products-form.js?v=20261019-products';
 import { normalizeProductPrice } from './optional-price.js?v=20261019-price';
 
-const ATTEMPT_PREFIX = 'ia4tube.edit.attempt.v1.';
+// v1 permanently identified matching content, including completed purchases
+// without a receipt in this tab. Keep those records untouched as history;
+// only explicit per-tab pending attempts may recover a pre-migration request.
+const ATTEMPT_PREFIX = 'ia4tube.edit.attempt.v2.';
 const PENDING_PREFIX = 'ia4tube.edit.pending.v1.';
 const RECEIPT_KEY = 'ia4tube.edit.receipt.v1';
 const ACCEPTED_TYPES = new Set(['image/png','image/jpeg','image/webp']);
@@ -11,7 +14,7 @@ const REQUEST_ID = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f
 
 function storedAttempt(raw) {
   if (!raw) return null;
-  // Preserve pre-update requests whose response may have been lost.
+  // Unconfirmed attempts in this lifecycle remain recoverable after a timeout.
   if (REQUEST_ID.test(raw)) return {requestId:raw,confirmed:false};
   const value = JSON.parse(raw);
   if (!value || !REQUEST_ID.test(value.requestId) || value.confirmed !== true) throw new Error('Não foi possível recuperar esta tentativa.');
@@ -168,11 +171,11 @@ export function createOrderController({dialog,money,toast,onBusy}) {
       const fingerprint = await fingerprintPayload(payload);
       let requestId;
       try {
+        // Finalize the previous known receipt before another model can replace
+        // it. Its own lock protects unrelated newer purchases in other tabs.
+        const known = knownReceipt();
+        if (known) await withAttemptLock(known.fingerprint,() => confirmSavedAttempt(known,localStorage,sessionStorage));
         requestId = await withAttemptLock(fingerprint,() => {
-          // Migrate only a known confirmed receipt, including the previous Gastro
-          // purchase; uncertain requests must remain available for safe retries.
-          const known = knownReceipt();
-          if (known?.fingerprint === fingerprint) confirmSavedAttempt(known,localStorage,sessionStorage);
           return getOrCreateRequestId(fingerprint,localStorage,sessionStorage);
         });
       } catch {throw new Error('Ative o armazenamento deste navegador para salvar o pedido sem duplicações. Nenhum pedido foi enviado.');}

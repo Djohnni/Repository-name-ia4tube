@@ -1,10 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createOrderController} from '../order.js';
+import {createOrderController,fingerprintPayload} from '../order.js';
+import {idempotencyKey} from '../order-adapter.js';
 
 const item = {id:'b142f07c-6fb2-4b99-842f-b12817c88df3',version:2,recipe:'sextou',orderEnabled:true};
 const config = {prices:{10:1990,20:2990}};
-const savedIds = ['d7f5c088-ece8-4e54-90c3-05ca6f9730e5','47f5c088-ece8-4e54-90c3-05ca6f9730e6'];
+const savedIds = ['d7f5c088-ece8-4e54-90c3-05ca6f9730e5','47f5c088-ece8-4e54-90c3-05ca6f9730e6','57f5c088-ece8-4e54-90c3-05ca6f9730e7'];
+const legacyId='0c521fbc-a903-44b8-af74-37cbda3c1371';
+const companyFingerprint=company=>fingerprintPayload({videoId:item.id,videoVersion:item.version,company,durationSeconds:10,
+  logo:{name:'logo.png',mime:'image/png',data:btoa('logo')},photo:null,consent:true});
 const memoryStorage = () => {
   const values = new Map();
   return {values,getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,String(value)),removeItem:key=>values.delete(key)};
@@ -182,6 +186,39 @@ test('reopening and submitting identical data creates a new identity without cli
   assert.notEqual(firstReceipt.orderId,secondReceipt.orderId);
 });
 
+test('legacy company A without receipt, followed by B and A, creates three fresh orders',async t=>{
+  const f=fixture(t),fingerprint=await companyFingerprint('Deoutromundo');
+  const legacyKey='ia4tube.edit.attempt.v1.'+fingerprint;
+  f.local.setItem(legacyKey,legacyId);
+  f.node('#order-company').value='Deoutromundo';
+  const first=f.submit();await f.waitForRequest(1);
+  assert.notEqual(f.requests[0].options.headers['Idempotency-Key'],await idempotencyKey(legacyId),'even the first POST must not replay the historical order');
+  f.succeed();await first;
+  assert.equal(JSON.parse(f.session.getItem('ia4tube.edit.receipt.v1')).fingerprint,fingerprint);
+  f.reopen();const second=f.submit();await f.waitForRequest(2);f.succeed(1);await second;
+  f.reopen();f.node('#order-company').value='Deoutromundo';
+  const third=f.submit();await f.waitForRequest(3);f.succeed(2);await third;
+  assert.equal(new Set(f.requests.map(request=>request.options.headers['Idempotency-Key'])).size,3);
+  assert.equal(f.requests[0].options.body.get('data'),f.requests[2].options.body.get('data'));
+  assert.notEqual(f.requests[0].options.body.get('data'),f.requests[1].options.body.get('data'));
+  assert.equal(f.local.getItem(legacyKey),legacyId,'historical data remains intact');
+  assert.equal(JSON.parse(f.session.getItem('ia4tube.edit.receipt.v1')).orderId,savedIds[2]);
+});
+
+test('known confirmed receipt retires its pending request even when the next payload differs',async t=>{
+  const f=fixture(t),fingerprint=await companyFingerprint('Deoutromundo');
+  const pendingKey='ia4tube.edit.pending.v1.'+fingerprint;
+  const attemptKey='ia4tube.edit.attempt.v2.'+fingerprint;
+  f.local.setItem(attemptKey,legacyId);f.session.setItem(pendingKey,legacyId);
+  f.session.setItem('ia4tube.edit.receipt.v1',JSON.stringify({orderId:savedIds[0],status:'awaiting_authorization',fingerprint,requestId:legacyId}));
+  // The form contains Gastro, not Deoutromundo: the receipt still confirms A.
+  const next=f.submit();await f.waitForRequest(1);
+  assert.equal(f.session.getItem(pendingKey),null);
+  assert.deepEqual(JSON.parse(f.local.getItem(attemptKey)),{requestId:legacyId,confirmed:true});
+  assert.notEqual(f.requests[0].options.headers['Idempotency-Key'],await idempotencyKey(legacyId));
+  f.succeed(0,savedIds[1]);await next;
+});
+
 test('a timeout preserves the same identity for retry instead of making an uncertain duplicate',async t=>{
   const f=fixture(t),first=f.submit();const original=await f.waitForRequest(1);
   original.reject(Object.assign(new Error('Timed out'),{name:'AbortError'}));await first;
@@ -221,7 +258,7 @@ for(const failure of ['quota exception','silent write failure']) {
     assert.equal(f.navigation.length,0,'do not leave the confirmation without a restorable receipt');
     assert.equal(f.session.getItem('ia4tube.edit.receipt.v1'),null);
     assert.equal([...f.session.values.keys()].filter(key=>key.startsWith('ia4tube.edit.pending.v1.')).length,1);
-    const attempts=[...f.local.values.entries()].filter(([key])=>key.startsWith('ia4tube.edit.attempt.v1.'));
+    const attempts=[...f.local.values.entries()].filter(([key])=>key.startsWith('ia4tube.edit.attempt.v2.'));
     assert.equal(attempts.length,1);
     assert.match(attempts[0][1],/^[a-f0-9-]{36}$/,'unretired attempt is retained, not marked confirmed');
     await f.submit();assert.equal(f.requests.length,1,'a late event still cannot submit from confirmation');
