@@ -4,7 +4,7 @@ import {readFile,stat,readdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {buildMultipartOrder,idempotencyKey,normalizeReceipt,safeWhatsAppUrl,SUBMIT_ENDPOINT} from '../order-adapter.js';
-import {fingerprintPayload,getOrCreateRequestId,resetSavedAttempt} from '../order.js';
+import {fingerprintPayload,getOrCreateRequestId,confirmSavedAttempt} from '../order.js';
 import {LEGACY_IDS,LEGACY_CATALOG_SHA256,legacyItems,NEW_MODELS,PIZZA_EXAMPLES,COMBO_EXAMPLES} from './catalog-contract.mjs';
 
 const id = 'b142f07c-6fb2-4b99-842f-b12817c88df3';
@@ -78,20 +78,20 @@ test('same fingerprint reuses request ID; changed file/model creates another',as
   const otherFile = await fingerprintPayload({...payload,logo:{...payload.logo,data:'AQID'}});
   assert.notEqual(getOrCreateRequestId(otherFile,storage),first);
 });
-test('Fazer outro pedido creates a new attempt only after a saved receipt',async () => {
+test('confirmed success automatically makes the next identical submission a new order',async () => {
   const storage = memoryStorage();
   const fingerprint = await fingerprintPayload(payload);
   const first = getOrCreateRequestId(fingerprint,storage);
-  assert.throws(() => resetSavedAttempt({fingerprint,requestId:first},storage));
+  assert.throws(() => confirmSavedAttempt({fingerprint,requestId:first},storage));
   assert.equal(getOrCreateRequestId(fingerprint,storage),first);
-  resetSavedAttempt({orderId,status:'awaiting_authorization',fingerprint,requestId:first},storage);
+  confirmSavedAttempt({orderId,status:'awaiting_authorization',fingerprint,requestId:first},storage);
   assert.notEqual(getOrCreateRequestId(fingerprint,storage),first);
 });
 test('old receipt cannot remove a newer tab attempt',async () => {
   const storage = memoryStorage();
   const fingerprint = await fingerprintPayload(payload);
   const newer = getOrCreateRequestId(fingerprint,storage);
-  resetSavedAttempt({orderId,status:'awaiting_authorization',fingerprint,requestId},storage);
+  confirmSavedAttempt({orderId,status:'awaiting_authorization',fingerprint,requestId},storage);
   assert.equal(getOrCreateRequestId(fingerprint,storage),newer);
 });
 test('valid receipt retains order ID, API price, message and WhatsApp URL',() => {

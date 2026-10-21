@@ -9,7 +9,7 @@
   <title>Em destaque · iA4tube</title>
   <link rel="icon" href="./assets/logo.png">
   <link rel="stylesheet" href="./styles.css?v=20261019-products">
-  <script type="module" src="./app.js?v=20261020-styles"></script>
+  <script type="module" src="./app.js?v=20261020-new-order"></script>
 </head>
 <body>
   <a class="skip-link" href="#feed">Ir para os vídeos</a>
@@ -80,7 +80,7 @@
       <button type="submit" id="send-order" class="primary-action">Salvar pedido e ir para o WhatsApp <span data-icon="arrow-up-right"></span></button>
       <p class="order-local-note">Seu pedido será salvo antes de abrir o WhatsApp. Combine a confirmação e os próximos passos com a iA4tube.</p>
     </form>
-    <section id="order-success" class="order-success" aria-live="polite" hidden><span class="success-mark" data-icon="check"></span><h3>Pedido salvo!</h3><p id="saved-order-id"></p><p>Confirme o recebimento e os próximos passos pelo WhatsApp.</p><a id="whatsapp-link" class="primary-action" rel="noopener noreferrer">Continuar no WhatsApp <span data-icon="message"></span></a><button id="copy-message" class="secondary-action" type="button">Copiar mensagem</button><textarea id="saved-message" aria-label="Mensagem do pedido" readonly rows="6" hidden></textarea><p class="order-local-note">Se o WhatsApp não abrir, o pedido continua salvo. Use o botão acima ou copie a mensagem.</p><button id="new-order" class="secondary-action" type="button">Fazer outro pedido</button><p class="order-local-note">O pedido acima e seus arquivos continuam preservados. Esta opção permite iniciar uma nova compra, mesmo com os mesmos dados.</p></section>
+    <section id="order-success" class="order-success" aria-live="polite" hidden><span class="success-mark" data-icon="check"></span><h3>Pedido salvo!</h3><p id="saved-order-id"></p><p>Confirme o recebimento e os próximos passos pelo WhatsApp.</p><a id="whatsapp-link" class="primary-action" rel="noopener noreferrer">Continuar no WhatsApp <span data-icon="message"></span></a><button id="copy-message" class="secondary-action" type="button">Copiar mensagem</button><textarea id="saved-message" aria-label="Mensagem do pedido" readonly rows="6" hidden></textarea><p class="order-local-note">Se o WhatsApp não abrir, o pedido continua salvo. Use o botão acima ou copie a mensagem.</p><button id="new-order" class="secondary-action" type="button">Voltar aos vídeos</button><p class="order-local-note">Seu pedido está salvo. Você já pode escolher um vídeo e enviar outro pedido, mesmo com os mesmos dados.</p></section>
     <p id="display-only-note" class="preview-note" hidden>Este vídeo é apenas uma referência visual. A personalização ainda não foi habilitada para ele.</p>
   </dialog>
   <dialog id="about-dialog" class="sheet about-sheet" aria-labelledby="about-title"><button class="close-dialog circle" aria-label="Fechar"><span data-icon="close"></span></button><span class="eyebrow">COMO FUNCIONA</span><h2 id="about-title">Uma nova forma de escolher.</h2><p>Deslize pelos vídeos em destaque. No perfil, você encontra também os modelos anteriores.</p><p>“Fazer o meu” salva seu pedido antes de abrir o WhatsApp. Depois, envie a mensagem para confirmar os próximos passos.</p><p class="preview-note">Você recebe o vídeo pelo WhatsApp. A produção começa após a confirmação do pedido.</p><button class="primary-action close-about">Entendi, vamos ver <span data-icon="arrow-up-right"></span></button></dialog>

@@ -4,29 +4,57 @@ import { createProductsForm } from './products-form.js?v=20261019-products';
 import { normalizeProductPrice } from './optional-price.js?v=20261019-price';
 
 const ATTEMPT_PREFIX = 'ia4tube.edit.attempt.v1.';
+const PENDING_PREFIX = 'ia4tube.edit.pending.v1.';
 const RECEIPT_KEY = 'ia4tube.edit.receipt.v1';
 const ACCEPTED_TYPES = new Set(['image/png','image/jpeg','image/webp']);
+const REQUEST_ID = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i;
+
+function storedAttempt(raw) {
+  if (!raw) return null;
+  // Preserve pre-update requests whose response may have been lost.
+  if (REQUEST_ID.test(raw)) return {requestId:raw,confirmed:false};
+  const value = JSON.parse(raw);
+  if (!value || !REQUEST_ID.test(value.requestId) || value.confirmed !== true) throw new Error('Não foi possível recuperar esta tentativa.');
+  return value;
+}
 
 export async function fingerprintPayload(payload) {
   const bytes = new TextEncoder().encode(JSON.stringify(payload));
   const digest = await crypto.subtle.digest('SHA-256',bytes);
   return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2,'0')).join('');
 }
-export function getOrCreateRequestId(fingerprint,storage = localStorage) {
+export function getOrCreateRequestId(fingerprint,storage = localStorage,pendingStorage = null) {
   if (!/^[a-f0-9]{64}$/.test(fingerprint)) throw new Error('Não foi possível identificar esta tentativa.');
+  const pendingKey = PENDING_PREFIX + fingerprint;
+  const pending = pendingStorage?.getItem(pendingKey);
+  if (pending) {
+    if (!REQUEST_ID.test(pending)) throw new Error('Não foi possível recuperar esta tentativa.');
+    return pending;
+  }
   const key = ATTEMPT_PREFIX + fingerprint;
-  const existing = storage.getItem(key);
-  if (existing && /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(existing)) return existing;
-  const requestId = crypto.randomUUID();
-  storage.setItem(key,requestId);
-  if (storage.getItem(key) !== requestId) throw new Error('O navegador não conseguiu preservar esta tentativa.');
+  const existing = storedAttempt(storage.getItem(key));
+  const requestId = existing && !existing.confirmed ? existing.requestId : crypto.randomUUID();
+  if (requestId !== existing?.requestId) {
+    storage.setItem(key,requestId);
+    if (storage.getItem(key) !== requestId) throw new Error('O navegador não conseguiu preservar esta tentativa.');
+  }
+  if (pendingStorage) {
+    pendingStorage.setItem(pendingKey,requestId);
+    if (pendingStorage.getItem(pendingKey) !== requestId) throw new Error('O navegador não conseguiu preservar esta tentativa.');
+  }
   return requestId;
 }
-export function resetSavedAttempt(saved,storage = localStorage) {
-  if (!saved?.orderId || saved.status !== 'awaiting_authorization' || !/^[a-f0-9]{64}$/.test(saved.fingerprint || '') || !saved.requestId) throw new Error('Só é possível iniciar outro pedido após confirmar que este foi salvo.');
+export function confirmSavedAttempt(saved,storage = localStorage,pendingStorage = null) {
+  if (!REQUEST_ID.test(saved?.orderId || '') || saved.status !== 'awaiting_authorization' || !/^[a-f0-9]{64}$/.test(saved.fingerprint || '') || !REQUEST_ID.test(saved.requestId || '')) throw new Error('Só é possível iniciar outro pedido após confirmar que este foi salvo.');
   const key = ATTEMPT_PREFIX + saved.fingerprint;
-  // A newer attempt in another tab must never be removed by an older receipt.
-  if (storage.getItem(key) === saved.requestId) storage.removeItem(key);
+  // An old receipt cannot retire a newer purchase in another tab.
+  const current = storedAttempt(storage.getItem(key));
+  if (current?.requestId === saved.requestId && !current.confirmed) {
+    storage.setItem(key,JSON.stringify({requestId:saved.requestId,confirmed:true}));
+    if (storedAttempt(storage.getItem(key))?.confirmed !== true) throw new Error('Não foi possível confirmar esta tentativa no navegador.');
+  }
+  const pendingKey = PENDING_PREFIX + saved.fingerprint;
+  if (pendingStorage?.getItem(pendingKey) === saved.requestId) pendingStorage.removeItem(pendingKey);
 }
 async function readUpload(file,maxBytes,label) {
   if (!file) return null;
@@ -75,8 +103,19 @@ export function createOrderController({dialog,money,toast,onBusy}) {
     success.scrollIntoView({block:'nearest'});
   }
   function rememberReceipt(saved) {
-    try {sessionStorage.setItem(RECEIPT_KEY,JSON.stringify({...saved,savedAt:Date.now()}));return true;}
+    try {
+      const value = JSON.stringify({...saved,savedAt:Date.now()});
+      sessionStorage.setItem(RECEIPT_KEY,value);
+      return sessionStorage.getItem(RECEIPT_KEY) === value;
+    }
     catch {return false;} // Keep the saved confirmation visible if browser storage is unavailable.
+  }
+  function knownReceipt() {
+    const raw = sessionStorage.getItem(RECEIPT_KEY);
+    try {return JSON.parse(raw || 'null');} catch {return null;}
+  }
+  function withAttemptLock(fingerprint,action) {
+    return navigator.locks ? navigator.locks.request(`edit-${fingerprint}`,action) : action();
   }
   function open(nextItem,nextConfig) {
     if (busy) return;
@@ -104,7 +143,7 @@ export function createOrderController({dialog,money,toast,onBusy}) {
   }
   form.addEventListener('submit',async event => {
     event.preventDefault();
-    if (busy || !item || !config || !form.reportValidity()) return;
+    if (busy || receipt || form.hidden || !item || !config || !form.reportValidity()) return;
     errorBox.hidden = true;setBusy(true);
     try {
       const company = document.querySelector('#order-company').value.trim();
@@ -129,7 +168,13 @@ export function createOrderController({dialog,money,toast,onBusy}) {
       const fingerprint = await fingerprintPayload(payload);
       let requestId;
       try {
-        requestId = navigator.locks ? await navigator.locks.request(`edit-${fingerprint}`,() => getOrCreateRequestId(fingerprint)) : getOrCreateRequestId(fingerprint);
+        requestId = await withAttemptLock(fingerprint,() => {
+          // Migrate only a known confirmed receipt, including the previous Gastro
+          // purchase; uncertain requests must remain available for safe retries.
+          const known = knownReceipt();
+          if (known?.fingerprint === fingerprint) confirmSavedAttempt(known,localStorage,sessionStorage);
+          return getOrCreateRequestId(fingerprint,localStorage,sessionStorage);
+        });
       } catch {throw new Error('Ative o armazenamento deste navegador para salvar o pedido sem duplicações. Nenhum pedido foi enviado.');}
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(),90000);
@@ -143,6 +188,8 @@ export function createOrderController({dialog,money,toast,onBusy}) {
       if (!result.orderId || result.status !== 'awaiting_authorization') throw new Error('A resposta não confirmou o pedido. Tente novamente para consultar a mesma tentativa, sem criar outra.');
       const saved = {orderId:result.orderId,status:result.status,totalCents:result.totalCents,message:result.message,whatsappUrl:result.whatsappUrl,fingerprint,requestId,videoId:item.id};
       const receiptPreserved = rememberReceipt(saved);showReceipt(saved);
+      try {if (receiptPreserved) await withAttemptLock(fingerprint,() => confirmSavedAttempt(saved,localStorage,sessionStorage));}
+      catch { /* A confirmed order remains saved; its receipt can recover this next time. */ }
       // Persist the receipt route before leaving. Browser Back restores the saved order.
       history.replaceState(null,'','#pedido-salvo');
       try {if (receiptPreserved) location.assign(safeWhatsAppUrl(result.whatsappUrl,result.message,result.orderId));}
@@ -156,10 +203,12 @@ export function createOrderController({dialog,money,toast,onBusy}) {
     try {await navigator.clipboard.writeText(receipt.message);toast('Mensagem copiada.');}
     catch {messageBox.hidden = false;messageBox.focus();messageBox.select();toast('Selecione e copie a mensagem abaixo.');}
   });
-  document.querySelector('#new-order').addEventListener('click',() => {
+  document.querySelector('#new-order').addEventListener('click',async () => {
     if (busy || !receipt) return;
+    const saved = receipt;
     try {
-      resetSavedAttempt(receipt);
+      await withAttemptLock(saved.fingerprint,() => confirmSavedAttempt(saved,localStorage,sessionStorage));
+      if (receipt !== saved) return;
       sessionStorage.removeItem(RECEIPT_KEY);
     } catch(error) {toast(error.message || 'Não foi possível preparar outro pedido. O anterior continua salvo.');return;}
     receipt = null;item = null;form.reset();errorBox.hidden = true;success.hidden = true;messageBox.hidden = true;
