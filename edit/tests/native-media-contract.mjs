@@ -1,8 +1,19 @@
 import assert from 'node:assert/strict';
 
-// Only these three poster/video pairs were approved on 2026-10-21.
+// These five existing poster/video pairs were authorized on 2026-10-21:
+// three first, then the two pending examples, without changing production.
 // Keep prior identities and source hashes explicit; production bindings stay unchanged.
 export const NATIVE_MEDIA = [
+  {
+    id:'b142f07c-6fb2-4b99-842f-b12817c88df3',name:'respeita-essa-fome',
+    previous:{poster:'./media/57e290dd-07fe-4f29-9800-a1810507ff1c.png',video:'./media/6f1f187f-724b-4677-a240-e3580adffe64.mp4'},
+    sha256:{poster:'66638ca1adf86be9cb53a5bce1148e8cb86e894f90ba6351c6fbc3e77df49a3b',video:'295fc88f738919c5ecee65405c808d477b9a011ba2f76ecfd3c171e9d117accc'},
+  },
+  {
+    id:'d90dda14-dd61-4526-8882-50d4952b0359',name:'so-uma-olhadinha',
+    previous:{poster:'./media/726f8036-46be-4849-966f-774e30f6f4e9.png',video:'./media/4494bf3b-737b-42fb-9d5d-8516a91d633b.mp4'},
+    sha256:{poster:'870a7d164bf35d4f7b5ced317f0c0ea7e040afa3ec5b8667b1392a0d5c64257b',video:'a850a412c8d46590100b7e77dd0ddeef35f6afaa6d68cb4ac94f848d441dafb3'},
+  },
   {
     id:'cc2ff272-4fbf-404c-b5a0-3a5ece29b15d',name:'fome-chamando',
     previous:{poster:'./media/3dbba064-3249-40c1-8e5c-0b0845fa168e.png',video:'./media/85862775-668b-47e0-a3cd-c1d48c3e9308.mp4'},
@@ -23,7 +34,7 @@ export const NATIVE_MEDIA = [
 export const nativeMediaPath=(row,type)=>`./media/audio-api-20261021/${row.name}.${type==='poster'?'png':'mp4'}`;
 export const PRE_NATIVE_CATALOG_SHA256='9384da986724d45e591e3670ea73e2f7144ad1f69964bca78bd7fd1bc67cfe2b';
 
-// Reconstruct only the six explicitly approved historical fields, after verifying
+// Reconstruct only the ten explicitly authorized historical fields, after verifying
 // their exact replacement paths. All other values still reach the original hashes.
 export function restorePriorMediaForHistory(items) {
   return items.map(item=>{

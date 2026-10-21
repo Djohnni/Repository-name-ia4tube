@@ -8,14 +8,14 @@ const data=JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),
 const before=JSON.parse(await readFile(new URL('./fixtures/catalog-pre-native-audio.json',import.meta.url),'utf8'));
 const sha256=bytes=>createHash('sha256').update(bytes).digest('hex');
 
-test('native-audio update changes only six approved media fields and preserves all thirty cards and metadata',()=>{
+test('native-audio update changes only ten authorized media fields and preserves all thirty cards and metadata',()=>{
   assert.equal(sha256(JSON.stringify(before)),PRE_NATIVE_CATALOG_SHA256);
   assert.equal(before.catalog.length,30);
   assert.equal(data.catalog.length,30);
   assert.deepEqual(data.catalog.map(row=>row.id),before.catalog.map(row=>row.id));
   const original=structuredClone(data);
   original.catalog=restorePriorMediaForHistory(original.catalog);
-  assert.deepEqual(original,before,'Only the three approved poster/video pairs may differ.');
+  assert.deepEqual(original,before,'Only the five authorized poster/video pairs may differ.');
   const changed=data.catalog.filter((item,index)=>JSON.stringify(item)!==JSON.stringify(before.catalog[index]));
   assert.deepEqual(changed.map(row=>row.id),NATIVE_MEDIA.map(row=>row.id));
   for(const item of changed) {
@@ -24,7 +24,7 @@ test('native-audio update changes only six approved media fields and preserves a
   }
 });
 
-test('the six native-audio assets are byte-identical to the approved source files and old assets remain',async()=>{
+test('the ten native-audio assets are byte-identical to the authorized source files and old assets remain',async()=>{
   const expected=[];
   for(const row of NATIVE_MEDIA) {
     for(const type of ['poster','video']) {
