@@ -29,8 +29,13 @@ body.video-only #toast {
 .video-shade {
   background: linear-gradient(180deg, #0007 0%, transparent 16%, transparent 65%, #0006 86%, #000d 100%);
 }
+/* Mobile feed without a bottom navigation bar. */
 @media (max-width: 700px) {
-  .video-actions { bottom: calc(164px + env(safe-area-inset-bottom)); }
+  .video-info { bottom: calc(19px + env(safe-area-inset-bottom)); }
+  .video-actions { bottom: calc(96px + env(safe-area-inset-bottom)); }
+  .video-progress { bottom: env(safe-area-inset-bottom); }
+  .profile-view { padding-bottom: calc(37px + env(safe-area-inset-bottom)); }
+  .toast { bottom: calc(32px + env(safe-area-inset-bottom)); }
 }
 @media (max-height: 720px) and (min-width: 701px) {
   .video-actions { bottom: 96px; }
