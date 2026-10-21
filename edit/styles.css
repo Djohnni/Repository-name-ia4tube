@@ -18,6 +18,7 @@ body.video-only .video-info,
 body.video-only .video-shade,
 body.video-only .video-progress,
 body.video-only .center-pause,
+body.video-only .release-notice,
 body.video-only .video-actions > :not(.interface-toggle),
 body.video-only .skip-link,
 body.video-only #toast {
