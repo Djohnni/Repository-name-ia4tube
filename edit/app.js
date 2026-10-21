@@ -1,5 +1,6 @@
-import { createOrderController } from './order.js?v=20261021-upload';
+import { createOrderController } from './order.js?v=20261021-release';
 import { createPlaybackAudio } from './playback-audio.js?v=20261021-native-sound';
+import { releaseInfo, orderShowcase } from './availability.js?v=20261021-release';
 
 const paths = {
   home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
@@ -12,6 +13,7 @@ const paths = {
   muted:'<path d="m11 5-6 4H2v6h3l6 4zM16 9l6 6M16 15l6-6"/>',
   message:'<path d="M21 11.5a8.5 8.5 0 0 1-12.7 7.4L3 21l1.9-5.3A8.5 8.5 0 1 1 21 11.5Z"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/>',
+  lock:'<rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/>',
   eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
   'eye-off':'<path d="m3 3 18 18M10.6 5.1 12 5c6.5 0 10 7 10 7a19 19 0 0 1-3 4M6.2 6.2A20 20 0 0 0 2 12s3.5 7 10 7a12 12 0 0 0 5.8-1.8M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
 };
@@ -32,7 +34,7 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let catalog = [],daily = [],cards = [],videos = [],playlist = [];
 let creator = {name:'iA4tube',avatar:'./assets/logo.png'},prices = {},data = null;
 let activeIndex = 0,soundEnabled = true,userPaused = reduceMotion,routeIsProfile = false;
-let progressFrame = 0,toastTimer,playlistKey = '';
+let progressFrame = 0,toastTimer,releaseTimer,playlistKey = '';
 let videoOnly = false;
 const playbackAudio = createPlaybackAudio({onChange:syncSound});
 const order = createOrderController({dialog:personalize,money,toast,onBusy:playback});
@@ -58,11 +60,36 @@ addEventListener('keydown',event => {
 function canPlay() {return !routeIsProfile && !document.hidden && !personalize.open && !about.open && !userPaused;}
 function syncPlayButton(card) {
   if (!card) return;
-  const paused = card.querySelector('video').paused;
+  const video = card.querySelector('video');
+  const paused = video.paused;
   card.classList.toggle('is-paused',paused);
-  const button = card.querySelector('.play-toggle');
-  button.innerHTML = icon(paused ? 'play' : 'pause');
-  button.setAttribute('aria-label',paused ? 'Reproduzir vídeo' : 'Pausar vídeo');
+  video.setAttribute('aria-label',paused ? 'Reproduzir vídeo' : 'Pausar vídeo');
+}
+function syncReleases() {
+  const now = Date.now();
+  cards.forEach((card,index) => {
+    const item = playlist[index];
+    const release = releaseInfo(item,now);
+    const notice = card.querySelector('.release-notice');
+    const button = card.querySelector('.make-button');
+    card.classList.toggle('is-scheduled',Boolean(release));
+    notice.hidden = !release;
+    if (release) notice.querySelector('strong').textContent = release.label;
+    button.disabled = Boolean(release);
+    button.innerHTML = (release ? 'Em breve' : item.orderEnabled ? 'Fazer meu pedido' : 'Ver detalhes') + ' ' + icon(release ? 'lock' : 'arrow-up-right');
+    if (release) button.setAttribute('aria-describedby',notice.id);
+    else button.removeAttribute('aria-describedby');
+  });
+  document.querySelector('#orderable-count').textContent = catalog.filter(item => item.orderEnabled && !releaseInfo(item,now)).length;
+  document.querySelectorAll('.profile-card').forEach(card => {
+    const release = releaseInfo({id:card.dataset.id},now);
+    const badge = card.querySelector('.profile-release');
+    badge.hidden = !release;
+    if (release) badge.textContent = release.label;
+  });
+  clearTimeout(releaseTimer);
+  const pending = catalog.map(item => releaseInfo(item,now)?.opensAt).filter(Number.isFinite);
+  if (pending.length) releaseTimer = setTimeout(syncReleases,Math.min(Math.max(1,Math.min(...pending) - now + 50),2147483647));
 }
 function syncSound(state = playbackAudio.getState()) {
   soundEnabled = state.audible;
@@ -115,15 +142,16 @@ function renderFeed(items,key) {
     const article = document.createElement('article');
     article.className = 'video-card';article.dataset.id = item.id;
     article.setAttribute('aria-label',`${item.label}: ${item.title}`);
-    article.innerHTML = `<video src="${esc(mediaPath(item.video))}" poster="${esc(mediaPath(item.poster))}" muted loop playsinline preload="metadata" aria-label="Vídeo ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle play-toggle" aria-label="Pausar vídeo">${icon('pause')}</button><button class="circle model-info" aria-label="Detalhes deste modelo">${icon('info')}</button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>${item.orderEnabled ? 'a partir de' : 'referência visual'}</small><strong>${item.orderEnabled ? money(startingPrice(item)) : 'Em breve'}</strong></div><button class="make-button">${item.orderEnabled ? 'Fazer meu pedido' : 'Ver detalhes'} ${icon('arrow-up-right')}</button></div></div>`;
+    article.innerHTML = `<video src="${esc(mediaPath(item.video))}" poster="${esc(mediaPath(item.poster))}" muted loop playsinline preload="metadata" role="button" tabindex="0" aria-label="Vídeo ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="release-notice" id="release-${esc(item.id)}" role="status" hidden>${icon('lock')}<strong></strong></div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>${item.orderEnabled ? 'a partir de' : 'referência visual'}</small><strong>${item.orderEnabled ? money(startingPrice(item)) : 'Em breve'}</strong></div><button class="make-button">${item.orderEnabled ? 'Fazer meu pedido' : 'Ver detalhes'} ${icon('arrow-up-right')}</button></div></div>`;
     article.querySelector('.creator-action').addEventListener('click',() => location.hash = 'perfil');
     article.querySelector('.sound-toggle').addEventListener('click',toggleSound);
-    article.querySelector('.play-toggle').addEventListener('click',togglePlay);
     article.querySelector('.interface-toggle').addEventListener('click',() => setVideoOnly(!videoOnly));
     article.querySelector('video').addEventListener('click',togglePlay);
     article.querySelector('.make-button').addEventListener('click',() => openPersonalize(item));
-    article.querySelector('.model-info').addEventListener('click',() => openPersonalize(item));
     const video = article.querySelector('video');
+    video.addEventListener('keydown',event => {
+      if (event.key === ' ' || event.key === 'Enter') {event.preventDefault();togglePlay();}
+    });
     video.addEventListener('play',() => syncPlayButton(article));
     video.addEventListener('pause',() => syncPlayButton(article));
     video.addEventListener('error',() => {if (activeCard() === article) toast('Não foi possível carregar este vídeo. Tente o próximo.');});
@@ -136,7 +164,7 @@ function renderFeed(items,key) {
     feed.innerHTML = '<div class="empty-feed"><span class="eyebrow">SEM VÍDEOS EM DESTAQUE</span><h2>A próxima inspiração<br>está chegando.</h2><p>Os modelos anteriores continuam no perfil.</p><a class="primary-action" href="#perfil">Ver perfil da iA4tube</a></div>';
   }
   feed.scrollTo({top:0,behavior:'instant'});
-  cards.forEach(card => observer.observe(card));syncSound();syncInterface();activate(0);tick();
+  cards.forEach(card => observer.observe(card));syncSound();syncInterface();syncReleases();activate(0);tick();
 }
 function goTo(index) {
   if (index < 0 || index >= cards.length) return;
@@ -153,6 +181,8 @@ feed.addEventListener('keydown',event => {
 
 function openPersonalize(item) {
   if (!data) return;
+  const release = releaseInfo(item);
+  if (release) {syncReleases();toast(release.label);return;}
   document.querySelector('#chosen-poster').src = mediaPath(item.poster);
   document.querySelector('#chosen-poster').alt = `Modelo ${item.label}`;
   document.querySelector('#chosen-title').textContent = item.title;
@@ -160,7 +190,8 @@ function openPersonalize(item) {
   const phrase = item.phrase || (item.recipe === 'sextou' ? 'SEXTOU' : item.recipe === 'sabadou' ? item.copyLabel || item.label : 'Referência visual');
   document.querySelector('#chosen-phrase').textContent = item.recipe === 'produtos' ? phrase : `Frase do modelo: ${phrase}`;
   document.querySelector('#model-note').textContent = item.note || (item.orderEnabled ? 'O vídeo será personalizado com o modelo de produção vinculado a esta referência.' : 'Somente referência visual; não disponível para pedidos.');
-  order.open(item,data);personalize.showModal();playback();
+  if (order.open(item,data) === false) return;
+  personalize.showModal();playback();
 }
 document.querySelector('#preview-info').addEventListener('click',() => {about.showModal();playback();});
 for (const dialog of [personalize,about]) {
@@ -180,13 +211,14 @@ function renderProfile() {
   document.querySelector('#orderable-count').textContent = catalog.filter(item => item.orderEnabled).length;
   const grid = document.querySelector('#profile-grid');grid.replaceChildren();
   for (const item of catalog) {
-    const button = document.createElement('button');button.className = 'profile-card';
+    const button = document.createElement('button');button.className = 'profile-card';button.dataset.id = item.id;
     if (item.creativeTemplate) button.classList.add('profile-card--creative');
     button.setAttribute('aria-label',`Assistir ${item.label}: ${item.title}`);
-    button.innerHTML = `<div class="profile-thumbnail"><img src="${esc(mediaPath(item.poster))}" alt="${esc(item.title)}" loading="lazy"><span>${icon('play')}${esc(item.duration)}s</span></div><div class="profile-card-copy"><span>${esc(item.label)}</span><h3>${esc(item.title)}</h3></div>`;
+    button.innerHTML = `<div class="profile-thumbnail"><img src="${esc(mediaPath(item.poster))}" alt="${esc(item.title)}" loading="lazy"><span>${icon('play')}${esc(item.duration)}s</span><span class="profile-release" hidden></span></div><div class="profile-card-copy"><span>${esc(item.label)}</span><h3>${esc(item.title)}</h3></div>`;
     button.addEventListener('click',() => location.hash = `video/${encodeURIComponent(item.id)}`);grid.append(button);
   }
   if (!catalog.length) grid.innerHTML = '<p class="empty-profile">Nenhum vídeo disponível ainda. </p>';
+  syncReleases();
 }
 function route() {
   routeIsProfile = location.hash === '#perfil';
@@ -210,7 +242,9 @@ function route() {
 }
 addEventListener('hashchange',route);
 addEventListener('resize',() => {if (!routeIsProfile) feed.scrollTo({top:activeIndex * feed.clientHeight,behavior:'instant'});});
-document.addEventListener('visibilitychange',playback);
+document.addEventListener('visibilitychange',() => {syncReleases();playback();});
+addEventListener('pageshow',syncReleases);
+addEventListener('focus',syncReleases);
 function toast(message) {
   const element = document.querySelector('#toast');element.textContent = message;element.classList.add('visible');
   clearTimeout(toastTimer);toastTimer = setTimeout(() => element.classList.remove('visible'),3200);
@@ -223,9 +257,9 @@ async function load() {
     data = await response.json();
     if (!Array.isArray(data.catalog) || !Array.isArray(data.dailySelection?.videoIds)) throw new Error('O catálogo não está disponível.');
     creator = {...creator,...data.creator};prices = data.prices || {};
-    catalog = data.catalog.filter(item => item.status === 'published');
+    catalog = orderShowcase(data.catalog.filter(item => item.status === 'published'));
     const byId = new Map(catalog.map(item => [item.id,item]));
-    daily = [...new Set(data.dailySelection.videoIds)].map(id => byId.get(id)).filter(Boolean);
+    daily = orderShowcase([...new Set(data.dailySelection.videoIds)].map(id => byId.get(id)).filter(Boolean));
     renderProfile();route();
     const receipt = order.restore();
     if (receipt) {personalize.showModal();playback();}

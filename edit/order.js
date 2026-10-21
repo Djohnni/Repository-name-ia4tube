@@ -3,6 +3,7 @@ import { createModelOptions } from './model-options.js?v=20261020-styles';
 import { createProductsForm } from './products-form.js?v=20261021-upload';
 import { normalizeProductPrice } from './optional-price.js?v=20261019-price';
 import { createUploadField } from './upload-field.js?v=20261021-upload';
+import { releaseInfo } from './availability.js?v=20261021-release';
 
 // v1 permanently identified matching content, including completed purchases
 // without a receipt in this tab. Keep those records untouched as history;
@@ -115,6 +116,8 @@ export function createOrderController({dialog,money,toast,onBusy}) {
   }
   function open(nextItem,nextConfig) {
     if (busy) return;
+    const release = releaseInfo(nextItem);
+    if (release) {toast(release.label);return false;}
     if (item?.id !== nextItem.id || receipt) resetForm();
     item = nextItem;config = nextConfig;receipt = null;
     document.querySelector('#sheet-title').textContent = 'Gostou? Faça o seu.';
@@ -126,6 +129,7 @@ export function createOrderController({dialog,money,toast,onBusy}) {
     if (enabled && invalidPrice) {
       form.hidden = true;displayOnly.hidden = false;displayOnly.textContent = 'O preço deste modelo precisa ser conferido no programa antes de receber pedidos.';
     } else displayOnly.textContent = 'Este vídeo é apenas uma referência visual. A personalização ainda não foi habilitada para ele.';
+    return true;
   }
   function restore() {
     if (location.hash !== '#pedido-salvo') return false;
@@ -140,6 +144,8 @@ export function createOrderController({dialog,money,toast,onBusy}) {
   form.addEventListener('submit',async event => {
     event.preventDefault();
     if (busy || receipt || form.hidden || !item || !config || !form.reportValidity()) return;
+    const release = releaseInfo(item);
+    if (release) {showError(release.label);return;}
     errorBox.hidden = true;setBusy(true);
     try {
       const company = document.querySelector('#order-company').value.trim();
@@ -176,6 +182,8 @@ export function createOrderController({dialog,money,toast,onBusy}) {
       const timeout = setTimeout(() => controller.abort(),90000);
       let response;
       try {
+        const release = releaseInfo(item);
+        if (release) throw new Error(release.label);
         response = await fetch(SUBMIT_ENDPOINT,{method:'POST',headers:{'Idempotency-Key':await idempotencyKey(requestId)},body:buildMultipartOrder(payload),signal:controller.signal,credentials:'omit',cache:'no-store'});
       } finally {clearTimeout(timeout);}
       const responseBody = await response.json().catch(() => ({}));

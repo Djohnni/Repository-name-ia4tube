@@ -46,21 +46,22 @@ test('feed overlay has no model title, description, creator label or example bad
   assert.equal(text.replace('a partir de','').replace('R$ 19,90','').replace('Fazer meu pedido','').trim(),'');
 });
 
-test('five lateral controls retain avatar, sound, play, information and interface toggle',() => {
+test('three lateral controls retain only avatar, sound and interface toggle',() => {
   const {innerHTML} = renderCard();
   const actions = innerHTML.match(/<div class="video-actions">([\s\S]*?)<\/div>/)?.[1];
   assert.ok(actions,'Lateral actions are retained.');
   const buttons = [...actions.matchAll(/<button\b[\s\S]*?<\/button>/g)].map(match => match[0]);
-  assert.equal(buttons.length,5);
-  ['creator-action','sound-toggle','play-toggle','model-info','interface-toggle'].forEach((className,index) => {
+  assert.equal(buttons.length,3);
+  ['creator-action','sound-toggle','interface-toggle'].forEach((className,index) => {
     assert.match(buttons[index],new RegExp('class="[^"]*\\b' + className + '\\b'));
     assert.match(buttons[index],/aria-label="[^"]+"/);
   });
   assert.match(buttons[0],/<img\b/);
-  assert.match(buttons[4],/aria-label="Ocultar interface"/);
-  assert.match(buttons[4],/aria-pressed="false"/);
-  assert.match(buttons[4],/data-icon="eye-off"/);
-  assert.equal([...innerHTML.matchAll(/<button\b/g)].length,6,'Only the five controls and order CTA are present.');
+  assert.match(buttons[2],/aria-label="Ocultar interface"/);
+  assert.match(buttons[2],/aria-pressed="false"/);
+  assert.match(buttons[2],/data-icon="eye-off"/);
+  assert.equal([...innerHTML.matchAll(/<button\b/g)].length,4,'Only the three controls and order CTA are present.');
+  assert.doesNotMatch(innerHTML,/\b(?:play-toggle|model-info)\b/);
 });
 
 test('each model keeps only its correct starting price and order action',() => {
@@ -88,8 +89,25 @@ test('removed swipe hint leaves no DOM selector that can break navigation',() =>
   assert.doesNotMatch(page,/\bid="swipe-hint"/);
   assert.doesNotMatch(app,/#swipe-hint/);
   assert.match(app,/article\.querySelector\('\.make-button'\)\.addEventListener\('click',\(\) => openPersonalize\(item\)\)/);
-  assert.match(app,/article\.querySelector\('\.model-info'\)\.addEventListener\('click',\(\) => openPersonalize\(item\)\)/);
+  assert.doesNotMatch(app,/querySelector\('\.(?:model-info|play-toggle)'\)/);
   assert.match(app,/article\.querySelector\('\.creator-action'\)\.addEventListener\('click',\(\) => location\.hash = 'perfil'\)/);
+});
+
+test('video tap and Space still pause playback without a lateral play button',() => {
+  assert.match(app,/article\.querySelector\('video'\)\.addEventListener\('click',togglePlay\)/);
+  assert.match(app,/if \(event\.key === ' '\) \{event\.preventDefault\(\);togglePlay\(\);\}/);
+  const source = app.match(/function syncPlayButton\(card\) \{[\s\S]*?\n\}/)?.[0];
+  assert.ok(source,'Playback state must remain synchronizable.');
+  const video = {paused:true,attributes:{},setAttribute(name,value){this.attributes[name]=value;}};
+  const classes = new Map();
+  const card = {classList:{toggle(name,value){classes.set(name,value);}},querySelector(selector){
+    assert.equal(selector,'video','Do not query the removed lateral play button.');return video;
+  }};
+  const context = {};
+  runInNewContext(source,context,{timeout:1000});
+  assert.doesNotThrow(()=>context.syncPlayButton(null));
+  context.syncPlayButton(card);assert.equal(classes.get('is-paused'),true);
+  video.paused=false;context.syncPlayButton(card);assert.equal(classes.get('is-paused'),false);
 });
 
 test('legacy form stays intact apart from isolated products and optional-price fields',() => {

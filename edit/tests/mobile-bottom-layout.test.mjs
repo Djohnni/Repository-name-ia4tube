@@ -27,10 +27,10 @@ test('mobile bottom navigation is absent while desktop navigation remains',() =>
   assert.match(page,/class="feed-tab">Em destaque<\/span>/);
 });
 
-test('mobile price and lateral controls move down by the removed 68px bar',() => {
+test('mobile price stays low and compact lateral controls move nearer the order row',() => {
   const block = mobileLayout();
   assert.match(block,/\.video-info\s*\{[^}]*bottom:\s*calc\(19px\s*\+\s*env\(safe-area-inset-bottom\)\)/);
-  assert.match(block,/\.video-actions\s*\{[^}]*bottom:\s*calc\(96px\s*\+\s*env\(safe-area-inset-bottom\)\)/);
+  assert.match(block,/\.video-actions\s*\{[^}]*bottom:\s*calc\(88px\s*\+\s*env\(safe-area-inset-bottom\)\)/);
 });
 
 test('mobile video progress respects the device safe area without a nav reservation',() => {
@@ -60,5 +60,5 @@ test('mobile overlay change does not resize the player or alter the order form',
 });
 
 test('stylesheet URL is versioned for the mobile layout update',() => {
-  assert.match(page,/<link rel="stylesheet" href="\.\/styles\.css\?v=20261021-native-sound">/);
+  assert.match(page,/<link rel="stylesheet" href="\.\/styles\.css\?v=20261021-release">/);
 });

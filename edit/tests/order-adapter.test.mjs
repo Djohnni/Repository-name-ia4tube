@@ -193,7 +193,7 @@ test('all catalog media/avatar paths resolve inside edit and exist',async () => 
   assert.ok((await stat(new URL('../assets/logo.png',import.meta.url))).size > 0);
 });
 test('public entry files contain no local/admin/token/test marker dependencies',async () => {
-  for (const name of ['index.html','app.js','order.js','order-adapter.js','catalog.json','styles.css']) {
+  for (const name of ['index.html','app.js','order.js','order-adapter.js','availability.js','catalog.json','styles.css']) {
     const source = await readFile(new URL('../'+name,import.meta.url),'utf8');
     assert.doesNotMatch(source,/127\.0\.0\.1|localhost|X-Vitrine-Token|csrfToken|\/admin|\[teste-criativo:/i,name);
   }
@@ -202,5 +202,10 @@ test('public entry files contain no local/admin/token/test marker dependencies',
   assert.match(html,/https:\/\/ia4tube\.com\/politica-de-privacidade\//);
   const app = await readFile(new URL('../app.js',import.meta.url),'utf8');
   assert.match(app,/fetch\('\.\/catalog\.json'/);
-  assert.doesNotMatch(app,/new Date\(|Date\.now\(/); // featured list must not expire tomorrow.
+  const releaseSync=app.match(/function syncReleases\(\) \{[\s\S]*?\n\}/)?.[0];
+  assert.ok(releaseSync,'The scheduled CTA release must stay isolated from feed selection.');
+  assert.match(releaseSync,/const now = Date\.now\(\);/);
+  assert.doesNotMatch(app.replace(releaseSync,''),/new Date\(|Date\.now\(/); // The featured list itself never expires.
+  assert.match(app,/catalog = orderShowcase\(data\.catalog\.filter\(item => item\.status === 'published'\)\);/);
+  assert.match(app,/daily = orderShowcase\(\[\.\.\.new Set\(data\.dailySelection\.videoIds\)\]\.map\(id => byId\.get\(id\)\)\.filter\(Boolean\)\);/);
 });
