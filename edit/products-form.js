@@ -1,12 +1,15 @@
+import { createUploadField } from './upload-field.js?v=20261021-upload';
+
 export const PRODUCT_PACKAGES = {2:3800,4:4800,6:5800,8:6800};
 
 // The same fields feed the existing product renderer, in the customer's order.
-export function createProductsForm({form,money,readUpload}) {
+export function createProductsForm({form,money}) {
   const section = form.querySelector('#products-options');
   const list = form.querySelector('#products-list');
   const single = [...form.querySelectorAll('[data-single-product]')];
   let enabled = false;
   const cards = [];
+  const uploads = [];
   for (let index = 1; index <= 8; index++) {
     const card = document.createElement('fieldset');
     card.className = 'product-order-card';card.hidden = true;card.disabled = true;
@@ -20,6 +23,7 @@ export function createProductsForm({form,money,readUpload}) {
         <label class="order-field">Tempo deste produto<select data-field="seconds"><option value="4">4 segundos</option><option value="6">6 segundos</option><option value="8">8 segundos</option><option value="10">10 segundos</option></select></label>
       </details>`;
     card.querySelector('[data-field="speechEnabled"]').addEventListener('change',() => sync());
+    uploads.push(createUploadField(card.querySelector('[data-field="photo"]'),{maxBytes:10 * 1024 * 1024,label:`Foto do produto ${index}`}));
     cards.push(card);list.append(card);
   }
   function count() {return Number(form.querySelector('[name="packageCount"]:checked')?.value || 2);}
@@ -45,7 +49,7 @@ export function createProductsForm({form,money,readUpload}) {
     const items = [],photos = [];
     for (const [index,card] of cards.slice(0,count()).entries()) {
       const field = key => card.querySelector(`[data-field="${key}"]`);
-      const photo = await readUpload(field('photo').files[0],10 * 1024 * 1024,`Foto do produto ${index + 1}`);
+      const photo = await uploads[index].read();
       if (!photo) throw new Error(`Adicione a foto do produto ${index + 1}.`);
       photos.push(photo);
       const price = field('price').value.trim();
@@ -59,5 +63,5 @@ export function createProductsForm({form,money,readUpload}) {
     return {productsVideo:{packageCount:count(),branch:text('#products-branch'),openingText:text('#products-opening'),openingSeconds:6,
       whatsapp:text('#products-whatsapp'),instagram:text('#products-instagram'),location:text('#products-location'),items},photos};
   }
-  return {open,sync,payload,isEnabled:() => enabled};
+  return {open,sync,payload,resetUploads:() => uploads.forEach(upload => upload.reset()),isEnabled:() => enabled};
 }

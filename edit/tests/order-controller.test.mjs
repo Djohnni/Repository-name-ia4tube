@@ -20,14 +20,16 @@ class Element {
   constructor(tag='div') {
     this.tag=tag;this.children=[];this.listeners=new Map();this.selectors=new Map();
     this.attributes=new Map();this.value='';this.textContent='';this.innerHTML='';
-    this.hidden=false;this.disabled=false;this.checked=false;this.files=[];
+    this.hidden=false;this.disabled=false;this.checked=false;this.files=[];this.dataset={};
   }
   append(...children) {this.children.push(...children);}
   before(element) {this.insertedBefore=element;}
+  after(element) {this.insertedAfter=element;}
   replaceChildren() {this.children=[];this.value='';}
   addEventListener(type,handler) {this.listeners.set(type,handler);}
   async emit(type) {return this.listeners.get(type)?.({preventDefault(){}});}
   setAttribute(key,value) {this.attributes.set(key,value);}
+  getAttribute(key) {return this.attributes.get(key)??null;}
   removeAttribute(key) {this.attributes.delete(key);delete this[key];}
   scrollIntoView() {}
   focus() {}
@@ -52,28 +54,30 @@ function fixture(t) {
   const previous=new Map(globals.map(name=>[name,Object.getOwnPropertyDescriptor(globalThis,name)]));
   const install=(name,value)=>Object.defineProperty(globalThis,name,{value,writable:true,configurable:true});
   const realSetTimeout=globalThis.setTimeout,realClearTimeout=globalThis.clearTimeout;
-  const pendingRequests=new Set(),pendingSubmissions=new Set(),requestTimers=new Set();
+  const pendingRequests=new Set(),pendingSubmissions=new Set(),requestTimers=new Map(),activeReaders=new Set(),reads=[];
   let cleaningUp=false;
   const aborted=()=>Object.assign(new Error('Mock request aborted'),{name:'AbortError'});
   t.after(async()=>{
     cleaningUp=true;
     try {
       for(const request of pendingRequests)request.reject(aborted());
-      for(const timer of requestTimers)realClearTimeout(timer);
+      for(const reader of activeReaders)reader.abort();
+      for(const [timer,callback] of requestTimers) {realClearTimeout(timer);callback();}
       // A failed assertion can leave crypto work before fetch. Keep the mock
       // installed until those submissions reach its immediate cleanup rejection.
       await Promise.allSettled([...pendingSubmissions]);
     } finally {
-      for(const timer of requestTimers)realClearTimeout(timer);
+      for(const timer of requestTimers.keys())realClearTimeout(timer);
       for(const [name,descriptor] of previous) {
         if(descriptor)Object.defineProperty(globalThis,name,descriptor);else delete globalThis[name];
       }
     }
   });
   install('setTimeout',(callback,delay,...args)=>{
-    const timer=realSetTimeout(()=>{requestTimers.delete(timer);callback(...args);},delay);
-    requestTimers.add(timer);
-    if(cleaningUp)realClearTimeout(timer);
+    const invoke=()=>{requestTimers.delete(timer);callback(...args);};
+    const timer=realSetTimeout(invoke,delay);
+    requestTimers.set(timer,invoke);
+    if(cleaningUp) {realClearTimeout(timer);queueMicrotask(invoke);}
     return timer;
   });
   install('clearTimeout',timer=>{requestTimers.delete(timer);realClearTimeout(timer);});
@@ -85,7 +89,8 @@ function fixture(t) {
   const form=node('#order-form');form.elements=[];form.reportValidity=()=>true;
   const single=new Element('section');single.selectors.set('input,select,textarea,button',[]);
   form.selectors.set('[data-single-product]',[single]);
-  for(const selector of ['#products-options','#products-list','#products-price','.duration-field','#price-10','#price-20'])form.selectors.set(selector,new Element());
+  for(const selector of ['#products-options','#products-list','#products-price','#products-branch','#products-opening',
+    '#products-whatsapp','#products-instagram','#products-location','.duration-field','#price-10','#price-20'])form.selectors.set(selector,new Element());
   const explanation=new Element('p');explanation.textContent='Receba pelo WhatsApp.';
   form.selectors.set('.order-explanation[data-single-product]',explanation);
   const durations={};
@@ -103,6 +108,12 @@ function fixture(t) {
     for(const selector of ['#order-company','#order-product-price'])node(selector).value='';
     for(const selector of ['#order-logo','#order-photo'])node(selector).files=[];
     node('#order-consent').checked=false;durations[10].checked=true;durations[20].checked=false;
+    for(const card of form.querySelector('#products-list').children) {
+      for(const [selector,field] of card.selectors) {
+        if(!selector.startsWith('[data-field='))continue;
+        field.value=selector==='[data-field="seconds"]'?'4':'';field.files=[];field.checked=false;
+      }
+    }
   };
   for(const selector of ['#order-company','#order-logo','#order-photo','#order-consent','#order-product-price','#send-order'])form.elements.push(node(selector));
   node('#send-order').innerHTML='Enviar pedido';
@@ -116,8 +127,25 @@ function fixture(t) {
   install('navigator',{locks:{request:async(_name,action)=>action()},clipboard:{writeText:async()=>{}}});
   install('localStorage',local);install('sessionStorage',session);install('location',location);
   install('history',{replaceState:(_state,_title,url)=>{location.hash=url;}});
+  let readBehavior=read=>queueMicrotask(()=>read.complete());
   install('FileReader',class {
-    readAsDataURL(file) {queueMicrotask(()=>{this.result=`data:${file.type};base64,${file.data}`;this.onload();});}
+    constructor() {this.readyState=0;this.result=null;this.error=null;}
+    readAsDataURL(file) {
+      this.readyState=1;activeReaders.add(this);
+      const settle=(type,value)=>{
+        if(read.settled)return false;
+        read.settled=true;this.readyState=2;activeReaders.delete(this);
+        if(type==='load')this.result=value;else this.error=value;
+        this['on'+type]?.({target:this});this.onloadend?.({target:this});return true;
+      };
+      const read={reader:this,file,settled:false,
+        complete:()=>settle('load',`data:${file.type};base64,${file.data}`),
+        fail:(name='NotReadableError')=>settle('error',new DOMException('Simulated file read failure',name)),
+        abort:()=>settle('abort',new DOMException('Simulated file read aborted','AbortError'))};
+      this.current=read;reads.push(read);
+      if(cleaningUp)queueMicrotask(()=>read.abort());else readBehavior(read);
+    }
+    abort() {this.current?.abort();}
   });
   install('fetch',async(url,options)=>new Promise((resolve,reject)=>{
     const settle=action=>value=>{
@@ -135,7 +163,19 @@ function fixture(t) {
     node('#order-logo').files=[{name:'logo.png',type:'image/png',size:4,data:btoa('logo')}];
   };
   controller.open(item,config);fill();
-  return {controller,form,node,local,session,navigation,toasts,requests,fill,
+  const waitUntil=async(predicate,message)=>{
+    const deadline=performance.now()+2000;
+    while(!predicate() && performance.now()<deadline)await new Promise(resolve=>realSetTimeout(resolve,5));
+    assert.ok(predicate(),message);
+  };
+  return {controller,form,node,local,session,navigation,toasts,requests,fill,reads,
+    configureReads:behavior=>{readBehavior=behavior;},
+    choose:async(selector,file)=>{node(selector).files=file?[file]:[];await node(selector).emit('change');},
+    tick:()=>new Promise(resolve=>realSetTimeout(resolve,1)),
+    async waitForReads(count) {
+      await waitUntil(()=>reads.length>=count,'expected mocked file read to start');
+      assert.equal(reads.length,count);return reads[count-1];
+    },
     submit:()=>{
       const submission=form.emit('submit');pendingSubmissions.add(submission);
       submission.then(()=>pendingSubmissions.delete(submission),()=>pendingSubmissions.delete(submission));
@@ -143,14 +183,13 @@ function fixture(t) {
     },
     reopen:()=>{controller.open(item,config);fill();},
     async waitForRequest(count) {
-      const deadline=performance.now()+2000;
-      while(requests.length<count && performance.now()<deadline)await new Promise(resolve=>realSetTimeout(resolve,5));
+      await waitUntil(()=>requests.length>=count,'expected mocked HTTP request to start');
       assert.equal(requests.length,count,'expected only the intended mocked HTTP requests');
       return requests[count-1];
     },
-    succeed(index=0,orderId=savedIds[index]) {
+    succeed(index=0,orderId=savedIds[index],totalCents=1990) {
       const message='Pedido: '+orderId;
-      requests[index].resolve({ok:true,json:async()=>({orderId,status:'awaiting_authorization',totalCents:1990,
+      requests[index].resolve({ok:true,json:async()=>({orderId,status:'awaiting_authorization',totalCents,
         whatsappMessage:message,whatsappUrl:'https://wa.me/554791049079?text='+encodeURIComponent(message)})});
     },
   };
@@ -269,3 +308,135 @@ for(const failure of ['quota exception','silent write failure']) {
     assert.equal([...f.session.values.keys()].filter(key=>key.startsWith('ia4tube.edit.pending.v1.')).length,0);
   });
 }
+
+const imageFile=(name,bytes,type='image/png')=>({name,type,size:bytes.length,data:btoa(bytes)});
+
+test('logo and optional photo are prepared on change and reused byte-for-byte without rereading on submit',async t=>{
+  const f=fixture(t);
+  await f.choose('#order-logo',imageFile('marca.png','selected-logo'));
+  await f.choose('#order-photo',imageFile('lanche.jpg','selected-photo','image/jpeg'));
+  await f.waitForReads(2);await f.tick();
+  assert.equal(f.node('#order-logo').insertedAfter.tag,'small');
+  const sending=f.submit();const request=await f.waitForRequest(1);
+  assert.equal(f.reads.length,2,'submit reuses both prepared uploads');
+  assert.equal(await request.options.body.get('logo').text(),'selected-logo');
+  assert.equal(await request.options.body.get('photos').text(),'selected-photo');
+  assert.equal(request.options.body.get('logo').name,'marca.png');
+  assert.equal(request.options.body.get('photos').type,'image/jpeg');
+  f.succeed();await sending;
+  assert.equal(f.node('#order-success').hidden,false);
+});
+
+test('immediate submit waits for the in-flight logo preparation and double click still sends one POST',async t=>{
+  const f=fixture(t);f.configureReads(()=>{});
+  await f.choose('#order-logo',imageFile('marca.png','slow-logo'));const read=await f.waitForReads(1);
+  const sending=f.submit(),doubleClick=f.submit();await f.tick();
+  assert.equal(f.requests.length,0);assert.equal(f.controller.isBusy(),true);
+  assert.equal(f.reads.length,1,'submit must await the same read, not start another');
+  read.complete();const request=await f.waitForRequest(1);
+  assert.equal(await request.options.body.get('logo').text(),'slow-logo');
+  f.succeed();await Promise.all([sending,doubleClick]);
+  assert.equal(f.requests.length,1);assert.equal(f.controller.isBusy(),false);
+});
+
+test('a newer selection wins even if the old file finishes after it',async t=>{
+  const f=fixture(t);f.configureReads(()=>{});
+  await f.choose('#order-logo',imageFile('primeira.png','old-logo'));const oldRead=await f.waitForReads(1);
+  await f.choose('#order-logo',imageFile('atual.png','new-logo'));const newRead=await f.waitForReads(2);
+  newRead.complete();oldRead.complete();await f.tick();
+  const sending=f.submit();const request=await f.waitForRequest(1);
+  assert.equal(f.reads.length,2);
+  assert.equal(request.options.body.get('logo').name,'atual.png');
+  assert.equal(await request.options.body.get('logo').text(),'new-logo');
+  f.succeed();await sending;
+});
+
+test('a definitive file read failure preserves the form and sends no HTTP request or attempt',async t=>{
+  const f=fixture(t);f.configureReads(read=>queueMicrotask(()=>read.fail('SecurityError')));
+  await f.choose('#order-logo',imageFile('marca.png','inaccessible'));await f.waitForReads(1);await f.tick();
+  await f.submit();
+  assert.equal(f.requests.length,0);assert.equal(f.local.values.size,0);
+  assert.equal(f.controller.isBusy(),false);assert.equal(f.form.hidden,false);
+  assert.equal(f.node('#order-error').hidden,false);
+  assert.equal(f.node('#order-company').value,'Gastro');
+  assert.equal(f.node('#order-logo').files[0].name,'marca.png');
+  assert.equal(f.reads.length,2,'only a new explicit submit retries a definitive completed failure');
+});
+
+test('one transient local read retry recovers without duplicating the HTTP order',async t=>{
+  const f=fixture(t);let attempts=0;
+  f.configureReads(read=>queueMicrotask(()=>++attempts===1?read.fail('NotReadableError'):read.complete()));
+  await f.choose('#order-logo',imageFile('marca.png','recoverable'));
+  const sending=f.submit(),doubleClick=f.submit();const request=await f.waitForRequest(1);
+  assert.equal(f.reads.length,2);assert.equal(f.requests.length,1);
+  assert.equal(await request.options.body.get('logo').text(),'recoverable');
+  f.succeed();await Promise.all([sending,doubleClick]);
+  await f.submit();assert.equal(f.requests.length,1,'late submit at confirmation remains harmless');
+});
+
+test('changing the model resets prepared logo and photo instead of reusing previous customer assets',async t=>{
+  const f=fixture(t);
+  await f.choose('#order-logo',imageFile('anterior.png','old-logo'));
+  await f.choose('#order-photo',imageFile('anterior.jpg','old-photo','image/jpeg'));
+  await f.waitForReads(2);await f.tick();
+  f.controller.open({...item,id:'d90dda14-dd61-4526-8882-50d4952b0359'},config);
+  f.node('#order-company').value='Outra empresa';f.node('#order-consent').checked=true;
+  await f.submit();assert.equal(f.requests.length,0,'a cleared required logo cannot be replaced by cached bytes');
+  assert.equal(f.node('#order-logo').files.length,0);assert.equal(f.node('#order-photo').files.length,0);
+  await f.choose('#order-logo',imageFile('nova.png','new-customer-logo'));await f.waitForReads(3);await f.tick();
+  const sending=f.submit();const request=await f.waitForRequest(1);
+  assert.equal(await request.options.body.get('logo').text(),'new-customer-logo');
+  assert.equal(request.options.body.has('photos'),false,'the optional photo from the old model stays cleared');
+  f.succeed();await sending;
+});
+
+test('late completion from a previous model cannot repopulate the reset upload cache',async t=>{
+  const f=fixture(t);f.configureReads(()=>{});
+  await f.choose('#order-logo',imageFile('anterior.png','old-in-flight'));const oldRead=await f.waitForReads(1);
+  f.controller.open({...item,id:'d90dda14-dd61-4526-8882-50d4952b0359'},config);
+  f.node('#order-company').value='Outra empresa';f.node('#order-consent').checked=true;
+  oldRead.complete();await f.tick();await f.submit();assert.equal(f.requests.length,0);
+  await f.choose('#order-logo',imageFile('nova.png','new-selection'));const newRead=await f.waitForReads(2);newRead.complete();await f.tick();
+  const sending=f.submit();const request=await f.waitForRequest(1);
+  assert.equal(await request.options.body.get('logo').text(),'new-selection');
+  f.succeed();await sending;
+});
+
+test('network retry after successful preparation uses the same bytes and request identity without rereading',async t=>{
+  const f=fixture(t);
+  await f.choose('#order-logo',imageFile('marca.png','prepared-once'));await f.waitForReads(1);await f.tick();
+  const first=f.submit();const original=await f.waitForRequest(1);
+  original.reject(Object.assign(new Error('Timed out'),{name:'AbortError'}));await first;
+  const retry=f.submit();const repeated=await f.waitForRequest(2);
+  assert.equal(f.reads.length,1);
+  assert.equal(repeated.options.headers['Idempotency-Key'],original.options.headers['Idempotency-Key']);
+  assert.equal(await repeated.options.body.get('logo').text(),'prepared-once');
+  f.succeed(1);await retry;
+});
+
+test('multiproduct photos use their own prepared bytes in order and are discarded for the next order',async t=>{
+  const f=fixture(t),packageItem={...item,id:'f142f07c-6fb2-4b99-842f-b12817c88df3',recipe:'produtos'};
+  f.controller.open(packageItem,config);f.fill();
+  await f.node('#order-logo').emit('change');
+  const cards=f.form.querySelector('#products-list').children.slice(0,2);
+  for(const [index,card] of cards.entries()) {
+    card.querySelector('[data-field="name"]').value='Produto '+(index+1);
+    card.querySelector('[data-field="price"]').value=index===0?'R$ 29,90':'';
+    card.querySelector('[data-field="seconds"]').value='4';
+    const photo=card.querySelector('[data-field="photo"]');
+    photo.files=[imageFile(`produto-${index+1}.png`,`photo-${index+1}`)];await photo.emit('change');
+  }
+  await f.waitForReads(3);await f.tick();
+  const sending=f.submit();const request=await f.waitForRequest(1);
+  assert.equal(f.reads.length,3,'package submit reuses logo and both independent photo caches');
+  const data=JSON.parse(request.options.body.get('data'));
+  assert.equal(data.productsVideo.packageCount,2);
+  assert.deepEqual(data.productsVideo.items.map(product=>product.name),['Produto 1','Produto 2']);
+  assert.deepEqual(await Promise.all(request.options.body.getAll('photos').map(photo=>photo.text())),['photo-1','photo-2']);
+  f.succeed(0,savedIds[0],3800);await sending;
+  f.controller.open(packageItem,config);f.fill();
+  await f.submit();
+  assert.equal(f.requests.length,1,'new package cannot reuse photos belonging to the completed order');
+  assert.match(f.node('#order-error').textContent,/foto do produto 1/i);
+  assert.equal(cards[0].querySelector('[data-field="photo"]').files.length,0);
+});

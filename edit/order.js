@@ -1,7 +1,8 @@
 import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261020-styles';
 import { createModelOptions } from './model-options.js?v=20261020-styles';
-import { createProductsForm } from './products-form.js?v=20261019-products';
+import { createProductsForm } from './products-form.js?v=20261021-upload';
 import { normalizeProductPrice } from './optional-price.js?v=20261019-price';
+import { createUploadField } from './upload-field.js?v=20261021-upload';
 
 // v1 permanently identified matching content, including completed purchases
 // without a receipt in this tab. Keep those records untouched as history;
@@ -9,7 +10,6 @@ import { normalizeProductPrice } from './optional-price.js?v=20261019-price';
 const ATTEMPT_PREFIX = 'ia4tube.edit.attempt.v2.';
 const PENDING_PREFIX = 'ia4tube.edit.pending.v1.';
 const RECEIPT_KEY = 'ia4tube.edit.receipt.v1';
-const ACCEPTED_TYPES = new Set(['image/png','image/jpeg','image/webp']);
 const REQUEST_ID = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i;
 
 function storedAttempt(raw) {
@@ -59,19 +59,6 @@ export function confirmSavedAttempt(saved,storage = localStorage,pendingStorage 
   const pendingKey = PENDING_PREFIX + saved.fingerprint;
   if (pendingStorage?.getItem(pendingKey) === saved.requestId) pendingStorage.removeItem(pendingKey);
 }
-async function readUpload(file,maxBytes,label) {
-  if (!file) return null;
-  if (!ACCEPTED_TYPES.has(file.type)) throw new Error(`${label}: escolha uma imagem PNG, JPG ou WebP.`);
-  if (!file.size || file.size > maxBytes) throw new Error(`${label}: o limite é ${Math.round(maxBytes / 1024 / 1024)} MB.`);
-  const data = await new Promise((resolve,reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
-    reader.onerror = () => reject(new Error(`Não foi possível ler ${label.toLowerCase()}. Selecione o arquivo novamente.`));
-    reader.readAsDataURL(file);
-  });
-  return {name:file.name,mime:file.type,data};
-}
-
 export function createOrderController({dialog,money,toast,onBusy}) {
   const form = document.querySelector('#order-form');
   const errorBox = document.querySelector('#order-error');
@@ -81,8 +68,14 @@ export function createOrderController({dialog,money,toast,onBusy}) {
   const messageBox = document.querySelector('#saved-message');
   let item = null,config = null,busy = false,receipt = null;
   const initialSubmitLabel = submit.innerHTML;
-  const products = createProductsForm({form,money,readUpload});
+  const logoUpload = createUploadField(document.querySelector('#order-logo'),{maxBytes:5 * 1024 * 1024,label:'Logo'});
+  const photoUpload = createUploadField(document.querySelector('#order-photo'),{maxBytes:10 * 1024 * 1024,label:'Foto do produto'});
+  const products = createProductsForm({form,money});
   const modelOptions = createModelOptions(form,money);
+
+  function clearUploads() {logoUpload.reset();photoUpload.reset();products.resetUploads();}
+  function resetForm() {clearUploads();form.reset();}
+  form.addEventListener('reset',clearUploads);
 
   function setBusy(value) {
     busy = value;
@@ -122,7 +115,7 @@ export function createOrderController({dialog,money,toast,onBusy}) {
   }
   function open(nextItem,nextConfig) {
     if (busy) return;
-    if (item?.id !== nextItem.id || receipt) form.reset();
+    if (item?.id !== nextItem.id || receipt) resetForm();
     item = nextItem;config = nextConfig;receipt = null;
     document.querySelector('#sheet-title').textContent = 'Gostou? Faça o seu.';
     errorBox.hidden = true;success.hidden = true;messageBox.hidden = true;
@@ -155,8 +148,8 @@ export function createOrderController({dialog,money,toast,onBusy}) {
       if (!products.isEnabled() && ![10,20].includes(durationSeconds)) throw new Error('Escolha 10 ou 20 segundos.');
       if (!document.querySelector('#order-consent').checked) throw new Error('Confirme a autorização para usar as imagens.');
       const [logo,photo] = await Promise.all([
-        readUpload(document.querySelector('#order-logo').files[0],5 * 1024 * 1024,'Logo'),
-        products.isEnabled() ? null : readUpload(document.querySelector('#order-photo').files[0],10 * 1024 * 1024,'Foto do produto'),
+        logoUpload.read(),
+        products.isEnabled() ? null : photoUpload.read(),
       ]);
       if (!logo) throw new Error('Adicione o logo da empresa.');
       const payload = products.isEnabled()
@@ -214,7 +207,7 @@ export function createOrderController({dialog,money,toast,onBusy}) {
       if (receipt !== saved) return;
       sessionStorage.removeItem(RECEIPT_KEY);
     } catch(error) {toast(error.message || 'Não foi possível preparar outro pedido. O anterior continua salvo.');return;}
-    receipt = null;item = null;form.reset();errorBox.hidden = true;success.hidden = true;messageBox.hidden = true;
+    receipt = null;item = null;resetForm();errorBox.hidden = true;success.hidden = true;messageBox.hidden = true;
     dialog.close();toast('Pedido anterior preservado. Escolha um vídeo para fazer outro pedido.');
   });
   dialog.addEventListener('close',() => {
