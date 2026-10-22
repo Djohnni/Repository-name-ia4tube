@@ -103,12 +103,13 @@ function tapHarness() {
   const context = {
     videos:[video],activeIndex:0,userPaused:false,routeIsProfile:false,videoOnly:false,
     swipeGuide:{cancel() {guideEvents.push('cancel');},schedule() {guideEvents.push('schedule');}},
+    swipeSound:{consumeClick() {return false;}},
     personalize:{open:false},about:{open:false},
     document:{hidden:false,dispatchEvent() {}},Event:class {},
     playbackAudio:createPlaybackAudio(),mediaWindow:{sync() {}},tick() {},
     activeCard() {return {};},syncPlayButton() {},
   };
-  runInNewContext(['canPlay','playback','togglePlay','activateVideo','handleVideoKeydown'].map(source).join('\n'),context);
+  runInNewContext(['canPlay','playback','togglePlay','enableSwipeSound','activateVideo','handleVideoKeydown'].map(source).join('\n'),context);
   const event = overrides => ({currentTarget:video,preventDefault() {},...overrides});
   async function blockAutoplay() {
     context.playback();
@@ -216,4 +217,57 @@ test('tap unlock is bound only to videos and is not a broad page or pointer hand
   assert.match(source('renderFeed'),/video\.addEventListener\('keydown',handleVideoKeydown\)/);
   assert.equal((app.match(/addEventListener\('click',activateVideo\)/g) || []).length,1);
   assert.doesNotMatch(app,/addEventListener\('(pointerdown|pointerup|touchstart|touchend)',activateVideo/);
+});
+
+test('a swipe retries blocked audio in the same call stack without pausing or rewinding',async () => {
+  const h = tapHarness();await h.blockAutoplay();
+  h.context.enableSwipeSound();
+  assert.equal(h.requests.length,3);assert.equal(h.requests[2].muted,false);
+  assert.equal(h.pauses.length,0);assert.equal(h.context.userPaused,false);
+  assert.equal(h.video.currentTime,5);assert.equal(h.video.src,'original.mp4');
+  assert.equal(h.video.volume,.7);
+  h.requests[2].resolve();await flush();
+  h.context.enableSwipeSound();
+  assert.equal(h.requests.length,3,'An already audible video does not need another attempt.');
+});
+
+test('swipes preserve explicit mute, deliberate pause and inactive views',async () => {
+  const h = tapHarness();await h.blockAutoplay();
+  for (const [object,key] of [[h.context.personalize,'open'],[h.context.about,'open'],[h.context,'routeIsProfile'],[h.context.document,'hidden'],[h.context,'userPaused']]) {
+    object[key] = true;h.context.enableSwipeSound();object[key] = false;
+  }
+  h.context.activeIndex = 1;h.context.enableSwipeSound();h.context.activeIndex = 0;
+  assert.equal(h.requests.length,2);assert.equal(h.pauses.length,0);
+  h.context.playbackAudio.setEnabled(false);h.context.enableSwipeSound();
+  assert.equal(h.requests.length,2);assert.equal(h.context.playbackAudio.getState().enabled,false);
+});
+
+test('a browser-denied swipe retry falls back once and remains available for another gesture',async () => {
+  const h = tapHarness();await h.blockAutoplay();
+  h.context.enableSwipeSound();h.requests[2].reject(denied());await flush();
+  assert.equal(h.requests.length,4);assert.equal(h.requests[3].muted,true);
+  h.requests[3].resolve();await flush();
+  assert.equal(h.context.playbackAudio.getState().blocked,true);assert.equal(h.pauses.length,0);
+  h.context.enableSwipeSound();
+  assert.equal(h.requests.length,5);assert.equal(h.requests[4].muted,false);
+  h.requests[4].resolve();await flush();
+});
+
+test('the compatible click after a swipe does not toggle or pause playback',async () => {
+  const h = tapHarness();await h.blockAutoplay();
+  h.context.enableSwipeSound();h.requests[2].resolve();await flush();
+  h.context.swipeSound.consumeClick = () => true;
+  h.context.activateVideo(h.event());
+  assert.equal(h.context.userPaused,false);assert.equal(h.pauses.length,0);assert.equal(h.requests.length,3);
+  h.context.swipeSound.consumeClick = () => false;
+  h.context.activateVideo(h.event());
+  assert.equal(h.context.userPaused,true);assert.equal(h.pauses.length,1);
+});
+
+test('swipe recognition is feed-scoped and tracks while the initial audio attempt settles',() => {
+  const setup = app.match(/const swipeSound = createSwipeSound\([\s\S]*?\n\}\);/)?.[0];
+  assert.ok(setup);assert.match(setup,/feed,canAttempt:.*canPlay\(\).*videos\[activeIndex\]/);
+  assert.match(setup,/onSwipe:enableSwipeSound/);
+  assert.doesNotMatch(setup,/blocked|audible|\.enabled/);
+  assert.doesNotMatch(source('enableSwipeSound'),/await|setTimeout|userPaused\s*=/);
 });

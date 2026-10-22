@@ -2,7 +2,8 @@ import { createOrderController } from './order.js?v=20261022-phrase';
 import { createPlaybackAudio } from './playback-audio.js?v=20261021-native-sound';
 import { releaseInfo, orderShowcase } from './availability.js?v=20261021-products-open';
 import { createMediaWindow } from './media-window.js?v=20261022-light-media';
-import { createSwipeGuide } from './swipe-guide.js?v=20261022-swipe-guide-v3';
+import { createSwipeGuide } from './swipe-guide.js?v=20261022-swipe-three-sound';
+import { createSwipeSound } from './swipe-sound.js?v=20261022-swipe-three-sound';
 
 const paths = {
   home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
@@ -50,6 +51,9 @@ const swipeGuide = createSwipeGuide({
   motionQuery:matchMedia('(prefers-reduced-motion: reduce)'),
   getContext:() => ({current:activeCard(),next:cards[activeIndex + 1],
     enabled:!routeIsProfile && !document.hidden && !personalize.open && !about.open && !videoOnly && !!videos[activeIndex]}),
+});
+const swipeSound = createSwipeSound({
+  feed,canAttempt:() => canPlay() && !!videos[activeIndex],onSwipe:enableSwipeSound,
 });
 const order = createOrderController({dialog:personalize,money,toast,onBusy:playback,
   onSaved:detail => document.dispatchEvent(new CustomEvent('ia4tube:edit-order-saved',{detail:{...detail,videoTitle:catalog.find(item => item.id === detail.videoId)?.label}}))});
@@ -145,7 +149,15 @@ function togglePlay() {
   if (!videos[activeIndex]) return;
   userPaused = !videos[activeIndex].paused;playback();
 }
+function enableSwipeSound() {
+  const state = playbackAudio.getState();
+  if (!videos[activeIndex] || !canPlay() || !state.enabled || !state.blocked) return;
+  // Retry inside the real gesture, without seeking or undoing an intentional mute.
+  playbackAudio.setEnabled(true);
+  playback();
+}
 function activateVideo(event) {
+  if (swipeSound.consumeClick(event)) return;
   const video = videos[activeIndex];
   if (!video || event.currentTarget !== video || routeIsProfile || document.hidden || personalize.open || about.open) return;
   const state = playbackAudio.getState();

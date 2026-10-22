@@ -1,4 +1,4 @@
-// A one-time visual cue only: it never scrolls, changes media or sends events.
+// Three brief visual cues per page: never scroll, change media or send events.
 export function createSwipeGuide({
   feed,hint,getContext,motionQuery,
   doc = globalThis.document,win = globalThis.window,
@@ -6,7 +6,7 @@ export function createSwipeGuide({
 } = {}) {
   const removers = [];
   let waiting = null,returning = null,finishing = null,pair = null,painted = null,baseline = 0;
-  let done = false,destroyed = false;
+  let cycles = 0,done = false,destroyed = false;
   const position = () => Number.isFinite(feed?.scrollTop) ? feed.scrollTop : 0;
   const context = () => {try {return getContext?.();} catch {return null;}};
   const usable = card => card?.classList && card?.style && card.isConnected !== false;
@@ -21,30 +21,42 @@ export function createSwipeGuide({
     removers.push(() => target.removeEventListener?.(type,handler,options));
   }
   function detach() {removers.splice(0).forEach(remove => remove());}
-  function clean() {
-    if (waiting !== null) clearTimer(waiting);
-    if (returning !== null) clearTimer(returning);
-    if (finishing !== null) clearTimer(finishing);
-    waiting = null;returning = null;finishing = null;
+  function cleanVisual() {
     if (painted) for (const card of [painted.current,painted.next]) {
       card.classList.remove('swipe-guide-card');
       card.classList.remove('is-returning');
       card.style.removeProperty('--swipe-guide-lift');
     }
-    painted = null;pair = null;
+    painted = null;
     if (hint) {
       hint.hidden = true;hint.classList.remove('is-active');hint.classList.remove('is-returning');
       hint.style.removeProperty('--swipe-guide-lift');
     }
   }
+  function clean() {
+    if (waiting !== null) clearTimer(waiting);
+    if (returning !== null) clearTimer(returning);
+    if (finishing !== null) clearTimer(finishing);
+    waiting = null;returning = null;finishing = null;
+    cleanVisual();pair = null;
+  }
   function cancel() {done = true;clean();detach();}
+
+  const stillCurrent = () => !destroyed && !done && same(context()) && Math.abs(position() - baseline) < 2;
+
+  function finishCycle() {
+    finishing = null;
+    if (!stillCurrent()) {cancel();return;}
+    cleanVisual();
+    if (cycles >= 3) {done = true;pair = null;detach();return;}
+    // Keep the original pair and scroll position while the hand briefly rests.
+    waiting = setTimer(start,400);
+  }
 
   function start() {
     waiting = null;
-    if (destroyed || done || !same(context()) || Math.abs(position() - baseline) >= 2) {
-      cancel();return;
-    }
-    done = true;painted = pair;
+    if (!stillCurrent()) {cancel();return;}
+    cycles++;painted = pair;
     const lift = `${Math.min(36,feed.clientHeight * .06)}px`;
     for (const card of [pair.current,pair.next]) {
       card.style.setProperty('--swipe-guide-lift',lift);
@@ -57,11 +69,11 @@ export function createSwipeGuide({
     hint.classList.add('is-active');
     returning = setTimer(() => {
       returning = null;
-      if (!painted) return;
+      if (!stillCurrent()) {cancel();return;}
       for (const card of [painted.current,painted.next]) card.classList.add('is-returning');
       hint.classList.add('is-returning');
     },1100);
-    finishing = setTimer(() => {clean();detach();},1800);
+    finishing = setTimer(finishCycle,1800);
   }
 
   function schedule() {

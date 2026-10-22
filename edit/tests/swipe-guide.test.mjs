@@ -40,15 +40,18 @@ function fixture({height = 800,scrollTop = 0,reduced = false} = {}) {
     setTimer(callback,delay) {const token = ++id;timers.set(token,{callback,at:clock + delay});return token;},
     clearTimer:token => timers.delete(token),
   });
-  f.clean = () => {
+  f.cleanVisual = () => {
     assert.equal(hint.hidden,true);assert.equal(hint.classes.has('is-active'),false);assert.equal(hint.classes.has('is-returning'),false);assert.equal(hint.properties.has('--swipe-guide-lift'),false);
     for (const card of cards) {assert.equal(card.classes.has('swipe-guide-card'),false);assert.equal(card.classes.has('is-returning'),false);assert.equal(card.properties.has('--swipe-guide-lift'),false);}
+  };
+  f.clean = () => {
+    f.cleanVisual();
     assert.equal(timers.size,0);
   };
   return f;
 }
 
-test('intro starts after two seconds, lifts only current and next, and cleans after 1800ms',() => {
+test('intro starts after two seconds and repeats exactly three 1800ms cycles with 400ms rests',() => {
   const f = fixture();f.cards[0].classes.add('is-paused');f.guide.schedule();
   f.advance(1999);assert.equal(f.hint.hidden,true);assert.equal(f.cards[0].classes.has('swipe-guide-card'),false);
   f.advance(1);assert.equal(f.hint.hidden,false);assert.equal(f.hint.classes.has('is-active'),true);assert.equal(f.hint.properties.get('--swipe-guide-lift'),'36px');
@@ -58,15 +61,35 @@ test('intro starts after two seconds, lifts only current and next, and cleans af
   f.advance(1);assert.equal(f.hint.classes.has('is-returning'),true);
   assert.equal(f.cards[0].classes.has('is-returning'),true);assert.equal(f.cards[1].classes.has('is-returning'),true);
   assert.equal(f.cards[2].classes.has('is-returning'),false);
-  f.advance(699);assert.equal(f.hint.hidden,false);f.advance(1);f.clean();
+  f.advance(699);assert.equal(f.hint.hidden,false);f.advance(1);f.cleanVisual();
+  assert.equal(f.timers.size,1,'Only the next cycle is waiting in the rest.');
   assert.equal(f.cards[0].classes.has('is-paused'),true,'Unrelated card state survives cleanup.');
+  for (let cycle = 2;cycle <= 3;cycle++) {
+    f.advance(399);f.cleanVisual();f.advance(1);
+    assert.equal(f.hint.hidden,false);assert.equal(f.hint.classes.has('is-active'),true);
+    assert.equal(f.hint.classes.has('is-returning'),false);
+    for (const card of f.cards.slice(0,2)) {
+      assert.equal(card.classes.has('swipe-guide-card'),true);
+      assert.equal(card.classes.has('is-returning'),false);
+      assert.equal(card.properties.get('--swipe-guide-lift'),'36px');
+    }
+    f.advance(1099);assert.equal(f.hint.classes.has('is-returning'),false);
+    f.advance(1);assert.equal(f.hint.classes.has('is-returning'),true);
+    f.advance(700);f.cleanVisual();
+    assert.equal(f.feed.scrollTop,0);
+  }
+  f.clean();
+  for (const target of [f.feed,f.doc,f.win,f.motion]) assert.equal(target.count(),0);
   f.guide.schedule();f.advance(10000);f.clean();
 });
 
 test('repeated schedule calls do not restart the two-second delay or the running animation',() => {
   const f = fixture();f.guide.schedule();f.advance(1200);f.guide.schedule();
   assert.equal(f.timers.size,1);f.advance(800);assert.equal(f.hint.hidden,false);
-  f.guide.schedule();assert.equal(f.timers.size,2);f.advance(1800);f.clean();
+  f.guide.schedule();assert.equal(f.timers.size,2);f.advance(1800);f.cleanVisual();
+  f.advance(200);f.guide.schedule();assert.equal(f.timers.size,1);
+  f.advance(199);f.cleanVisual();f.advance(1);assert.equal(f.hint.hidden,false);
+  f.advance(4000);f.clean();
 });
 
 test('the hand initial style is established after unhiding and before activating its transition',() => {
@@ -75,17 +98,23 @@ test('the hand initial style is established after unhiding and before activating
     reads++;assert.equal(f.hint.hidden,false);assert.equal(f.hint.classes.has('is-active'),false);return 96;
   }});
   f.guide.schedule();f.advance(2000);assert.equal(reads,1);assert.equal(f.hint.classes.has('is-active'),true);
-  f.advance(1800);f.clean();assert.equal(reads,1);
+  f.advance(1800);f.cleanVisual();assert.equal(reads,1);
+  f.advance(400);assert.equal(reads,2);f.advance(2200);assert.equal(reads,3);
+  f.advance(1800);f.clean();assert.equal(reads,3);
 });
 
 for (const type of ['pointerdown','touchstart','wheel','keydown','click']) {
   test(`${type} without actual scrolling never cancels, delays or consumes the cue`,() => {
-    for (const delay of [0,1200,2100,3200]) {
+    for (const delay of [0,1200,2100,3200,3900,4300,5500,6100,6500,7700]) {
       const f = fixture();f.guide.schedule();f.advance(delay);
       let reached = false;f.scope.addEventListener(type,() => {reached = true;});
       f.scope.emit(type,{preventDefault() {assert.fail('Do not block the input.');},stopPropagation() {assert.fail('Do not block audio activation.');}});
       assert.equal(reached,true);f.guide.schedule();
       if (delay < 2000) {f.advance(1999 - delay);assert.equal(f.hint.hidden,true);f.advance(1);}
+      if ((delay >= 3800 && delay < 4200) || (delay >= 6000 && delay < 6400)) {
+        f.cleanVisual();assert.equal(f.timers.size,1);
+        f.advance((delay < 4200 ? 4200 : 6400) - delay);
+      }
       assert.equal(f.hint.hidden,false);assert.equal(f.hint.classes.has('is-active'),true);
       f.advance(10000);f.clean();f.guide.schedule();f.advance(10000);f.clean();
     }
@@ -94,7 +123,7 @@ for (const type of ['pointerdown','touchstart','wheel','keydown','click']) {
 
 test('touch before the feed is ready does not consume the page intro',() => {
   const f = fixture();f.context.enabled = false;f.scope.emit('pointerdown');f.context.enabled = true;
-  f.guide.schedule();f.advance(2000);assert.equal(f.hint.hidden,false);f.advance(1800);f.clean();
+  f.guide.schedule();f.advance(2000);assert.equal(f.hint.hidden,false);f.advance(6200);f.clean();
 });
 
 test('initial ineligible context does not arm but permits a later ready pair',() => {
@@ -106,18 +135,27 @@ test('initial ineligible context does not arm but permits a later ready pair',()
   }
 });
 
-test('disabled profile or dialog context and a changed pair cancel pending and running cues',() => {
-  for (const delay of [1000,2100]) for (const change of [f => {f.context.enabled = false;},
+test('disabled profile or dialog context and a changed pair cancel pending, resting and running cues',() => {
+  for (const delay of [1000,2100,3900,4300,6100,6500]) for (const change of [f => {f.context.enabled = false;},
     f => {f.context.current = f.cards[1];f.context.next = f.cards[2];},f => {f.context.next = null;}]) {
     const f = fixture();f.guide.schedule();f.advance(delay);change(f);f.guide.schedule();f.clean();
     f.context = {current:f.cards[0],next:f.cards[1],enabled:true};f.guide.schedule();f.advance(5000);f.clean();
   }
 });
 
-test('the timer revalidates eligibility and card identity before showing anything',() => {
-  for (const change of [f => {f.context.enabled = false;},f => {f.context.current = f.cards[2];},
+test('every cycle revalidates eligibility and both original cards before showing anything',() => {
+  for (const cycleStart of [2000,4200,6400]) for (const change of [f => {f.context.enabled = false;},f => {f.context.current = f.cards[2];},
     f => {f.context.next = f.cards[2];},f => {f.doc.hidden = true;},f => {f.motion.matches = true;}]) {
-    const f = fixture();f.guide.schedule();change(f);f.advance(2000);f.clean();
+    const f = fixture();f.guide.schedule();f.advance(cycleStart - 1);change(f);f.advance(1);f.clean();
+    f.context = {current:f.cards[0],next:f.cards[1],enabled:true};f.doc.hidden = false;f.motion.matches = false;
+    f.guide.schedule();f.advance(10000);f.clean();
+  }
+});
+
+test('return and cleanup timers revalidate context in all three cycles',() => {
+  for (const at of [3100,3800,5300,6000,7500,8200]) {
+    const f = fixture();f.guide.schedule();f.advance(at - 1);f.context.enabled = false;
+    f.advance(1);f.clean();f.context.enabled = true;f.guide.schedule();f.advance(10000);f.clean();
   }
 });
 
@@ -129,11 +167,21 @@ test('unchanged initial scroll events do not cancel while real scroll movement d
 });
 
 test('movement without a scroll event is caught before the cue starts',() => {
-  const f = fixture();f.guide.schedule();f.feed.scrollTop = 50;f.advance(2000);f.clean();
+  for (const cycleStart of [2000,4200,6400]) {
+    const f = fixture();f.guide.schedule();f.advance(cycleStart - 1);f.feed.scrollTop = 50;f.advance(1);f.clean();
+  }
+});
+
+test('real scrolling during any cycle or rest ends all remaining repetitions',() => {
+  for (const at of [2100,3900,4300,6100,6500]) {
+    const f = fixture();f.guide.schedule();f.advance(at);f.feed.scrollTop = 2;f.feed.emit('scroll');f.clean();
+    f.feed.scrollTop = 0;f.guide.schedule();f.advance(10000);f.clean();
+    for (const target of [f.feed,f.doc,f.win,f.motion]) assert.equal(target.count(),0);
+  }
 });
 
 test('hidden document, route, resize and page exit cancel with no later restart',() => {
-  for (const delay of [0,2100]) for (const action of [f => {f.doc.hidden = true;f.doc.emit('visibilitychange');},
+  for (const delay of [0,2100,3900,4300,6100,6500]) for (const action of [f => {f.doc.hidden = true;f.doc.emit('visibilitychange');},
     f => f.win.emit('hashchange'),f => f.win.emit('resize'),f => f.win.emit('pagehide')]) {
     const f = fixture();f.guide.schedule();f.advance(delay);action(f);f.clean();
     f.doc.hidden = false;f.guide.schedule();f.advance(6000);f.clean();
@@ -147,16 +195,18 @@ test('visibilitychange while visible does not cancel an eligible cue',() => {
 
 test('reduced motion never arms and switching it on removes an active cue immediately',() => {
   const initial = fixture({reduced:true});initial.guide.schedule();initial.advance(6000);initial.clean();initial.guide.destroy();
-  for (const delay of [0,2100]) {
+  for (const delay of [0,2100,3900,4300,6100,6500]) {
     const f = fixture();f.guide.schedule();f.advance(delay);f.motion.matches = true;f.motion.emit('change');f.clean();
     f.motion.matches = false;f.motion.emit('change');f.guide.schedule();f.advance(6000);f.clean();
   }
 });
 
 test('destroy cancels all timers, clears only owned visual state and removes observers',() => {
-  const f = fixture();f.guide.schedule();f.advance(2100);f.guide.destroy();f.clean();
-  for (const target of [f.feed,f.scope,f.doc,f.win,f.motion]) assert.equal(target.count(),0);
-  f.guide.schedule();f.advance(6000);f.clean();f.guide.destroy();f.clean();
+  for (const at of [2100,3900,4300,6100,6500]) {
+    const f = fixture();f.guide.schedule();f.advance(at);f.guide.destroy();f.clean();
+    for (const target of [f.feed,f.scope,f.doc,f.win,f.motion]) assert.equal(target.count(),0);
+    f.guide.schedule();f.advance(10000);f.clean();f.guide.destroy();f.clean();
+  }
 });
 
 test('lift stays below visibility and activation thresholds even in short viewports',() => {
