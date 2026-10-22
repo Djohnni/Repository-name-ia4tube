@@ -95,8 +95,9 @@ test('removed swipe hint leaves no DOM selector that can break navigation',() =>
   assert.match(app,/article\.querySelector\('\.creator-action'\)\.addEventListener\('click',\(\) => location\.hash = 'perfil'\)/);
 });
 
-test('video tap and Space still pause playback without a lateral play button',() => {
-  assert.match(app,/article\.querySelector\('video'\)\.addEventListener\('click',togglePlay\)/);
+test('video activation and Space preserve playback controls without a lateral play button',() => {
+  assert.match(app,/article\.querySelector\('video'\)\.addEventListener\('click',activateVideo\)/);
+  assert.match(app,/video\.addEventListener\('keydown',handleVideoKeydown\)/);
   assert.match(app,/if \(event\.key === ' '\) \{event\.preventDefault\(\);togglePlay\(\);\}/);
   const source = app.match(/function syncPlayButton\(card\) \{[\s\S]*?\n\}/)?.[0];
   assert.ok(source,'Playback state must remain synchronizable.');

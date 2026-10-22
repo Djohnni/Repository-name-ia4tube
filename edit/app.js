@@ -130,7 +130,29 @@ function playback() {
   });
   tick();
 }
-function togglePlay() {if (!videos[activeIndex]) return;userPaused = !videos[activeIndex].paused;playback();}
+function togglePlay() {
+  if (!videos[activeIndex]) return;
+  userPaused = !videos[activeIndex].paused;playback();
+}
+function activateVideo(event) {
+  const video = videos[activeIndex];
+  if (!video || event.currentTarget !== video || routeIsProfile || document.hidden || personalize.open || about.open) return;
+  const state = playbackAudio.getState();
+  if (state.enabled && state.blocked) {
+    // Use this first tap for sound, without also pausing the playing video.
+    playbackAudio.setEnabled(true);
+    userPaused = false;
+    playback();
+    return;
+  }
+  togglePlay();
+}
+function handleVideoKeydown(event) {
+  if (event.key === ' ' || event.key === 'Enter') {
+    event.preventDefault();
+    if (!event.repeat) activateVideo(event);
+  }
+}
 function activate(index) {
   if (index < 0 || index >= cards.length) return;
   activeIndex = index;
@@ -158,12 +180,10 @@ function renderFeed(items,key,initialIndex = 0) {
     article.querySelector('.creator-action').addEventListener('click',() => location.hash = 'perfil');
     article.querySelector('.sound-toggle').addEventListener('click',toggleSound);
     article.querySelector('.interface-toggle').addEventListener('click',() => setVideoOnly(!videoOnly));
-    article.querySelector('video').addEventListener('click',togglePlay);
+    article.querySelector('video').addEventListener('click',activateVideo);
     article.querySelector('.make-button').addEventListener('click',() => openPersonalize(item));
     const video = article.querySelector('video');
-    video.addEventListener('keydown',event => {
-      if (event.key === ' ' || event.key === 'Enter') {event.preventDefault();togglePlay();}
-    });
+    video.addEventListener('keydown',handleVideoKeydown);
     video.addEventListener('play',() => syncPlayButton(article));
     video.addEventListener('pause',() => syncPlayButton(article));
     video.addEventListener('error',() => {if (activeCard() === article && video.getAttribute('src')) toast('Não foi possível carregar este vídeo. Tente o próximo.');});

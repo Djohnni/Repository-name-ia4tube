@@ -215,7 +215,7 @@ test('feed replacement releases old resources before replacing cards and first a
     }},
     creator:catalog.creator,esc:escapeHtml,mediaPath:value => value,posterPath:entry => entry.poster,
     icon:() => '',money:() => 'R$ 19,90',startingPrice:() => 1990,
-    syncSound() {},syncInterface() {},syncReleases() {},tick() {},toggleSound() {},togglePlay() {},
+    syncSound() {},syncInterface() {},syncReleases() {},tick() {},toggleSound() {},togglePlay() {},activateVideo() {},handleVideoKeydown() {},
     activate:index => events.push(['activate',index]),
   };
   runInNewContext(functionSource('renderFeed'),context,{timeout:1000});
