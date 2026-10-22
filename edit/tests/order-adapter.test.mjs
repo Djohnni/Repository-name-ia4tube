@@ -53,7 +53,7 @@ test('photo is optional and 20s keeps the same selected model',() => {
 });
 test('invalid form data is rejected before network',() => {
   for (const patch of [
-    {company:''},{company:'x'.repeat(101)},{durationSeconds:6},{videoId:'unknown'},
+    {company:'x'},{company:'x'.repeat(101)},{durationSeconds:6},{videoId:'unknown'},
     {videoVersion:0},{videoVersion:2.5},{consent:false},{logo:null},
     {logo:{...payload.logo,mime:'text/html'}},{logo:{...payload.logo,data:'invalid!'}},
     {logo:{...payload.logo,name:'../logo.png'}},

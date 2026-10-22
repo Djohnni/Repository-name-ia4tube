@@ -1,7 +1,8 @@
-import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261020-styles';
+import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261022-no-photo';
 import { createModelOptions } from './model-options.js?v=20261020-styles';
 import { createProductsForm } from './products-form.js?v=20261021-upload';
 import { normalizeProductPrice } from './optional-price.js?v=20261019-price';
+import { normalizeProductDescription } from './product-description.js?v=20261022-no-photo';
 import { createUploadField } from './upload-field.js?v=20261021-upload';
 import { releaseInfo } from './availability.js?v=20261021-products-open';
 
@@ -73,9 +74,28 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
   const photoUpload = createUploadField(document.querySelector('#order-photo'),{maxBytes:10 * 1024 * 1024,label:'Foto do produto'});
   const products = createProductsForm({form,money});
   const modelOptions = createModelOptions(form,money);
+  const photoInput = document.querySelector('#order-photo');
+  const descriptionInput = document.querySelector('#order-product-description');
+  const photoChoice = document.querySelector('#order-has-photo');
+  const descriptionChoice = document.querySelector('#order-no-photo');
+
+  function usesDescription() {return !products.isEnabled() && descriptionChoice.checked;}
+  function syncImageFields() {
+    const single = !products.isEnabled(),described = usesDescription();
+    photoChoice.disabled = descriptionChoice.disabled = busy || !single;
+    document.querySelector('#order-photo-field').hidden = !single || described;
+    photoInput.disabled = busy || !single || described;
+    document.querySelector('#order-description-field').hidden = !single || !described;
+    descriptionInput.disabled = busy || !single || !described;
+    descriptionInput.required = described;
+    document.querySelector('#order-company').disabled = busy || single;
+  }
+  for (const choice of [photoChoice,descriptionChoice]) choice.addEventListener('change',() => {
+    photoUpload.reset();syncImageFields();
+  });
 
   function clearUploads() {logoUpload.reset();photoUpload.reset();products.resetUploads();}
-  function resetForm() {clearUploads();form.reset();}
+  function resetForm() {clearUploads();form.reset();syncImageFields();}
   form.addEventListener('reset',clearUploads);
 
   function setBusy(value) {
@@ -83,6 +103,7 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
     [...form.elements].forEach(control => control.disabled = value);
     products.sync(value);
     modelOptions.sync(value);
+    syncImageFields();
     dialog.querySelector('.close-dialog').disabled = value;
     submit.innerHTML = value ? 'Salvando seu pedido…' : initialSubmitLabel;
     form.setAttribute('aria-busy',String(value));onBusy();
@@ -126,6 +147,7 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
     products.open(item.recipe === 'produtos');
     form.hidden = !enabled;displayOnly.hidden = enabled;
     const invalidPrice = modelOptions.open(item,config);
+    syncImageFields();
     if (enabled && invalidPrice) {
       form.hidden = true;displayOnly.hidden = false;displayOnly.textContent = 'O preço deste modelo precisa ser conferido no programa antes de receber pedidos.';
     } else displayOnly.textContent = 'Este vídeo é apenas uma referência visual. A personalização ainda não foi habilitada para ele.';
@@ -148,20 +170,22 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
     if (release) {showError(release.label);return;}
     errorBox.hidden = true;setBusy(true);
     try {
-      const company = document.querySelector('#order-company').value.trim();
+      const company = products.isEnabled() ? document.querySelector('#order-company').value.trim() : '';
       const durationSeconds = Number(form.querySelector('[name="duration"]:checked')?.value);
-      if (company.length < 2 || company.length > 100) throw new Error('Preencha o nome da empresa com 2 a 100 caracteres.');
+      if (products.isEnabled() && (company.length < 2 || company.length > 100)) throw new Error('Preencha o nome da empresa com 2 a 100 caracteres.');
       if (!products.isEnabled() && ![10,20].includes(durationSeconds)) throw new Error('Escolha 10 ou 20 segundos.');
       if (!document.querySelector('#order-consent').checked) throw new Error('Confirme a autorização para usar as imagens.');
+      const productDescription = usesDescription() ? normalizeProductDescription(descriptionInput.value,{required:true}) : '';
       const [logo,photo] = await Promise.all([
         logoUpload.read(),
-        products.isEnabled() ? null : photoUpload.read(),
+        products.isEnabled() || usesDescription() ? null : photoUpload.read(),
       ]);
       if (!logo) throw new Error('Adicione o logo da empresa.');
       const payload = products.isEnabled()
         ? {videoId:item.id,videoVersion:item.version,company,logo,consent:true,...await products.payload()}
         : {videoId:item.id,videoVersion:item.version,company,durationSeconds,logo,photo,consent:true};
       if (!products.isEnabled()) {
+        if (productDescription) payload.productDescription = productDescription;
         const productPrice = normalizeProductPrice(document.querySelector('#order-product-price').value);
         if (productPrice) payload.productPrice = productPrice;
         const animal = modelOptions.animal();

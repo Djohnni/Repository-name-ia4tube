@@ -8,8 +8,8 @@
   <meta name="description" content="Vídeos personalizados com a logo e o produto da sua empresa.">
   <title>Em destaque · iA4tube</title>
   <link rel="icon" href="./assets/logo.png">
-  <link rel="stylesheet" href="./styles.css?v=20261022-form-copy">
-  <script type="module" src="./app.js?v=20261022-light-media"></script>
+  <link rel="stylesheet" href="./styles.css?v=20261022-no-photo">
+  <script type="module" src="./app.js?v=20261022-no-photo"></script>
   <link rel="stylesheet" href="./analytics.css?v=20261022-analytics">
   <script type="module" src="./analytics.js?v=20261022-light-media"></script>
 </head>
@@ -50,9 +50,10 @@
     <div class="chosen-model"><img id="chosen-poster" alt=""><div><span id="chosen-kicker" class="model-kicker"></span><h3 id="chosen-title"></h3><p id="chosen-phrase"></p></div></div>
     <p class="preview-note" id="model-note"></p>
     <form id="order-form">
-      <label class="order-field">Nome da empresa<input id="order-company" name="company" autocomplete="organization" minlength="2" maxlength="100" required placeholder="Como aparecerá no vídeo"></label>
       <label class="order-field">Logo da empresa<input id="order-logo" type="file" name="logo" accept="image/png,image/jpeg,image/webp" required></label>
-      <label class="order-field" data-single-product>Foto do produto <span class="optional">opcional</span><input id="order-photo" type="file" name="photo" accept="image/png,image/jpeg,image/webp"></label>
+      <fieldset class="product-image-mode" data-single-product><legend>Imagem do produto</legend><div><label><input id="order-has-photo" type="radio" name="productImageMode" value="photo" checked>Tenho foto</label><label><input id="order-no-photo" type="radio" name="productImageMode" value="description">Não tenho foto</label></div></fieldset>
+      <label id="order-photo-field" class="order-field" data-single-product>Foto do produto <span class="optional">opcional</span><input id="order-photo" type="file" name="photo" accept="image/png,image/jpeg,image/webp"></label>
+      <label id="order-description-field" class="order-field" data-single-product hidden>Descreva o produto<textarea id="order-product-description" name="productDescription" minlength="5" maxlength="500" rows="3" disabled placeholder="Ex.: hambúrguer com pão de brioche, carne, queijo, alface e tomate."></textarea><small>A imagem criada será ilustrativa, com base na sua descrição.</small></label>
       <label class="order-field" data-single-product>Preço do produto <span class="optional">opcional</span><input id="order-product-price" name="productPrice" maxlength="30" inputmode="decimal" placeholder="Ex.: R$ 29,90"></label>
       <fieldset class="duration-field" data-single-product><legend>Duração do vídeo</legend><div class="price-options"><label><input type="radio" name="duration" value="10" checked><span>10 segundos</span><strong id="price-10">—</strong></label><label><input type="radio" name="duration" value="20"><span>20 segundos</span><strong id="price-20">—</strong></label></div></fieldset>
       <p class="order-explanation" data-single-product></p>
@@ -65,6 +66,7 @@
           <label><input type="radio" name="packageCount" value="8"><span>8 imagens</span><strong>R$ 68,00</strong></label>
         </div>
         <p class="order-explanation">Um único vídeo com seus produtos, narração, música, abertura e encerramento. Receba pelo WhatsApp.</p>
+        <label class="order-field">Nome da empresa<input id="order-company" name="company" autocomplete="organization" minlength="2" maxlength="100" required placeholder="Como aparecerá no vídeo"></label>
         <label class="order-field">Tipo de empresa<input id="products-branch" maxlength="100" value="HAMBURGUERIA" required placeholder="Ex.: PIZZARIA"></label>
         <label class="order-field">Frase da abertura<input id="products-opening" maxlength="60" value="CONFIRA NOSSAS OFERTAS!" required></label>
         <details class="product-extra"><summary>Contato no encerramento · opcional</summary>

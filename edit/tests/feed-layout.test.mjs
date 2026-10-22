@@ -112,11 +112,18 @@ test('video tap and Space still pause playback without a lateral play button',()
   video.paused=false;context.syncPlayButton(card);assert.equal(classes.get('is-paused'),false);
 });
 
-test('legacy form stays intact apart from isolated fields and removed helper copy',() => {
+test('legacy form stays intact apart from single-product image choices and package-only company',() => {
   const form = page.match(/<form id="order-form">[\s\S]*?<\/form>/)?.[0];
   assert.ok(form);
-  // Restore only the requested copy removals to compare the original form contract.
-  const legacy = form.replace(/      <fieldset id="products-options"[\s\S]*?      <\/fieldset>\r?\n/,'').replace(/      <label[^\n]*id="order-product-price"[^\n]*\r?\n/,'').replace(/ data-single-product/g,'')
+  const company = form.match(/        (<label[^\n]*id="order-company"[^\n]*<\/label>)/)?.[1];
+  assert.ok(company,'The existing company input belongs to the product package.');
+  // Restore only the authorized UI additions, relocation and prior copy removals.
+  const legacy = form.replace(/      <fieldset id="products-options"[\s\S]*?      <\/fieldset>\r?\n/,'')
+    .replace(/      <fieldset class="product-image-mode"[^\n]*\r?\n/,'')
+    .replace(/      <label id="order-description-field"[^\n]*\r?\n/,'')
+    .replace(/      <label[^\n]*id="order-product-price"[^\n]*\r?\n/,'')
+    .replace(/ data-single-product/g,'').replace(' id="order-photo-field"','')
+    .replace('<form id="order-form">','<form id="order-form">\n      '+company)
     .replace(/(<input id="order-logo"[^>]*>)(<\/label>)/,'$1<small>PNG, JPG ou WebP · até 5 MB</small>$2')
     .replace(/(<input id="order-photo"[^>]*>)(<\/label>)/,'$1<small>PNG, JPG ou WebP · até 10 MB</small>$2')
     .replace('<p class="order-explanation"></p>','<p class="order-explanation">A versão de 20s repete a animação de 10s. Você recebe o vídeo pelo WhatsApp.</p>');

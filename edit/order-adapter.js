@@ -1,5 +1,6 @@
 export const SUBMIT_ENDPOINT = 'https://marcagrande-pedidos-wshgj6ugza-uc.a.run.app/orders';
 import { normalizeProductPrice } from './optional-price.js?v=20261019-price';
+import { normalizeProductDescription } from './product-description.js?v=20261022-no-photo';
 const UUID_V4 = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i;
 const ORDER_ID = /^[A-Za-z0-9_-]{1,100}$/;
 const IMAGE_TYPES = new Set(['image/png','image/jpeg','image/webp']);
@@ -20,11 +21,13 @@ function uploadBlob(upload,maxBytes,label) {
 
 export function buildMultipartOrder(payload) {
   const company = typeof payload?.company === 'string' ? payload.company.trim() : '';
-  if (company.length < 2 || company.length > 100) throw new Error('Preencha o nome da empresa com 2 a 100 caracteres.');
+  const products = payload?.productsVideo;
+  if ((products && company.length < 2) || (company && company.length < 2) || company.length > 100) throw new Error('Preencha o nome da empresa com 2 a 100 caracteres.');
   if (!UUID_V4.test(payload.videoId || '') || !Number.isSafeInteger(payload.videoVersion) || payload.videoVersion < 1) throw new Error('Escolha novamente um modelo disponível.');
-  const products = payload.productsVideo;
   const productPrice = normalizeProductPrice(payload.productPrice);
+  const productDescription = normalizeProductDescription(payload.productDescription);
   if (products && productPrice) throw new Error('Informe o preço dentro de cada produto do pacote.');
+  if (products && productDescription) throw new Error('A descrição sem foto está disponível somente para modelos individuais.');
   if (!products && ![10,20].includes(payload.durationSeconds)) throw new Error('Escolha 10 ou 20 segundos.');
   if (payload.consent !== true) throw new Error('Confirme a autorização para usar as imagens.');
   const form = new FormData();
@@ -50,10 +53,11 @@ export function buildMultipartOrder(payload) {
     sextou:{businessType:'auto',date:null,copyId:'trabalho-sabor',durationSeconds:payload.durationSeconds},
     showcase:{videoId:payload.videoId,videoVersion:payload.videoVersion},
     ...(productPrice ? {productPrice} : {}),
+    ...(productDescription ? {productDescription} : {}),
     ...(payload.animal ? {animal:payload.animal} : {}),
   }));
   form.append('logo',uploadBlob(payload.logo,5 * 1024 * 1024,'Logo'),payload.logo.name);
-  if (payload.photo) form.append('photos',uploadBlob(payload.photo,10 * 1024 * 1024,'Foto do produto'),payload.photo.name);
+  if (!productDescription && payload.photo) form.append('photos',uploadBlob(payload.photo,10 * 1024 * 1024,'Foto do produto'),payload.photo.name);
   return form;
 }
 
@@ -85,7 +89,8 @@ export function normalizeReceipt(result,payload) {
     '',
     'Pedido: ' + result.orderId,
     'Produto: ' + (payload.productsVideo ? `Vídeo de produtos · ${payload.productsVideo.packageCount} imagens` : 'Vídeo personalizado · ' + payload.durationSeconds + ' segundos'),
-    'Estabelecimento: ' + payload.company,
+    ...(typeof payload.company === 'string' && payload.company.trim() ? ['Estabelecimento: ' + payload.company.trim()] : []),
+    ...(payload.productDescription ? ['Descrição do produto: ' + normalizeProductDescription(payload.productDescription)] : []),
     ...(payload.productPrice ? ['Preço do produto na arte: ' + normalizeProductPrice(payload.productPrice)] : []),
     '',
     'Gostaria de confirmar o recebimento e combinar os próximos passos.',

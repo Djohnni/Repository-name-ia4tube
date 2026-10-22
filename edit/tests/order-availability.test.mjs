@@ -5,6 +5,7 @@ import {runInNewContext} from 'node:vm';
 import {releaseInfo,RELEASE_AT,SCHEDULED_IDS,PRODUCT_PACKAGE_ID} from '../availability.js';
 import {buildMultipartOrder,idempotencyKey,normalizeReceipt,safeWhatsAppUrl,SUBMIT_ENDPOINT} from '../order-adapter.js';
 import {normalizeProductPrice} from '../optional-price.js';
+import {normalizeProductDescription} from '../product-description.js';
 
 const source=(await readFile(new URL('../order.js',import.meta.url),'utf8')).replace(/^import[^\n]*\n/gm,'').replace(/^export /gm,'');
 const opens=Date.parse(RELEASE_AT);
@@ -37,7 +38,7 @@ function fixture(initial=opens-1) {
   const context={Date:clock,TextEncoder,crypto,AbortController,setTimeout,clearTimeout,
     document:{querySelector:node},navigator:{clipboard:{writeText:async()=>{}}},localStorage:local,sessionStorage:session,
     location,history:{replaceState(_state,_title,url){location.hash=url;}},
-    releaseInfo:item=>releaseInfo(item,now),buildMultipartOrder,idempotencyKey,normalizeReceipt,safeWhatsAppUrl,SUBMIT_ENDPOINT,normalizeProductPrice,
+    releaseInfo:item=>releaseInfo(item,now),buildMultipartOrder,idempotencyKey,normalizeReceipt,safeWhatsAppUrl,SUBMIT_ENDPOINT,normalizeProductPrice,normalizeProductDescription,
     createUploadField:input=>({reset(){},async read(){reads++;return input===node('#order-logo')?{name:'logo.png',mime:'image/png',data:btoa('logo')}:null;}}),
     createProductsForm:()=>({resetUploads(){},sync(){},open(value){productsEnabled=value;},isEnabled:()=>productsEnabled,
       async payload(){return {photos:[1,2].map(index=>({name:'produto-'+index+'.png',mime:'image/png',data:btoa('photo-'+index)})),

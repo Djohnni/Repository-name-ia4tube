@@ -9,6 +9,8 @@ const savedIds = ['d7f5c088-ece8-4e54-90c3-05ca6f9730e5','47f5c088-ece8-4e54-90c
 const legacyId='0c521fbc-a903-44b8-af74-37cbda3c1371';
 const companyFingerprint=company=>fingerprintPayload({videoId:item.id,videoVersion:item.version,company,durationSeconds:10,
   logo:{name:'logo.png',mime:'image/png',data:btoa('logo')},photo:null,consent:true});
+const descriptionFingerprint=productDescription=>fingerprintPayload({videoId:item.id,videoVersion:item.version,company:'',durationSeconds:10,
+  logo:{name:'logo.png',mime:'image/png',data:btoa('logo')},photo:null,consent:true,...(productDescription?{productDescription}:{})});
 const memoryStorage = () => {
   const values = new Map();
   return {values,getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,String(value)),removeItem:key=>values.delete(key)};
@@ -85,7 +87,13 @@ function fixture(t,{onSaved}={}) {
   const node=selector=>{if(!nodes.has(selector))nodes.set(selector,new Element());return nodes.get(selector);};
   for(const selector of ['#order-form','#order-error','#send-order','#order-success','#display-only-note',
     '#saved-message','#sheet-title','#saved-order-id','#whatsapp-link','#order-company','#order-logo',
-    '#order-photo','#order-consent','#order-product-price','#copy-message','#new-order','.chosen-model','#model-note'])node(selector);
+    '#order-photo','#order-consent','#order-product-price','#copy-message','#new-order','.chosen-model','#model-note',
+    '#order-has-photo','#order-no-photo','#order-product-description','#order-photo-field','#order-description-field'])node(selector);
+  const imageChoices=['#order-has-photo','#order-no-photo'].map(node);
+  imageChoices.forEach((choice,index)=>{
+    let checked=index===0;
+    Object.defineProperty(choice,'checked',{get:()=>checked,set(value){checked=Boolean(value);if(checked)imageChoices.forEach(other=>{if(other!==choice)other.checked=false;});}});
+  });
   const form=node('#order-form');form.elements=[];form.reportValidity=()=>true;
   const single=new Element('section');single.selectors.set('input,select,textarea,button',[]);
   form.selectors.set('[data-single-product]',[single]);
@@ -105,7 +113,8 @@ function fixture(t,{onSaved}={}) {
   const query=form.querySelector.bind(form);
   form.querySelector=selector=>selector==='[name="duration"]:checked'?Object.values(durations).find(radio=>radio.checked):query(selector);
   form.reset=()=>{
-    for(const selector of ['#order-company','#order-product-price'])node(selector).value='';
+    for(const selector of ['#order-company','#order-product-price','#order-product-description'])node(selector).value='';
+    node('#order-has-photo').checked=true;
     for(const selector of ['#order-logo','#order-photo'])node(selector).files=[];
     node('#order-consent').checked=false;durations[10].checked=true;durations[20].checked=false;
     for(const card of form.querySelector('#products-list').children) {
@@ -115,7 +124,8 @@ function fixture(t,{onSaved}={}) {
       }
     }
   };
-  for(const selector of ['#order-company','#order-logo','#order-photo','#order-consent','#order-product-price','#send-order'])form.elements.push(node(selector));
+  for(const selector of ['#order-company','#order-logo','#order-photo','#order-consent','#order-product-price','#send-order',
+    '#order-has-photo','#order-no-photo','#order-product-description'])form.elements.push(node(selector));
   node('#send-order').innerHTML='Enviar pedido';
   const dialog=new Element('dialog');dialog.selectors.set('.close-dialog',new Element('button'));dialog.close=()=>dialog.emit('close');
   const local=memoryStorage(),session=memoryStorage(),navigation=[],toasts=[],requests=[];
@@ -225,17 +235,18 @@ test('reopening and submitting identical data creates a new identity without cli
   assert.notEqual(firstReceipt.orderId,secondReceipt.orderId);
 });
 
-test('legacy company A without receipt, followed by B and A, creates three fresh orders',async t=>{
+test('legacy company history stays intact while description A B and A create three fresh orders',async t=>{
   const f=fixture(t),fingerprint=await companyFingerprint('Deoutromundo');
   const legacyKey='ia4tube.edit.attempt.v1.'+fingerprint;
   f.local.setItem(legacyKey,legacyId);
-  f.node('#order-company').value='Deoutromundo';
+  const describe=text=>{f.node('#order-no-photo').checked=true;f.node('#order-product-description').value=text;};
+  describe('Hambúrguer com queijo');
   const first=f.submit();await f.waitForRequest(1);
   assert.notEqual(f.requests[0].options.headers['Idempotency-Key'],await idempotencyKey(legacyId),'even the first POST must not replay the historical order');
   f.succeed();await first;
-  assert.equal(JSON.parse(f.session.getItem('ia4tube.edit.receipt.v1')).fingerprint,fingerprint);
-  f.reopen();const second=f.submit();await f.waitForRequest(2);f.succeed(1);await second;
-  f.reopen();f.node('#order-company').value='Deoutromundo';
+  assert.equal(JSON.parse(f.session.getItem('ia4tube.edit.receipt.v1')).fingerprint,await descriptionFingerprint('Hambúrguer com queijo'));
+  f.reopen();describe('Pizza com calabresa');const second=f.submit();await f.waitForRequest(2);f.succeed(1);await second;
+  f.reopen();describe('Hambúrguer com queijo');
   const third=f.submit();await f.waitForRequest(3);f.succeed(2);await third;
   assert.equal(new Set(f.requests.map(request=>request.options.headers['Idempotency-Key'])).size,3);
   assert.equal(f.requests[0].options.body.get('data'),f.requests[2].options.body.get('data'));
@@ -509,4 +520,74 @@ test('multiproduct photos use their own prepared bytes in order and are discarde
   assert.match(f.node('#order-error').textContent,/foto do produto 1/i);
   assert.equal(cards[0].querySelector('[data-field="photo"]').files.length,0);
   assert.equal(events.length,1,'an incomplete new package is not a saved order');
+});
+
+test('individual description mode submits without company or a previously selected photo',async t=>{
+  const events=[],f=fixture(t,{onSaved:summary=>events.push(summary)});
+  await f.choose('#order-photo',imageFile('foto-anterior.jpg','old-photo','image/jpeg'));
+  await f.waitForReads(1);await f.tick();
+  f.node('#order-no-photo').checked=true;await f.node('#order-no-photo').emit('change');
+  f.node('#order-product-description').value='  Hambúrguer com carne, queijo e salada  ';
+  assert.equal(f.node('#order-company').disabled,true);
+  assert.equal(f.node('#order-photo-field').hidden,true);assert.equal(f.node('#order-photo').disabled,true);
+  assert.equal(f.node('#order-description-field').hidden,false);assert.equal(f.node('#order-product-description').required,true);
+  const sending=f.submit(),request=await f.waitForRequest(1),data=JSON.parse(request.options.body.get('data'));
+  assert.equal(data.company,'');assert.equal(data.productDescription,'Hambúrguer com carne, queijo e salada');
+  assert.equal(request.options.body.has('photos'),false);assert.equal(f.reads.length,2,'Only the logo is read during submit.');
+  f.succeed();await sending;
+  assert.equal(f.node('#order-photo').disabled,true,'Unlocking submit must not re-enable the inactive file field.');
+  assert.equal(events.length,1);assert.equal(Object.hasOwn(events[0],'productDescription'),false);
+});
+
+test('description length is validated before files attempts or network and mode survives the error',async t=>{
+  const f=fixture(t);f.node('#order-no-photo').checked=true;await f.node('#order-no-photo').emit('change');
+  for(const value of ['','    ','abcd','x'.repeat(501)]) {
+    f.node('#order-product-description').value=value;await f.submit();
+    assert.equal(f.requests.length,0);assert.equal(f.reads.length,0);assert.equal(f.local.values.size,0);
+    assert.match(f.node('#order-error').textContent,/5 a 500/);
+    assert.equal(f.node('#order-product-description').disabled,false);
+    assert.equal(f.node('#order-product-description').required,true);
+    assert.equal(f.node('#order-photo').disabled,true);
+  }
+});
+
+test('switching back to photo omits inactive description and preserves the selected photo bytes',async t=>{
+  const f=fixture(t);await f.choose('#order-photo',imageFile('produto.jpg','chosen-photo','image/jpeg'));
+  await f.waitForReads(1);await f.tick();
+  f.node('#order-no-photo').checked=true;await f.node('#order-no-photo').emit('change');
+  f.node('#order-product-description').value='x'.repeat(501);
+  f.node('#order-has-photo').checked=true;await f.node('#order-has-photo').emit('change');
+  assert.equal(f.node('#order-product-description').disabled,true);assert.equal(f.node('#order-product-description').required,false);
+  assert.equal(f.node('#order-photo').disabled,false);
+  const sending=f.submit(),request=await f.waitForRequest(1),data=JSON.parse(request.options.body.get('data'));
+  assert.equal(Object.hasOwn(data,'productDescription'),false);
+  assert.equal(await request.options.body.get('photos').text(),'chosen-photo');
+  f.succeed();await sending;
+});
+
+test('switching from description to a product package restores company and excludes all single-image choices',async t=>{
+  const f=fixture(t);f.node('#order-no-photo').checked=true;await f.node('#order-no-photo').emit('change');
+  f.node('#order-product-description').value='Hambúrguer com queijo';
+  f.controller.open({...item,id:'f142f07c-6fb2-4b99-842f-b12817c88df3',recipe:'produtos'},config);
+  assert.equal(f.node('#order-company').disabled,false);
+  assert.equal(f.node('#order-product-description').value,'');
+  assert.equal(f.node('#order-description-field').hidden,true);
+  assert.equal(f.node('#order-product-description').disabled,true);assert.equal(f.node('#order-product-description').required,false);
+  assert.equal(f.node('#order-has-photo').disabled,true);assert.equal(f.node('#order-no-photo').disabled,true);
+  f.node('#order-company').value='';f.node('#order-consent').checked=true;await f.submit();
+  assert.equal(f.requests.length,0);assert.match(f.node('#order-error').textContent,/nome da empresa/);
+});
+
+test('description timeout retries the same identity and a changed description starts another attempt',async t=>{
+  const f=fixture(t);f.node('#order-no-photo').checked=true;await f.node('#order-no-photo').emit('change');
+  f.node('#order-product-description').value='Pizza de calabresa';
+  const first=f.submit(),original=await f.waitForRequest(1);
+  original.reject(Object.assign(new Error('Timed out'),{name:'AbortError'}));await first;
+  const retry=f.submit(),repeated=await f.waitForRequest(2);
+  assert.equal(repeated.options.headers['Idempotency-Key'],original.options.headers['Idempotency-Key']);
+  repeated.reject(Object.assign(new Error('Timed out'),{name:'AbortError'}));await retry;
+  f.node('#order-product-description').value='Pizza de queijo';
+  const changed=f.submit(),next=await f.waitForRequest(3);
+  assert.notEqual(next.options.headers['Idempotency-Key'],original.options.headers['Idempotency-Key']);
+  f.succeed(2);await changed;
 });
