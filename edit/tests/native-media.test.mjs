@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile,readdir,stat} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {NATIVE_MEDIA,nativeMediaPath,PRE_NATIVE_CATALOG_SHA256,restorePriorMediaForHistory} from './native-media-contract.mjs';
+import {restorePriorProductDemoForHistory} from './products-demo-contract.mjs';
 
 const data=JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
 const before=JSON.parse(await readFile(new URL('./fixtures/catalog-pre-native-audio.json',import.meta.url),'utf8'));
@@ -16,7 +17,7 @@ test('native-audio update changes only ten authorized media fields and preserves
   const original=structuredClone(data);
   original.catalog=restorePriorMediaForHistory(original.catalog);
   assert.deepEqual(original,before,'Only the five authorized poster/video pairs may differ.');
-  const changed=data.catalog.filter((item,index)=>JSON.stringify(item)!==JSON.stringify(before.catalog[index]));
+  const changed=restorePriorProductDemoForHistory(data.catalog).filter((item,index)=>JSON.stringify(item)!==JSON.stringify(before.catalog[index]));
   assert.deepEqual(changed.map(row=>row.id),NATIVE_MEDIA.map(row=>row.id));
   for(const item of changed) {
     const previous=before.catalog.find(row=>row.id===item.id);
@@ -46,7 +47,8 @@ test('historical normalization refuses unrelated or unexpected media substitutio
   altered.find(row=>row.id===NATIVE_MEDIA[0].id).video='./media/unapproved.mp4';
   assert.throws(()=>restorePriorMediaForHistory(altered));
   const restored=restorePriorMediaForHistory(data.catalog);
+  const beforeProductDemo=restorePriorProductDemoForHistory(data.catalog);
   for(const item of restored.filter(row=>!NATIVE_MEDIA.some(approved=>approved.id===row.id))) {
-    assert.deepEqual(item,data.catalog.find(row=>row.id===item.id));
+    assert.deepEqual(item,beforeProductDemo.find(row=>row.id===item.id));
   }
 });

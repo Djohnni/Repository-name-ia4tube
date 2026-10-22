@@ -165,6 +165,8 @@ test('all catalog media/avatar paths resolve inside edit and exist',async () => 
     for (const type of ['poster','video']) {
       if(NATIVE_MEDIA.some(row=>row.id===item.id)) {
         assert.equal(item[type],nativeMediaPath(NATIVE_MEDIA.find(row=>row.id===item.id),type));
+      } else if(item.id==='2830b796-2375-49e8-8e97-9a731c115252') {
+        assert.equal(item[type],`./media/produtos-oburgao-20261022.${type==='poster'?'png':'mp4'}`);
       } else if(LEGACY_IDS.includes(item.id)) {
         assert.match(item[type],/^\.\/media\/(?:[a-f0-9-]{36}|produtos-cardapio)\.(png|mp4)$/);
       } else if(PIZZA_EXAMPLES.some(row=>row[0]===item.id)) {
@@ -185,7 +187,9 @@ test('all catalog media/avatar paths resolve inside edit and exist',async () => 
   }
   const rootMedia=await readdir(new URL('../media/',import.meta.url));
   const additionDirectories=['audio-api-20261021','combos-20261020','novos-20261020','pizzas-20261020','previews-20261022','sabado-20261024'];
-  assert.equal(rootMedia.filter(name=>!additionDirectories.includes(name)).length,16);
+  const replacementDemoFiles=['produtos-oburgao-20261022.mp4','produtos-oburgao-20261022.png'];
+  assert.deepEqual(rootMedia.filter(name=>replacementDemoFiles.includes(name)).sort(),replacementDemoFiles);
+  assert.equal(rootMedia.filter(name=>!additionDirectories.includes(name)&&!replacementDemoFiles.includes(name)).length,16);
   assert.deepEqual(rootMedia.filter(name=>additionDirectories.includes(name)).sort(),additionDirectories);
   assert.equal((await readdir(new URL('../media/novos-20261020/',import.meta.url))).length,32);
   assert.equal((await readdir(new URL('../media/pizzas-20261020/',import.meta.url))).length,6);

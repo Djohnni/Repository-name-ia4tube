@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {restorePriorProductDemoForHistory} from './products-demo-contract.mjs';
 
 // These five existing poster/video pairs were authorized on 2026-10-21:
 // three first, then the two pending examples, without changing production.
@@ -37,7 +38,7 @@ export const PRE_NATIVE_CATALOG_SHA256='9384da986724d45e591e3670ea73e2f7144ad1f6
 // Reconstruct only the ten explicitly authorized historical fields, after verifying
 // their exact replacement paths. All other values still reach the original hashes.
 export function restorePriorMediaForHistory(items) {
-  return items.map(item=>{
+  return restorePriorProductDemoForHistory(items).map(item=>{
     const approved=NATIVE_MEDIA.find(row=>row.id===item.id);
     if(!approved)return structuredClone(item);
     for(const type of ['poster','video'])assert.equal(item[type],nativeMediaPath(approved,type));
