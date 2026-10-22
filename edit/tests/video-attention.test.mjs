@@ -107,6 +107,30 @@ test('initial deep-link measures the card actually visible, without reading a UR
   assert.equal(f.timers.size,1);assert.equal(f.intersections[0].cards.size,3);
 });
 
+test('lazy media release preserves the final watch interval and last position before currentTime resets',() => {
+  const f = fixture();f.grant();f.tick(2);f.step(.5,{sample:false});
+  f.doc.hidden = true;
+  f.doc.emit('ia4tube:edit-before-media-change');
+  f.cards[0].video.currentTime = 0;f.cards[0].video.readyState = 0;
+  f.doc.emit('visibilitychange');f.win.emit('pagehide');
+  const time=f.matching('edit_video_time'),last=f.matching('edit_video_last');
+  assert.equal(time.length,1);assert.equal(time[0].watchSeconds,2.5);
+  assert.equal(time[0].videoPositionSeconds,2.5);
+  assert.equal(last.length,1);assert.equal(last[0].videoPositionSeconds,2.5);
+});
+
+test('lazy media switch samples the outgoing frame before release without duplicate views',() => {
+  const f=fixture();f.grant();f.tick(2);f.step(.5,{sample:false});
+  f.cards.forEach((card,i) => {card.bounds=rect((i-2)*100,(i-1)*100);});
+  f.doc.emit('ia4tube:edit-before-media-change');
+  f.cards[0].video.currentTime=0;f.cards[0].video.readyState=0;
+  f.doc.emit('scroll');f.tick(2);
+  const time=f.matching('edit_video_time');
+  assert.equal(time.length,1);assert.equal(time[0].reason,'switch');
+  assert.equal(time[0].watchSeconds,2.5);assert.equal(time[0].videoPositionSeconds,2.5);
+  assert.deepEqual(f.matching('edit_video_view').map(row=>row.videoId),['first','third']);
+});
+
 test('visibility uses card area clipped by the feed and viewport, with a 65 percent threshold',() => {
   assert.equal(videoVisibilityRatio(rect(),rect(0,65),rect()),.65);
   assert.equal(videoVisibilityRatio(rect(),rect(),rect(0,100,0,50)),.5);

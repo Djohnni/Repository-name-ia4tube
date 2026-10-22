@@ -191,6 +191,8 @@ export function installVideoAttention({win = globalThis.window,doc = globalThis.
     }
     if (enabled) return;
     enabled = true;
+    // Snapshot the outgoing timeline before lazy media release resets currentTime.
+    listen(doc,'ia4tube:edit-before-media-change',() => sample());
     listen(doc,'visibilitychange',() => sample(doc.hidden ? 'page_hidden' : undefined));
     listen(win,'pagehide',() => {sample('page_exit');exited = true;});
     listen(win,'pageshow',() => {exited = false;sample();});

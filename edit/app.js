@@ -1,6 +1,7 @@
 import { createOrderController } from './order.js?v=20261022-analytics';
 import { createPlaybackAudio } from './playback-audio.js?v=20261021-native-sound';
 import { releaseInfo, orderShowcase } from './availability.js?v=20261021-products-open';
+import { createMediaWindow } from './media-window.js?v=20261022-light-media';
 
 const paths = {
   home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
@@ -36,7 +37,13 @@ let creator = {name:'iA4tube',avatar:'./assets/logo.png'},prices = {},data = nul
 let activeIndex = 0,soundEnabled = true,userPaused = reduceMotion,routeIsProfile = false;
 let progressFrame = 0,toastTimer,releaseTimer,playlistKey = '';
 let videoOnly = false;
+let posterPreviews = {};
+const posterPath = item => {
+  const preview = posterPreviews[item.poster];
+  return mediaPath(typeof preview === 'string' && /^\.\/media\/previews-20261022\/[a-z0-9/_-]+\.webp$/i.test(preview) ? preview : item.poster);
+};
 const playbackAudio = createPlaybackAudio({onChange:syncSound});
+const mediaWindow = createMediaWindow({cancel:video => playbackAudio.cancel(video)});
 const order = createOrderController({dialog:personalize,money,toast,onBusy:playback,
   onSaved:detail => document.dispatchEvent(new CustomEvent('ia4tube:edit-order-saved',{detail:{...detail,videoTitle:catalog.find(item => item.id === detail.videoId)?.label}}))});
 
@@ -112,7 +119,9 @@ function tick() {
   if (video && !video.paused && canPlay()) progressFrame = requestAnimationFrame(tick);
 }
 function playback() {
+  document.dispatchEvent(new Event('ia4tube:edit-before-media-change'));
   videos.forEach((video,index) => {if (index !== activeIndex || !canPlay()) {playbackAudio.cancel(video);video.pause();}});
+  mediaWindow.sync(videos,activeIndex,{visible:!routeIsProfile && !document.hidden});
   const video = videos[activeIndex];
   if (video && canPlay()) playbackAudio.play(video,{
     isCurrent:() => videos[activeIndex] === video && canPlay(),
@@ -135,15 +144,17 @@ const observer = new IntersectionObserver(entries => {
   if (winner && !routeIsProfile) activate(cards.indexOf(winner.target));
 },{root:feed,threshold:[.1,.65,.9]});
 
-function renderFeed(items,key) {
+function renderFeed(items,key,initialIndex = 0) {
   if (playlistKey === key) return;
+  document.dispatchEvent(new Event('ia4tube:edit-before-media-change'));
   observer.disconnect();videos.forEach(video => {playbackAudio.cancel(video);video.pause();});cancelAnimationFrame(progressFrame);
-  playlist = items;playlistKey = key;activeIndex = 0;feed.replaceChildren();
+  mediaWindow.clear();
+  playlist = items;playlistKey = key;activeIndex = Math.max(0,Math.min(initialIndex,items.length - 1));feed.replaceChildren();
   for (const item of items) {
     const article = document.createElement('article');
     article.className = 'video-card';article.dataset.id = item.id;article.dataset.title = item.label;article.dataset.recipe = item.recipe;
     article.setAttribute('aria-label',`${item.label}: ${item.title}`);
-    article.innerHTML = `<video src="${esc(mediaPath(item.video))}" poster="${esc(mediaPath(item.poster))}" muted loop playsinline preload="metadata" role="button" tabindex="0" aria-label="Vídeo ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="release-notice" id="release-${esc(item.id)}" role="status" hidden>${icon('lock')}<strong></strong></div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>${item.orderEnabled ? 'a partir de' : 'referência visual'}</small><strong>${item.orderEnabled ? money(startingPrice(item)) : 'Em breve'}</strong></div><button class="make-button">${item.orderEnabled ? 'Fazer meu pedido' : 'Ver detalhes'} ${icon('arrow-up-right')}</button></div></div>`;
+    article.innerHTML = `<video data-src="${esc(mediaPath(item.video))}" data-poster="${esc(posterPath(item))}" muted loop playsinline preload="none" role="button" tabindex="0" aria-label="Vídeo ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="release-notice" id="release-${esc(item.id)}" role="status" hidden>${icon('lock')}<strong></strong></div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>${item.orderEnabled ? 'a partir de' : 'referência visual'}</small><strong>${item.orderEnabled ? money(startingPrice(item)) : 'Em breve'}</strong></div><button class="make-button">${item.orderEnabled ? 'Fazer meu pedido' : 'Ver detalhes'} ${icon('arrow-up-right')}</button></div></div>`;
     article.querySelector('.creator-action').addEventListener('click',() => location.hash = 'perfil');
     article.querySelector('.sound-toggle').addEventListener('click',toggleSound);
     article.querySelector('.interface-toggle').addEventListener('click',() => setVideoOnly(!videoOnly));
@@ -155,7 +166,7 @@ function renderFeed(items,key) {
     });
     video.addEventListener('play',() => syncPlayButton(article));
     video.addEventListener('pause',() => syncPlayButton(article));
-    video.addEventListener('error',() => {if (activeCard() === article) toast('Não foi possível carregar este vídeo. Tente o próximo.');});
+    video.addEventListener('error',() => {if (activeCard() === article && video.getAttribute('src')) toast('Não foi possível carregar este vídeo. Tente o próximo.');});
     feed.append(article);
   }
   cards = [...feed.querySelectorAll('.video-card')];videos = cards.map(card => card.querySelector('video'));
@@ -164,8 +175,8 @@ function renderFeed(items,key) {
     document.querySelector('#position').innerHTML = '00 <span>/ 00</span>';
     feed.innerHTML = '<div class="empty-feed"><span class="eyebrow">SEM VÍDEOS EM DESTAQUE</span><h2>A próxima inspiração<br>está chegando.</h2><p>Os modelos anteriores continuam no perfil.</p><a class="primary-action" href="#perfil">Ver perfil da iA4tube</a></div>';
   }
-  feed.scrollTo({top:0,behavior:'instant'});
-  cards.forEach(card => observer.observe(card));syncSound();syncInterface();syncReleases();activate(0);tick();
+  feed.scrollTo({top:activeIndex * feed.clientHeight,behavior:'instant'});
+  cards.forEach(card => observer.observe(card));syncSound();syncInterface();syncReleases();activate(activeIndex);tick();
 }
 function goTo(index) {
   if (index < 0 || index >= cards.length) return;
@@ -184,7 +195,7 @@ function openPersonalize(item) {
   if (!data) return;
   const release = releaseInfo(item);
   if (release) {syncReleases();toast(release.label);return;}
-  document.querySelector('#chosen-poster').src = mediaPath(item.poster);
+  document.querySelector('#chosen-poster').src = posterPath(item);
   document.querySelector('#chosen-poster').alt = `Modelo ${item.label}`;
   document.querySelector('#chosen-title').textContent = item.title;
   document.querySelector('#chosen-kicker').textContent = item.label;
@@ -217,7 +228,7 @@ function renderProfile() {
     const button = document.createElement('button');button.className = 'profile-card';button.dataset.id = item.id;
     if (item.creativeTemplate) button.classList.add('profile-card--creative');
     button.setAttribute('aria-label',`Assistir ${item.label}: ${item.title}`);
-    button.innerHTML = `<div class="profile-thumbnail"><img src="${esc(mediaPath(item.poster))}" alt="${esc(item.title)}" loading="lazy"><span>${icon('play')}${esc(item.duration)}s</span><span class="profile-release" hidden></span></div><div class="profile-card-copy"><span>${esc(item.label)}</span><h3>${esc(item.title)}</h3></div>`;
+    button.innerHTML = `<div class="profile-thumbnail"><img data-src="${esc(posterPath(item))}" alt="${esc(item.title)}" width="720" height="1280" loading="lazy" decoding="async"><span>${icon('play')}${esc(item.duration)}s</span><span class="profile-release" hidden></span></div><div class="profile-card-copy"><span>${esc(item.label)}</span><h3>${esc(item.title)}</h3></div>`;
     button.addEventListener('click',() => location.hash = `video/${encodeURIComponent(item.id)}`);grid.append(button);
   }
   if (!catalog.length) grid.innerHTML = '<p class="empty-profile">Nenhum vídeo disponível ainda. </p>';
@@ -228,13 +239,17 @@ function route() {
   if (routeIsProfile) setVideoOnly(false);
   document.querySelector('#feed-view').hidden = routeIsProfile;
   document.querySelector('#profile-view').hidden = !routeIsProfile;
+  if (routeIsProfile) document.querySelectorAll('#profile-grid img[data-src]').forEach(image => {
+    if (!image.getAttribute('src')) image.src = image.dataset.src;
+  });
   document.querySelectorAll('[data-nav]').forEach(link => {if (link.dataset.nav === (routeIsProfile ? 'profile' : 'feed')) link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});
   document.title = routeIsProfile ? 'Perfil · iA4tube' : 'Em destaque · iA4tube';
   if (!routeIsProfile && data) {
     let requestedId = '';
     if (location.hash.startsWith('#video/')) {try {requestedId = decodeURIComponent(location.hash.slice(7));} catch {}}
     const fromProfile = requestedId && catalog.some(item => item.id === requestedId);
-    renderFeed(fromProfile ? catalog : daily,fromProfile ? 'profile' : 'daily');
+    const initialIndex = fromProfile ? catalog.findIndex(item => item.id === requestedId) : 0;
+    renderFeed(fromProfile ? catalog : daily,fromProfile ? 'profile' : 'daily',initialIndex);
     document.querySelector('.feed-tab').textContent = fromProfile ? 'Do perfil' : 'Em destaque';
     if (fromProfile) {
       const index = playlist.findIndex(item => item.id === requestedId);
@@ -255,7 +270,8 @@ function toast(message) {
 async function load() {
   feed.innerHTML = '<div class="empty-feed"><p role="status">Carregando os vídeos…</p></div>';
   try {
-    const response = await fetch('./catalog.json',{cache:'no-store'});
+    const [response,previews] = await Promise.all([fetch('./catalog.json',{cache:'no-store'}),loadPosterPreviews()]);
+    posterPreviews = previews;
     if (!response.ok) throw new Error('Não foi possível carregar o catálogo.');
     data = await response.json();
     if (!Array.isArray(data.catalog) || !Array.isArray(data.dailySelection?.videoIds)) throw new Error('O catálogo não está disponível.');
@@ -271,5 +287,16 @@ async function load() {
     document.querySelector('#catalog-error').textContent = error.message || 'Confira sua conexão e tente novamente.';
     document.querySelector('#retry-catalog').addEventListener('click',load);
   }
+}
+async function loadPosterPreviews() {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(),2500);
+  try {
+    const response = await fetch('./poster-previews.json?v=20261022-light-media',{signal:controller.signal});
+    if (!response.ok) return {};
+    const value = await response.json();
+    return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  } catch {return {};}
+  finally {clearTimeout(timeout);}
 }
 route();load();

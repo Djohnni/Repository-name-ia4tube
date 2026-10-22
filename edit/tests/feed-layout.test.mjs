@@ -26,7 +26,7 @@ function renderCard(item = fixture,videoOnly = false) {
     item,creator:catalog.creator,prices:catalog.prices,videoOnly,
     startingPrice:runInNewContext(app.match(/const startingPrice = [^\n]+/)[0] + '\nstartingPrice',
       {data:catalog,prices:catalog.prices},{timeout:1000}),
-    esc:escapeHtml,mediaPath:value => value,
+    esc:escapeHtml,mediaPath:value => value,posterPath:item => item.poster,
     money:cents => 'R$ ' + (cents / 100).toFixed(2).replace('.',','),
     icon:name => '<svg aria-hidden="true" data-icon="' + escapeHtml(name) + '"></svg>',
     document:{createElement(tag){assert.equal(tag,'article');return article;}},
@@ -82,7 +82,9 @@ test('accessible article model name and video metadata are preserved',() => {
   assert.equal(article.attributes['aria-label'],fixture.label + ': ' + fixture.title);
   assert.equal(article.dataset.id,fixture.id);
   assert.match(article.innerHTML,/<video[^>]+aria-label="Vídeo RÓTULO ÚNICO DO MODELO"/);
-  assert.match(article.innerHTML,/\bmuted loop playsinline preload="metadata"/);
+  assert.match(article.innerHTML,/\bmuted loop playsinline preload="none"/);
+  assert.match(article.innerHTML,/<video data-src="[^"]+" data-poster="[^"]+"/);
+  assert.doesNotMatch(article.innerHTML,/<video[^>]*\s(?:src|poster)="/);
 });
 
 test('removed swipe hint leaves no DOM selector that can break navigation',() => {

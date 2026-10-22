@@ -1,5 +1,5 @@
 import {createEditMeasurement,isPublicEdit,pageContext,readConsent,saveConsent} from './analytics-core.js?v=20261022-video-attention';
-import {installVideoAttention} from './video-attention.js?v=20261022-video-attention';
+import {installVideoAttention} from './video-attention.js?v=20261022-light-media';
 
 // Dedicated GA4 property: iA4tube Edit. No connection to the app/mascot property.
 export const MEASUREMENT_ID = 'G-SXXCEQ97J5';
