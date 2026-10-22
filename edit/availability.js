@@ -8,8 +8,9 @@ export const SCHEDULED_IDS = Object.freeze([
   'a1a42dba-b196-43b6-82cb-816868721523',
   'd3fb329a-b67c-4554-8e94-74b715e6197b',
 ]);
-// Manual hold: remove only on a new instruction from the owner.
-export const FUTURE_IDS = Object.freeze(['2830b796-2375-49e8-8e97-9a731c115252']);
+// The owner released the narrated package and placed it third on 2026-10-21.
+export const PRODUCT_PACKAGE_ID = '2830b796-2375-49e8-8e97-9a731c115252';
+export const FUTURE_IDS = Object.freeze([]);
 const ids = new Set(SCHEDULED_IDS);
 const futureIds = new Set(FUTURE_IDS);
 const opensAt = Date.parse(RELEASE_AT);
@@ -23,5 +24,9 @@ export function releaseInfo(item,now = Date.now()) {
 }
 
 export function orderShowcase(items) {
-  return [...items.filter(item => !futureIds.has(item.id)),...items.filter(item => futureIds.has(item.id))];
+  const packageItem = items.find(item => item.id === PRODUCT_PACKAGE_ID);
+  const otherItems = items.filter(item => item.id !== PRODUCT_PACKAGE_ID);
+  const ordered = [...otherItems.filter(item => !futureIds.has(item.id)),...otherItems.filter(item => futureIds.has(item.id))];
+  if (packageItem) ordered.splice(Math.min(2,ordered.length),0,packageItem);
+  return ordered;
 }

@@ -1,6 +1,6 @@
-import { createOrderController } from './order.js?v=20261021-release';
+import { createOrderController } from './order.js?v=20261021-products-open';
 import { createPlaybackAudio } from './playback-audio.js?v=20261021-native-sound';
-import { releaseInfo, orderShowcase } from './availability.js?v=20261021-release';
+import { releaseInfo, orderShowcase } from './availability.js?v=20261021-products-open';
 
 const paths = {
   home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
-import {RELEASE_AT,SCHEDULED_IDS,FUTURE_IDS,releaseInfo,orderShowcase} from '../availability.js';
+import {RELEASE_AT,SCHEDULED_IDS,FUTURE_IDS,PRODUCT_PACKAGE_ID,releaseInfo,orderShowcase} from '../availability.js';
 import {buildMultipartOrder} from '../order-adapter.js';
 
 const catalog=JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
@@ -50,27 +50,45 @@ test('earlier dates do not promise tomorrow and unrelated cards are never schedu
   assert.equal(releaseInfo({id:'unknown'},opens-1),null);
 });
 
-test('the narrated package stays future-only after the timed release and has no automatic deadline',()=>{
-  assert.deepEqual(FUTURE_IDS,['2830b796-2375-49e8-8e97-9a731c115252']);
-  const item=catalog.catalog.find(row=>row.id===FUTURE_IDS[0]);
+test('the narrated package is released immediately without altering prices or the five timed models',()=>{
+  assert.equal(PRODUCT_PACKAGE_ID,'2830b796-2375-49e8-8e97-9a731c115252');
+  assert.deepEqual(FUTURE_IDS,[]);
+  const item=catalog.catalog.find(row=>row.id===PRODUCT_PACKAGE_ID);
   assert.equal(item.recipe,'produtos');
+  assert.equal(item.orderEnabled,true);assert.equal(item.version,1);
+  assert.deepEqual(catalog.productsPrices,{'2':3800,'4':4800,'6':5800,'8':6800});
   for(const now of [opens-1,opens,opens+86400000,Date.parse('2027-01-01T00:00:00Z')]) {
-    assert.deepEqual(releaseInfo(item,now),{opensAt:null,label:'Libera futuramente'});
+    assert.equal(releaseInfo(item,now),null);
   }
 });
 
-test('display ordering moves only the package to the end and preserves all identities and source order',()=>{
+test('display ordering moves only the package to third and preserves every other identity and source order',()=>{
   const published=catalog.catalog.filter(row=>row.status==='published');
   const original=published.slice();
   const ordered=orderShowcase(published);
+  const others=published.filter(row=>row.id!==PRODUCT_PACKAGE_ID);
   assert.notEqual(ordered,published);
   assert.deepEqual(published,original);
   assert.deepEqual(ordered.map(row=>row.id),[
-    ...published.filter(row=>!FUTURE_IDS.includes(row.id)).map(row=>row.id),...FUTURE_IDS,
+    ...others.slice(0,2).map(row=>row.id),PRODUCT_PACKAGE_ID,...others.slice(2).map(row=>row.id),
   ]);
-  assert.equal(ordered.at(-1).recipe,'produtos');
-  assert.deepEqual(ordered.slice(-6,-1).map(row=>row.id),expected);
+  assert.equal(ordered[2].recipe,'produtos');
+  assert.equal(ordered.filter(row=>row.id===PRODUCT_PACKAGE_ID).length,1);
+  assert.deepEqual(ordered.slice(-5).map(row=>row.id),expected);
+  assert.deepEqual(orderShowcase(ordered),ordered,'Applying display order repeatedly must not move or duplicate another card.');
   assert.ok(ordered.every(row=>original.includes(row)),'Display order must reuse immutable model references.');
+  const byId=new Map(published.map(row=>[row.id,row]));
+  assert.deepEqual(orderShowcase(catalog.dailySelection.videoIds.map(id=>byId.get(id))).map(row=>row.id),ordered.map(row=>row.id));
+});
+
+test('display ordering preserves lists without the package, empty lists and short lists',()=>{
+  const without=catalog.catalog.filter(row=>row.status==='published'&&row.id!==PRODUCT_PACKAGE_ID);
+  const original=without.slice(),ordered=orderShowcase(without);
+  assert.deepEqual(ordered,original);assert.notEqual(ordered,without);assert.deepEqual(without,original);
+  assert.deepEqual(orderShowcase([]),[]);
+  const item=catalog.catalog.find(row=>row.id===PRODUCT_PACKAGE_ID);
+  assert.deepEqual(orderShowcase([item]),[item]);
+  assert.deepEqual(orderShowcase([item,without[0]]),[without[0],item]);
 });
 
 test('availability is display metadata and cannot mutate catalog snapshots, prices or media',()=>{
@@ -126,7 +144,7 @@ function interfaceFixture(now=opens-1) {
   return {context,cards,count,timers,setNow:value=>{now=value;}};
 }
 
-test('release sync shows five timed notices plus one future package and disables only their CTAs',()=>{
+test('release sync shows only five timed notices while the third package CTA is available',()=>{
   const f=interfaceFixture();f.context.syncReleases();
   const held=new Set([...expected,...FUTURE_IDS]);
   for(const card of f.cards) {
@@ -141,21 +159,23 @@ test('release sync shows five timed notices plus one future package and disables
       assert.match(card.button.innerHTML,/Fazer meu pedido/);assert.equal(card.attributes.has('aria-describedby'),false);
     }
   }
-  assert.equal(f.count.textContent,22);assert.equal(f.timers.size,1);
+  assert.equal(f.cards[2].dataset.id,PRODUCT_PACKAGE_ID);assert.equal(f.cards[2].button.disabled,false);
+  assert.equal(f.cards[2].notice.hidden,true);assert.equal(f.cards[2].badge.hidden,true);
+  assert.equal(f.count.textContent,23);assert.equal(f.timers.size,1);
   assert.equal([...f.timers.values()][0].delay,51);
 });
 
-test('exact release refresh unlocks the five in place, preserves future hold and schedules no rolling timer',()=>{
+test('exact release refresh unlocks the five in place, keeps the package open and schedules no rolling timer',()=>{
   const f=interfaceFixture();f.context.syncReleases();const before=f.cards.slice();
   f.setNow(opens);f.context.syncReleases();
-  assert.equal(f.count.textContent,27);assert.equal(f.timers.size,0);
+  assert.equal(f.count.textContent,28);assert.equal(f.timers.size,0);
   assert.ok(f.cards.every((card,index)=>card===before[index]),'No card or media element is replaced.');
   for(const card of f.cards) {
     const held=FUTURE_IDS.includes(card.dataset.id);
     assert.equal(card.button.disabled,held);assert.equal(card.notice.hidden,!held);assert.equal(card.badge.hidden,!held);
     if(!held)assert.equal(card.attributes.has('aria-describedby'),false);
   }
-  f.setNow(opens+86400000);f.context.syncReleases();assert.equal(f.timers.size,0);assert.equal(f.count.textContent,27);
+  f.setNow(opens+86400000);f.context.syncReleases();assert.equal(f.timers.size,0);assert.equal(f.count.textContent,28);
 });
 
 test('visibility, pageshow and focus refresh deadlines while the direct order action retains a guard',()=>{

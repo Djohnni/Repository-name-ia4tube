@@ -3,7 +3,7 @@ import { createModelOptions } from './model-options.js?v=20261020-styles';
 import { createProductsForm } from './products-form.js?v=20261021-upload';
 import { normalizeProductPrice } from './optional-price.js?v=20261019-price';
 import { createUploadField } from './upload-field.js?v=20261021-upload';
-import { releaseInfo } from './availability.js?v=20261021-release';
+import { releaseInfo } from './availability.js?v=20261021-products-open';
 
 // v1 permanently identified matching content, including completed purchases
 // without a receipt in this tab. Keep those records untouched as history;

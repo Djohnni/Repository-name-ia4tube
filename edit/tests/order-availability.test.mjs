@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
-import {releaseInfo,RELEASE_AT,SCHEDULED_IDS,FUTURE_IDS} from '../availability.js';
+import {releaseInfo,RELEASE_AT,SCHEDULED_IDS,PRODUCT_PACKAGE_ID} from '../availability.js';
 import {buildMultipartOrder,idempotencyKey,normalizeReceipt,safeWhatsAppUrl,SUBMIT_ENDPOINT} from '../order-adapter.js';
 import {normalizeProductPrice} from '../optional-price.js';
 
@@ -19,7 +19,7 @@ const storage=()=>{
 // Evaluate the actual order controller with a deterministic clock and inert UI.
 // The multipart, receipt, price, fingerprint and idempotency code are not stubbed.
 function fixture(initial=opens-1) {
-  let now=initial,reads=0,resetCount=0;
+  let now=initial,reads=0,resetCount=0,productsEnabled=false;
   const nodes=new Map(),toasts=[],requests=[],navigation=[];
   const node=selector=>{
     if(!nodes.has(selector))nodes.set(selector,{value:'',hidden:false,disabled:false,checked:false,innerHTML:'',textContent:'',listeners:new Map(),
@@ -39,12 +39,16 @@ function fixture(initial=opens-1) {
     location,history:{replaceState(_state,_title,url){location.hash=url;}},
     releaseInfo:item=>releaseInfo(item,now),buildMultipartOrder,idempotencyKey,normalizeReceipt,safeWhatsAppUrl,SUBMIT_ENDPOINT,normalizeProductPrice,
     createUploadField:input=>({reset(){},async read(){reads++;return input===node('#order-logo')?{name:'logo.png',mime:'image/png',data:btoa('logo')}:null;}}),
-    createProductsForm:()=>({resetUploads(){},sync(){},open(){},isEnabled:()=>false}),
+    createProductsForm:()=>({resetUploads(){},sync(){},open(value){productsEnabled=value;},isEnabled:()=>productsEnabled,
+      async payload(){return {photos:[1,2].map(index=>({name:'produto-'+index+'.png',mime:'image/png',data:btoa('photo-'+index)})),
+        productsVideo:{packageCount:2,branch:'HAMBURGUERIA',openingText:'CONFIRA NOSSAS OFERTAS!',openingSeconds:6,
+          whatsapp:'',instagram:'',location:'',items:[1,2].map(index=>({name:'Produto '+index,price:'',seconds:4,speechOverrideEnabled:false,speechText:''}))}};}}),
     createModelOptions:()=>({sync(){},open:()=>false,animal:()=>null}),
     fetch:async(url,options)=>{
       requests.push({url,options});
       const message='Pedido: '+savedId;
-      return {ok:true,json:async()=>({orderId:savedId,status:'awaiting_authorization',totalCents:2400,
+      const totalCents=JSON.parse(options.body.get('data')).campaignId==='produtos-cardapio-v1'?3800:2400;
+      return {ok:true,json:async()=>({orderId:savedId,status:'awaiting_authorization',totalCents,
         whatsappMessage:message,whatsappUrl:'https://wa.me/554791049079?text='+encodeURIComponent(message)})};
     },
   };
@@ -68,14 +72,21 @@ test('scheduled open rejects without resetting existing inputs, receipts or atte
   assert.equal(f.requests.length,0);assert.equal(f.reads,0);
 });
 
-test('future package cannot open before or after midnight and never clears another filled form',()=>{
-  const future={id:FUTURE_IDS[0],version:1,recipe:'produtos',orderEnabled:true};
+test('released package opens and submits the unchanged two-product request before or after midnight',async()=>{
+  const item={id:PRODUCT_PACKAGE_ID,version:1,recipe:'produtos',orderEnabled:true};
   for(const now of [opens-1,opens,opens+86400000]) {
-    const f=fixture(now);f.node('#order-company').value='Preservar empresa';
-    assert.equal(f.controller.open(future,config),false);
-    assert.deepEqual(f.toasts,['Libera futuramente']);assert.equal(f.resets,0);
-    assert.equal(f.node('#order-company').value,'Preservar empresa');
-    assert.equal(f.reads,0);assert.equal(f.requests.length,0);
+    const f=fixture(now);
+    assert.equal(f.controller.open(item,config),true);assert.equal(f.form.hidden,false);
+    assert.deepEqual(f.toasts,[]);f.fill();await f.submit();
+    assert.equal(f.requests.length,1);assert.equal(f.requests[0].url,SUBMIT_ENDPOINT);
+    const body=f.requests[0].options.body,data=JSON.parse(body.get('data'));
+    assert.deepEqual(data.showcase,{videoId:PRODUCT_PACKAGE_ID,videoVersion:1});
+    assert.equal(data.campaignId,'produtos-cardapio-v1');assert.equal(data.productsVideo.packageCount,2);
+    assert.deepEqual(data.productsVideo.items.map(row=>row.name),['Produto 1','Produto 2']);
+    assert.equal(body.getAll('logo').length,1);assert.equal(body.getAll('photos').length,2);
+    assert.equal(f.node('#order-success').hidden,false);assert.equal(f.navigation.length,1);
+    assert.equal(JSON.parse(f.session.getItem('ia4tube.edit.receipt.v1')).totalCents,3800);
+    for(const key of ['opensAt','releaseAt','releaseLabel','isLocked'])assert.equal(Object.hasOwn(data,key),false);
   }
 });
 
@@ -97,7 +108,7 @@ test('the same controller opens at midnight and submits one unchanged request wi
   assert.equal(f.node('#order-success').hidden,false);assert.equal(f.navigation.length,1);
 });
 
-for(const videoId of [SCHEDULED_IDS[0],FUTURE_IDS[0]]) test('saved confirmation remains restorable and cannot submit again: '+videoId,async()=>{
+for(const videoId of [SCHEDULED_IDS[0],PRODUCT_PACKAGE_ID]) test('saved confirmation remains restorable and cannot submit again: '+videoId,async()=>{
   const f=fixture();
   const message='Pedido: '+savedId;
   const saved={orderId:savedId,status:'awaiting_authorization',totalCents:2400,videoId,
