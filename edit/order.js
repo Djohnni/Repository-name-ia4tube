@@ -1,8 +1,9 @@
-import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261022-no-photo';
+import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261022-phrase';
 import { createModelOptions } from './model-options.js?v=20261020-styles';
 import { createProductsForm } from './products-form.js?v=20261021-upload';
 import { normalizeProductPrice } from './optional-price.js?v=20261019-price';
 import { normalizeProductDescription } from './product-description.js?v=20261022-no-photo';
+import { modelMainPhrase, normalizeCustomPhrase } from './custom-phrase.js?v=20261022-phrase';
 import { createUploadField } from './upload-field.js?v=20261021-upload';
 import { releaseInfo } from './availability.js?v=20261021-products-open';
 
@@ -78,6 +79,34 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
   const descriptionInput = document.querySelector('#order-product-description');
   const photoChoice = document.querySelector('#order-has-photo');
   const descriptionChoice = document.querySelector('#order-no-photo');
+  const phraseOptions = document.querySelector('#order-phrase-options');
+  const phraseInput = document.querySelector('#order-custom-phrase');
+  const modifyPhrase = document.querySelector('#modify-main-phrase');
+  const resetPhrase = document.querySelector('#reset-main-phrase');
+  let editingPhrase = false;
+
+  function syncPhraseFields() {
+    const active = !products.isEnabled() && !form.hidden;
+    phraseOptions.hidden = !active;
+    document.querySelector('#order-phrase-current').textContent = modelMainPhrase(item);
+    document.querySelector('#order-phrase-current').hidden = editingPhrase;
+    document.querySelector('#order-phrase-editor').hidden = !active || !editingPhrase;
+    document.querySelector('#chosen-phrase').hidden = active;
+    modifyPhrase.hidden = editingPhrase;
+    modifyPhrase.disabled = busy || !active;
+    modifyPhrase.setAttribute('aria-expanded',String(editingPhrase));
+    phraseInput.disabled = resetPhrase.disabled = busy || !active || !editingPhrase;
+    phraseInput.required = active && editingPhrase;
+    if (!editingPhrase) phraseInput.value = modelMainPhrase(item);
+  }
+  modifyPhrase.addEventListener('click',() => {
+    if (busy || products.isEnabled() || form.hidden) return;
+    editingPhrase = true;syncPhraseFields();phraseInput.focus();phraseInput.select();
+  });
+  resetPhrase.addEventListener('click',() => {
+    if (busy || products.isEnabled()) return;
+    editingPhrase = false;syncPhraseFields();modifyPhrase.focus();
+  });
 
   function usesDescription() {return !products.isEnabled() && descriptionChoice.checked;}
   function syncImageFields() {
@@ -95,8 +124,8 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
   });
 
   function clearUploads() {logoUpload.reset();photoUpload.reset();products.resetUploads();}
-  function resetForm() {clearUploads();form.reset();syncImageFields();}
-  form.addEventListener('reset',clearUploads);
+  function resetForm() {editingPhrase = false;clearUploads();form.reset();syncImageFields();syncPhraseFields();}
+  form.addEventListener('reset',() => {editingPhrase = false;clearUploads();});
 
   function setBusy(value) {
     busy = value;
@@ -104,6 +133,7 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
     products.sync(value);
     modelOptions.sync(value);
     syncImageFields();
+    syncPhraseFields();
     dialog.querySelector('.close-dialog').disabled = value;
     submit.innerHTML = value ? 'Salvando seu pedido…' : initialSubmitLabel;
     form.setAttribute('aria-busy',String(value));onBusy();
@@ -151,6 +181,7 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
     if (enabled && invalidPrice) {
       form.hidden = true;displayOnly.hidden = false;displayOnly.textContent = 'O preço deste modelo precisa ser conferido no programa antes de receber pedidos.';
     } else displayOnly.textContent = 'Este vídeo é apenas uma referência visual. A personalização ainda não foi habilitada para ele.';
+    syncPhraseFields();
     return true;
   }
   function restore() {
@@ -176,6 +207,8 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
       if (!products.isEnabled() && ![10,20].includes(durationSeconds)) throw new Error('Escolha 10 ou 20 segundos.');
       if (!document.querySelector('#order-consent').checked) throw new Error('Confirme a autorização para usar as imagens.');
       const productDescription = usesDescription() ? normalizeProductDescription(descriptionInput.value,{required:true}) : '';
+      const enteredPhrase = !products.isEnabled() && editingPhrase ? normalizeCustomPhrase(phraseInput.value,{required:true}) : '';
+      const customPhrase = enteredPhrase && enteredPhrase !== modelMainPhrase(item) ? enteredPhrase : '';
       const [logo,photo] = await Promise.all([
         logoUpload.read(),
         products.isEnabled() || usesDescription() ? null : photoUpload.read(),
@@ -186,6 +219,7 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
         : {videoId:item.id,videoVersion:item.version,company,durationSeconds,logo,photo,consent:true};
       if (!products.isEnabled()) {
         if (productDescription) payload.productDescription = productDescription;
+        if (customPhrase) payload.customPhrase = customPhrase;
         const productPrice = normalizeProductPrice(document.querySelector('#order-product-price').value);
         if (productPrice) payload.productPrice = productPrice;
         const animal = modelOptions.animal();

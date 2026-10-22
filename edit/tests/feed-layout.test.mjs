@@ -112,13 +112,14 @@ test('video tap and Space still pause playback without a lateral play button',()
   video.paused=false;context.syncPlayButton(card);assert.equal(classes.get('is-paused'),false);
 });
 
-test('legacy form stays intact apart from single-product image choices and package-only company',() => {
+test('legacy form stays intact apart from authorized individual options and package-only company',() => {
   const form = page.match(/<form id="order-form">[\s\S]*?<\/form>/)?.[0];
   assert.ok(form);
   const company = form.match(/        (<label[^\n]*id="order-company"[^\n]*<\/label>)/)?.[1];
   assert.ok(company,'The existing company input belongs to the product package.');
   // Restore only the authorized UI additions, relocation and prior copy removals.
   const legacy = form.replace(/      <fieldset id="products-options"[\s\S]*?      <\/fieldset>\r?\n/,'')
+    .replace(/      <section id="order-phrase-options"[^\n]*\r?\n/,'')
     .replace(/      <fieldset class="product-image-mode"[^\n]*\r?\n/,'')
     .replace(/      <label id="order-description-field"[^\n]*\r?\n/,'')
     .replace(/      <label[^\n]*id="order-product-price"[^\n]*\r?\n/,'')

@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {createOrderController,fingerprintPayload} from '../order.js';
 import {idempotencyKey} from '../order-adapter.js';
 
-const item = {id:'b142f07c-6fb2-4b99-842f-b12817c88df3',version:2,recipe:'sextou',orderEnabled:true};
+const item = {id:'b142f07c-6fb2-4b99-842f-b12817c88df3',version:2,recipe:'sextou',orderEnabled:true,
+  phrase:'RESPEITA ESSA FOME!',creativeTemplate:'cartaz-impacto-v1'};
 const config = {prices:{10:1990,20:2990}};
 const savedIds = ['d7f5c088-ece8-4e54-90c3-05ca6f9730e5','47f5c088-ece8-4e54-90c3-05ca6f9730e6','57f5c088-ece8-4e54-90c3-05ca6f9730e7'];
 const legacyId='0c521fbc-a903-44b8-af74-37cbda3c1371';
@@ -88,7 +89,9 @@ function fixture(t,{onSaved}={}) {
   for(const selector of ['#order-form','#order-error','#send-order','#order-success','#display-only-note',
     '#saved-message','#sheet-title','#saved-order-id','#whatsapp-link','#order-company','#order-logo',
     '#order-photo','#order-consent','#order-product-price','#copy-message','#new-order','.chosen-model','#model-note',
-    '#order-has-photo','#order-no-photo','#order-product-description','#order-photo-field','#order-description-field'])node(selector);
+    '#order-has-photo','#order-no-photo','#order-product-description','#order-photo-field','#order-description-field',
+    '#order-phrase-options','#order-phrase-current','#order-phrase-editor','#order-custom-phrase',
+    '#modify-main-phrase','#reset-main-phrase','#chosen-phrase'])node(selector);
   const imageChoices=['#order-has-photo','#order-no-photo'].map(node);
   imageChoices.forEach((choice,index)=>{
     let checked=index===0;
@@ -113,7 +116,7 @@ function fixture(t,{onSaved}={}) {
   const query=form.querySelector.bind(form);
   form.querySelector=selector=>selector==='[name="duration"]:checked'?Object.values(durations).find(radio=>radio.checked):query(selector);
   form.reset=()=>{
-    for(const selector of ['#order-company','#order-product-price','#order-product-description'])node(selector).value='';
+    for(const selector of ['#order-company','#order-product-price','#order-product-description','#order-custom-phrase'])node(selector).value='';
     node('#order-has-photo').checked=true;
     for(const selector of ['#order-logo','#order-photo'])node(selector).files=[];
     node('#order-consent').checked=false;durations[10].checked=true;durations[20].checked=false;
@@ -125,7 +128,8 @@ function fixture(t,{onSaved}={}) {
     }
   };
   for(const selector of ['#order-company','#order-logo','#order-photo','#order-consent','#order-product-price','#send-order',
-    '#order-has-photo','#order-no-photo','#order-product-description'])form.elements.push(node(selector));
+    '#order-has-photo','#order-no-photo','#order-product-description',
+    '#order-custom-phrase','#modify-main-phrase','#reset-main-phrase'])form.elements.push(node(selector));
   node('#send-order').innerHTML='Enviar pedido';
   const dialog=new Element('dialog');dialog.selectors.set('.close-dialog',new Element('button'));dialog.close=()=>dialog.emit('close');
   const local=memoryStorage(),session=memoryStorage(),navigation=[],toasts=[],requests=[];
@@ -590,4 +594,123 @@ test('description timeout retries the same identity and a changed description st
   const changed=f.submit(),next=await f.waitForRequest(3);
   assert.notEqual(next.options.headers['Idempotency-Key'],original.options.headers['Idempotency-Key']);
   f.succeed(2);await changed;
+});
+
+test('default main phrase is visible only once and submits the unchanged legacy request',async t=>{
+  const f=fixture(t);
+  assert.equal(f.node('#order-phrase-options').hidden,false);
+  assert.equal(f.node('#order-phrase-current').textContent,item.phrase);
+  assert.equal(f.node('#order-phrase-current').hidden,false);
+  assert.equal(f.node('#chosen-phrase').hidden,true);
+  assert.equal(f.node('#order-phrase-editor').hidden,true);
+  assert.equal(f.node('#order-custom-phrase').disabled,true);
+  assert.equal(f.node('#order-custom-phrase').required,false);
+  const sending=f.submit(),request=await f.waitForRequest(1);
+  assert.equal(Object.hasOwn(JSON.parse(request.options.body.get('data')),'customPhrase'),false);
+  f.succeed();await sending;
+  assert.equal(JSON.parse(f.session.getItem('ia4tube.edit.receipt.v1')).fingerprint,await descriptionFingerprint(''));
+});
+
+test('opening an unchanged multiline phrase only normalizes its editor and sends no override',async t=>{
+  const f=fixture(t),multiline={...item,id:'d90dda14-dd61-4526-8882-50d4952b0359',
+    phrase:'EU: SÓ VOU DAR UMA OLHADINHA.\n5 SEGUNDOS DEPOIS:'};
+  f.controller.open(multiline,config);f.fill();
+  await f.node('#modify-main-phrase').emit('click');
+  assert.equal(f.node('#order-phrase-editor').hidden,false);
+  assert.equal(f.node('#order-phrase-current').hidden,true,'The original paragraph must not duplicate the editor.');
+  assert.equal(f.node('#order-custom-phrase').value,'EU: SÓ VOU DAR UMA OLHADINHA. 5 SEGUNDOS DEPOIS:');
+  assert.equal(f.node('#order-custom-phrase').required,true);
+  assert.equal(f.node('#modify-main-phrase').getAttribute('aria-expanded'),'true');
+  const sending=f.submit(),request=await f.waitForRequest(1);
+  assert.equal(Object.hasOwn(JSON.parse(request.options.body.get('data')),'customPhrase'),false);
+  f.succeed();await sending;
+});
+
+test('custom phrase and no-photo description are normalized together without entering analytics',async t=>{
+  const events=[],f=fixture(t,{onSaved:summary=>events.push(summary)});
+  await f.node('#modify-main-phrase').emit('click');
+  f.node('#order-custom-phrase').value='  O melhor pa\u0303o  ';
+  f.node('#order-no-photo').checked=true;await f.node('#order-no-photo').emit('change');
+  f.node('#order-product-description').value='Hambúrguer com queijo';
+  const sending=f.submit(),request=await f.waitForRequest(1),data=JSON.parse(request.options.body.get('data'));
+  assert.equal(data.customPhrase,'O melhor pão');assert.equal(data.productDescription,'Hambúrguer com queijo');
+  assert.equal(request.options.body.has('photos'),false);
+  for(const selector of ['#order-custom-phrase','#modify-main-phrase','#reset-main-phrase'])assert.equal(f.node(selector).disabled,true);
+  f.succeed();await sending;
+  assert.equal(events.length,1);assert.equal(Object.hasOwn(events[0],'customPhrase'),false);
+});
+
+test('invalid custom phrases block before uploads, request identity and network while preserving the editor',async t=>{
+  const f=fixture(t);await f.node('#modify-main-phrase').emit('click');
+  for(const value of ['','   ','A','x'.repeat(61),'O\nMELHOR','O\x00MELHOR']) {
+    f.node('#order-custom-phrase').value=value;await f.submit();
+    assert.equal(f.requests.length,0);assert.equal(f.reads.length,0);assert.equal(f.local.values.size,0);
+    assert.match(f.node('#order-error').textContent,/2 a 60/);
+    assert.equal(f.node('#order-custom-phrase').disabled,false);
+    assert.equal(f.node('#order-custom-phrase').value,value);
+    assert.equal(f.node('#order-phrase-editor').hidden,false);
+  }
+});
+
+test('using the original phrase discards an invalid draft and restores the legacy payload',async t=>{
+  const f=fixture(t);await f.node('#modify-main-phrase').emit('click');
+  f.node('#order-custom-phrase').value='x'.repeat(61);
+  await f.node('#reset-main-phrase').emit('click');
+  assert.equal(f.node('#order-custom-phrase').value,item.phrase);
+  assert.equal(f.node('#order-custom-phrase').required,false);
+  assert.equal(f.node('#order-custom-phrase').disabled,true);
+  assert.equal(f.node('#order-phrase-current').hidden,false);
+  assert.equal(f.node('#order-phrase-editor').hidden,true);
+  assert.equal(f.node('#modify-main-phrase').getAttribute('aria-expanded'),'false');
+  const sending=f.submit(),request=await f.waitForRequest(1);
+  assert.equal(Object.hasOwn(JSON.parse(request.options.body.get('data')),'customPhrase'),false);
+  f.succeed();await sending;
+});
+
+test('draft phrase survives reopening the same model and resets on another model or new saved order',async t=>{
+  const f=fixture(t);await f.node('#modify-main-phrase').emit('click');
+  f.node('#order-custom-phrase').value='O MELHOR';f.reopen();
+  assert.equal(f.node('#order-custom-phrase').value,'O MELHOR');assert.equal(f.node('#order-phrase-editor').hidden,false);
+  f.controller.open({...item,id:'d90dda14-dd61-4526-8882-50d4952b0359',phrase:'OUTRA FRASE'},config);f.fill();
+  assert.equal(f.node('#order-custom-phrase').value,'OUTRA FRASE');assert.equal(f.node('#order-phrase-editor').hidden,true);
+  await f.node('#modify-main-phrase').emit('click');f.node('#order-custom-phrase').value='MINHA FRASE';
+  const sending=f.submit();await f.waitForRequest(1);f.succeed();await sending;
+  await f.node('#new-order').emit('click');f.reopen();
+  assert.equal(f.node('#order-custom-phrase').value,item.phrase);assert.equal(f.node('#order-phrase-editor').hidden,true);
+});
+
+test('switching to the product package hides and disables all custom phrase controls',async t=>{
+  const f=fixture(t);await f.node('#modify-main-phrase').emit('click');f.node('#order-custom-phrase').value='O MELHOR';
+  const packageItem={...item,id:'2830b796-2375-49e8-8e97-9a731c115252',recipe:'produtos',phrase:'Seus produtos em um só vídeo.'};
+  f.controller.open(packageItem,config);f.fill();
+  assert.equal(f.node('#order-phrase-options').hidden,true);assert.equal(f.node('#order-phrase-editor').hidden,true);
+  assert.equal(f.node('#order-custom-phrase').required,false);assert.equal(f.node('#chosen-phrase').hidden,false);
+  for(const selector of ['#order-custom-phrase','#modify-main-phrase','#reset-main-phrase'])assert.equal(f.node(selector).disabled,true);
+  await f.node('#modify-main-phrase').emit('click');assert.equal(f.node('#order-phrase-editor').hidden,true);
+  const cards=f.form.querySelector('#products-list').children.slice(0,2);
+  for(const [index,card] of cards.entries()) {
+    card.querySelector('[data-field="photo"]').files=[imageFile('produto-'+index+'.png','photo-'+index)];
+    card.querySelector('[data-field="name"]').value='Produto '+(index+1);
+    card.querySelector('[data-field="seconds"]').value='4';
+  }
+  const sending=f.submit(),request=await f.waitForRequest(1),data=JSON.parse(request.options.body.get('data'));
+  assert.equal(Object.hasOwn(data,'customPhrase'),false);assert.equal(data.company,'Gastro');
+  assert.equal(data.productsVideo.packageCount,2);f.succeed(0,savedIds[0],3800);await sending;
+});
+
+test('custom phrase timeout retries one identity, edits start another, and returning to original omits override',async t=>{
+  const f=fixture(t);await f.node('#modify-main-phrase').emit('click');f.node('#order-custom-phrase').value='O MELHOR';
+  const first=f.submit(),original=await f.waitForRequest(1);
+  original.reject(Object.assign(new Error('Timed out'),{name:'AbortError'}));await first;
+  const retry=f.submit(),repeated=await f.waitForRequest(2);
+  assert.equal(repeated.options.headers['Idempotency-Key'],original.options.headers['Idempotency-Key']);
+  repeated.reject(Object.assign(new Error('Timed out'),{name:'AbortError'}));await retry;
+  f.node('#order-custom-phrase').value='MINHA ESCOLHA';
+  const changed=f.submit(),next=await f.waitForRequest(3);
+  assert.notEqual(next.options.headers['Idempotency-Key'],original.options.headers['Idempotency-Key']);
+  next.reject(Object.assign(new Error('Timed out'),{name:'AbortError'}));await changed;
+  f.node('#order-custom-phrase').value='  '+item.phrase+'  ';
+  const reset=f.submit(),last=await f.waitForRequest(4);
+  assert.equal(Object.hasOwn(JSON.parse(last.options.body.get('data')),'customPhrase'),false);
+  f.succeed(3,savedIds[0]);await reset;
 });

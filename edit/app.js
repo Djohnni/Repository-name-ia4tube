@@ -1,4 +1,4 @@
-import { createOrderController } from './order.js?v=20261022-no-photo';
+import { createOrderController } from './order.js?v=20261022-phrase';
 import { createPlaybackAudio } from './playback-audio.js?v=20261021-native-sound';
 import { releaseInfo, orderShowcase } from './availability.js?v=20261021-products-open';
 import { createMediaWindow } from './media-window.js?v=20261022-light-media';

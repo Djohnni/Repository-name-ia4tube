@@ -8,8 +8,8 @@
   <meta name="description" content="Vídeos personalizados com a logo e o produto da sua empresa.">
   <title>Em destaque · iA4tube</title>
   <link rel="icon" href="./assets/logo.png">
-  <link rel="stylesheet" href="./styles.css?v=20261022-no-photo">
-  <script type="module" src="./app.js?v=20261022-no-photo"></script>
+  <link rel="stylesheet" href="./styles.css?v=20261022-phrase">
+  <script type="module" src="./app.js?v=20261022-phrase"></script>
   <link rel="stylesheet" href="./analytics.css?v=20261022-analytics">
   <script type="module" src="./analytics.js?v=20261022-light-media"></script>
 </head>
@@ -50,6 +50,7 @@
     <div class="chosen-model"><img id="chosen-poster" alt=""><div><span id="chosen-kicker" class="model-kicker"></span><h3 id="chosen-title"></h3><p id="chosen-phrase"></p></div></div>
     <p class="preview-note" id="model-note"></p>
     <form id="order-form">
+      <section id="order-phrase-options" class="order-phrase-options" data-single-product aria-label="Frase principal"><span>Frase principal</span><p id="order-phrase-current"></p><button id="modify-main-phrase" class="phrase-action" type="button" aria-expanded="false" aria-controls="order-phrase-editor">Modificar frase principal</button><div id="order-phrase-editor" hidden><label class="order-field">Nova frase principal<input id="order-custom-phrase" name="customPhrase" minlength="2" maxlength="60" disabled><small>De 2 a 60 caracteres.</small></label><button id="reset-main-phrase" class="phrase-action" type="button" disabled>Usar frase original</button></div></section>
       <label class="order-field">Logo da empresa<input id="order-logo" type="file" name="logo" accept="image/png,image/jpeg,image/webp" required></label>
       <fieldset class="product-image-mode" data-single-product><legend>Imagem do produto</legend><div><label><input id="order-has-photo" type="radio" name="productImageMode" value="photo" checked>Tenho foto</label><label><input id="order-no-photo" type="radio" name="productImageMode" value="description">Não tenho foto</label></div></fieldset>
       <label id="order-photo-field" class="order-field" data-single-product>Foto do produto <span class="optional">opcional</span><input id="order-photo" type="file" name="photo" accept="image/png,image/jpeg,image/webp"></label>
