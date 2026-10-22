@@ -1,4 +1,5 @@
-import {createEditMeasurement,isPublicEdit,pageContext,readConsent,saveConsent} from './analytics-core.js?v=20261022-analytics';
+import {createEditMeasurement,isPublicEdit,pageContext,readConsent,saveConsent} from './analytics-core.js?v=20261022-video-attention';
+import {installVideoAttention} from './video-attention.js?v=20261022-video-attention';
 
 // Dedicated GA4 property: iA4tube Edit. No connection to the app/mascot property.
 export const MEASUREMENT_ID = 'G-SXXCEQ97J5';
@@ -34,16 +35,18 @@ export function installAnalytics(win = window,doc = document) {
   }
   const measurement = createEditMeasurement({allowed,storage,context,
     send:(name,params) => tag('event',name,{...params,send_to:MEASUREMENT_ID})});
+  let attention;
+  try {attention = installVideoAttention({win,doc,send:(name,detail) => measurement.video(name,detail)});} catch { /* Optional observer cannot affect existing measurement. */ }
   const banner = doc.createElement('section');
   banner.id = 'edit-stats-choice';banner.className = 'edit-stats-choice';banner.hidden = true;
   banner.setAttribute('aria-label','Privacidade das estatísticas');
-  banner.innerHTML = '<p><strong>Podemos medir as visitas?</strong>Usamos cookies do Google Analytics para contar acessos, suas origens e pedidos salvos. Sua escolha não interfere no pedido. <a href="https://ia4tube.com/politica-de-privacidade/" target="_blank" rel="noopener noreferrer">Privacidade</a></p><div class="edit-stats-actions"><button type="button" data-choice="denied">Recusar</button><button type="button" data-choice="granted">Permitir</button></div>';
+  banner.innerHTML = '<p><strong>Podemos medir as visitas?</strong>Usamos cookies do Google Analytics para medir acessos, origens, vídeos vistos e pedidos salvos. Sua escolha não interfere no pedido. <a href="https://ia4tube.com/politica-de-privacidade/" target="_blank" rel="noopener noreferrer">Privacidade</a></p><div class="edit-stats-actions"><button type="button" data-choice="denied">Recusar</button><button type="button" data-choice="granted">Permitir</button></div>';
   doc.body.append(banner);
   const settings = doc.createElement('button');
   settings.type = 'button';settings.className = 'edit-stats-settings';settings.textContent = 'Privacidade das estatísticas';
   const status = doc.createElement('p');status.className = 'edit-stats-status';status.setAttribute('role','status');
   const explanation = doc.createElement('p');explanation.className = 'edit-stats-status';
-  explanation.innerHTML = 'Com sua permissão, medimos visitas, origem e pedidos salvos pelo Google Analytics. Não enviamos nomes, contatos, textos do pedido ou imagens para essa medição. Você pode mudar sua escolha aqui. <a href="https://policies.google.com/technologies/partner-sites?hl=pt-BR" target="_blank" rel="noopener noreferrer">Como o Google usa esses dados</a>.';
+  explanation.innerHTML = 'Com sua permissão, medimos visitas, origem, vídeos vistos, tempo de permanência e pedidos salvos pelo Google Analytics. Não enviamos nomes de clientes, contatos, textos do pedido ou imagens para essa medição. Você pode mudar sua escolha aqui. <a href="https://policies.google.com/technologies/partner-sites?hl=pt-BR" target="_blank" rel="noopener noreferrer">Como o Google usa esses dados</a>.';
   doc.querySelector('#about-dialog')?.append(settings,status,explanation);
   function clearCookies() {
     try {
@@ -60,7 +63,10 @@ export function installAnalytics(win = window,doc = document) {
     choice = privacySignal ? 'denied' : next;
     if (persist) saveConsent(storage,choice);
     win[disableKey] = choice !== 'granted';
-    if (choice !== 'granted') measurement.setConsent('denied');
+    if (choice !== 'granted') {
+      measurement.setConsent('denied');
+      try {attention?.setConsent('denied');} catch {}
+    }
     if (choice === 'granted') {
       if (started) tag('consent','update',{...DENIED,analytics_storage:'granted'});
       else startGoogle();
@@ -69,6 +75,7 @@ export function installAnalytics(win = window,doc = document) {
       finally {clearCookies();}
     }
     measurement.setConsent(choice);
+    try {attention?.setConsent(allowed ? choice : 'denied');} catch {}
     banner.hidden = choice !== null;
     status.textContent = privacySignal ? 'Estatísticas desativadas pela preferência do seu navegador.' : choice === 'granted' ? 'Estatísticas permitidas neste navegador.' : choice === 'denied' ? 'Estatísticas recusadas neste navegador.' : 'Estatísticas ainda não permitidas.';
     doc.documentElement.dataset.editAnalytics = choice === 'granted' ? (allowed ? 'enabled' : 'local-preview') : choice === 'denied' ? 'disabled' : 'consent-required';

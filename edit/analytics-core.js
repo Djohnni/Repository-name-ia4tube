@@ -42,6 +42,7 @@ export function saveConsent(storage,choice,now = Date.now()) {
 function publicModel(detail) {
   if (!detail || !UUID.test(detail.videoId || '')) return null;
   const params = {video_id:detail.videoId};
+  if (typeof detail.videoTitle === 'string' && detail.videoTitle.length <= 100 && /^[\p{L}\p{N}\p{M} .,!?'’·()&+–—-]+$/u.test(detail.videoTitle)) params.edit_video_name = detail.videoTitle;
   if (['sextou','sabadou','produtos'].includes(detail.recipe)) params.model_type = detail.recipe;
   if ([10,20].includes(detail.durationSeconds)) params.duration_seconds = detail.durationSeconds;
   if ([1,2,4,6,8].includes(detail.productCount)) params.product_count = detail.productCount;
@@ -66,6 +67,21 @@ export function createEditMeasurement({send,storage,context = {},allowed = false
     open(detail) {
       const params = publicModel(detail);
       return params ? emit('edit_order_open',params) : false;
+    },
+    video(name,detail) {
+      if (!['edit_video_view','edit_video_time','edit_video_last'].includes(name)) return false;
+      const params = publicModel(detail);
+      if (!params || !params.edit_video_name) return false;
+      if (Number.isSafeInteger(detail.feedPosition) && detail.feedPosition >= 1 && detail.feedPosition <= 500) params.feed_position = detail.feedPosition;
+      if (Number.isFinite(detail.videoPositionSeconds) && detail.videoPositionSeconds >= 0 && detail.videoPositionSeconds <= 3600) params.video_position_seconds = Math.round(detail.videoPositionSeconds * 10) / 10;
+      if (['heartbeat','switch','hidden','modal','profile','page_hidden','page_exit','not_visible'].includes(detail.reason)) params.video_reason = detail.reason;
+      if (name === 'edit_video_time') {
+        if (!Number.isFinite(detail.visibleSeconds) || detail.visibleSeconds <= 0 || detail.visibleSeconds > 120) return false;
+        if (!Number.isFinite(detail.watchSeconds) || detail.watchSeconds < 0 || detail.watchSeconds > detail.visibleSeconds) return false;
+        params.visible_seconds = Math.round(detail.visibleSeconds * 1000) / 1000;
+        params.watch_seconds = Math.round(detail.watchSeconds * 1000) / 1000;
+      }
+      return emit(name,params);
     },
     saved(detail) {
       const params = publicModel(detail);

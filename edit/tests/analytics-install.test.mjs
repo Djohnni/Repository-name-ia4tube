@@ -86,7 +86,7 @@ test('granting loads only the dedicated property and explicitly queues one canon
   assert.equal(f.doc.documentElement.dataset.editAnalytics,'enabled');
 });
 
-test('only custom order events are measured and their saved receipt is deduplicated',()=>{
+test('generic clicks and submissions are ignored while custom saved receipts are deduplicated',()=>{
   const f=fixture();f.choose('granted');
   f.doc.emit('click',{target:{href:'https://wa.me/5547999999999?text=private'}});
   f.doc.emit('submit',{company:'private',phone:'5547999999999'});
@@ -94,7 +94,10 @@ test('only custom order events are measured and their saved receipt is deduplica
   f.doc.emit('ia4tube:edit-order-saved',{...model,orderId:firstId,company:'private'});
   f.doc.emit('ia4tube:edit-order-saved',{...model,orderId:firstId});
   assert.deepEqual(f.events().map(event=>event[1]),['page_view','edit_order_open','edit_order_saved']);
-  assert.deepEqual([...f.listeners.keys()],['ia4tube:edit-order-open','ia4tube:edit-order-saved']);
+  assert.equal(f.listeners.has('click'),false);
+  assert.equal(f.listeners.has('submit'),false);
+  assert.equal(f.listeners.get('ia4tube:edit-order-open').length,1);
+  assert.equal(f.listeners.get('ia4tube:edit-order-saved').length,1);
   assert.equal(JSON.stringify(f.events()).includes('private'),false);assert.equal(JSON.stringify(f.events()).includes(firstId),false);
 });
 

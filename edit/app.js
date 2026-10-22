@@ -38,7 +38,7 @@ let progressFrame = 0,toastTimer,releaseTimer,playlistKey = '';
 let videoOnly = false;
 const playbackAudio = createPlaybackAudio({onChange:syncSound});
 const order = createOrderController({dialog:personalize,money,toast,onBusy:playback,
-  onSaved:detail => document.dispatchEvent(new CustomEvent('ia4tube:edit-order-saved',{detail}))});
+  onSaved:detail => document.dispatchEvent(new CustomEvent('ia4tube:edit-order-saved',{detail:{...detail,videoTitle:catalog.find(item => item.id === detail.videoId)?.label}}))});
 
 function activeCard() {return cards[activeIndex];}
 function syncInterface() {
@@ -141,7 +141,7 @@ function renderFeed(items,key) {
   playlist = items;playlistKey = key;activeIndex = 0;feed.replaceChildren();
   for (const item of items) {
     const article = document.createElement('article');
-    article.className = 'video-card';article.dataset.id = item.id;
+    article.className = 'video-card';article.dataset.id = item.id;article.dataset.title = item.label;article.dataset.recipe = item.recipe;
     article.setAttribute('aria-label',`${item.label}: ${item.title}`);
     article.innerHTML = `<video src="${esc(mediaPath(item.video))}" poster="${esc(mediaPath(item.poster))}" muted loop playsinline preload="metadata" role="button" tabindex="0" aria-label="Vídeo ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="release-notice" id="release-${esc(item.id)}" role="status" hidden>${icon('lock')}<strong></strong></div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>${item.orderEnabled ? 'a partir de' : 'referência visual'}</small><strong>${item.orderEnabled ? money(startingPrice(item)) : 'Em breve'}</strong></div><button class="make-button">${item.orderEnabled ? 'Fazer meu pedido' : 'Ver detalhes'} ${icon('arrow-up-right')}</button></div></div>`;
     article.querySelector('.creator-action').addEventListener('click',() => location.hash = 'perfil');
@@ -193,7 +193,7 @@ function openPersonalize(item) {
   document.querySelector('#model-note').textContent = item.note || (item.orderEnabled ? 'O vídeo será personalizado com o modelo de produção vinculado a esta referência.' : 'Somente referência visual; não disponível para pedidos.');
   if (order.open(item,data) === false) return;
   personalize.showModal();playback();
-  try {if (item.orderEnabled && !document.querySelector('#order-form').hidden) document.dispatchEvent(new CustomEvent('ia4tube:edit-order-open',{detail:{videoId:item.id,recipe:item.recipe}}));}
+  try {if (item.orderEnabled && !document.querySelector('#order-form').hidden) document.dispatchEvent(new CustomEvent('ia4tube:edit-order-open',{detail:{videoId:item.id,videoTitle:item.label,recipe:item.recipe}}));}
   catch { /* Optional measurement is independent from the form. */ }
 }
 document.querySelector('#preview-info').addEventListener('click',() => {about.showModal();playback();});

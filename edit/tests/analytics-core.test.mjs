@@ -175,3 +175,44 @@ test('a failing event sender does not throw or mark a failed order as counted',(
   blocked=false;measurement.setConsent('granted');assert.equal(measurement.saved({...model,orderId:firstId}),true);
   assert.deepEqual(events.map(event=>event.name),['page_view','edit_order_saved']);
 });
+
+test('public catalog names join orders and video attention without customer fields',()=>{
+  const {measurement,events}=fixture();measurement.setConsent('granted');
+  const detail={...model,videoTitle:'Respeita essa fome',feedPosition:1,visibleSeconds:10,watchSeconds:8.5,
+    videoPositionSeconds:2.347,reason:'heartbeat',company:'Privado',logo:'secret',phone:'5547999999999'};
+  measurement.open(detail);measurement.saved({...detail,orderId:firstId});
+  assert.equal(measurement.video('edit_video_view',detail),true);
+  assert.equal(measurement.video('edit_video_time',detail),true);
+  assert.equal(measurement.video('edit_video_last',{...detail,reason:'page_hidden'}),true);
+  assert.ok(events.slice(1).every(event=>event.params.edit_video_name==='Respeita essa fome'));
+  const time=events.find(event=>event.name==='edit_video_time').params;
+  assert.equal(time.visible_seconds,10);assert.equal(time.watch_seconds,8.5);
+  assert.equal(time.video_position_seconds,2.3);assert.equal(time.feed_position,1);
+  for(const name of ['edit_video_view','edit_video_last']) {
+    const params=events.find(event=>event.name===name).params;
+    assert.equal(Object.hasOwn(params,'visible_seconds'),false);
+    assert.equal(Object.hasOwn(params,'watch_seconds'),false);
+  }
+  assert.equal(JSON.stringify(events).includes('Privado'),false);
+  assert.equal(JSON.stringify(events).includes('5547999999999'),false);
+  assert.equal(JSON.stringify(events).includes('secret'),false);
+});
+
+test('video attention needs consent and strict event, title and timing limits',()=>{
+  const {measurement,events}=fixture();
+  const detail={...model,videoTitle:'Só uma olhadinha',visibleSeconds:10,watchSeconds:10};
+  assert.equal(measurement.video('edit_video_time',detail),false);
+  measurement.setConsent('granted');
+  for(const name of ['purchase','page_view','unknown'])assert.equal(measurement.video(name,detail),false);
+  for(const videoTitle of [undefined,'https://example.com','private@example.com','x'.repeat(101),'\nprivate']) {
+    assert.equal(measurement.video('edit_video_view',{...detail,videoTitle}),false);
+  }
+  for(const [visibleSeconds,watchSeconds] of [[0,0],[-1,0],[121,0],[10,11],[NaN,1],[10,-1],[10,Infinity]]) {
+    assert.equal(measurement.video('edit_video_time',{...detail,visibleSeconds,watchSeconds}),false);
+  }
+  assert.deepEqual(events.map(event=>event.name),['page_view']);
+  assert.equal(measurement.video('edit_video_time',detail),true);
+  measurement.setConsent('denied');
+  assert.equal(measurement.video('edit_video_last',detail),false);
+  assert.equal(events.length,2);
+});
