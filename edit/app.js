@@ -1,4 +1,4 @@
-import { createOrderController } from './order.js?v=20261021-products-open';
+import { createOrderController } from './order.js?v=20261022-analytics';
 import { createPlaybackAudio } from './playback-audio.js?v=20261021-native-sound';
 import { releaseInfo, orderShowcase } from './availability.js?v=20261021-products-open';
 
@@ -37,7 +37,8 @@ let activeIndex = 0,soundEnabled = true,userPaused = reduceMotion,routeIsProfile
 let progressFrame = 0,toastTimer,releaseTimer,playlistKey = '';
 let videoOnly = false;
 const playbackAudio = createPlaybackAudio({onChange:syncSound});
-const order = createOrderController({dialog:personalize,money,toast,onBusy:playback});
+const order = createOrderController({dialog:personalize,money,toast,onBusy:playback,
+  onSaved:detail => document.dispatchEvent(new CustomEvent('ia4tube:edit-order-saved',{detail}))});
 
 function activeCard() {return cards[activeIndex];}
 function syncInterface() {
@@ -192,6 +193,8 @@ function openPersonalize(item) {
   document.querySelector('#model-note').textContent = item.note || (item.orderEnabled ? 'O vídeo será personalizado com o modelo de produção vinculado a esta referência.' : 'Somente referência visual; não disponível para pedidos.');
   if (order.open(item,data) === false) return;
   personalize.showModal();playback();
+  try {if (item.orderEnabled && !document.querySelector('#order-form').hidden) document.dispatchEvent(new CustomEvent('ia4tube:edit-order-open',{detail:{videoId:item.id,recipe:item.recipe}}));}
+  catch { /* Optional measurement is independent from the form. */ }
 }
 document.querySelector('#preview-info').addEventListener('click',() => {about.showModal();playback();});
 for (const dialog of [personalize,about]) {

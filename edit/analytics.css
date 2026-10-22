@@ -1,0 +1,12 @@
+/* Isolated optional-statistics controls; no rules affect the feed or checkout. */
+.edit-stats-choice{position:fixed;z-index:80;left:16px;bottom:16px;width:min(420px,calc(100vw - 32px));padding:16px;border:1px solid #666;border-radius:14px;background:#17171df5;color:#fff;box-shadow:0 6px 30px #0007;font:14px/1.45 system-ui,sans-serif}
+.edit-stats-choice[hidden]{display:none}
+.edit-stats-choice p{margin:0 0 12px}
+.edit-stats-choice strong{display:block;margin-bottom:4px;font-size:15px}
+.edit-stats-choice a{color:#e4c7ff;text-decoration:underline}
+.edit-stats-actions{display:flex;gap:10px}
+.edit-stats-actions button{flex:1;min-height:42px;border:1px solid #aaa;border-radius:8px;color:#fff;background:#292930;padding:8px 12px;font:600 14px system-ui,sans-serif;cursor:pointer}
+.edit-stats-actions button:focus-visible,.edit-stats-settings:focus-visible{outline:3px solid #dfb7ff;outline-offset:3px}
+.edit-stats-settings{display:block;border:0;background:transparent;color:inherit;text-decoration:underline;font:inherit;font-size:13px;margin:12px 0;cursor:pointer}
+.edit-stats-status{font-size:12px!important}
+@media(max-width:600px){.edit-stats-choice{bottom:max(12px,env(safe-area-inset-bottom));left:12px;width:calc(100vw - 24px)}}

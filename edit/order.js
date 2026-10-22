@@ -60,7 +60,7 @@ export function confirmSavedAttempt(saved,storage = localStorage,pendingStorage 
   const pendingKey = PENDING_PREFIX + saved.fingerprint;
   if (pendingStorage?.getItem(pendingKey) === saved.requestId) pendingStorage.removeItem(pendingKey);
 }
-export function createOrderController({dialog,money,toast,onBusy}) {
+export function createOrderController({dialog,money,toast,onBusy,onSaved = () => {}}) {
   const form = document.querySelector('#order-form');
   const errorBox = document.querySelector('#order-error');
   const submit = document.querySelector('#send-order');
@@ -192,6 +192,10 @@ export function createOrderController({dialog,money,toast,onBusy}) {
       if (!result.orderId || result.status !== 'awaiting_authorization') throw new Error('A resposta não confirmou o pedido. Tente novamente para consultar a mesma tentativa, sem criar outra.');
       const saved = {orderId:result.orderId,status:result.status,totalCents:result.totalCents,message:result.message,whatsappUrl:result.whatsappUrl,fingerprint,requestId,videoId:item.id};
       const receiptPreserved = rememberReceipt(saved);showReceipt(saved);
+      // Optional statistics never participate in saving or redirecting the order.
+      try {onSaved({orderId:saved.orderId,videoId:item.id,recipe:item.recipe,
+        ...(payload.productsVideo ? {productCount:payload.productsVideo.packageCount} : {durationSeconds:payload.durationSeconds,productCount:1})});}
+      catch { /* Analytics must never turn a saved order into a checkout error. */ }
       try {if (receiptPreserved) await withAttemptLock(fingerprint,() => confirmSavedAttempt(saved,localStorage,sessionStorage));}
       catch { /* A confirmed order remains saved; its receipt can recover this next time. */ }
       // Persist the receipt route before leaving. Browser Back restores the saved order.

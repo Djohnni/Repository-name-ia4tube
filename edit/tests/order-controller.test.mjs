@@ -49,7 +49,7 @@ class Element {
   }
 }
 
-function fixture(t) {
+function fixture(t,{onSaved}={}) {
   const globals=['document','navigator','localStorage','sessionStorage','location','history','FileReader','fetch','setTimeout','clearTimeout'];
   const previous=new Map(globals.map(name=>[name,Object.getOwnPropertyDescriptor(globalThis,name)]));
   const install=(name,value)=>Object.defineProperty(globalThis,name,{value,writable:true,configurable:true});
@@ -157,7 +157,7 @@ function fixture(t) {
     if(cleaningUp || options.signal?.aborted)onAbort();
     else options.signal?.addEventListener('abort',onAbort,{once:true});
   }));
-  const controller=createOrderController({dialog,money:value=>String(value),toast:text=>toasts.push(text),onBusy(){}});
+  const controller=createOrderController({dialog,money:value=>String(value),toast:text=>toasts.push(text),onBusy(){},onSaved});
   const fill=()=>{
     node('#order-company').value='Gastro';node('#order-consent').checked=true;
     node('#order-logo').files=[{name:'logo.png',type:'image/png',size:4,data:btoa('logo')}];
@@ -168,7 +168,7 @@ function fixture(t) {
     while(!predicate() && performance.now()<deadline)await new Promise(resolve=>realSetTimeout(resolve,5));
     assert.ok(predicate(),message);
   };
-  return {controller,form,node,local,session,navigation,toasts,requests,fill,reads,
+  return {controller,form,node,local,session,location,navigation,toasts,requests,fill,reads,
     configureReads:behavior=>{readBehavior=behavior;},
     choose:async(selector,file)=>{node(selector).files=file?[file]:[];await node(selector).emit('change');},
     tick:()=>new Promise(resolve=>realSetTimeout(resolve,1)),
@@ -278,6 +278,73 @@ test('HTTP 200 without a valid saved receipt does not finalize or retire the att
   assert.equal(f.requests[1].options.headers['Idempotency-Key'],original.options.headers['Idempotency-Key']);
   f.succeed(1);await retry;
   assert.equal(f.node('#order-success').hidden,false);
+});
+
+test('saved-order observer receives only the allowed summary once after a confirmed double-click submission',async t=>{
+  const events=[];
+  const f=fixture(t,{onSaved:summary=>{
+    assert.equal(f.node('#order-success').hidden,false,'confirmation is shown before measurement');
+    assert.equal(f.navigation.length,0,'summary is queued before leaving for WhatsApp');
+    events.push(summary);
+  }});
+  const first=f.submit(),doubleClick=f.submit();await f.waitForRequest(1);
+  assert.deepEqual(events,[],'a click alone is not a saved order');
+  f.succeed();await Promise.all([first,doubleClick]);await f.submit();
+  assert.deepEqual(events,[{orderId:savedIds[0],videoId:item.id,recipe:'sextou',durationSeconds:10,productCount:1}]);
+  assert.equal(f.requests.length,1);assert.equal(f.navigation.length,1);
+});
+
+test('two genuinely new identical orders each notify the saved-order observer with their distinct receipt',async t=>{
+  const events=[],f=fixture(t,{onSaved:summary=>events.push(summary)});
+  const first=f.submit();await f.waitForRequest(1);f.succeed();await first;
+  f.reopen();const second=f.submit();await f.waitForRequest(2);f.succeed(1);await second;
+  assert.deepEqual(events.map(event=>event.orderId),savedIds.slice(0,2));
+  assert.equal(f.requests[0].options.body.get('data'),f.requests[1].options.body.get('data'));
+  assert.equal(f.navigation.length,2);
+});
+
+for(const failure of ['network','HTTP error','invalid receipt']) {
+  test(`saved-order observer ignores ${failure} and only notifies after a confirmed retry`,async t=>{
+    const events=[],f=fixture(t,{onSaved:summary=>events.push(summary)});
+    const first=f.submit(),request=await f.waitForRequest(1);
+    if(failure==='network')request.reject(Object.assign(new Error('Timed out'),{name:'AbortError'}));
+    else request.resolve({ok:failure==='invalid receipt',json:async()=>failure==='HTTP error'
+      ? {error:'Não foi possível salvar.'}
+      : {status:'awaiting_authorization',totalCents:1990}});
+    await first;
+    assert.deepEqual(events,[]);assert.equal(f.navigation.length,0);assert.equal(f.form.hidden,false);
+    const retry=f.submit();await f.waitForRequest(2);f.succeed(1);await retry;
+    assert.equal(f.requests[1].options.headers['Idempotency-Key'],request.options.headers['Idempotency-Key']);
+    assert.deepEqual(events.map(event=>event.orderId),[savedIds[1]]);assert.equal(f.navigation.length,1);
+  });
+}
+
+test('restoring a saved confirmation never notifies the saved-order observer',async t=>{
+  const events=[],f=fixture(t,{onSaved:summary=>events.push(summary)});
+  const message='Pedido: '+savedIds[0];
+  const saved={orderId:savedIds[0],status:'awaiting_authorization',totalCents:1990,videoId:item.id,
+    message,whatsappUrl:'https://wa.me/554791049079?text='+encodeURIComponent(message),savedAt:Date.now()};
+  f.session.setItem('ia4tube.edit.receipt.v1',JSON.stringify(saved));f.location.hash='#pedido-salvo';
+  assert.equal(f.controller.restore(),true);assert.equal(f.controller.restore(),true);await f.submit();
+  assert.deepEqual(events,[]);assert.equal(f.requests.length,0);assert.equal(f.navigation.length,0);
+  assert.equal(f.node('#order-success').hidden,false);
+});
+
+test('a throwing saved-order observer cannot undo the confirmation or block WhatsApp',async t=>{
+  let calls=0;
+  const f=fixture(t,{onSaved:()=>{calls++;throw new Error('Analytics unavailable');}});
+  const sending=f.submit();await f.waitForRequest(1);f.succeed();await sending;
+  assert.equal(calls,1);assert.equal(f.node('#order-success').hidden,false);assert.equal(f.node('#order-error').hidden,true);
+  assert.equal(f.controller.isBusy(),false);assert.equal(f.navigation.length,1);
+  assert.equal(JSON.parse(f.session.getItem('ia4tube.edit.receipt.v1')).orderId,savedIds[0]);
+});
+
+test('the saved-order observer result is never awaited before WhatsApp navigation',async t=>{
+  let calls=0,thenCalls=0;
+  const f=fixture(t,{onSaved:()=>{calls++;return {then(){thenCalls++;}};}});
+  const sending=f.submit();await f.waitForRequest(1);f.succeed();await sending;
+  assert.equal(calls,1);assert.equal(thenCalls,0);assert.equal(f.navigation.length,1);
+  assert.equal(f.node('#order-success').hidden,false);assert.equal(f.controller.isBusy(),false);
 });
 
 for(const failure of ['quota exception','silent write failure']) {
@@ -415,7 +482,7 @@ test('network retry after successful preparation uses the same bytes and request
 });
 
 test('multiproduct photos use their own prepared bytes in order and are discarded for the next order',async t=>{
-  const f=fixture(t),packageItem={...item,id:'f142f07c-6fb2-4b99-842f-b12817c88df3',recipe:'produtos'};
+  const events=[],f=fixture(t,{onSaved:summary=>events.push(summary)}),packageItem={...item,id:'f142f07c-6fb2-4b99-842f-b12817c88df3',recipe:'produtos'};
   f.controller.open(packageItem,config);f.fill();
   await f.node('#order-logo').emit('change');
   const cards=f.form.querySelector('#products-list').children.slice(0,2);
@@ -434,9 +501,12 @@ test('multiproduct photos use their own prepared bytes in order and are discarde
   assert.deepEqual(data.productsVideo.items.map(product=>product.name),['Produto 1','Produto 2']);
   assert.deepEqual(await Promise.all(request.options.body.getAll('photos').map(photo=>photo.text())),['photo-1','photo-2']);
   f.succeed(0,savedIds[0],3800);await sending;
+  assert.deepEqual(events,[{orderId:savedIds[0],videoId:packageItem.id,recipe:'produtos',productCount:2}],
+    'package measurement includes the count, not item names, contact details, prices or the single-product duration');
   f.controller.open(packageItem,config);f.fill();
   await f.submit();
   assert.equal(f.requests.length,1,'new package cannot reuse photos belonging to the completed order');
   assert.match(f.node('#order-error').textContent,/foto do produto 1/i);
   assert.equal(cards[0].querySelector('[data-field="photo"]').files.length,0);
+  assert.equal(events.length,1,'an incomplete new package is not a saved order');
 });
