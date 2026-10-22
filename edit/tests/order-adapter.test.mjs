@@ -184,7 +184,7 @@ test('all catalog media/avatar paths resolve inside edit and exist',async () => 
     }
   }
   const rootMedia=await readdir(new URL('../media/',import.meta.url));
-  const additionDirectories=['audio-api-20261021','combos-20261020','novos-20261020','pizzas-20261020','previews-20261022'];
+  const additionDirectories=['audio-api-20261021','combos-20261020','novos-20261020','pizzas-20261020','previews-20261022','sabado-20261024'];
   assert.equal(rootMedia.filter(name=>!additionDirectories.includes(name)).length,16);
   assert.deepEqual(rootMedia.filter(name=>additionDirectories.includes(name)).sort(),additionDirectories);
   assert.equal((await readdir(new URL('../media/novos-20261020/',import.meta.url))).length,32);

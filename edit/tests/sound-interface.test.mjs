@@ -106,7 +106,7 @@ function tapHarness() {
     swipeSound:{consumeClick() {return false;}},
     personalize:{open:false},about:{open:false},
     document:{hidden:false,dispatchEvent() {}},Event:class {},
-    playbackAudio:createPlaybackAudio(),mediaWindow:{sync() {}},tick() {},
+    playbackAudio:createPlaybackAudio(),mediaWindow:{sync() {}},syncPreviewImages() {},cards:[],tick() {},
     activeCard() {return {};},syncPlayButton() {},
   };
   runInNewContext(['canPlay','playback','togglePlay','enableSwipeSound','activateVideo','handleVideoKeydown'].map(source).join('\n'),context);

@@ -1,0 +1,30 @@
+{
+  "label": "Sábado, novos vídeos",
+  "items": [
+    {
+      "id": "previa-sabado-burger",
+      "title": "Bateu a fome?",
+      "poster": "./media/sabado-20261024/burger.webp"
+    },
+    {
+      "id": "previa-sabado-combo",
+      "title": "A dupla tá on",
+      "poster": "./media/sabado-20261024/combo.webp"
+    },
+    {
+      "id": "previa-sabado-pizza",
+      "title": "Puxa esse sabor",
+      "poster": "./media/sabado-20261024/pizza.webp"
+    },
+    {
+      "id": "previa-sabado-mascote",
+      "title": "Hoje eu mereço",
+      "poster": "./media/sabado-20261024/mascote.webp"
+    },
+    {
+      "id": "previa-sabado-pizza-dupla",
+      "title": "Em boa companhia",
+      "poster": "./media/sabado-20261024/pizza-dupla.webp"
+    }
+  ]
+}

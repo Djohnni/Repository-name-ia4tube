@@ -19,6 +19,7 @@ body.video-only .video-shade,
 body.video-only .video-progress,
 body.video-only .center-pause,
 body.video-only .release-notice,
+body.video-only .saturday-notice,
 body.video-only .swipe-guide,
 body.video-only .video-actions > :not(.interface-toggle),
 body.video-only .skip-link,
@@ -27,6 +28,13 @@ body.video-only #toast {
   pointer-events: none;
 }
 .interface-toggle[aria-pressed="true"] { border-color: #ffffff80; }
+/* Announcements are images, not purchasable video models. */
+.preview-poster { position: absolute; inset: 0; z-index: -3; display: block; width: 100%; height: 100%; object-fit: cover; }
+.saturday-notice { position: absolute; z-index: 2; top: 50%; left: 50%; transform: translate(-50%,-50%); width: min(290px,calc(100% - 64px)); padding: 18px 22px 21px; text-align: center; border-radius: 18px; border: 1px solid #f3c85f80; background: #101014ed; box-shadow: 0 10px 35px #0007; pointer-events: none; }
+.saturday-notice span { display: block; margin-bottom: 8px; color: var(--gold); font-size: 10px; font-weight: 750; letter-spacing: 2px; }
+.saturday-notice strong { display: block; max-width: 220px; margin: auto; font-size: clamp(25px,2.4vw,32px); font-weight: 750; line-height: 1.15; text-wrap: balance; }
+.saturday-preview .video-shade { background: linear-gradient(180deg,#0005,transparent 20%,transparent 80%,#0005); }
+.profile-card--preview .profile-card-copy span { line-height: 1.5; }
 .sound-toggle { position: relative; }
 .sound-hint { position: absolute; right: calc(100% + 9px); top: 50%; transform: translateY(-50%); white-space: nowrap; background: #161619e8; color: #fff; border: 1px solid #ffffff45; border-radius: 7px; padding: 7px 9px; font-size: 11px; line-height: 1.3; }
 .video-actions { bottom: 88px; gap: 10px; }

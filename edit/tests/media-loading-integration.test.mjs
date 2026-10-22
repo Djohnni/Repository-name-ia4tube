@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
 import {orderShowcase} from '../availability.js';
+import {withSaturdayPreviews} from '../saturday-previews.js';
 
 const app = await readFile(new URL('../app.js',import.meta.url),'utf8');
 const catalogSource = await readFile(new URL('../catalog.json',import.meta.url),'utf8');
@@ -110,6 +111,7 @@ function routeFixture(hash = '#hoje',items = [item]) {
   const grid = {replaceChildren() {buttons.length = 0;images.length = 0;},append(button) {buttons.push(button);}};
   nodes.set('#profile-grid',grid);
   const context = {location:{hash},routeIsProfile:false,catalog:items,daily:[items[0]],playlist:[],data:{},
+    saturdayPreviews:[],withSaturdayPreviews,
     feed:{clientHeight:600,scrollTo:options => events.push(['scroll',options.top])},
     setVideoOnly:value => events.push(['interface',value]),syncReleases() {},
     renderFeed(list,key,index) {events.push(['render',key,index]);context.playlist = list;},
@@ -178,7 +180,7 @@ test('missing and malformed deep links safely render the daily feed at index zer
 test('playback prepares the current media window synchronously before requesting audio',() => {
   const events = [];let inCall = true,prepared = false;
   const videos = [0,1,2].map(index => ({pause:() => events.push(['pause',index])}));
-  const context = {videos,activeIndex:1,routeIsProfile:false,document:{hidden:false,dispatchEvent() {}},Event,
+  const context = {videos,activeIndex:1,cards:[],syncPreviewImages() {},routeIsProfile:false,document:{hidden:false,dispatchEvent() {}},Event,
     personalize:{open:false},about:{open:false},userPaused:false,videoOnly:false,
     swipeGuide:{cancel:() => events.push(['guide-cancel']),schedule:() => events.push(['guide-schedule'])},
     canPlay:() => !context.routeIsProfile && !context.document.hidden,
@@ -243,7 +245,7 @@ test('loading preview mappings leaves catalog records and original media paths i
   const previews = Object.freeze({[original.catalog[0].poster]:'./media/previews-20261022/example.webp'});
   const context = {feed:{},data:null,creator:{},prices:{},catalog:[],daily:[],posterPreviews:{},orderShowcase,
     fetch:async (url,options) => {assert.equal(url,'./catalog.json');assert.equal(options.cache,'no-store');return {ok:true,json:async () => original};},
-    loadPosterPreviews:async () => previews,renderProfile:() => events.push('profile'),route:() => events.push('route'),
+    loadPosterPreviews:async () => previews,loadSaturdayPreviews:async () => [],saturdayPreviews:[],renderProfile:() => events.push('profile'),route:() => events.push('route'),
     order:{restore:() => null},document:{querySelector:selector => assert.fail('Unexpected catalog error: ' + selector)},
   };
   runInNewContext(functionSource('load'),context,{timeout:1000});
