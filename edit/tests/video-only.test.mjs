@@ -29,6 +29,7 @@ function harness() {
   const listeners = new Map();
   const context = {
     videoOnly:false,soundEnabled:true,userPaused:false,activeIndex:3,videos:[video],
+    swipeGuide:{cancel() {}},
     icon:name => '<svg data-icon="' + name + '"></svg>',
     document:{
       body:{classList:{toggle(name,enabled){if (enabled) classes.add(name);else classes.delete(name);}}},
@@ -122,7 +123,7 @@ test('video-only CSS hides only named website UI with visibility, preserving lay
     'body.video-only .sidebar','body.video-only .desktop-heading','body.video-only .feed-top',
     'body.video-only .feed-controls','body.video-only .mobile-nav','body.video-only .video-info',
     'body.video-only .video-shade','body.video-only .video-progress','body.video-only .center-pause',
-    'body.video-only .release-notice',
+    'body.video-only .release-notice','body.video-only .swipe-guide',
     'body.video-only .video-actions > :not(.interface-toggle)','body.video-only .skip-link','body.video-only #toast',
   ]);
 });

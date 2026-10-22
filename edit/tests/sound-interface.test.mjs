@@ -101,7 +101,8 @@ function tapHarness() {
     pause() {pauses.push(true);this.paused = true;},
   };
   const context = {
-    videos:[video],activeIndex:0,userPaused:false,routeIsProfile:false,
+    videos:[video],activeIndex:0,userPaused:false,routeIsProfile:false,videoOnly:false,
+    swipeGuide:{cancel() {},schedule() {}},
     personalize:{open:false},about:{open:false},
     document:{hidden:false,dispatchEvent() {}},Event:class {},
     playbackAudio:createPlaybackAudio(),mediaWindow:{sync() {}},tick() {},

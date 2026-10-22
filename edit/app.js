@@ -2,6 +2,7 @@ import { createOrderController } from './order.js?v=20261022-phrase';
 import { createPlaybackAudio } from './playback-audio.js?v=20261021-native-sound';
 import { releaseInfo, orderShowcase } from './availability.js?v=20261021-products-open';
 import { createMediaWindow } from './media-window.js?v=20261022-light-media';
+import { createSwipeGuide } from './swipe-guide.js?v=20261022-swipe-guide-v2';
 
 const paths = {
   home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
@@ -44,6 +45,12 @@ const posterPath = item => {
 };
 const playbackAudio = createPlaybackAudio({onChange:syncSound});
 const mediaWindow = createMediaWindow({cancel:video => playbackAudio.cancel(video)});
+const swipeGuide = createSwipeGuide({
+  feed,hint:document.querySelector('#swipe-guide'),scope:document.querySelector('#feed-view'),
+  motionQuery:matchMedia('(prefers-reduced-motion: reduce)'),
+  getContext:() => ({current:activeCard(),next:cards[activeIndex + 1],
+    enabled:canPlay() && !videoOnly && !!videos[activeIndex] && !videos[activeIndex].paused}),
+});
 const order = createOrderController({dialog:personalize,money,toast,onBusy:playback,
   onSaved:detail => document.dispatchEvent(new CustomEvent('ia4tube:edit-order-saved',{detail:{...detail,videoTitle:catalog.find(item => item.id === detail.videoId)?.label}}))});
 
@@ -60,6 +67,7 @@ function syncInterface() {
 }
 function setVideoOnly(value) {
   videoOnly = Boolean(value);
+  if (videoOnly) swipeGuide.cancel();
   syncInterface();
 }
 addEventListener('keydown',event => {
@@ -119,13 +127,14 @@ function tick() {
   if (video && !video.paused && canPlay()) progressFrame = requestAnimationFrame(tick);
 }
 function playback() {
+  if (routeIsProfile || document.hidden || personalize.open || about.open || userPaused || videoOnly) swipeGuide.cancel();
   document.dispatchEvent(new Event('ia4tube:edit-before-media-change'));
   videos.forEach((video,index) => {if (index !== activeIndex || !canPlay()) {playbackAudio.cancel(video);video.pause();}});
   mediaWindow.sync(videos,activeIndex,{visible:!routeIsProfile && !document.hidden});
   const video = videos[activeIndex];
   if (video && canPlay()) playbackAudio.play(video,{
     isCurrent:() => videos[activeIndex] === video && canPlay(),
-    onPlaying:tick,
+    onPlaying:() => {tick();swipeGuide.schedule();},
     onError:() => syncPlayButton(activeCard()),
   });
   tick();
@@ -168,6 +177,7 @@ const observer = new IntersectionObserver(entries => {
 
 function renderFeed(items,key,initialIndex = 0) {
   if (playlistKey === key) return;
+  if (cards.length) swipeGuide.cancel();
   document.dispatchEvent(new Event('ia4tube:edit-before-media-change'));
   observer.disconnect();videos.forEach(video => {playbackAudio.cancel(video);video.pause();});cancelAnimationFrame(progressFrame);
   mediaWindow.clear();

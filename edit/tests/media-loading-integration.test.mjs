@@ -179,11 +179,13 @@ test('playback prepares the current media window synchronously before requesting
   const events = [];let inCall = true,prepared = false;
   const videos = [0,1,2].map(index => ({pause:() => events.push(['pause',index])}));
   const context = {videos,activeIndex:1,routeIsProfile:false,document:{hidden:false,dispatchEvent() {}},Event,
+    personalize:{open:false},about:{open:false},userPaused:false,videoOnly:false,
+    swipeGuide:{cancel:() => events.push(['guide-cancel']),schedule:() => events.push(['guide-schedule'])},
     canPlay:() => !context.routeIsProfile && !context.document.hidden,
     playbackAudio:{cancel:video => events.push(['cancel',videos.indexOf(video)]),play(video,options) {
       assert.equal(inCall,true,'play() must remain in the user gesture call stack.');
       assert.equal(prepared,true);assert.equal(video,videos[1]);assert.equal(options.isCurrent(),true);
-      events.push(['play',1]);
+      events.push(['play',1]);options.onPlaying();
     }},
     mediaWindow:{sync(list,index,{visible}) {
       assert.equal(list,videos);assert.equal(index,1);events.push(['sync',visible]);prepared = visible;
@@ -192,17 +194,21 @@ test('playback prepares the current media window synchronously before requesting
   runInNewContext(functionSource('playback'),context,{timeout:1000});
   context.playback();inCall = false;
   assert.ok(events.findIndex(event => event[0] === 'sync') < events.findIndex(event => event[0] === 'play'));
+  assert.ok(events.findIndex(event => event[0] === 'guide-schedule') > events.findIndex(event => event[0] === 'play'));
   for (const hide of [() => {context.routeIsProfile = true;},() => {context.routeIsProfile = false;context.document.hidden = true;}]) {
     events.length = 0;hide();context.playback();
     assert.ok(events.some(event => event[0] === 'sync' && event[1] === false));
     assert.equal(events.some(event => event[0] === 'play'),false);
+    assert.equal(events.some(event => event[0] === 'guide-schedule'),false);
+    assert.ok(events.some(event => event[0] === 'guide-cancel'));
   }
 });
 
 test('feed replacement releases old resources before replacing cards and first activates the requested index',() => {
   const events = [],articles = [],nodes = new Map([['#previous',{}],['#next',{}],['#position',{}]]);
   const oldVideo = {pause:() => events.push('pause-old')};
-  const context = {playlistKey:'old',playlist:[],activeIndex:0,cards:[],videos:[oldVideo],progressFrame:9,
+  const context = {playlistKey:'old',playlist:[],activeIndex:0,cards:[{}],videos:[oldVideo],progressFrame:9,
+    swipeGuide:{cancel:() => events.push('guide-cancel')},
     Event,observer:{disconnect:() => events.push('disconnect'),observe() {}},
     playbackAudio:{cancel:video => {assert.equal(video,oldVideo);events.push('cancel-old');}},
     mediaWindow:{clear:() => events.push('clear')},cancelAnimationFrame:() => events.push('cancel-frame'),
@@ -222,6 +228,7 @@ test('feed replacement releases old resources before replacing cards and first a
   const items = Array.from({length:6},(_,index) => ({...item,id:'model-' + index}));
   context.renderFeed(items,'profile',4);
   assert.ok(events.indexOf('clear') >= 0 && events.indexOf('clear') < events.indexOf('replace'));
+  assert.ok(events.indexOf('guide-cancel') >= 0 && events.indexOf('guide-cancel') < events.indexOf('replace'));
   assert.deepEqual(events.filter(event => Array.isArray(event) && event[0] === 'activate'),[['activate',4]]);
   assert.ok(events.some(event => Array.isArray(event) && event[0] === 'scroll' && event[1] === 2400));
   assert.equal(context.activeIndex,4);assert.equal(context.videos.length,6);

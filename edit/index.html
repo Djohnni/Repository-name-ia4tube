@@ -8,8 +8,8 @@
   <meta name="description" content="Vídeos personalizados com a logo e o produto da sua empresa.">
   <title>Em destaque · iA4tube</title>
   <link rel="icon" href="./assets/logo.png">
-  <link rel="stylesheet" href="./styles.css?v=20261022-phrase">
-  <script type="module" src="./app.js?v=20261022-video-sound-tap"></script>
+  <link rel="stylesheet" href="./styles.css?v=20261022-swipe-guide-v2">
+  <script type="module" src="./app.js?v=20261022-swipe-guide-v2"></script>
   <link rel="stylesheet" href="./analytics.css?v=20261022-analytics">
   <script type="module" src="./analytics.js?v=20261022-light-media"></script>
 </head>
@@ -31,6 +31,12 @@
         <div class="stage">
           <div class="feed-top"><a href="#hoje" class="mobile-brand" aria-label="iA4tube"><img src="./assets/logo.png" alt=""></a><span class="feed-tab">Em destaque</span><button class="preview-chip" id="preview-info" aria-label="Como funciona">COMO FUNCIONA</button></div>
           <div id="feed" class="feed" tabindex="0" aria-label="Deslize para trocar de vídeo"></div>
+          <div id="swipe-guide" class="swipe-guide" aria-hidden="true" hidden>
+            <svg viewBox="0 0 64 96" focusable="false" aria-hidden="true">
+              <path class="swipe-guide-trail" d="M25 23V4M17 12l8-8 8 8"/>
+              <path class="swipe-guide-hand" d="M20 57V34a5 5 0 0 1 10 0v16a5 5 0 0 1 9-3 5 5 0 0 1 9 3 5 5 0 0 1 9 4v13c0 10-5 16-6 21H26c-2-5-5-7-8-11L8 63a5 5 0 0 1 8-6l4 5Z"/>
+            </svg>
+          </div>
           <div class="video-progress" aria-hidden="true"><span id="progress"></span></div>
         </div>
         <div class="feed-controls" aria-label="Trocar vídeo"><span id="position">00 <span>/ 00</span></span><button id="previous" class="circle" aria-label="Vídeo anterior"><span data-icon="chevron-up"></span></button><button id="next" class="circle" aria-label="Próximo vídeo"><span data-icon="chevron-down"></span></button><small>Role para<br>explorar</small></div>
