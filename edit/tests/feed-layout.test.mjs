@@ -123,7 +123,7 @@ test('legacy form stays intact apart from authorized individual options and pack
     .replace(/      <fieldset class="product-image-mode"[^\n]*\r?\n/,'')
     .replace(/      <label id="order-description-field"[^\n]*\r?\n/,'')
     .replace(/      <label[^\n]*id="order-product-price"[^\n]*\r?\n/,'')
-    .replace('data-single-product>opcional<input id="order-photo"','data-single-product>Foto do produto <span class="optional">opcional</span><input id="order-photo"')
+    .replace('data-single-product><input id="order-photo"','data-single-product>Foto do produto <span class="optional">opcional</span><input id="order-photo"')
     .replace(' aria-label="Foto do produto opcional"','')
     .replace(/ data-single-product/g,'').replace(' id="order-photo-field"','')
     .replace('<form id="order-form">','<form id="order-form">\n      '+company)
@@ -135,10 +135,10 @@ test('legacy form stays intact apart from authorized individual options and pack
   assert.match(form,/name="duration" value="20"/);
 });
 
-test('photo upload shows only opcional and keeps its accessible name and optional file contract',() => {
+test('photo upload has no repeated visible label and keeps its accessible name and optional file contract',() => {
   const field=page.match(/<label id="order-photo-field"[^\n]*<\/label>/)?.[0];
   assert.ok(field);
-  assert.equal(field.replace(/<[^>]*>/g,''),'opcional');
+  assert.equal(field.replace(/<[^>]*>/g,''),'');
   assert.match(field,/<input id="order-photo" type="file" name="photo" accept="image\/png,image\/jpeg,image\/webp" aria-label="Foto do produto opcional">/);
   assert.doesNotMatch(field,/\brequired\b|class="optional"/);
 });
