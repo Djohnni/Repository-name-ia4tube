@@ -1,6 +1,6 @@
 // A one-time visual cue only: it never scrolls, changes media or sends events.
 export function createSwipeGuide({
-  feed,hint,scope = feed,getContext,motionQuery,
+  feed,hint,getContext,motionQuery,
   doc = globalThis.document,win = globalThis.window,
   setTimer = setTimeout,clearTimer = clearTimeout,
 } = {}) {
@@ -77,10 +77,8 @@ export function createSwipeGuide({
     waiting = setTimer(start,2000);
   }
 
-  // Observers are passive and never consume the input needed to unlock sound.
-  for (const type of ['pointerdown','touchstart','wheel','keydown','click']) {
-    listen(scope,type,cancel,{capture:true,passive:true});
-  }
+  // Taps (including sound and pause) never cancel or postpone the cue.
+  // Only actual scrolling or leaving the feed ends the invitation.
   listen(feed,'scroll',() => {
     // Initial scrollTo can dispatch asynchronously with an unchanged position.
     if (pair && Math.abs(position() - baseline) >= 2) cancel();

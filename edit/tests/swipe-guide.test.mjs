@@ -79,21 +79,22 @@ test('the hand initial style is established after unhiding and before activating
 });
 
 for (const type of ['pointerdown','touchstart','wheel','keydown','click']) {
-  test(`${type} cancels before or during the cue without consuming the user input`,() => {
+  test(`${type} without actual scrolling never cancels, delays or consumes the cue`,() => {
     for (const delay of [0,1200,2100,3200]) {
       const f = fixture();f.guide.schedule();f.advance(delay);
       let reached = false;f.scope.addEventListener(type,() => {reached = true;});
       f.scope.emit(type,{preventDefault() {assert.fail('Do not block the input.');},stopPropagation() {assert.fail('Do not block audio activation.');}});
-      assert.equal(reached,true);f.clean();f.guide.schedule();f.advance(10000);f.clean();
-      const listener = f.scope.options.find(entry => entry.type === type);
-      assert.deepEqual(listener.options,{capture:true,passive:true});
+      assert.equal(reached,true);f.guide.schedule();
+      if (delay < 2000) {f.advance(1999 - delay);assert.equal(f.hint.hidden,true);f.advance(1);}
+      assert.equal(f.hint.hidden,false);assert.equal(f.hint.classes.has('is-active'),true);
+      f.advance(10000);f.clean();f.guide.schedule();f.advance(10000);f.clean();
     }
   });
 }
 
-test('interaction before any eligible schedule also consumes the page intro',() => {
+test('touch before the feed is ready does not consume the page intro',() => {
   const f = fixture();f.context.enabled = false;f.scope.emit('pointerdown');f.context.enabled = true;
-  f.guide.schedule();f.advance(5000);f.clean();
+  f.guide.schedule();f.advance(2000);assert.equal(f.hint.hidden,false);f.advance(1800);f.clean();
 });
 
 test('initial ineligible context does not arm but permits a later ready pair',() => {

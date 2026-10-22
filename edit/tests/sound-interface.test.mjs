@@ -89,7 +89,7 @@ test('pause and feed replacement cancel outstanding audio playback attempts',() 
 const flush = async () => {for (let i = 0;i < 8;i++) await Promise.resolve();};
 const denied = () => Object.assign(new Error('A gesture is required'),{name:'NotAllowedError'});
 function tapHarness() {
-  const requests = [],pauses = [];
+  const requests = [],pauses = [],guideEvents = [];
   const video = {
     muted:true,paused:true,currentTime:5,src:'original.mp4',volume:.7,
     play() {
@@ -102,7 +102,7 @@ function tapHarness() {
   };
   const context = {
     videos:[video],activeIndex:0,userPaused:false,routeIsProfile:false,videoOnly:false,
-    swipeGuide:{cancel() {},schedule() {}},
+    swipeGuide:{cancel() {guideEvents.push('cancel');},schedule() {guideEvents.push('schedule');}},
     personalize:{open:false},about:{open:false},
     document:{hidden:false,dispatchEvent() {}},Event:class {},
     playbackAudio:createPlaybackAudio(),mediaWindow:{sync() {}},tick() {},
@@ -116,8 +116,26 @@ function tapHarness() {
     requests[1].resolve();await flush();
     assert.equal(context.playbackAudio.getState().blocked,true);
   }
-  return {context,video,requests,pauses,event,blockAutoplay};
+  return {context,video,requests,pauses,event,blockAutoplay,guideEvents};
 }
+
+test('the cue is armed before playback settles and survives sound, pause and resume taps',async () => {
+  const h = tapHarness();h.context.playback();
+  assert.deepEqual(h.guideEvents,['schedule'],'Do not wait for the play promise to arm the guide.');
+  h.requests[0].resolve();await flush();
+  h.context.activateVideo(h.event());
+  assert.equal(h.context.userPaused,true);assert.equal(h.guideEvents.includes('cancel'),false);
+  h.context.activateVideo(h.event());
+  assert.equal(h.context.userPaused,false);assert.equal(h.guideEvents.includes('cancel'),false);
+  const blocked = tapHarness();await blocked.blockAutoplay();blocked.context.activateVideo(blocked.event());
+  assert.equal(blocked.guideEvents.includes('cancel'),false);
+});
+
+test('guide eligibility does not depend on whether a tapped video is paused',() => {
+  const setup = app.match(/const swipeGuide = createSwipeGuide\([\s\S]*?\n\}\);/)?.[0];
+  assert.ok(setup);assert.doesNotMatch(setup,/canPlay|userPaused|\.paused/);
+  for (const gate of ['routeIsProfile','document.hidden','personalize.open','about.open','videoOnly']) assert.ok(setup.includes(gate));
+});
 
 test('first tap on a blocked video requests audible playback synchronously without pause or seek',async () => {
   const h = tapHarness();await h.blockAutoplay();
