@@ -110,13 +110,30 @@ test('video tap and Space still pause playback without a lateral play button',()
   video.paused=false;context.syncPlayButton(card);assert.equal(classes.get('is-paused'),false);
 });
 
-test('legacy form stays intact apart from isolated products and optional-price fields',() => {
+test('legacy form stays intact apart from isolated fields and removed helper copy',() => {
   const form = page.match(/<form id="order-form">[\s\S]*?<\/form>/)?.[0];
   assert.ok(form);
-  const legacy = form.replace(/      <fieldset id="products-options"[\s\S]*?      <\/fieldset>\r?\n/,'').replace(/      <label[^\n]*id="order-product-price"[^\n]*\r?\n/,'').replace(/ data-single-product/g,'');
+  // Restore only the requested copy removals to compare the original form contract.
+  const legacy = form.replace(/      <fieldset id="products-options"[\s\S]*?      <\/fieldset>\r?\n/,'').replace(/      <label[^\n]*id="order-product-price"[^\n]*\r?\n/,'').replace(/ data-single-product/g,'')
+    .replace(/(<input id="order-logo"[^>]*>)(<\/label>)/,'$1<small>PNG, JPG ou WebP · até 5 MB</small>$2')
+    .replace(/(<input id="order-photo"[^>]*>)(<\/label>)/,'$1<small>PNG, JPG ou WebP · até 10 MB</small>$2')
+    .replace('<p class="order-explanation"></p>','<p class="order-explanation">A versão de 20s repete a animação de 10s. Você recebe o vídeo pelo WhatsApp.</p>');
   assert.equal(digest(legacy),'2a55a61ece259903033a54ef10ae2076a3e6e9934fc8700791908688a1b8cb5f');
   assert.match(form,/name="duration" value="10" checked/);
   assert.match(form,/name="duration" value="20"/);
+});
+
+test('order form removes only requested fixed helper copy and keeps compatibility node',async () => {
+  for (const id of ['order-logo','order-photo','order-product-price']) {
+    const field=page.match(new RegExp('<label[^\\n]*id="'+id+'"[^\\n]*<\\/label>'))?.[0];
+    assert.ok(field,id);
+    assert.doesNotMatch(field,/<small>/);
+  }
+  assert.match(page,/<p class="order-explanation" data-single-product><\/p>/);
+  assert.doesNotMatch(page,/Deixe vazio para não mostrar valor na arte|A versão de 20s repete a animação de 10s/);
+  assert.match(page,/até 10 MB por foto e 24 MB no total/);
+  const css=await readFile(new URL('../styles.css',import.meta.url),'utf8');
+  assert.match(css,/\.order-explanation:empty\s*\{\s*display:\s*none;?\s*\}/);
 });
 
 test('archiving weekend cards preserves every model, media reference and price',() => {

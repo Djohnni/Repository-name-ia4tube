@@ -8,7 +8,7 @@
   <meta name="description" content="Vídeos personalizados com a logo e o produto da sua empresa.">
   <title>Em destaque · iA4tube</title>
   <link rel="icon" href="./assets/logo.png">
-  <link rel="stylesheet" href="./styles.css?v=20261021-release2">
+  <link rel="stylesheet" href="./styles.css?v=20261022-form-copy">
   <script type="module" src="./app.js?v=20261022-analytics"></script>
   <link rel="stylesheet" href="./analytics.css?v=20261022-analytics">
   <script type="module" src="./analytics.js?v=20261022-analytics"></script>
@@ -51,11 +51,11 @@
     <p class="preview-note" id="model-note"></p>
     <form id="order-form">
       <label class="order-field">Nome da empresa<input id="order-company" name="company" autocomplete="organization" minlength="2" maxlength="100" required placeholder="Como aparecerá no vídeo"></label>
-      <label class="order-field">Logo da empresa<input id="order-logo" type="file" name="logo" accept="image/png,image/jpeg,image/webp" required><small>PNG, JPG ou WebP · até 5 MB</small></label>
-      <label class="order-field" data-single-product>Foto do produto <span class="optional">opcional</span><input id="order-photo" type="file" name="photo" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG ou WebP · até 10 MB</small></label>
-      <label class="order-field" data-single-product>Preço do produto <span class="optional">opcional</span><input id="order-product-price" name="productPrice" maxlength="30" inputmode="decimal" placeholder="Ex.: R$ 29,90"><small>Deixe vazio para não mostrar valor na arte.</small></label>
+      <label class="order-field">Logo da empresa<input id="order-logo" type="file" name="logo" accept="image/png,image/jpeg,image/webp" required></label>
+      <label class="order-field" data-single-product>Foto do produto <span class="optional">opcional</span><input id="order-photo" type="file" name="photo" accept="image/png,image/jpeg,image/webp"></label>
+      <label class="order-field" data-single-product>Preço do produto <span class="optional">opcional</span><input id="order-product-price" name="productPrice" maxlength="30" inputmode="decimal" placeholder="Ex.: R$ 29,90"></label>
       <fieldset class="duration-field" data-single-product><legend>Duração do vídeo</legend><div class="price-options"><label><input type="radio" name="duration" value="10" checked><span>10 segundos</span><strong id="price-10">—</strong></label><label><input type="radio" name="duration" value="20"><span>20 segundos</span><strong id="price-20">—</strong></label></div></fieldset>
-      <p class="order-explanation" data-single-product>A versão de 20s repete a animação de 10s. Você recebe o vídeo pelo WhatsApp.</p>
+      <p class="order-explanation" data-single-product></p>
       <fieldset id="products-options" class="products-options" hidden disabled>
         <legend>Quantas imagens de produtos?</legend>
         <div class="price-options product-packages">

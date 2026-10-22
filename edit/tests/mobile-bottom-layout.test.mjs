@@ -59,6 +59,6 @@ test('mobile overlay change does not resize the player or alter the order form',
   assert.doesNotMatch(block,/(?:height|width|transform|animation|transition)\s*:/);
 });
 
-test('stylesheet URL is versioned for the mobile layout update',() => {
-  assert.match(page,/<link rel="stylesheet" href="\.\/styles\.css\?v=20261021-release2">/);
+test('stylesheet URL is versioned for the current form layout update',() => {
+  assert.match(page,/<link rel="stylesheet" href="\.\/styles\.css\?v=20261022-form-copy">/);
 });

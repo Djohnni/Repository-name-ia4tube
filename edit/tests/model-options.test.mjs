@@ -12,7 +12,7 @@ const sloth = {...capy,id:'sloth',defaultAnimal:'preguica'};
 const plain = {id:'plain',recipe:'sextou',prices:{10:2100}};
 
 // Minimal DOM contract of the isolated option component; radios stay exclusive.
-function fixture(t) {
+function fixture(t,originalExplanation='Original explanation') {
   const prior = globalThis.document;
   class Element {
     constructor(tag) {this.tag=tag;this.children=[];this.hidden=false;this.disabled=false;this.required=false;this.value='';this.textContent='';}
@@ -28,7 +28,7 @@ function fixture(t) {
       set checked(value) {checked=Boolean(value);if(value)for(const [key,input]of Object.entries(radios))if(key!==String(seconds))input.checked=false;}};
   }
   const priceLabels = {10:new Element('span'),20:new Element('span')};
-  const explanation = new Element('p');explanation.textContent='Original explanation';
+  const explanation = new Element('p');explanation.textContent=originalExplanation;
   let row;
   const form = {querySelector(selector) {
     if(selector==='.duration-field')return {before:element=>row=element};
@@ -95,6 +95,17 @@ test('animal remains readable during submit lock and hidden stale fields stay di
   assert.equal(f.select.disabled,true);
   assert.equal(f.radios[10].disabled,true);
   assert.equal(f.radios[20].disabled,true);
+});
+
+test('empty legacy explanation stays empty when switching back from a new model',t=>{
+  const f=fixture(t,'');
+  assert.equal(f.controller.open(old,config),false);
+  assert.equal(f.explanation.textContent,'');
+  assert.equal(f.controller.open(plain,config),false);
+  assert.equal(f.explanation.textContent,'Vídeo de 10 segundos com sua marca. Receba pelo WhatsApp.');
+  assert.equal(f.controller.open(old,config),false);
+  assert.equal(f.explanation.textContent,'');
+  assert.equal(f.radios[20].disabled,false);
 });
 test('different animal model uses its own sample default, same model retains customer choice',t=>{
   const f=fixture(t);f.controller.open(capy,config);f.select.value='gato';
