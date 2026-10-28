@@ -1,4 +1,5 @@
-import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261022-phrase';
+import { requestAppCalendar, appCalendarAttemptScope } from './app-calendar.js?v=20261028-app-calendar';
+import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261028-app-calendar';
 import { createModelOptions } from './model-options.js?v=20261020-styles';
 import { createProductsForm } from './products-form.js?v=20261021-upload';
 import { normalizeProductPrice } from './optional-price.js?v=20261019-price';
@@ -225,7 +226,8 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
         const animal = modelOptions.animal();
         if (animal) payload.animal = animal;
       }
-      const fingerprint = await fingerprintPayload(payload);
+      const appScope = appCalendarAttemptScope();
+      const fingerprint = await fingerprintPayload(appScope ? {...payload,appCalendarSession:appScope} : payload);
       let requestId;
       try {
         // Finalize the previous known receipt before another model can replace
@@ -236,6 +238,8 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
           return getOrCreateRequestId(fingerprint,localStorage,sessionStorage);
         });
       } catch {throw new Error('Ative o armazenamento deste navegador para salvar o pedido sem duplicações. Nenhum pedido foi enviado.');}
+      const appCalendar = await requestAppCalendar(requestId);
+      if (appCalendar) payload.appCalendar = appCalendar;
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(),90000);
       let response;

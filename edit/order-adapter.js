@@ -34,10 +34,18 @@ export function buildMultipartOrder(payload) {
   if (!products && ![10,20].includes(payload.durationSeconds)) throw new Error('Escolha 10 ou 20 segundos.');
   if (payload.consent !== true) throw new Error('Confirme a autorização para usar as imagens.');
   const form = new FormData();
+  let appCalendar;
+  if (payload.appCalendar !== undefined) {
+    if (!payload.appCalendar || Object.keys(payload.appCalendar).join(',') !== 'ticket' ||
+        typeof payload.appCalendar.ticket !== 'string' || !/^[a-f0-9-]{36}\.[A-Za-z0-9_-]{43}$/.test(payload.appCalendar.ticket)) {
+      throw new Error('Confira a data e o horário no calendário do app.');
+    }
+    appCalendar = {ticket:payload.appCalendar.ticket};
+  }
   if (products) {
     if (![2,4,6,8].includes(products.packageCount) || !Array.isArray(products.items) || products.items.length !== products.packageCount || !Array.isArray(payload.photos) || payload.photos.length !== products.packageCount) throw new Error('Confira a quantidade de produtos do pacote escolhido.');
     form.append('data',JSON.stringify({schemaVersion:2,campaignId:'produtos-cardapio-v1',company,whatsapp:null,
-      selections:[{id:'93',format:'video'}],productsVideo:products,showcase:{videoId:payload.videoId,videoVersion:payload.videoVersion}}));
+      selections:[{id:'93',format:'video'}],productsVideo:products,showcase:{videoId:payload.videoId,videoVersion:payload.videoVersion},...(appCalendar ? {appCalendar} : {})}));
     form.append('logo',uploadBlob(payload.logo,5 * 1024 * 1024,'Logo'),payload.logo.name);
     let total = 0;
     payload.photos.forEach((photo,index) => {
@@ -55,6 +63,7 @@ export function buildMultipartOrder(payload) {
     selections:[{id:'93',format:'video'}],
     sextou:{businessType:'auto',date:null,copyId:'trabalho-sabor',durationSeconds:payload.durationSeconds},
     showcase:{videoId:payload.videoId,videoVersion:payload.videoVersion},
+    ...(appCalendar ? {appCalendar} : {}),
     ...(productPrice ? {productPrice} : {}),
     ...(productDescription ? {productDescription} : {}),
     ...(customPhrase ? {customPhrase} : {}),
