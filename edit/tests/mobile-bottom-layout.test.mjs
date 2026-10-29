@@ -60,5 +60,5 @@ test('mobile overlay change does not resize the player or alter the order form',
 });
 
 test('stylesheet URL is versioned for the current swipe guide update',() => {
-  assert.match(page,/<link rel="stylesheet" href="\.\/styles\.css\?v=20261028-ready-posts">/);
+  assert.match(page,/<link rel="stylesheet" href="\.\/styles\.css\?v=20261029-extra40">/);
 });

@@ -189,7 +189,7 @@ test('all catalog media/avatar paths resolve inside edit and exist',async () => 
     }
   }
   const rootMedia=await readdir(new URL('../media/',import.meta.url));
-  const additionDirectories=['audio-api-20261021','combos-20261020','novos-20261020','pizzas-20261020','posts-prontos-20261028','previews-20261022','sabado-20261024'];
+  const additionDirectories=['audio-api-20261021','combos-20261020','novos-20261020','pizzas-20261020','posts-extra-20261029','posts-prontos-20261028','previews-20261022','sabado-20261024'];
   const replacementDemoFiles=['produtos-oburgao-20261022.mp4','produtos-oburgao-20261022.png'];
   assert.deepEqual(rootMedia.filter(name=>replacementDemoFiles.includes(name)).sort(),replacementDemoFiles);
   assert.equal(rootMedia.filter(name=>!additionDirectories.includes(name)&&!replacementDemoFiles.includes(name)).length,16);

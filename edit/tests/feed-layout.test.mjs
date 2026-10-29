@@ -121,7 +121,10 @@ test('legacy form stays intact apart from authorized individual options and pack
   const company = form.match(/        (<label[^\n]*id="order-company"[^\n]*<\/label>)/)?.[1];
   assert.ok(company,'The existing company input belongs to the product package.');
   // Restore only the authorized UI additions, relocation and prior copy removals.
-  const legacy = form.replace(/      <fieldset id="products-options"[\s\S]*?      <\/fieldset>\r?\n/,'')
+  const legacy = form.replace(/      <fieldset id="extra-post-fields"[^\n]*\r?\n/,'')
+    .replace(' id="order-photo-mode"','').replace(' id="order-photo-legend"','')
+    .replace('<span id="order-photo-caption" hidden></span>','')
+    .replace(/      <fieldset id="products-options"[\s\S]*?      <\/fieldset>\r?\n/,'')
     .replace(/      <section id="order-phrase-options"[^\n]*\r?\n/,'')
     .replace(/      <fieldset class="product-image-mode"[^\n]*\r?\n/,'')
     .replace(/      <label id="order-description-field"[^\n]*\r?\n/,'')

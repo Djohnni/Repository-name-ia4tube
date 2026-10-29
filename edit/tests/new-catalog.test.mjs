@@ -30,7 +30,8 @@ test('all sixteen approved models have exact identifiers, phrases and distinct a
       assert.equal(Object.hasOwn(item,field),false);
     }
   }
-  assert.deepEqual(data.dailySelection.videoIds,data.catalog.filter(item=>item.status==='published').map(item=>item.id));
+  const extraIds=new Set(data.catalog.filter(item=>/^posts-prontos-extra-/.test(item.creativeTemplate||'')).map(item=>item.id));
+  assert.deepEqual(data.dailySelection.videoIds.filter(id=>!extraIds.has(id)),data.catalog.filter(item=>item.status==='published'&&!extraIds.has(item.id)).map(item=>item.id));
 });
 
 test('only the two animal models expose the exact selectable species and matching defaults',()=>{

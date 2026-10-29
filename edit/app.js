@@ -1,5 +1,6 @@
-import { createOrderController } from './order.js?v=20261028-ready-posts';
-import { feedItems } from './ready-posts.js?v=20261028-ready-posts';
+import { createOrderController } from './order.js?v=20261029-extra40';
+import { feedItems } from './ready-posts.js?v=20261029-extra40';
+import { isExtraReadyPost } from './ready-posts-extra.js?v=20261029-extra40';
 import { createPlaybackAudio } from './playback-audio.js?v=20261021-native-sound';
 import { releaseInfo, orderShowcase } from './availability.js?v=20261021-products-open';
 import { createMediaWindow } from './media-window.js?v=20261022-light-media';
@@ -238,6 +239,7 @@ function renderFeed(items,key,initialIndex = 0) {
   cards.forEach(card => observer.observe(card));syncSound();syncInterface();syncReleases();activate(activeIndex);tick();
 }
 function createImageCard(item) {
+  if (isExtraReadyPost(item) && typeof item.video==='string' && item.video) return createAnimatedPostCard(item);
   const card = document.createElement('article');
   card.className = 'video-card image-card';card.dataset.id = item.id;
   card.dataset.title = item.label;card.dataset.recipe = item.recipe;card.dataset.mediaKind = 'image';
@@ -246,6 +248,22 @@ function createImageCard(item) {
   card.querySelector('.creator-action').addEventListener('click',() => location.hash = 'perfil');
   card.querySelector('.interface-toggle').addEventListener('click',() => setVideoOnly(!videoOnly));
   card.querySelector('.make-button').addEventListener('click',() => openPersonalize(item));
+  return card;
+}
+// A reviewed optional animation is shown only for the new collection. Orders still default to image.
+function createAnimatedPostCard(item) {
+  const card=document.createElement('article');
+  card.className='video-card image-card animated-post-card';card.dataset.id=item.id;
+  card.dataset.title=item.label;card.dataset.recipe=item.recipe;card.dataset.mediaKind='image';
+  card.setAttribute('aria-label',`Prévia animada: ${item.title}`);
+  card.innerHTML=`<video data-src="${esc(mediaPath(item.video))}" data-poster="${esc(posterPath(item))}" muted loop playsinline preload="none" role="button" tabindex="0" aria-label="Prévia ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="release-notice" id="release-${esc(item.id)}" role="status" hidden>${icon('lock')}<strong></strong></div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>imagem</small><strong>${money(startingPrice(item))}</strong></div><button class="make-button">Fazer meu pedido ${icon('arrow-up-right')}</button></div></div>`;
+  card.querySelector('.creator-action').addEventListener('click',()=>location.hash='perfil');
+  card.querySelector('.sound-toggle').addEventListener('click',toggleSound);
+  card.querySelector('.interface-toggle').addEventListener('click',()=>setVideoOnly(!videoOnly));
+  card.querySelector('.make-button').addEventListener('click',()=>openPersonalize(item));
+  const video=card.querySelector('video');video.addEventListener('click',activateVideo);video.addEventListener('keydown',handleVideoKeydown);
+  video.addEventListener('play',()=>syncPlayButton(card));video.addEventListener('pause',()=>syncPlayButton(card));
+  video.addEventListener('error',()=>{if(activeCard()===card&&video.getAttribute('src'))toast('Não foi possível carregar a prévia. A imagem continua disponível.');});
   return card;
 }
 function createPreviewCard(item) {
@@ -280,7 +298,7 @@ function openPersonalize(item) {
   document.querySelector('#chosen-title').textContent = item.title;
   document.querySelector('#chosen-kicker').textContent = item.label;
   const phrase = item.phrase || (item.recipe === 'sextou' ? 'SEXTOU' : item.recipe === 'sabadou' ? item.copyLabel || item.label : 'Referência visual');
-  document.querySelector('#chosen-phrase').textContent = item.recipe === 'produtos' ? phrase : `Frase do modelo: ${phrase}`;
+  document.querySelector('#chosen-phrase').textContent = isExtraReadyPost(item) ? '' : item.recipe === 'produtos' ? phrase : `Frase do modelo: ${phrase}`;
   document.querySelector('#model-note').textContent = item.note || (item.orderEnabled ? 'O vídeo será personalizado com o modelo de produção vinculado a esta referência.' : 'Somente referência visual; não disponível para pedidos.');
   if (order.open(item,data) === false) return;
   personalize.showModal();playback();

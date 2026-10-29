@@ -1,6 +1,6 @@
 // Only the additive post models have a choice of still image or animation.
 export const isReadyPost = item => item?.mediaKind === 'image' &&
-  /^posts-prontos-(?:0[1-9]|[1-3][0-9]|40)-v1$/.test(item?.creativeTemplate || '');
+  /^posts-prontos-(?:extra-)?(?:0[1-9]|[1-3][0-9]|40)-v1$/.test(item?.creativeTemplate || '');
 export function feedItems(items,kind) {
   const selected = items.filter(item => kind === 'image' ? item.mediaKind === 'image' : item.mediaKind !== 'image');
   return selected.length === items.length ? items : selected;

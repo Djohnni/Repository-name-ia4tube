@@ -8,6 +8,7 @@ import {normalizeProductPrice} from '../optional-price.js';
 import {normalizeProductDescription} from '../product-description.js';
 import {modelMainPhrase,normalizeCustomPhrase} from '../custom-phrase.js';
 import {requestAppCalendar,appCalendarAttemptScope} from '../app-calendar.js';
+import {createExtraPostOptions} from '../ready-posts-extra.js';
 
 const source=(await readFile(new URL('../order.js',import.meta.url),'utf8')).replace(/^import[^\n]*\n/gm,'').replace(/^export /gm,'');
 const opens=Date.parse(RELEASE_AT);
@@ -40,7 +41,7 @@ function fixture(initial=opens-1) {
   const context={Date:clock,TextEncoder,crypto,AbortController,setTimeout,clearTimeout,
     document:{querySelector:node},navigator:{clipboard:{writeText:async()=>{}}},localStorage:local,sessionStorage:session,
     location,history:{replaceState(_state,_title,url){location.hash=url;}},
-    requestAppCalendar,appCalendarAttemptScope,
+    requestAppCalendar,appCalendarAttemptScope,createExtraPostOptions,
     releaseInfo:item=>releaseInfo(item,now),buildMultipartOrder,idempotencyKey,normalizeReceipt,safeWhatsAppUrl,SUBMIT_ENDPOINT,normalizeProductPrice,normalizeProductDescription,modelMainPhrase,normalizeCustomPhrase,
     createUploadField:input=>({reset(){},async read(){reads++;return input===node('#order-logo')?{name:'logo.png',mime:'image/png',data:btoa('logo')}:null;}}),
     createProductsForm:()=>({resetUploads(){},sync(){},open(value){productsEnabled=value;},isEnabled:()=>productsEnabled,

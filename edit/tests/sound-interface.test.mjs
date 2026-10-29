@@ -215,7 +215,8 @@ test('Enter and Space use one video activation while repeats and unrelated keys 
 test('tap unlock is bound only to videos and is not a broad page or pointer handler',() => {
   assert.match(source('renderFeed'),/querySelector\('video'\)\.addEventListener\('click',activateVideo\)/);
   assert.match(source('renderFeed'),/video\.addEventListener\('keydown',handleVideoKeydown\)/);
-  assert.equal((app.match(/addEventListener\('click',activateVideo\)/g) || []).length,1);
+  assert.equal((app.match(/addEventListener\('click',activateVideo\)/g) || []).length,2);
+  assert.match(source('createAnimatedPostCard'),/video\.addEventListener\('click',activateVideo\)/);
   assert.doesNotMatch(app,/addEventListener\('(pointerdown|pointerup|touchstart|touchend)',activateVideo/);
 });
 

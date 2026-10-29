@@ -6,13 +6,17 @@ import {buildMultipartOrder} from '../order-adapter.js';
 import {fingerprintPayload} from '../order.js';
 
 const catalog=JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
+const originalCatalog=structuredClone(catalog);
+originalCatalog.catalog=originalCatalog.catalog.filter(item=>!/^posts-prontos-extra-/.test(item.creativeTemplate||''));
+const originalIds=new Set(originalCatalog.catalog.map(item=>item.id));
+originalCatalog.dailySelection.videoIds=originalCatalog.dailySelection.videoIds.filter(id=>originalIds.has(id));
 const before=JSON.parse(await readFile(new URL('./fixtures/catalog-pre-ready-posts.json',import.meta.url),'utf8'));
-const posts=catalog.catalog.filter(item=>item.mediaKind==='image');
+const posts=originalCatalog.catalog.filter(item=>item.mediaKind==='image');
 const source=await readFile(new URL('../app.js',import.meta.url),'utf8');
 const page=await readFile(new URL('../index.html',import.meta.url),'utf8');
 
 test('all30 released video records and catalogue metadata remain exactly unchanged',()=>{
-  assert.equal(before.catalog.length,30);assert.equal(catalog.catalog.length,70);
+  assert.equal(before.catalog.length,30);assert.equal(originalCatalog.catalog.length,70);
   assert.deepEqual(catalog.catalog.slice(0,30),before.catalog);
   const legacy=structuredClone(catalog);legacy.catalog=legacy.catalog.slice(0,30);
   const oldIds=new Set(legacy.catalog.map(item=>item.id));
@@ -48,8 +52,8 @@ test('image tab is initially selected and legacy video deep links and bounded im
   assert.ok(imageCard);assert.match(imageCard,/class="preview-poster post-image" data-src=/);
   assert.doesNotMatch(imageCard,/<video|sound-toggle|play-toggle/);
   assert.match(source,/location\.hash\.startsWith\('#video\/'\)/);
-  assert.deepEqual(feedItems(catalog.catalog,'image'),posts);
-  assert.deepEqual(feedItems(catalog.catalog,'video'),before.catalog);
+  assert.deepEqual(feedItems(originalCatalog.catalog,'image'),posts);
+  assert.deepEqual(feedItems(originalCatalog.catalog,'video'),before.catalog);
 });
 function optionsFixture(t) {
   const previous=globalThis.document;

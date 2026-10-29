@@ -12,6 +12,11 @@ const companyFingerprint=company=>fingerprintPayload({videoId:item.id,videoVersi
   logo:{name:'logo.png',mime:'image/png',data:btoa('logo')},photo:null,consent:true});
 const descriptionFingerprint=productDescription=>fingerprintPayload({videoId:item.id,videoVersion:item.version,company:'',durationSeconds:10,
   logo:{name:'logo.png',mime:'image/png',data:btoa('logo')},photo:null,consent:true,...(productDescription?{productDescription}:{})});
+const extraItem=overrides=>({id:'12345678-1234-4123-8123-123456789abc',version:1,recipe:'sextou',orderEnabled:true,
+  creativeTemplate:'posts-prontos-extra-25-v1',mediaKind:'image',photoRole:'person',allowDescription:false,allowProductPrice:false,
+  outputPrices:{image:990,video:2390},prices:{10:2390},phrase:'PARABÉNS, {{name}}!',primaryTemplate:'PARABÉNS, {{name}}!',secondaryTemplate:'',
+  personalizationFields:[{key:'name',label:'Nome da pessoa',placeholder:'Nome',required:true,maxLength:60,multiline:false}],...overrides});
+const extraField=(f,key)=>f.node('#extra-post-fields').children.flatMap(label=>label.children||[]).find(input=>input.name==='templateFields.'+key);
 const memoryStorage = () => {
   const values = new Map();
   return {values,getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,String(value)),removeItem:key=>values.delete(key)};
@@ -91,7 +96,8 @@ function fixture(t,{onSaved}={}) {
     '#order-photo','#order-consent','#order-product-price','#copy-message','#new-order','.chosen-model','#model-note',
     '#order-has-photo','#order-no-photo','#order-product-description','#order-photo-field','#order-description-field',
     '#order-phrase-options','#order-phrase-current','#order-phrase-editor','#order-custom-phrase',
-    '#modify-main-phrase','#reset-main-phrase','#chosen-phrase'])node(selector);
+    '#modify-main-phrase','#reset-main-phrase','#chosen-phrase','#extra-post-fields','#order-photo-mode',
+    '#order-photo-legend','#order-photo-caption','#order-description-caption','#order-description-note','#order-product-price-field'])node(selector);
   const imageChoices=['#order-has-photo','#order-no-photo'].map(node);
   imageChoices.forEach((choice,index)=>{
     let checked=index===0;
@@ -119,6 +125,7 @@ function fixture(t,{onSaved}={}) {
     for(const selector of ['#order-company','#order-product-price','#order-product-description','#order-custom-phrase'])node(selector).value='';
     node('#order-has-photo').checked=true;
     for(const selector of ['#order-logo','#order-photo'])node(selector).files=[];
+    for(const label of node('#extra-post-fields').children)for(const field of label.children||[])if(field.name?.startsWith('templateFields.'))field.value='';
     node('#order-consent').checked=false;durations[10].checked=true;durations[20].checked=false;
     for(const card of form.querySelector('#products-list').children) {
       for(const [selector,field] of card.selectors) {
@@ -217,6 +224,50 @@ test('simultaneous submit clicks send exactly one POST and keep controls busy un
   assert.equal(f.requests.length,1);f.succeed();await Promise.all([first,doubleClick]);
   assert.equal(f.controller.isBusy(),false);assert.equal(f.form.hidden,true);
   assert.equal(f.node('#order-success').hidden,false);assert.equal(f.navigation.length,1);
+});
+
+test('personalized communication requires actual name, keeps image default and never uploads a fictional person or product price',async t=>{
+  const f=fixture(t);f.controller.open(extraItem(),config);f.fill();
+  assert.equal(extraField(f,'name').value,'');assert.equal(f.node('#order-phrase-current').textContent,'PARABÉNS!');assert.equal(f.node('#chosen-phrase').hidden,true);
+  await f.submit();assert.match(f.node('#order-error').textContent,/Nome da pessoa/);assert.equal(f.reads.length,0);assert.equal(f.requests.length,0);
+  extraField(f,'name').value='  JOÃO  ';await extraField(f,'name').emit('input');assert.equal(f.node('#order-phrase-current').textContent,'PARABÉNS, JOÃO!');
+  f.node('#order-product-price').value='39,90';const pending=f.submit(),request=await f.waitForRequest(1),data=JSON.parse(request.options.body.get('data'));
+  assert.deepEqual(data.templateFields,{name:'JOÃO'});assert.deepEqual(data.selections,[{id:'93',format:'image'}]);assert.equal(Object.hasOwn(data,'productPrice'),false);assert.equal(Object.hasOwn(data,'customPhrase'),false);
+  assert.equal(request.options.body.get('photos'),null);assert.equal(f.reads.length,1);f.succeed(0,savedIds[0],990);await pending;
+});
+
+test('opening phrase edit before filling real name follows that name and does not freeze a generic overridden headline',async t=>{
+  const f=fixture(t);f.controller.open(extraItem(),config);f.fill();await f.node('#modify-main-phrase').emit('click');assert.equal(f.node('#order-custom-phrase').value,'PARABÉNS!');
+  extraField(f,'name').value='MARIA';await extraField(f,'name').emit('input');assert.equal(f.node('#order-custom-phrase').value,'PARABÉNS, MARIA!');
+  const pending=f.submit(),request=await f.waitForRequest(1),data=JSON.parse(request.options.body.get('data'));
+  assert.deepEqual(data.templateFields,{name:'MARIA'});assert.equal(Object.hasOwn(data,'customPhrase'),false);f.succeed(0,savedIds[0],990);await pending;
+});
+
+test('a local post requires its photo or real description and reaches the existing wire as productDescription without product price',async t=>{
+  const f=fixture(t);f.controller.open(extraItem({creativeTemplate:'posts-prontos-extra-09-v1',photoRole:'place',allowDescription:true,requireReference:true,personalizationFields:[],phrase:'VENHA NOS VISITAR!',primaryTemplate:'VENHA NOS VISITAR!'}),config);f.fill();
+  await f.submit();assert.match(f.node('#order-error').textContent,/foto ou descreva o local/);assert.equal(f.requests.length,0);
+  f.node('#order-no-photo').checked=true;await f.node('#order-no-photo').emit('change');f.node('#order-product-description').value='Salão com parede verde e mesas de madeira.';
+  assert.equal(f.node('#order-description-caption').textContent,'Descreva o local');assert.equal(f.node('#order-product-description').required,true);
+  const pending=f.submit(),request=await f.waitForRequest(1),data=JSON.parse(request.options.body.get('data'));
+  assert.equal(data.productDescription,'Salão com parede verde e mesas de madeira.');assert.equal(request.options.body.get('photos'),null);assert.equal(Object.hasOwn(data,'templateFields'),false);assert.equal(Object.hasOwn(data,'productPrice'),false);
+  f.succeed(0,savedIds[0],990);await pending;
+});
+
+test('photo-free communication ignores stale food input and sends actual multiline hours only',async t=>{
+  const f=fixture(t);f.controller.open(extraItem({creativeTemplate:'posts-prontos-extra-30-v1',photoRole:'none',phrase:'HORÁRIO DE ATENDIMENTO',primaryTemplate:'HORÁRIO DE ATENDIMENTO',personalizationFields:[{key:'hours',label:'Horários',required:true,multiline:true,maxLength:280}]}),config);f.fill();
+  f.node('#order-photo').files=[{name:'invalid.jpg',type:'invalid',size:1,data:'bad'}];f.node('#order-product-description').value='Hambúrguer';f.node('#order-product-price').value='29,90';f.node('#order-no-photo').checked=true;
+  assert.equal(f.node('#order-photo-field').hidden,true);assert.equal(f.node('#order-photo').disabled,true);extraField(f,'hours').value='Seg a sex:18h\r\nSábado:17h';
+  const pending=f.submit(),request=await f.waitForRequest(1),data=JSON.parse(request.options.body.get('data'));
+  assert.deepEqual(data.templateFields,{hours:'Seg a sex:18h\nSábado:17h'});assert.equal(request.options.body.get('photos'),null);assert.equal(Object.hasOwn(data,'productPrice'),false);assert.equal(Object.hasOwn(data,'productDescription'),false);
+  assert.equal(f.reads.length,1);f.succeed(0,savedIds[0],990);await pending;
+});
+
+test('clean product photo models have no editable fictitious Sextou headline and a second saved order starts with blank personal fields',async t=>{
+  const f=fixture(t);f.controller.open(extraItem({id:'12345678-1234-4123-8123-123456789ab5',creativeTemplate:'posts-prontos-extra-05-v1',photoRole:'product',allowProductPrice:true,allowDescription:true,personalizationFields:[],phrase:'',primaryTemplate:''}),config);f.fill();
+  assert.equal(f.node('#order-phrase-current').textContent,'');assert.equal(f.node('#order-phrase-options').hidden,true);assert.equal(f.node('#chosen-phrase').hidden,true);
+  const first=f.submit(),request=await f.waitForRequest(1);assert.equal(Object.hasOwn(JSON.parse(request.options.body.get('data')),'customPhrase'),false);f.succeed(0,savedIds[0],990);await first;
+  f.controller.open(extraItem(),config);f.fill();extraField(f,'name').value='CARLOS';const second=f.submit();await f.waitForRequest(2);f.succeed(1,savedIds[1],990);await second;
+  f.controller.open(extraItem(),config);f.fill();assert.equal(extraField(f,'name').value,'');await f.submit();assert.match(f.node('#order-error').textContent,/Nome da pessoa/);assert.equal(f.requests.length,2);
 });
 
 test('a delayed submit event on the saved confirmation cannot send a second order',async t=>{

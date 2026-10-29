@@ -1,7 +1,8 @@
 import { requestAppCalendar, appCalendarAttemptScope } from './app-calendar.js?v=20261028-app-calendar';
-import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261028-ready-posts';
+import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261029-extra40';
 import { createModelOptions } from './model-options.js?v=20261020-styles';
-import { createReadyPostOptions } from './ready-posts.js?v=20261028-ready-posts';
+import { createReadyPostOptions } from './ready-posts.js?v=20261029-extra40';
+import { createExtraPostOptions } from './ready-posts-extra.js?v=20261029-extra40';
 import { createProductsForm } from './products-form.js?v=20261021-upload';
 import { normalizeProductPrice } from './optional-price.js?v=20261019-price';
 import { normalizeProductDescription } from './product-description.js?v=20261022-no-photo';
@@ -78,6 +79,7 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
   const products = createProductsForm({form,money});
   const modelOptions = createModelOptions(form,money);
   const readyPosts = createReadyPostOptions(form,money);
+  const extraPosts = createExtraPostOptions(form,{onChange:()=>syncPhraseFields()});
   const photoInput = document.querySelector('#order-photo');
   const descriptionInput = document.querySelector('#order-product-description');
   const photoChoice = document.querySelector('#order-has-photo');
@@ -86,24 +88,30 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
   const phraseInput = document.querySelector('#order-custom-phrase');
   const modifyPhrase = document.querySelector('#modify-main-phrase');
   const resetPhrase = document.querySelector('#reset-main-phrase');
-  let editingPhrase = false;
+  let editingPhrase = false,phraseEditingSeed = null;
 
   function syncPhraseFields() {
-    const active = !products.isEnabled() && !form.hidden;
+    const mainPhrase=extraPosts.previewPhrase() ?? modelMainPhrase(item);
+    if (editingPhrase && extraPosts.isEnabled() && phraseInput.value===phraseEditingSeed) {
+      phraseInput.value=mainPhrase;phraseEditingSeed=mainPhrase;
+    }
+    const active = !products.isEnabled() && !form.hidden && (!extraPosts.isEnabled() || Boolean(mainPhrase));
     phraseOptions.hidden = !active;
-    document.querySelector('#order-phrase-current').textContent = modelMainPhrase(item);
+    document.querySelector('#order-phrase-current').textContent = mainPhrase;
     document.querySelector('#order-phrase-current').hidden = editingPhrase;
     document.querySelector('#order-phrase-editor').hidden = !active || !editingPhrase;
-    document.querySelector('#chosen-phrase').hidden = active;
+    document.querySelector('#chosen-phrase').hidden = active || extraPosts.isEnabled();
     modifyPhrase.hidden = editingPhrase;
     modifyPhrase.disabled = busy || !active;
     modifyPhrase.setAttribute('aria-expanded',String(editingPhrase));
     phraseInput.disabled = resetPhrase.disabled = busy || !active || !editingPhrase;
     phraseInput.required = active && editingPhrase;
-    if (!editingPhrase) phraseInput.value = modelMainPhrase(item);
+    if (!editingPhrase) phraseInput.value = mainPhrase;
   }
   modifyPhrase.addEventListener('click',() => {
     if (busy || products.isEnabled() || form.hidden) return;
+    phraseEditingSeed=extraPosts.previewPhrase() ?? modelMainPhrase(item);
+    phraseInput.value=phraseEditingSeed;
     editingPhrase = true;syncPhraseFields();phraseInput.focus();phraseInput.select();
   });
   resetPhrase.addEventListener('click',() => {
@@ -111,24 +119,25 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
     editingPhrase = false;syncPhraseFields();modifyPhrase.focus();
   });
 
-  function usesDescription() {return !products.isEnabled() && descriptionChoice.checked;}
+  function usesDescription() {return !products.isEnabled() && extraPosts.allowDescription() && descriptionChoice.checked;}
   function syncImageFields() {
     const single = !products.isEnabled(),described = usesDescription();
-    photoChoice.disabled = descriptionChoice.disabled = busy || !single;
-    document.querySelector('#order-photo-field').hidden = !single || described;
-    photoInput.disabled = busy || !single || described;
+    photoChoice.disabled = descriptionChoice.disabled = busy || !single || !extraPosts.allowDescription();
+    document.querySelector('#order-photo-field').hidden = !single || described || !extraPosts.allowPhoto();
+    photoInput.disabled = busy || !single || described || !extraPosts.allowPhoto();
     document.querySelector('#order-description-field').hidden = !single || !described;
     descriptionInput.disabled = busy || !single || !described;
     descriptionInput.required = described;
     document.querySelector('#order-company').disabled = busy || single;
+    extraPosts.sync(busy,{single});
   }
   for (const choice of [photoChoice,descriptionChoice]) choice.addEventListener('change',() => {
     photoUpload.reset();syncImageFields();
   });
 
   function clearUploads() {logoUpload.reset();photoUpload.reset();products.resetUploads();}
-  function resetForm() {editingPhrase = false;clearUploads();form.reset();syncImageFields();syncPhraseFields();}
-  form.addEventListener('reset',() => {editingPhrase = false;clearUploads();});
+  function resetForm() {editingPhrase = false;phraseEditingSeed=null;clearUploads();form.reset();syncImageFields();syncPhraseFields();}
+  form.addEventListener('reset',() => {editingPhrase = false;phraseEditingSeed=null;clearUploads();});
 
   function setBusy(value) {
     busy = value;
@@ -182,8 +191,9 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
     form.hidden = !enabled;displayOnly.hidden = enabled;
     const invalidPrice = modelOptions.open(item,config);
     const invalidPostPrice = readyPosts.open(item);
+    const invalidExtraFields = extraPosts.open(item);
     syncImageFields();
-    if (enabled && (invalidPrice || invalidPostPrice)) {
+    if (enabled && (invalidPrice || invalidPostPrice || invalidExtraFields)) {
       form.hidden = true;displayOnly.hidden = false;displayOnly.textContent = 'O preço deste modelo precisa ser conferido no programa antes de receber pedidos.';
     } else displayOnly.textContent = 'Este vídeo é apenas uma referência visual. A personalização ainda não foi habilitada para ele.';
     syncPhraseFields();
@@ -213,20 +223,23 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
       if (!document.querySelector('#order-consent').checked) throw new Error('Confirme a autorização para usar as imagens.');
       const productDescription = usesDescription() ? normalizeProductDescription(descriptionInput.value,{required:true}) : '';
       const enteredPhrase = !products.isEnabled() && editingPhrase ? normalizeCustomPhrase(phraseInput.value,{required:true}) : '';
-      const customPhrase = enteredPhrase && enteredPhrase !== modelMainPhrase(item) ? enteredPhrase : '';
+      const customPhrase = enteredPhrase && enteredPhrase !== (extraPosts.previewPhrase() ?? modelMainPhrase(item)) ? enteredPhrase : '';
+      const templateFields=extraPosts.read();
       const [logo,photo] = await Promise.all([
         logoUpload.read(),
-        products.isEnabled() || usesDescription() ? null : photoUpload.read(),
+        products.isEnabled() || usesDescription() || !extraPosts.allowPhoto() ? null : photoUpload.read(),
       ]);
       if (!logo) throw new Error('Adicione o logo da empresa.');
+      extraPosts.validateReference(photo,productDescription);
       const payload = products.isEnabled()
         ? {videoId:item.id,videoVersion:item.version,company,logo,consent:true,...await products.payload()}
         : {videoId:item.id,videoVersion:item.version,company,durationSeconds,logo,photo,consent:true};
       if (readyPosts.isEnabled()) payload.mediaKind = readyPosts.selected();
+      if (templateFields) payload.templateFields=templateFields;
       if (!products.isEnabled()) {
         if (productDescription) payload.productDescription = productDescription;
         if (customPhrase) payload.customPhrase = customPhrase;
-        const productPrice = normalizeProductPrice(document.querySelector('#order-product-price').value);
+        const productPrice = extraPosts.allowProductPrice() ? normalizeProductPrice(document.querySelector('#order-product-price').value) : '';
         if (productPrice) payload.productPrice = productPrice;
         const animal = modelOptions.animal();
         if (animal) payload.animal = animal;

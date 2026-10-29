@@ -2,6 +2,7 @@ export const SUBMIT_ENDPOINT = 'https://marcagrande-pedidos-wshgj6ugza-uc.a.run.
 import { normalizeProductPrice } from './optional-price.js?v=20261019-price';
 import { normalizeProductDescription } from './product-description.js?v=20261022-no-photo';
 import { normalizeCustomPhrase } from './custom-phrase.js?v=20261022-phrase';
+import { normalizeTemplateFieldObject } from './ready-posts-extra.js?v=20261029-extra40';
 const UUID_V4 = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i;
 const ORDER_ID = /^[A-Za-z0-9_-]{1,100}$/;
 const IMAGE_TYPES = new Set(['image/png','image/jpeg','image/webp']);
@@ -30,6 +31,8 @@ export function buildMultipartOrder(payload) {
   const productPrice = normalizeProductPrice(payload.productPrice);
   const productDescription = normalizeProductDescription(payload.productDescription);
   const customPhrase = normalizeCustomPhrase(payload.customPhrase);
+  const templateFields=normalizeTemplateFieldObject(payload.templateFields);
+  if (payload.templateFields!==undefined && (products || !mediaKind)) throw new Error('As informações deste modelo estão disponíveis somente para os novos posts.');
   if (products && productPrice) throw new Error('Informe o preço dentro de cada produto do pacote.');
   if (products && productDescription) throw new Error('A descrição sem foto está disponível somente para modelos individuais.');
   if (products && customPhrase) throw new Error('A frase principal personalizada está disponível somente para modelos individuais.');
@@ -70,6 +73,7 @@ export function buildMultipartOrder(payload) {
     ...(productPrice ? {productPrice} : {}),
     ...(productDescription ? {productDescription} : {}),
     ...(customPhrase ? {customPhrase} : {}),
+    ...(templateFields ? {templateFields} : {}),
     ...(payload.animal ? {animal:payload.animal} : {}),
   }));
   form.append('logo',uploadBlob(payload.logo,5 * 1024 * 1024,'Logo'),payload.logo.name);
@@ -108,6 +112,7 @@ export function normalizeReceipt(result,payload) {
     ...(typeof payload.company === 'string' && payload.company.trim() ? ['Estabelecimento: ' + payload.company.trim()] : []),
     ...(payload.productDescription ? ['Descrição do produto: ' + normalizeProductDescription(payload.productDescription)] : []),
     ...(payload.customPhrase ? ['Frase principal: ' + normalizeCustomPhrase(payload.customPhrase)] : []),
+    ...(payload.templateFields ? Object.entries(normalizeTemplateFieldObject(payload.templateFields)||{}).map(([key,value])=>key+': '+value) : []),
     ...(payload.productPrice ? ['Preço do produto na arte: ' + normalizeProductPrice(payload.productPrice)] : []),
     '',
     'Gostaria de confirmar o recebimento e combinar os próximos passos.',
