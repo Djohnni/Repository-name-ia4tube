@@ -10,9 +10,13 @@ export const SCHEDULED_IDS = Object.freeze([
 ]);
 // The owner released the narrated package and placed it third on 2026-10-21.
 export const PRODUCT_PACKAGE_ID = '2830b796-2375-49e8-8e97-9a731c115252';
+// Temporarily hidden from customers; keep the model and existing orders intact.
+// Remove its ID here when the owner chooses to offer the package again.
+export const HIDDEN_IDS = Object.freeze([PRODUCT_PACKAGE_ID]);
 export const FUTURE_IDS = Object.freeze([]);
 const ids = new Set(SCHEDULED_IDS);
 const futureIds = new Set(FUTURE_IDS);
+const hiddenIds = new Set(HIDDEN_IDS);
 const opensAt = Date.parse(RELEASE_AT);
 const day = new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'});
 
@@ -24,6 +28,7 @@ export function releaseInfo(item,now = Date.now()) {
 }
 
 export function orderShowcase(items) {
+  items = items.filter(item => !hiddenIds.has(item.id));
   const packageItem = items.find(item => item.id === PRODUCT_PACKAGE_ID);
   const otherItems = items.filter(item => item.id !== PRODUCT_PACKAGE_ID);
   const ordered = [...otherItems.filter(item => !futureIds.has(item.id)),...otherItems.filter(item => futureIds.has(item.id))];

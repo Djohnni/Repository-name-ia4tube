@@ -24,7 +24,7 @@ test('Ô Burgão demo changes only four approved presentation fields relative to
   assert.equal(item.recipe,'produtos');
   assert.equal(item.orderEnabled,true);
   assert.equal(item.status,'published');
-  assert.equal(orderShowcase(data.catalog.filter(row=>row.status==='published'))[2].id,PRODUCTS_DEMO_ID);
+  assert.equal(orderShowcase(data.catalog.filter(row=>row.status==='published')).some(row=>row.id===PRODUCTS_DEMO_ID),false);
   assert.deepEqual(data.productsPrices,{'2':3800,'4':4800,'6':5800,'8':6800});
 });
 
