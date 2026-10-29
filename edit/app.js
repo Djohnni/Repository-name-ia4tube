@@ -1,6 +1,8 @@
 import { createOrderController } from './order.js?v=20261029-extra40';
 import { feedItems } from './ready-posts.js?v=20261029-extra40';
 import { isExtraReadyPost } from './ready-posts-extra.js?v=20261029-extra40';
+import {IMAGE_CATEGORIES,filterImageItems} from './image-categories.js?v=20261029-image-categories';
+import {createImageCategoryMenu} from './image-category-menu.js?v=20261029-image-categories';
 import { createPlaybackAudio } from './playback-audio.js?v=20261021-native-sound';
 import { releaseInfo, orderShowcase } from './availability.js?v=20261021-products-open';
 import { createMediaWindow } from './media-window.js?v=20261022-light-media';
@@ -44,6 +46,7 @@ let activeIndex = 0,soundEnabled = true,userPaused = reduceMotion,routeIsProfile
 let progressFrame = 0,toastTimer,releaseTimer,playlistKey = '';
 let videoOnly = false;
 let selectedMediaKind = 'image';
+let selectedImageCategory='all',imageSearch='',imageCategoryMenu=null;
 let posterPreviews = {};
 const posterPath = item => {
   const preview = posterPreviews[item.poster];
@@ -62,6 +65,19 @@ const swipeSound = createSwipeSound({
 });
 const order = createOrderController({dialog:personalize,money,toast,onBusy:playback,
   onSaved:detail => document.dispatchEvent(new CustomEvent('ia4tube:edit-order-saved',{detail:{...detail,videoTitle:catalog.find(item => item.id === detail.videoId)?.label}}))});
+imageCategoryMenu=createImageCategoryMenu({
+  buttons:document.querySelectorAll('.image-category-toggle'),dialog:document.querySelector('#image-categories-dialog'),
+  items:()=>catalog,onSelect:applyImageCategory,onOpenChange:playback,
+});
+
+function applyImageCategory({categoryId,query}) {
+  if (selectedImageCategory===categoryId && imageSearch===query) return;
+  selectedImageCategory=categoryId;imageSearch=query;playlistKey='';
+  if (location.hash.startsWith('#video/')) history.replaceState(null,'','#hoje');
+  renderProfile();route();
+  const label=IMAGE_CATEGORIES.find(category=>category.id===categoryId)?.label || 'Todas as imagens';
+  toast(`${label} · ${filterImageItems(catalog,categoryId,query).length} imagens`);
+}
 
 function activeCard() {return cards[activeIndex];}
 function syncInterface() {
@@ -82,7 +98,7 @@ function setVideoOnly(value) {
 addEventListener('keydown',event => {
   if (event.key === 'Escape' && videoOnly) setVideoOnly(false);
 });
-function canPlay() {return !routeIsProfile && !document.hidden && !personalize.open && !about.open && !userPaused;}
+function canPlay() {return !routeIsProfile && !document.hidden && !personalize.open && !about.open && !imageCategoryMenu?.isOpen() && !userPaused;}
 function syncPlayButton(card) {
   if (!card) return;
   const video = card.querySelector('video');
@@ -233,7 +249,10 @@ function renderFeed(items,key,initialIndex = 0) {
   document.querySelector('#previous').disabled = true;document.querySelector('#next').disabled = cards.length < 2;
   if (!cards.length) {
     document.querySelector('#position').innerHTML = '00 <span>/ 00</span>';
-    feed.innerHTML = '<div class="empty-feed"><span class="eyebrow">SEM VÍDEOS EM DESTAQUE</span><h2>A próxima inspiração<br>está chegando.</h2><p>Os modelos anteriores continuam no perfil.</p><a class="primary-action" href="#perfil">Ver perfil da iA4tube</a></div>';
+    if (selectedMediaKind==='image') {
+      feed.innerHTML='<div class="empty-feed"><h2>Nenhuma imagem encontrada.</h2><button class="primary-action" id="reset-image-categories">Ver todas as imagens</button></div>';
+      feed.querySelector('#reset-image-categories').addEventListener('click',()=>applyImageCategory({categoryId:'all',query:''}));
+    } else feed.innerHTML = '<div class="empty-feed"><span class="eyebrow">SEM VÍDEOS EM DESTAQUE</span><h2>A próxima inspiração<br>está chegando.</h2><p>Os modelos anteriores continuam no perfil.</p><a class="primary-action" href="#perfil">Ver perfil da iA4tube</a></div>';
   }
   feed.scrollTo({top:activeIndex * feed.clientHeight,behavior:'instant'});
   cards.forEach(card => observer.observe(card));syncSound();syncInterface();syncReleases();activate(activeIndex);tick();
@@ -322,6 +341,8 @@ function renderProfile() {
   document.querySelector('#catalog-count').textContent = catalog.length;
   document.querySelector('#orderable-count').textContent = catalog.filter(item => item.orderEnabled).length;
   const grid = document.querySelector('#profile-grid');grid.replaceChildren();
+  document.querySelector('.profile-catalog-heading h2').textContent=selectedMediaKind==='image' && (selectedImageCategory!=='all' || imageSearch)
+    ? (IMAGE_CATEGORIES.find(category=>category.id===selectedImageCategory)?.label || 'Imagens encontradas') : 'Todos os modelos';
   for (const item of selectedItems(catalog)) {
     const button = document.createElement('button');button.className = 'profile-card';button.dataset.id = item.id;
     if (item.kind === 'saturday-preview') {
@@ -340,7 +361,7 @@ function renderProfile() {
 }
 function selectedItems(items) {
   const selected = feedItems(items,selectedMediaKind);
-  return selectedMediaKind === 'video' ? withSaturdayPreviews(selected,saturdayPreviews) : selected;
+  return selectedMediaKind === 'video' ? withSaturdayPreviews(selected,saturdayPreviews) : filterImageItems(selected,selectedImageCategory,imageSearch);
 }
 for (const tab of document.querySelectorAll('.feed-tabs [data-media-kind]')) tab.addEventListener('click',() => {
   const next = tab.dataset.mediaKind;
@@ -366,17 +387,23 @@ function route() {
     if (requested) {
       const kind = requested.mediaKind === 'image' ? 'image' : 'video';
       if (kind !== selectedMediaKind) {selectedMediaKind = kind;renderProfile();}
+      if (kind==='image' && !filterImageItems([requested],selectedImageCategory,imageSearch).length) {
+        selectedImageCategory='all';imageSearch='';playlistKey='';renderProfile();
+      }
     }
     const profileItems = selectedItems(catalog);
     const fromProfile = requestedId && profileItems.some(item => item.id === requestedId);
     const initialIndex = fromProfile ? profileItems.findIndex(item => item.id === requestedId) : 0;
-    renderFeed(fromProfile ? profileItems : selectedItems(daily),`${selectedMediaKind}-${fromProfile ? 'profile' : 'daily'}`,initialIndex);
+    const categoryKey=selectedMediaKind==='image' ? `-${selectedImageCategory}-${imageSearch}` : '';
+    renderFeed(fromProfile ? profileItems : selectedItems(daily),`${selectedMediaKind}-${fromProfile ? 'profile' : 'daily'}${categoryKey}`,initialIndex);
     document.querySelectorAll('.feed-tabs [data-media-kind]').forEach(tab => tab.setAttribute('aria-selected',String(tab.dataset.mediaKind === selectedMediaKind)));
     if (fromProfile) {
       const index = playlist.findIndex(item => item.id === requestedId);
       feed.scrollTo({top:index * feed.clientHeight,behavior:'instant'});activate(index);
     } else if (requestedId) toast('Esse vídeo não está disponível. Veja os vídeos em destaque.');
   }
+  document.body.classList.toggle('browsing-images',selectedMediaKind==='image');
+  imageCategoryMenu.sync({mediaKind:selectedMediaKind,categoryId:selectedImageCategory,query:imageSearch});
   playback();
 }
 addEventListener('hashchange',route);

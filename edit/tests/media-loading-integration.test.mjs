@@ -6,6 +6,7 @@ import {runInNewContext} from 'node:vm';
 import {orderShowcase} from '../availability.js';
 import {withSaturdayPreviews} from '../saturday-previews.js';
 import {feedItems} from '../ready-posts.js';
+import {IMAGE_CATEGORIES,filterImageItems} from '../image-categories.js';
 
 const app = await readFile(new URL('../app.js',import.meta.url),'utf8');
 const catalogSource = await readFile(new URL('../catalog.json',import.meta.url),'utf8');
@@ -110,17 +111,19 @@ test('the actual feed template carries deferred media without eager video src or
 
 function routeFixture(hash = '#hoje',items = [item]) {
   const events = [],images = [],buttons = [],nodes = new Map();
-  for (const selector of ['#catalog-count','#orderable-count','#feed-view','#profile-view','.feed-tab']) nodes.set(selector,{});
+  for (const selector of ['#catalog-count','#orderable-count','#feed-view','#profile-view','.feed-tab','.profile-catalog-heading h2']) nodes.set(selector,{});
   const grid = {replaceChildren() {buttons.length = 0;images.length = 0;},append(button) {buttons.push(button);}};
   nodes.set('#profile-grid',grid);
   const context = {location:{hash},routeIsProfile:false,catalog:items,daily:[items[0]],playlist:[],data:{},
     saturdayPreviews:[],withSaturdayPreviews,feedItems,selectedMediaKind:'video',
+    IMAGE_CATEGORIES,filterImageItems,selectedImageCategory:'all',imageSearch:'',
+    imageCategoryMenu:{sync(value) {this.state=value;},isOpen:() => false},
     feed:{clientHeight:600,scrollTo:options => events.push(['scroll',options.top])},
     setVideoOnly:value => events.push(['interface',value]),syncReleases() {},
     renderFeed(list,key,index) {events.push(['render',key,index]);context.playlist = list;},
     activate:index => events.push(['activate',index]),playback:() => events.push(['playback']),toast:message => events.push(['toast',message]),
     esc:escapeHtml,icon:() => '',posterPath:entry => entry.poster.replace(/\.png$/,'.webp'),
-    document:{querySelector(selector) {assert.ok(nodes.has(selector),selector);return nodes.get(selector);},
+    document:{body:{classList:{toggle() {}}},querySelector(selector) {assert.ok(nodes.has(selector),selector);return nodes.get(selector);},
       querySelectorAll(selector) {
         if (selector === '[data-nav]' || selector === '.feed-tabs [data-media-kind]') return [];
         assert.equal(selector,'#profile-grid img[data-src]');return images;

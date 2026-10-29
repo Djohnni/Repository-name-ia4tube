@@ -1,5 +1,6 @@
 import test from 'node:test';
 import {feedItems} from '../ready-posts.js';
+import {filterImageItems} from '../image-categories.js';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
@@ -140,7 +141,7 @@ test('real video playback safely stops at a static preview and resumes on return
   const events = [],video = {pause:() => events.push('pause')};
   const cards = [{querySelector:() => null},imageCard(0)];
   const context = {videos:[video,null],cards,activeIndex:1,routeIsProfile:false,userPaused:false,videoOnly:false,
-    document:{hidden:false,dispatchEvent() {}},Event,personalize:{open:false},about:{open:false},
+    document:{hidden:false,dispatchEvent() {}},Event,personalize:{open:false},about:{open:false},imageCategoryMenu:null,
     swipeGuide:{schedule() {},cancel() {}},syncPreviewImages,
     mediaWindow:{sync(list,index) {assert.equal(list[1],null);events.push(['media',index]);}},
     playbackAudio:{cancel:value => {assert.equal(value,video);events.push('cancel');},play:value => {assert.equal(value,video);events.push('play');}},
@@ -174,7 +175,8 @@ test('a direct preview link selects its appended image without creating a catalo
   const nodes = new Map(),events = [];
   const context = {location:{hash:'#video/previa-sabado-pizza'},data:{},catalog:[videoItem],daily:[videoItem],
     saturdayPreviews:previews,withSaturdayPreviews,feedItems,selectedMediaKind:'video',playlist:[],routeIsProfile:false,
-    document:{querySelector:selector => {if (!nodes.has(selector)) nodes.set(selector,{});return nodes.get(selector);},querySelectorAll:() => []},
+    filterImageItems,selectedImageCategory:'all',imageSearch:'',imageCategoryMenu:{sync(value) {this.state=value;}},
+    document:{body:{classList:{toggle() {}}},querySelector:selector => {if (!nodes.has(selector)) nodes.set(selector,{});return nodes.get(selector);},querySelectorAll:() => []},
     feed:{clientHeight:640,scrollTo:options => events.push(['scroll',options.top])},
     renderFeed(items,key,index) {context.playlist = items;events.push(['render',key,index]);},
     activate:index => events.push(['activate',index]),playback() {},toast:() => assert.fail('Known preview should route directly.'),setVideoOnly() {},

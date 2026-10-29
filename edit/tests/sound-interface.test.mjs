@@ -104,7 +104,7 @@ function tapHarness() {
     videos:[video],activeIndex:0,userPaused:false,routeIsProfile:false,videoOnly:false,
     swipeGuide:{cancel() {guideEvents.push('cancel');},schedule() {guideEvents.push('schedule');}},
     swipeSound:{consumeClick() {return false;}},
-    personalize:{open:false},about:{open:false},
+    personalize:{open:false},about:{open:false},imageCategoryMenu:{open:false,isOpen() {return this.open;}},
     document:{hidden:false,dispatchEvent() {}},Event:class {},
     playbackAudio:createPlaybackAudio(),mediaWindow:{sync() {}},syncPreviewImages() {},cards:[],tick() {},
     activeCard() {return {};},syncPlayButton() {},
@@ -234,7 +234,7 @@ test('a swipe retries blocked audio in the same call stack without pausing or re
 
 test('swipes preserve explicit mute, deliberate pause and inactive views',async () => {
   const h = tapHarness();await h.blockAutoplay();
-  for (const [object,key] of [[h.context.personalize,'open'],[h.context.about,'open'],[h.context,'routeIsProfile'],[h.context.document,'hidden'],[h.context,'userPaused']]) {
+  for (const [object,key] of [[h.context.personalize,'open'],[h.context.about,'open'],[h.context.imageCategoryMenu,'open'],[h.context,'routeIsProfile'],[h.context.document,'hidden'],[h.context,'userPaused']]) {
     object[key] = true;h.context.enableSwipeSound();object[key] = false;
   }
   h.context.activeIndex = 1;h.context.enableSwipeSound();h.context.activeIndex = 0;
