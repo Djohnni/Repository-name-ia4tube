@@ -1,4 +1,4 @@
-import {IMAGE_CATEGORIES,categoryCounts,normalizeCategoryId} from './image-categories.js?v=20261029-image-categories';
+import {IMAGE_CATEGORIES,categoryCounts,normalizeCategoryId} from './image-categories.js?v=20261029-products-first';
 
 // A browsing control only: it never opens or submits an order.
 export function createImageCategoryMenu({buttons,dialog,items,onSelect,onOpenChange=()=>{}}) {

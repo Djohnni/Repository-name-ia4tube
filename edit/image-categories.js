@@ -76,8 +76,19 @@ export function imageCategories(item) {
 
 export function filterImageItems(items,categoryId='all',query='') {
   const selected = normalizeCategoryId(categoryId),terms = termsFor(query);
-  return (Array.isArray(items) ? items : []).filter(item=>item?.mediaKind === 'image' &&
+  const filtered = (Array.isArray(items) ? items : []).filter(item=>item?.mediaKind === 'image' &&
     (selected === 'all' || imageCategories(item).includes(selected)) && matches(item,terms));
+  if (selected!=='all' || terms.length) return filtered;
+  // Lead the unfiltered feed with the original food models, then other products.
+  const priority = item => {
+    const categories=imageCategories(item);
+    if (!categories.includes('produtos')) return 3;
+    const original=/^posts-prontos-(\d{2})-v1$/.exec(item.creativeTemplate || '');
+    if (original && Number(original[1])>=21 && Number(original[1])<=39) return 0;
+    return categories.includes('dias-semana') || categories.includes('datas') ? 2 : 1;
+  };
+  return filtered.map((item,index)=>({item,index,priority:priority(item)}))
+    .sort((a,b)=>a.priority-b.priority || a.index-b.index).map(entry=>entry.item);
 }
 
 export function categoryCounts(items,query='') {

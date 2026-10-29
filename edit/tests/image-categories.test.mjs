@@ -35,24 +35,54 @@ test('video and non-image records are never classified or returned by image filt
   for(const id of ['all',...IMAGE_CATEGORIES.map(category=>category.id)])assert.ok(filterImageItems(all,id).every(item=>item.mediaKind==='image'));
 });
 
-test('filters preserve the exact relative order and object references without changing catalogue or prices',()=>{
+test('specific category filters preserve exact relative order and references without changing catalogue or prices',()=>{
   const before=JSON.stringify(document);
-  for(const id of ['all',...IMAGE_CATEGORIES.map(category=>category.id)]){
+  for(const id of IMAGE_CATEGORIES.map(category=>category.id)){
     const selected=filterImageItems(all,id);
-    assert.deepEqual(selected,images.filter(item=>id==='all'||imageCategories(item).includes(id)));
+    assert.deepEqual(selected,images.filter(item=>imageCategories(item).includes(id)));
     let previous=-1;for(const item of selected){const next=all.indexOf(item);assert.ok(next>previous);previous=next;}
   }
   const first=imageCategories(images[0]);first.push('modified');assert.ok(!imageCategories(images[0]).includes('modified'));
-  categoryCounts(all,'pizza');filterImageItems(all,'produtos','pizza');
+  categoryCounts(all,'pizza');filterImageItems(all,'produtos','pizza');filterImageItems(all);
   assert.equal(JSON.stringify(document),before);
   assert.equal(images[0].outputPrices.image,990);
+});
+
+test('the initial All feed starts with the 41 products and original Close, Pizza and Retro models',()=>{
+  const before=JSON.stringify(document),byId=new Map(all.map(item=>[item.id,item]));
+  const daily=document.dailySelection.videoIds.map(id=>byId.get(id)).filter(Boolean);
+  const result=filterImageItems(daily);
+  assert.equal(result.length,80);assert.equal(new Set(result).size,80);
+  assert.deepEqual(result.slice(0,3).map(item=>item.title),['Close de desejo','Pizza afetiva','Jogo retrô']);
+  assert.ok(result.slice(0,41).every(item=>imageCategories(item).includes('produtos')));
+  assert.ok(result.slice(41).every(item=>!imageCategories(item).includes('produtos')));
+  const originalIds=new Set(Array.from({length:19},(_,index)=>`posts-prontos-${index+21}-v1`));
+  assert.deepEqual(result.slice(0,19),daily.filter(item=>originalIds.has(item.creativeTemplate)));
+  assert.ok(result.slice(19,32).every(item=>!imageCategories(item).some(id=>id==='dias-semana'||id==='datas')));
+  assert.ok(result.slice(32,41).every(item=>imageCategories(item).some(id=>id==='dias-semana'||id==='datas')));
+  assert.deepEqual(result.slice(41),daily.filter(item=>item.mediaKind==='image'&&!imageCategories(item).includes('produtos')));
+  for(const item of result)assert.equal(item,byId.get(item.id),'Keep the released model object and identity.');
+  assert.equal(JSON.stringify(document),before,'Reordering the feed never rewrites catalogue, prices or contracts.');
+});
+
+test('ties in the initial priority groups retain their incoming order',()=>{
+  const incoming=[...images].reverse(),result=filterImageItems(incoming);
+  const originalIds=new Set(Array.from({length:19},(_,index)=>`posts-prontos-${index+21}-v1`));
+  assert.deepEqual(result.slice(0,19),incoming.filter(item=>originalIds.has(item.creativeTemplate)));
+  for(const samePriority of [
+    incoming.filter(item=>imageCategories(item).includes('produtos')&&!originalIds.has(item.creativeTemplate)&&!imageCategories(item).some(id=>id==='dias-semana'||id==='datas')),
+    incoming.filter(item=>imageCategories(item).includes('produtos')&&imageCategories(item).some(id=>id==='dias-semana'||id==='datas')),
+    incoming.filter(item=>!imageCategories(item).includes('produtos')),
+  ]){
+    const members=new Set(samePriority);assert.deepEqual(result.filter(item=>members.has(item)),samePriority);
+  }
 });
 
 test('category IDs normalize safely to All while non-array sources remain empty',()=>{
   assert.equal(normalizeCategoryId(' EQUIPE '),'equipe');
   for(const invalid of ['all','unknown','__proto__','constructor','',null,undefined,{},1])assert.equal(normalizeCategoryId(invalid),'all');
   assert.deepEqual(filterImageItems(null),[]);assert.deepEqual(filterImageItems({}),[]);
-  assert.deepEqual(filterImageItems(all,'unknown'),images);
+  assert.deepEqual(filterImageItems(all,'unknown'),filterImageItems(all,'all'));
   assert.equal(categoryCounts(undefined).all,0);
 });
 
@@ -76,6 +106,15 @@ test('word search is accent-insensitive, case-insensitive and combines terms usi
   assert.deepEqual(filterImageItems([future],'all','semanal boa quente'),[future]);
   assert.deepEqual(filterImageItems([future],'all','semanal ausente'),[]);
   assert.deepEqual(filterImageItems(all,'equipe','pizza'),[]);
-  assert.deepEqual(filterImageItems(all,'all','   '),images);
+  assert.deepEqual(filterImageItems(all,'all','   '),filterImageItems(all,'all'));
   assert.equal(categoryCounts(all,'pizza borda').all,1);assert.equal(categoryCounts(all,'pizza borda').interacao,1);
+});
+
+test('search results keep their incoming order instead of applying the initial products-first arrangement',()=>{
+  const byId=new Map(all.map(item=>[item.id,item]));
+  const incoming=document.dailySelection.videoIds.map(id=>byId.get(id)).filter(Boolean);
+  const text=item=>[item.title,item.label,item.phrase,item.secondaryPhrase].filter(value=>typeof value==='string').join(' ').normalize('NFD').replace(/\p{M}/gu,'').toLowerCase();
+  const expected=incoming.filter(item=>item.mediaKind==='image'&&text(item).includes('pizza'));
+  assert.deepEqual(filterImageItems(incoming,'all','PIZZA'),expected);
+  assert.deepEqual(filterImageItems(incoming,'produtos','pizza'),expected.filter(item=>imageCategories(item).includes('produtos')));
 });
