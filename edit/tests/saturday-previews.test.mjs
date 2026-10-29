@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {feedItems} from '../ready-posts.js';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
@@ -172,14 +173,14 @@ test('the position display separates five previews from the count of existing vi
 test('a direct preview link selects its appended image without creating a catalog item',() => {
   const nodes = new Map(),events = [];
   const context = {location:{hash:'#video/previa-sabado-pizza'},data:{},catalog:[videoItem],daily:[videoItem],
-    saturdayPreviews:previews,withSaturdayPreviews,playlist:[],routeIsProfile:false,
+    saturdayPreviews:previews,withSaturdayPreviews,feedItems,selectedMediaKind:'video',playlist:[],routeIsProfile:false,
     document:{querySelector:selector => {if (!nodes.has(selector)) nodes.set(selector,{});return nodes.get(selector);},querySelectorAll:() => []},
     feed:{clientHeight:640,scrollTo:options => events.push(['scroll',options.top])},
     renderFeed(items,key,index) {context.playlist = items;events.push(['render',key,index]);},
     activate:index => events.push(['activate',index]),playback() {},toast:() => assert.fail('Known preview should route directly.'),setVideoOnly() {},
   };
-  runInNewContext(source('route'),context);context.route();
-  assert.deepEqual(events,[['render','profile',3],['scroll',1920],['activate',3]]);
+  runInNewContext(source('selectedItems') + '\n' + source('route'),context);context.route();
+  assert.deepEqual(events,[['render','video-profile',3],['scroll',1920],['activate',3]]);
   assert.equal(context.catalog.length,1);assert.equal(context.catalog[0],videoItem);
   assert.equal(context.playlist[3].id,'previa-sabado-pizza');
 });
@@ -188,7 +189,7 @@ test('profile counts are based only on existing catalog and previews carry no du
   const profile = source('renderProfile');
   assert.match(profile,/#catalog-count'\)\.textContent = catalog\.length/);
   assert.match(profile,/#orderable-count'\)\.textContent = catalog\.filter/);
-  assert.match(profile,/withSaturdayPreviews\(catalog,saturdayPreviews\)/);
+  assert.match(profile,/selectedItems\(catalog\)/);
   const branch = profile.slice(profile.indexOf("if (item.kind === 'saturday-preview')"),profile.indexOf('if (item.creativeTemplate)'));
   assert.match(branch,/<span>Prévia<\/span>/);assert.doesNotMatch(branch,/duration|icon\('play'\)|openPersonalize/);
 });

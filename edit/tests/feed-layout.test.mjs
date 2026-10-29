@@ -1,3 +1,4 @@
+import {legacyVideoCatalog} from './legacy-catalog.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -10,6 +11,7 @@ const app = await readFile(new URL('../app.js',import.meta.url),'utf8');
 const page = await readFile(new URL('../index.html',import.meta.url),'utf8');
 const catalogSource = await readFile(new URL('../catalog.json',import.meta.url),'utf8');
 const catalog = JSON.parse(catalogSource);
+legacyVideoCatalog(catalog);
 const digest = value => createHash('sha256').update(value.replace(/\r\n/g,'\n')).digest('hex');
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g,char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const fixture = {
@@ -182,7 +184,7 @@ test('top navigation, profile and model details remain available',() => {
   for (const id of ['profile-view','profile-grid','personalize-dialog','chosen-title','chosen-kicker','chosen-phrase','model-note','preview-info']) {
     assert.ok(page.includes('id="' + id + '"'),id);
   }
-  assert.match(page,/class="feed-tab">Em destaque<\/span>/);
+  assert.match(page,/data-media-kind="image" aria-selected="true">Imagens<\/button>/);
   assert.match(page,/href="#perfil"/);
   assert.match(app,/function renderProfile\(\)/);
   assert.match(app,/document\.querySelector\('#chosen-title'\)\.textContent = item\.title/);

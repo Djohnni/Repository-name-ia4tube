@@ -1,3 +1,4 @@
+import {legacyVideoCatalog} from './legacy-catalog.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile,readdir} from 'node:fs/promises';
@@ -7,6 +8,7 @@ import {buildMultipartOrder} from '../order-adapter.js';
 import {restorePriorMediaForHistory} from './native-media-contract.mjs';
 
 const data=JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
+legacyVideoCatalog(data);
 const before=JSON.parse(await readFile(new URL('./fixtures/catalog-pre-pizza.json',import.meta.url),'utf8'));
 const pizzaIds=PIZZA_EXAMPLES.map(row=>row[0]);
 const comboIds=COMBO_EXAMPLES.map(row=>row[0]);

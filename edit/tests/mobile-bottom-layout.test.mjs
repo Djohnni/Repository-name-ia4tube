@@ -24,7 +24,7 @@ function mobileLayout() {
 test('mobile bottom navigation is absent while desktop navigation remains',() => {
   assert.doesNotMatch(page,/<nav\b[^>]*class="[^"]*\bmobile-nav\b/);
   assert.match(page,/<nav\b[^>]*class="desktop-nav"/);
-  assert.match(page,/class="feed-tab">Em destaque<\/span>/);
+  assert.match(page,/data-media-kind="image" aria-selected="true">Imagens<\/button>/);
 });
 
 test('mobile price stays low and compact lateral controls move nearer the order row',() => {
@@ -60,5 +60,5 @@ test('mobile overlay change does not resize the player or alter the order form',
 });
 
 test('stylesheet URL is versioned for the current swipe guide update',() => {
-  assert.match(page,/<link rel="stylesheet" href="\.\/styles\.css\?v=20261022-saturday-previews">/);
+  assert.match(page,/<link rel="stylesheet" href="\.\/styles\.css\?v=20261028-ready-posts">/);
 });

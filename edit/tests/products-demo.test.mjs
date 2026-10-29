@@ -1,3 +1,4 @@
+import {legacyVideoCatalog} from './legacy-catalog.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile,stat} from 'node:fs/promises';
@@ -7,6 +8,7 @@ import {PRODUCTS_DEMO_ID,PRE_PRODUCTS_DEMO_CATALOG_SHA256,PRODUCTS_DEMO_VIDEO_SH
   PRODUCTS_DEMO_PREVIOUS,PRODUCTS_DEMO_CURRENT,restorePriorProductDemoForHistory} from './products-demo-contract.mjs';
 
 const data=JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
+legacyVideoCatalog(data);
 const sha256=bytes=>createHash('sha256').update(bytes).digest('hex');
 const item=data.catalog.find(row=>row.id===PRODUCTS_DEMO_ID);
 

@@ -48,6 +48,7 @@ function fixture(initial=opens-1) {
         productsVideo:{packageCount:2,branch:'HAMBURGUERIA',openingText:'CONFIRA NOSSAS OFERTAS!',openingSeconds:6,
           whatsapp:'',instagram:'',location:'',items:[1,2].map(index=>({name:'Produto '+index,price:'',seconds:4,speechOverrideEnabled:false,speechText:''}))}};}}),
     createModelOptions:()=>({sync(){},open:()=>false,animal:()=>null}),
+    createReadyPostOptions:()=>({sync(){},open:()=>false,isEnabled:()=>false}),
     fetch:async(url,options)=>{
       requests.push({url,options});
       const message='Pedido: '+savedId;

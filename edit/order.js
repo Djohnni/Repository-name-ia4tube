@@ -1,6 +1,7 @@
 import { requestAppCalendar, appCalendarAttemptScope } from './app-calendar.js?v=20261028-app-calendar';
-import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261028-app-calendar';
+import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261028-ready-posts';
 import { createModelOptions } from './model-options.js?v=20261020-styles';
+import { createReadyPostOptions } from './ready-posts.js?v=20261028-ready-posts';
 import { createProductsForm } from './products-form.js?v=20261021-upload';
 import { normalizeProductPrice } from './optional-price.js?v=20261019-price';
 import { normalizeProductDescription } from './product-description.js?v=20261022-no-photo';
@@ -76,6 +77,7 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
   const photoUpload = createUploadField(document.querySelector('#order-photo'),{maxBytes:10 * 1024 * 1024,label:'Foto do produto'});
   const products = createProductsForm({form,money});
   const modelOptions = createModelOptions(form,money);
+  const readyPosts = createReadyPostOptions(form,money);
   const photoInput = document.querySelector('#order-photo');
   const descriptionInput = document.querySelector('#order-product-description');
   const photoChoice = document.querySelector('#order-has-photo');
@@ -133,6 +135,7 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
     [...form.elements].forEach(control => control.disabled = value);
     products.sync(value);
     modelOptions.sync(value);
+    readyPosts.sync(value);
     syncImageFields();
     syncPhraseFields();
     dialog.querySelector('.close-dialog').disabled = value;
@@ -178,8 +181,9 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
     products.open(item.recipe === 'produtos');
     form.hidden = !enabled;displayOnly.hidden = enabled;
     const invalidPrice = modelOptions.open(item,config);
+    const invalidPostPrice = readyPosts.open(item);
     syncImageFields();
-    if (enabled && invalidPrice) {
+    if (enabled && (invalidPrice || invalidPostPrice)) {
       form.hidden = true;displayOnly.hidden = false;displayOnly.textContent = 'O preço deste modelo precisa ser conferido no programa antes de receber pedidos.';
     } else displayOnly.textContent = 'Este vídeo é apenas uma referência visual. A personalização ainda não foi habilitada para ele.';
     syncPhraseFields();
@@ -218,6 +222,7 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
       const payload = products.isEnabled()
         ? {videoId:item.id,videoVersion:item.version,company,logo,consent:true,...await products.payload()}
         : {videoId:item.id,videoVersion:item.version,company,durationSeconds,logo,photo,consent:true};
+      if (readyPosts.isEnabled()) payload.mediaKind = readyPosts.selected();
       if (!products.isEnabled()) {
         if (productDescription) payload.productDescription = productDescription;
         if (customPhrase) payload.customPhrase = customPhrase;

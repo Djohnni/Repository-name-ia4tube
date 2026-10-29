@@ -4,7 +4,7 @@ import {readFile,readdir} from 'node:fs/promises';
 import {NEW_MODELS,LEGACY_IDS,PIZZA_EXAMPLES,COMBO_EXAMPLES} from './catalog-contract.mjs';
 
 const data=JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
-const additions=data.catalog.filter(item=>!LEGACY_IDS.includes(item.id)
+const additions=data.catalog.filter(item=>item.mediaKind!=='image' && !LEGACY_IDS.includes(item.id)
   && !PIZZA_EXAMPLES.some(row=>row[0]===item.id)
   && !COMBO_EXAMPLES.some(row=>row[0]===item.id));
 const animals={capivara:'Capivara',preguica:'Bicho-preguiça',gato:'Gato',cachorro:'Cachorro',

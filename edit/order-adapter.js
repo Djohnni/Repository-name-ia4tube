@@ -23,6 +23,8 @@ function uploadBlob(upload,maxBytes,label) {
 export function buildMultipartOrder(payload) {
   const company = typeof payload?.company === 'string' ? payload.company.trim() : '';
   const products = payload?.productsVideo;
+  const mediaKind = payload?.mediaKind;
+  if (mediaKind !== undefined && (!['image','video'].includes(mediaKind) || products || payload.durationSeconds !== 10)) throw new Error('Escolha o formato deste modelo.');
   if ((products && company.length < 2) || (company && company.length < 2) || company.length > 100) throw new Error('Preencha o nome da empresa com 2 a 100 caracteres.');
   if (!UUID_V4.test(payload.videoId || '') || !Number.isSafeInteger(payload.videoVersion) || payload.videoVersion < 1) throw new Error('Escolha novamente um modelo disponível.');
   const productPrice = normalizeProductPrice(payload.productPrice);
@@ -60,9 +62,10 @@ export function buildMultipartOrder(payload) {
     campaignId:'sextou-classico-v1',
     company,
     whatsapp:null,
-    selections:[{id:'93',format:'video'}],
+    selections:[{id:'93',format:mediaKind || 'video'}],
     sextou:{businessType:'auto',date:null,copyId:'trabalho-sabor',durationSeconds:payload.durationSeconds},
     showcase:{videoId:payload.videoId,videoVersion:payload.videoVersion},
+    ...(mediaKind ? {mediaKind} : {}),
     ...(appCalendar ? {appCalendar} : {}),
     ...(productPrice ? {productPrice} : {}),
     ...(productDescription ? {productDescription} : {}),
@@ -101,7 +104,7 @@ export function normalizeReceipt(result,payload) {
     'Olá! Enviei esse pedido pelo site da iA4tube Empresas.',
     '',
     'Pedido: ' + result.orderId,
-    'Produto: ' + (payload.productsVideo ? `Vídeo de produtos · ${payload.productsVideo.packageCount} imagens` : 'Vídeo personalizado · ' + payload.durationSeconds + ' segundos'),
+    'Produto: ' + (payload.productsVideo ? `Vídeo de produtos · ${payload.productsVideo.packageCount} imagens` : payload.mediaKind === 'image' ? 'Imagem personalizada' : 'Vídeo personalizado · ' + payload.durationSeconds + ' segundos'),
     ...(typeof payload.company === 'string' && payload.company.trim() ? ['Estabelecimento: ' + payload.company.trim()] : []),
     ...(payload.productDescription ? ['Descrição do produto: ' + normalizeProductDescription(payload.productDescription)] : []),
     ...(payload.customPhrase ? ['Frase principal: ' + normalizeCustomPhrase(payload.customPhrase)] : []),

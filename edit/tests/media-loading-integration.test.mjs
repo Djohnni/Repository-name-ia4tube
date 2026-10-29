@@ -1,13 +1,16 @@
+import {legacyVideoCatalog} from './legacy-catalog.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
 import {orderShowcase} from '../availability.js';
 import {withSaturdayPreviews} from '../saturday-previews.js';
+import {feedItems} from '../ready-posts.js';
 
 const app = await readFile(new URL('../app.js',import.meta.url),'utf8');
 const catalogSource = await readFile(new URL('../catalog.json',import.meta.url),'utf8');
 const catalog = JSON.parse(catalogSource);
+legacyVideoCatalog(catalog);
 const functionSource = name => {
   const source = app.match(new RegExp('^(?:async )?function ' + name + '\\([^\\n]*\\) \\{[\\s\\S]*?^\\}','m'))?.[0];
   assert.ok(source,'Missing application function: ' + name);
@@ -111,7 +114,7 @@ function routeFixture(hash = '#hoje',items = [item]) {
   const grid = {replaceChildren() {buttons.length = 0;images.length = 0;},append(button) {buttons.push(button);}};
   nodes.set('#profile-grid',grid);
   const context = {location:{hash},routeIsProfile:false,catalog:items,daily:[items[0]],playlist:[],data:{},
-    saturdayPreviews:[],withSaturdayPreviews,
+    saturdayPreviews:[],withSaturdayPreviews,feedItems,selectedMediaKind:'video',
     feed:{clientHeight:600,scrollTo:options => events.push(['scroll',options.top])},
     setVideoOnly:value => events.push(['interface',value]),syncReleases() {},
     renderFeed(list,key,index) {events.push(['render',key,index]);context.playlist = list;},
@@ -119,7 +122,7 @@ function routeFixture(hash = '#hoje',items = [item]) {
     esc:escapeHtml,icon:() => '',posterPath:entry => entry.poster.replace(/\.png$/,'.webp'),
     document:{querySelector(selector) {assert.ok(nodes.has(selector),selector);return nodes.get(selector);},
       querySelectorAll(selector) {
-        if (selector === '[data-nav]') return [];
+        if (selector === '[data-nav]' || selector === '.feed-tabs [data-media-kind]') return [];
         assert.equal(selector,'#profile-grid img[data-src]');return images;
       },
       createElement(tag) {
@@ -138,7 +141,7 @@ function routeFixture(hash = '#hoje',items = [item]) {
       },
     },
   };
-  runInNewContext(functionSource('renderProfile') + '\n' + functionSource('route'),context,{timeout:1000});
+  runInNewContext(functionSource('selectedItems') + '\n' + functionSource('renderProfile') + '\n' + functionSource('route'),context,{timeout:1000});
   return {context,events,images,buttons,nodes};
 }
 
@@ -163,7 +166,7 @@ test('a deep link passes its final index to the first feed render, including dec
   const items = Array.from({length:30},(_,index) => ({...item,id:index === 24 ? 'model / requested' : 'model-' + index}));
   const f = routeFixture('#video/' + encodeURIComponent(items[24].id),items);
   f.context.route();
-  assert.deepEqual(f.events.filter(event => ['render','activate'].includes(event[0])),[['render','profile',24],['activate',24]]);
+  assert.deepEqual(f.events.filter(event => ['render','activate'].includes(event[0])),[['render','video-profile',24],['activate',24]]);
   assert.equal(f.context.playlist,items);
   assert.ok(f.events.some(event => event[0] === 'scroll' && event[1] === 24 * 600));
 });
@@ -171,7 +174,7 @@ test('a deep link passes its final index to the first feed render, including dec
 test('missing and malformed deep links safely render the daily feed at index zero',() => {
   for (const hash of ['#video/missing','#video/%E0%A4%A']) {
     const f = routeFixture(hash);f.context.route();
-    assert.deepEqual(f.events.filter(event => event[0] === 'render'),[['render','daily',0]]);
+    assert.deepEqual(f.events.filter(event => event[0] === 'render'),[['render','video-daily',0]]);
     assert.equal(f.context.playlist,f.context.daily);
     assert.equal(f.events.some(event => event[0] === 'activate' && event[1] < 0),false);
   }
@@ -241,7 +244,7 @@ test('loading preview mappings leaves catalog records and original media paths i
     if (value && typeof value === 'object') {Object.values(value).forEach(freeze);Object.freeze(value);}
     return value;
   };
-  const original = freeze(JSON.parse(catalogSource)),before = JSON.stringify(original),events = [];
+  const original = freeze(legacyVideoCatalog(JSON.parse(catalogSource))),before = JSON.stringify(original),events = [];
   const previews = Object.freeze({[original.catalog[0].poster]:'./media/previews-20261022/example.webp'});
   const context = {feed:{},data:null,creator:{},prices:{},catalog:[],daily:[],posterPreviews:{},orderShowcase,
     fetch:async (url,options) => {assert.equal(url,'./catalog.json');assert.equal(options.cache,'no-store');return {ok:true,json:async () => original};},

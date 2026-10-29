@@ -1,3 +1,4 @@
+import {legacyVideoCatalog} from './legacy-catalog.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile,realpath} from 'node:fs/promises';
@@ -7,6 +8,7 @@ import {NATIVE_MEDIA,nativeMediaPath,PRE_NATIVE_CATALOG_SHA256,restorePriorMedia
 
 const editUrl=new URL('../',import.meta.url);
 const data=JSON.parse(await readFile(new URL('catalog.json',editUrl),'utf8'));
+legacyVideoCatalog(data);
 const previews=JSON.parse(await readFile(new URL('poster-previews.json',editUrl),'utf8'));
 const published=data.catalog.filter(item=>item.status==='published');
 const prefix='./media/previews-20261022/';

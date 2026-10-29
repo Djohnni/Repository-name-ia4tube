@@ -1,3 +1,4 @@
+import {legacyVideoCatalog} from './legacy-catalog.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile,readdir,stat} from 'node:fs/promises';
@@ -6,6 +7,7 @@ import {NATIVE_MEDIA,nativeMediaPath,PRE_NATIVE_CATALOG_SHA256,restorePriorMedia
 import {restorePriorProductDemoForHistory} from './products-demo-contract.mjs';
 
 const data=JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
+legacyVideoCatalog(data);
 const before=JSON.parse(await readFile(new URL('./fixtures/catalog-pre-native-audio.json',import.meta.url),'utf8'));
 const sha256=bytes=>createHash('sha256').update(bytes).digest('hex');
 

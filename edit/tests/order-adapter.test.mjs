@@ -1,3 +1,4 @@
+import {legacyVideoCatalog} from './legacy-catalog.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile,stat,readdir} from 'node:fs/promises';
@@ -134,6 +135,7 @@ test('unconfirmed response cannot unlock success',() => {
 });
 test('catalog preserves eight exact legacy entries followed by sixteen recipes, three pizzas and three combos',async () => {
   const catalog = JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
+  legacyVideoCatalog(catalog);
   assert.equal(catalog.catalog.length,30);
   assert.equal(new Set(catalog.catalog.map(item => item.id)).size,30);
   const legacy = legacyItems(catalog);
@@ -161,6 +163,7 @@ test('catalog preserves eight exact legacy entries followed by sixteen recipes, 
 });
 test('all catalog media/avatar paths resolve inside edit and exist',async () => {
   const catalog = JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
+  legacyVideoCatalog(catalog);
   for (const item of catalog.catalog) {
     for (const type of ['poster','video']) {
       if(NATIVE_MEDIA.some(row=>row.id===item.id)) {
@@ -186,7 +189,7 @@ test('all catalog media/avatar paths resolve inside edit and exist',async () => 
     }
   }
   const rootMedia=await readdir(new URL('../media/',import.meta.url));
-  const additionDirectories=['audio-api-20261021','combos-20261020','novos-20261020','pizzas-20261020','previews-20261022','sabado-20261024'];
+  const additionDirectories=['audio-api-20261021','combos-20261020','novos-20261020','pizzas-20261020','posts-prontos-20261028','previews-20261022','sabado-20261024'];
   const replacementDemoFiles=['produtos-oburgao-20261022.mp4','produtos-oburgao-20261022.png'];
   assert.deepEqual(rootMedia.filter(name=>replacementDemoFiles.includes(name)).sort(),replacementDemoFiles);
   assert.equal(rootMedia.filter(name=>!additionDirectories.includes(name)&&!replacementDemoFiles.includes(name)).length,16);

@@ -1,3 +1,4 @@
+import {legacyVideoCatalog} from './legacy-catalog.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -6,6 +7,7 @@ import {RELEASE_AT,SCHEDULED_IDS,FUTURE_IDS,PRODUCT_PACKAGE_ID,releaseInfo,order
 import {buildMultipartOrder} from '../order-adapter.js';
 
 const catalog=JSON.parse(await readFile(new URL('../catalog.json',import.meta.url),'utf8'));
+legacyVideoCatalog(catalog);
 const app=await readFile(new URL('../app.js',import.meta.url),'utf8');
 const opens=Date.parse('2026-10-22T00:00:00-03:00');
 const expected=[
