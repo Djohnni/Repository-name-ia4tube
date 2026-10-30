@@ -1,7 +1,8 @@
-import { requestAppCalendar, appCalendarAttemptScope } from './app-calendar.js?v=20261028-app-calendar';
-import { buildMultipartOrder, idempotencyKey, normalizeReceipt, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261029-extra40';
+import { requestAppCalendar, appCalendarAttemptScope } from './app-calendar.js?v=20261030-availability-v1';
+import { createOrderRecovery } from './order-recovery.js?v=20261030-availability-v1';
+import { buildMultipartOrder, idempotencyKey, normalizeReceipt, calendarContextHash, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261029-app-admission-v1';
 import { createModelOptions } from './model-options.js?v=20261020-styles';
-import { createReadyPostOptions } from './ready-posts.js?v=20261029-extra40';
+import { createReadyPostOptions,canChooseModel } from './ready-posts.js?v=20261030-availability-v1';
 import { createExtraPostOptions } from './ready-posts-extra.js?v=20261029-extra40';
 import { createProductsForm } from './products-form.js?v=20261021-upload';
 import { normalizeProductPrice } from './optional-price.js?v=20261019-price';
@@ -65,20 +66,25 @@ export function confirmSavedAttempt(saved,storage = localStorage,pendingStorage 
   const pendingKey = PENDING_PREFIX + saved.fingerprint;
   if (pendingStorage?.getItem(pendingKey) === saved.requestId) pendingStorage.removeItem(pendingKey);
 }
-export function createOrderController({dialog,money,toast,onBusy,onSaved = () => {}}) {
+export function createOrderController({dialog,money,toast,onBusy,onSaved = () => {},appOnly=false,
+  hasAppContext=()=>Boolean(appCalendarAttemptScope()),requestCalendar=requestAppCalendar,
+  originFor=()=>null,onReturnToOrigin=()=>false,canCreate=()=>null,onPendingChange=()=>{},
+  attemptScope=appCalendarAttemptScope,onAdmitted=()=>{}}) {
   const form = document.querySelector('#order-form');
   const errorBox = document.querySelector('#order-error');
   const submit = document.querySelector('#send-order');
   const success = document.querySelector('#order-success');
   const displayOnly = document.querySelector('#display-only-note');
   const messageBox = document.querySelector('#saved-message');
-  let item = null,config = null,busy = false,receipt = null;
+  let item = null,config = null,busy = false,receipt = null,origin = null;
+  const recovery=appOnly?createOrderRecovery({storage:{getItem:key=>sessionStorage.getItem(key),setItem:(key,value)=>sessionStorage.setItem(key,value)},scope:attemptScope,
+    isPending:(fingerprint,id)=>sessionStorage.getItem(PENDING_PREFIX+fingerprint)===id}):{hasModel:()=>false};
   const initialSubmitLabel = submit.innerHTML;
   const logoUpload = createUploadField(document.querySelector('#order-logo'),{maxBytes:5 * 1024 * 1024,label:'Logo'});
   const photoUpload = createUploadField(document.querySelector('#order-photo'),{maxBytes:10 * 1024 * 1024,label:'Foto do produto'});
   const products = createProductsForm({form,money});
   const modelOptions = createModelOptions(form,money);
-  const readyPosts = createReadyPostOptions(form,money);
+  const readyPosts = createReadyPostOptions(form,money,kind=>appOnly?canCreate(kind):null,()=>appOnly&&recovery.hasModel(item?.id));
   const extraPosts = createExtraPostOptions(form,{onChange:()=>syncPhraseFields()});
   const photoInput = document.querySelector('#order-photo');
   const descriptionInput = document.querySelector('#order-product-description');
@@ -159,8 +165,14 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
     document.querySelector('#saved-order-id').textContent = `Pedido ${saved.orderId} · ${money(saved.totalCents)}`;
     messageBox.value = saved.message || '';
     const link = document.querySelector('#whatsapp-link');
-    try {link.href = safeWhatsAppUrl(saved.whatsappUrl,saved.message,saved.orderId);link.hidden = false;}
-    catch {link.removeAttribute('href');link.hidden = true;toast('Pedido salvo. Copie a mensagem para continuar pelo WhatsApp.');}
+    try {link.href = safeWhatsAppUrl(saved.whatsappUrl,saved.message,saved.orderId);link.hidden = appOnly;}
+    catch {link.removeAttribute('href');link.hidden = true;if(!appOnly)toast('Pedido salvo. Copie a mensagem para continuar pelo WhatsApp.');}
+    if(appOnly){
+      document.querySelector('#copy-message').hidden=true;
+      const guidance=document.querySelector('#receipt-guidance');
+      if(guidance)guidance.textContent=saved.admission?'Pedido recebido. Acompanhe pelo app.':'Comprovante anterior preservado. A autorização atual precisa ser conferida antes de produzir.';
+      const back=document.querySelector('#return-source');if(back)back.hidden=false;
+    }
     success.scrollIntoView({block:'nearest'});
   }
   function rememberReceipt(saved) {
@@ -180,10 +192,15 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
   }
   function open(nextItem,nextConfig) {
     if (busy) return;
+    if(appOnly && !hasAppContext()){toast('Peça pelo app da iA4tube. O catálogo continua disponível para você escolher.');return false;}
+    if(appOnly && !canChooseModel(nextItem,canCreate) && !recovery.hasModel(nextItem.id)){
+      toast('Suas artes disponíveis acabaram. Você pode continuar vendo os modelos.');return false;
+    }
+    if(appOnly && receipt?.videoId===nextItem.id && recovery.hasModel(nextItem.id)){showReceipt(receipt);return true;}
     const release = releaseInfo(nextItem);
     if (release) {toast(release.label);return false;}
     if (item?.id !== nextItem.id || receipt) resetForm();
-    item = nextItem;config = nextConfig;receipt = null;
+    item = nextItem;config = nextConfig;receipt = null;origin = originFor(nextItem);
     document.querySelector('#sheet-title').textContent = 'Gostou? Faça o seu.';
     errorBox.hidden = true;success.hidden = true;messageBox.hidden = true;
     const enabled = item.orderEnabled === true && ['sextou','sabadou','produtos'].includes(item.recipe);
@@ -192,6 +209,8 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
     const invalidPrice = modelOptions.open(item,config);
     const invalidPostPrice = readyPosts.open(item);
     const invalidExtraFields = extraPosts.open(item);
+    if(appOnly){const explanation=form.querySelector('.order-explanation[data-single-product]');
+      explanation.textContent=explanation.textContent.replace('Receba pelo WhatsApp.','Acompanhe pelo app.');}
     syncImageFields();
     if (enabled && (invalidPrice || invalidPostPrice || invalidExtraFields)) {
       form.hidden = true;displayOnly.hidden = false;displayOnly.textContent = 'O preço deste modelo precisa ser conferido no programa antes de receber pedidos.';
@@ -212,6 +231,7 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
   form.addEventListener('submit',async event => {
     event.preventDefault();
     if (busy || receipt || form.hidden || !item || !config || !form.reportValidity()) return;
+    if(appOnly && !hasAppContext()){showError('Envie este pedido pelo app da iA4tube.');return;}
     const release = releaseInfo(item);
     if (release) {showError(release.label);return;}
     errorBox.hidden = true;setBusy(true);
@@ -244,8 +264,10 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
         const animal = modelOptions.animal();
         if (animal) payload.animal = animal;
       }
-      const appScope = appCalendarAttemptScope();
+      const appScope = attemptScope();
       const fingerprint = await fingerprintPayload(appScope ? {...payload,appCalendarSession:appScope} : payload);
+      if(appOnly && canCreate(payload.mediaKind || 'video')===false && !REQUEST_ID.test(sessionStorage.getItem(PENDING_PREFIX+fingerprint) || ''))
+        throw new Error('Suas artes disponíveis acabaram. Você pode continuar vendo os modelos e conferir uma tentativa pendente.');
       let requestId;
       try {
         // Finalize the previous known receipt before another model can replace
@@ -256,8 +278,11 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
           return getOrCreateRequestId(fingerprint,localStorage,sessionStorage);
         });
       } catch {throw new Error('Ative o armazenamento deste navegador para salvar o pedido sem duplicações. Nenhum pedido foi enviado.');}
-      const appCalendar = await requestAppCalendar(requestId);
+      const appCalendar = await requestCalendar(requestId);
+      if(appOnly && !appCalendar?.ticket)throw new Error('Confirme a conta e o calendário no app. Nenhum pedido foi enviado.');
       if (appCalendar) payload.appCalendar = appCalendar;
+      const contextHash=appOnly?await calendarContextHash(appCalendar.ticket):null;
+      if(appOnly){recovery.record(fingerprint,{requestId,modelId:item.id,modelVersion:item.version});try{onPendingChange();}catch{/* Visual refresh only. */}}
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(),90000);
       let response;
@@ -267,25 +292,49 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
         response = await fetch(SUBMIT_ENDPOINT,{method:'POST',headers:{'Idempotency-Key':await idempotencyKey(requestId)},body:buildMultipartOrder(payload),signal:controller.signal,credentials:'omit',cache:'no-store'});
       } finally {clearTimeout(timeout);}
       const responseBody = await response.json().catch(() => ({}));
-      const result = response.ok ? normalizeReceipt(responseBody,payload) : responseBody;
-      if (!response.ok) throw new Error(typeof result.error === 'string' ? result.error : typeof result.message === 'string' ? result.message : 'Não foi possível confirmar o pedido. Tente novamente; a mesma tentativa será preservada.');
+      const result = response.ok ? normalizeReceipt(responseBody,payload,{requireAdmission:appOnly,contextHash}) : responseBody;
+      if (!response.ok) {
+        const messages={billing_required:'Seu saldo não permite enviar este pedido. Confira seus créditos no app.',
+          app_required:'Peça pelo app da iA4tube.',edit_calendar_context_expired:'A autorização do calendário expirou. Reabra o Edit pelo app antes de enviar.',
+          edit_calendar_admission_disabled:'O envio pelo app está temporariamente indisponível. Sua tentativa foi preservada.',
+          edit_calendar_admission_unavailable:'A reserva ainda não foi confirmada. Tente novamente com a mesma tentativa.',
+          edit_calendar_admission_rate_limited:'Aguarde alguns segundos e tente o mesmo pedido.',
+          edit_calendar_allocation_busy:'Sua reserva está sendo conferida. Aguarde e repita a mesma tentativa.',
+          edit_calendar_allocation_reconciliation_required:'Sua reserva precisa ser conferida. Preserve este pedido e procure o suporte.',
+          edit_calendar_session_required:'Entre novamente na sua conta pelo app antes de enviar.',
+          edit_calendar_free_art_receipt_unconfirmed:'A confirmação da arte grátis precisa ser conferida. Preserve este pedido e procure o suporte.'};
+        throw new Error(messages[result.error] || (typeof result.error === 'string' ? result.error : typeof result.message === 'string' ? result.message : 'Não foi possível confirmar o pedido. Tente novamente; a mesma tentativa será preservada.'));
+      }
       if (!result.orderId || result.status !== 'awaiting_authorization') throw new Error('A resposta não confirmou o pedido. Tente novamente para consultar a mesma tentativa, sem criar outra.');
-      const saved = {orderId:result.orderId,status:result.status,totalCents:result.totalCents,message:result.message,whatsappUrl:result.whatsappUrl,fingerprint,requestId,videoId:item.id};
+      const saved = {orderId:result.orderId,status:result.status,totalCents:result.totalCents,message:result.message,whatsappUrl:result.whatsappUrl,fingerprint,requestId,videoId:item.id,
+        ...(appOnly?{admission:result.admission,receiptUrl:result.receiptUrl,videoVersion:item.version,origin}:{})};
       const receiptPreserved = rememberReceipt(saved);showReceipt(saved);
       // Optional statistics never participate in saving or redirecting the order.
       try {onSaved({orderId:saved.orderId,videoId:item.id,recipe:item.recipe,
         ...(payload.productsVideo ? {productCount:payload.productsVideo.packageCount} : {durationSeconds:payload.durationSeconds,productCount:1})});}
       catch { /* Analytics must never turn a saved order into a checkout error. */ }
-      try {if (receiptPreserved) await withAttemptLock(fingerprint,() => confirmSavedAttempt(saved,localStorage,sessionStorage));}
+      let attemptConfirmed=false;
+      try {if (receiptPreserved) {await withAttemptLock(fingerprint,() => confirmSavedAttempt(saved,localStorage,sessionStorage));attemptConfirmed=true;}}
       catch { /* A confirmed order remains saved; its receipt can recover this next time. */ }
+      if(appOnly){
+        if(attemptConfirmed)try{recovery.forget(fingerprint,requestId);}catch{/* Pending identity is already retired. */}
+        try{onAdmitted(saved);}catch{/* Read-only hint refresh cannot undo a saved order. */}
+        try{onPendingChange();}catch{/* Visual refresh only. */}
+      }
       // Persist the receipt route before leaving. Browser Back restores the saved order.
       history.replaceState(null,'','#pedido-salvo');
-      try {if (receiptPreserved) location.assign(safeWhatsAppUrl(result.whatsappUrl,result.message,result.orderId));}
-      catch {toast('O pedido foi salvo. Use “Continuar no WhatsApp” ou copie a mensagem.');}
+      try {if(appOnly){if(receiptPreserved&&attemptConfirmed)returnToOrigin(saved);}
+        else if (receiptPreserved) location.assign(safeWhatsAppUrl(result.whatsappUrl,result.message,result.orderId));}
+      catch {toast(appOnly?'O pedido foi salvo. Seu comprovante continua disponível nesta tela.':'O pedido foi salvo. Use “Continuar no WhatsApp” ou copie a mensagem.');}
     } catch(error) {
       showError(error.name === 'AbortError' ? 'A confirmação demorou mais que o esperado. Tente novamente; usaremos a mesma tentativa para não duplicar.' : error.message || 'Não foi possível confirmar o pedido. Tente novamente.');
     } finally {setBusy(false);}
   });
+  function returnToOrigin(saved){
+    if(onReturnToOrigin(saved.origin || {modelId:saved.videoId,modelVersion:saved.videoVersion},saved)===false)return false;
+    dialog.close();toast('Pedido '+saved.orderId+' salvo. Seu comprovante foi preservado.');return true;
+  }
+  if(appOnly)document.querySelector('#return-source')?.addEventListener('click',()=>{if(!busy&&receipt)returnToOrigin(receipt);});
   document.querySelector('#copy-message').addEventListener('click',async () => {
     if (!receipt?.message) return;
     try {await navigator.clipboard.writeText(receipt.message);toast('Mensagem copiada.');}
@@ -294,17 +343,20 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
   document.querySelector('#new-order').addEventListener('click',async () => {
     if (busy || !receipt) return;
     const saved = receipt;
+    if(appOnly && !saved.admission){toast('O comprovante anterior foi preservado. Confira sua autorização no app antes de produzir.');return;}
     try {
       await withAttemptLock(saved.fingerprint,() => confirmSavedAttempt(saved,localStorage,sessionStorage));
       if (receipt !== saved) return;
-      sessionStorage.removeItem(RECEIPT_KEY);
+      if(!appOnly)sessionStorage.removeItem(RECEIPT_KEY);
     } catch(error) {toast(error.message || 'Não foi possível preparar outro pedido. O anterior continua salvo.');return;}
+    if(appOnly && !returnToOrigin(saved))return;
     receipt = null;item = null;resetForm();errorBox.hidden = true;success.hidden = true;messageBox.hidden = true;
-    dialog.close();toast('Pedido anterior preservado. Escolha um vídeo para fazer outro pedido.');
+    if(!appOnly)dialog.close();toast('Pedido anterior preservado. Escolha um modelo para fazer outro pedido.');
   });
   dialog.addEventListener('close',() => {
     document.querySelector('.chosen-model').hidden = false;document.querySelector('#model-note').hidden = false;
-    if (location.hash === '#pedido-salvo') history.replaceState(null,'','#hoje');
+    if (location.hash === '#pedido-salvo' && !appOnly) history.replaceState(null,'','#hoje');
   });
-  return {open,restore,isBusy:() => busy};
+  return {open,restore,isBusy:() => busy,canRecover:modelId=>appOnly&&recovery.hasModel(modelId),
+    refreshAvailability:()=>readyPosts.sync(busy)};
 }

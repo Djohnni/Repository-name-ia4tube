@@ -12,7 +12,7 @@ function setup(hash = '#app-calendar=' + nonce) {
     setTimer:fn=>{timers.set(++next,fn);return next;},clearTimer:id=>timers.delete(id)};
   return {bridge:createAppCalendarBridge(options),urls,timers,options};
 }
-test('public Edit is unchanged and never requests a native context', async () => {
+test('public catalog has no native context; this bridge alone never grants checkout admission', async () => {
   const f=setup('#video/' + id);
   assert.equal(await f.bridge.request(id),null);assert.equal(f.urls.length,0);
 });

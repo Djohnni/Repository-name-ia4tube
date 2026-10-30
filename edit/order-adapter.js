@@ -98,7 +98,12 @@ export function safeWhatsAppUrl(value,message,orderId) {
   return url.href;
 }
 
-export function normalizeReceipt(result,payload) {
+export async function calendarContextHash(ticket) {
+  if(typeof ticket!=='string' || !/^[a-f0-9-]{36}\.[A-Za-z0-9_-]{43}$/.test(ticket))throw new Error('Confirme este pedido pelo calendário do app.');
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(ticket));
+  return [...new Uint8Array(digest)].map(byte=>byte.toString(16).padStart(2,'0')).join('');
+}
+export function normalizeReceipt(result,payload,{requireAdmission=false,contextHash=null}={}) {
   if (!result || !ORDER_ID.test(result.orderId || '') || result.status !== 'awaiting_authorization' ||
       !Number.isSafeInteger(result.totalCents) || result.totalCents < 0) {
     throw new Error('A resposta não confirmou o pedido. Tente novamente para consultar a mesma tentativa, sem criar outra.');
@@ -119,5 +124,21 @@ export function normalizeReceipt(result,payload) {
   ].join('\n');
   let whatsappUrl = '';
   try {whatsappUrl = safeWhatsAppUrl(result.whatsappUrl,message,result.orderId);} catch {}
-  return {orderId:result.orderId,status:result.status,totalCents:result.totalCents,message,whatsappUrl};
+  let admission,receiptUrl;
+  if(requireAdmission){
+    const value=result.admission,kind=payload.mediaKind || 'video',context=payload.appCalendar?.ticket?.split('.')[0]?.replaceAll('-','');
+    if(!value || value.schemaVersion!==1 || !UUID_V4.test(value.admissionId || '') || value.editOrderId!==result.orderId ||
+      !/^[a-f0-9]{64}$/.test(value.requestHash || '') || value.contextHash!==contextHash || value.mediaKind!==kind ||
+      value.quantity!==1 || !['reserved','bound'].includes(value.state) || !Number.isSafeInteger(value.reservedAt) ||
+      value.reservedAt<0 || value.planningId!=='pm_edit_'+context || value.pedidoId!=='edit_'+context)
+      throw new Error('O pedido ainda não confirmou a reserva. Tente novamente; a mesma tentativa será preservada.');
+    admission={schemaVersion:1,admissionId:value.admissionId,editOrderId:value.editOrderId,requestHash:value.requestHash,
+      contextHash:value.contextHash,mediaKind:value.mediaKind,quantity:1,state:value.state,reservedAt:value.reservedAt,
+      planningId:value.planningId,pedidoId:value.pedidoId};
+    try{const url=new URL(result.receiptUrl);if(url.username || url.password || url.origin!==new URL(SUBMIT_ENDPOINT).origin ||
+      url.pathname!=='/r/'+result.orderId || url.search || !/^#[A-Za-z0-9_-]{43}$/.test(url.hash))throw Error();receiptUrl=url.href;}
+    catch{throw new Error('A confirmação não preservou o comprovante. Tente novamente com a mesma tentativa.');}
+  }
+  return {orderId:result.orderId,status:result.status,totalCents:result.totalCents,message,whatsappUrl,
+    ...(requireAdmission?{admission,receiptUrl}:{})};
 }

@@ -1,5 +1,7 @@
-import { createOrderController } from './order.js?v=20261029-extra40';
-import { feedItems } from './ready-posts.js?v=20261029-extra40';
+import { createOrderController } from './order.js?v=20261030-availability-v1';
+import { appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability } from './app-calendar.js?v=20261030-availability-v1';
+import { captureOrderOrigin,resolveOrderOrigin } from './order-origin.js?v=20261029-app-admission-v1';
+import { feedItems,canChooseModel } from './ready-posts.js?v=20261030-availability-v1';
 import { isExtraReadyPost } from './ready-posts-extra.js?v=20261029-extra40';
 import {IMAGE_CATEGORIES,filterImageItems} from './image-categories.js?v=20261029-products-first';
 import {createImageCategoryMenu} from './image-category-menu.js?v=20261029-products-first';
@@ -63,12 +65,19 @@ const swipeGuide = createSwipeGuide({
 const swipeSound = createSwipeSound({
   feed,canAttempt:() => canPlay() && !!videos[activeIndex],onSwipe:enableSwipeSound,
 });
-const order = createOrderController({dialog:personalize,money,toast,onBusy:playback,
+const appCheckout=()=>Boolean(appCalendarAttemptScope()); // UX hint; the receiver and Render authorize every send.
+const orderCta=()=>appCheckout()?'Fazer meu pedido':'Peça pelo app';
+const order = createOrderController({dialog:personalize,money,toast,onBusy:playback,appOnly:true,
+  hasAppContext:appCheckout,
+  canCreate:appCreationAllowed,onAdmitted:refreshAppAvailability,onPendingChange:syncReleases,
+  originFor:item=>captureOrderOrigin({item,items:playlist,key:playlistKey,hash:location.hash,categoryId:selectedImageCategory,query:imageSearch}),
+  onReturnToOrigin:returnToOrderOrigin,
   onSaved:detail => document.dispatchEvent(new CustomEvent('ia4tube:edit-order-saved',{detail:{...detail,videoTitle:catalog.find(item => item.id === detail.videoId)?.label}}))});
 imageCategoryMenu=createImageCategoryMenu({
   buttons:document.querySelectorAll('.image-category-toggle'),dialog:document.querySelector('#image-categories-dialog'),
   items:()=>catalog,onSelect:applyImageCategory,onOpenChange:playback,
 });
+document.addEventListener('ia4tube:edit-availability-changed',()=>{syncReleases();order.refreshAvailability();});
 
 function applyImageCategory({categoryId,query}) {
   if (selectedImageCategory===categoryId && imageSearch===query) return;
@@ -119,7 +128,9 @@ function syncReleases() {
     notice.hidden = !release;
     if (release) notice.querySelector('strong').textContent = release.label;
     button.disabled = Boolean(release);
-    button.innerHTML = (release ? 'Em breve' : item.orderEnabled ? 'Fazer meu pedido' : 'Ver detalhes') + ' ' + icon(release ? 'lock' : 'arrow-up-right');
+    const recovering=order.canRecover(item.id);
+    button.hidden=appCheckout()&&!canChooseModel(item,appCreationAllowed)&&!recovering;
+    button.innerHTML = (release ? 'Em breve' : recovering?'Conferir pedido':item.orderEnabled ? orderCta() : 'Ver detalhes') + ' ' + icon(release ? 'lock' : 'arrow-up-right');
     if (release) button.setAttribute('aria-describedby',notice.id);
     else button.removeAttribute('aria-describedby');
   });
@@ -232,7 +243,7 @@ function renderFeed(items,key,initialIndex = 0) {
     const article = document.createElement('article');
     article.className = 'video-card';article.dataset.id = item.id;article.dataset.title = item.label;article.dataset.recipe = item.recipe;
     article.setAttribute('aria-label',`${item.label}: ${item.title}`);
-    article.innerHTML = `<video data-src="${esc(mediaPath(item.video))}" data-poster="${esc(posterPath(item))}" muted loop playsinline preload="none" role="button" tabindex="0" aria-label="Vídeo ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="release-notice" id="release-${esc(item.id)}" role="status" hidden>${icon('lock')}<strong></strong></div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>${item.orderEnabled ? 'a partir de' : 'referência visual'}</small><strong>${item.orderEnabled ? money(startingPrice(item)) : 'Em breve'}</strong></div><button class="make-button">${item.orderEnabled ? 'Fazer meu pedido' : 'Ver detalhes'} ${icon('arrow-up-right')}</button></div></div>`;
+    article.innerHTML = `<video data-src="${esc(mediaPath(item.video))}" data-poster="${esc(posterPath(item))}" muted loop playsinline preload="none" role="button" tabindex="0" aria-label="Vídeo ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="release-notice" id="release-${esc(item.id)}" role="status" hidden>${icon('lock')}<strong></strong></div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>${item.orderEnabled ? 'a partir de' : 'referência visual'}</small><strong>${item.orderEnabled ? money(startingPrice(item)) : 'Em breve'}</strong></div><button class="make-button">${item.orderEnabled ? orderCta() : 'Ver detalhes'} ${icon('arrow-up-right')}</button></div></div>`;
     article.querySelector('.creator-action').addEventListener('click',() => location.hash = 'perfil');
     article.querySelector('.sound-toggle').addEventListener('click',toggleSound);
     article.querySelector('.interface-toggle').addEventListener('click',() => setVideoOnly(!videoOnly));
@@ -263,7 +274,7 @@ function createImageCard(item) {
   card.className = 'video-card image-card';card.dataset.id = item.id;
   card.dataset.title = item.label;card.dataset.recipe = item.recipe;card.dataset.mediaKind = 'image';
   card.setAttribute('aria-label',`Imagem: ${item.title}`);
-  card.innerHTML = `<img class="preview-poster post-image" data-src="${esc(posterPath(item))}" alt="${esc(item.title)}" width="1152" height="1440" loading="lazy" decoding="async"><div class="video-shade"></div><div class="release-notice" id="release-${esc(item.id)}" role="status" hidden>${icon('lock')}<strong></strong></div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>imagem</small><strong>${money(startingPrice(item))}</strong></div><button class="make-button">Fazer meu pedido ${icon('arrow-up-right')}</button></div></div>`;
+  card.innerHTML = `<img class="preview-poster post-image" data-src="${esc(posterPath(item))}" alt="${esc(item.title)}" width="1152" height="1440" loading="lazy" decoding="async"><div class="video-shade"></div><div class="release-notice" id="release-${esc(item.id)}" role="status" hidden>${icon('lock')}<strong></strong></div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>imagem</small><strong>${money(startingPrice(item))}</strong></div><button class="make-button">${orderCta()} ${icon('arrow-up-right')}</button></div></div>`;
   card.querySelector('.creator-action').addEventListener('click',() => location.hash = 'perfil');
   card.querySelector('.interface-toggle').addEventListener('click',() => setVideoOnly(!videoOnly));
   card.querySelector('.make-button').addEventListener('click',() => openPersonalize(item));
@@ -275,7 +286,7 @@ function createAnimatedPostCard(item) {
   card.className='video-card image-card animated-post-card';card.dataset.id=item.id;
   card.dataset.title=item.label;card.dataset.recipe=item.recipe;card.dataset.mediaKind='image';
   card.setAttribute('aria-label',`Prévia animada: ${item.title}`);
-  card.innerHTML=`<video data-src="${esc(mediaPath(item.video))}" data-poster="${esc(posterPath(item))}" muted loop playsinline preload="none" role="button" tabindex="0" aria-label="Prévia ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="release-notice" id="release-${esc(item.id)}" role="status" hidden>${icon('lock')}<strong></strong></div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>imagem</small><strong>${money(startingPrice(item))}</strong></div><button class="make-button">Fazer meu pedido ${icon('arrow-up-right')}</button></div></div>`;
+  card.innerHTML=`<video data-src="${esc(mediaPath(item.video))}" data-poster="${esc(posterPath(item))}" muted loop playsinline preload="none" role="button" tabindex="0" aria-label="Prévia ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="release-notice" id="release-${esc(item.id)}" role="status" hidden>${icon('lock')}<strong></strong></div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>imagem</small><strong>${money(startingPrice(item))}</strong></div><button class="make-button">${orderCta()} ${icon('arrow-up-right')}</button></div></div>`;
   card.querySelector('.creator-action').addEventListener('click',()=>location.hash='perfil');
   card.querySelector('.sound-toggle').addEventListener('click',toggleSound);
   card.querySelector('.interface-toggle').addEventListener('click',()=>setVideoOnly(!videoOnly));
@@ -370,7 +381,16 @@ for (const tab of document.querySelectorAll('.feed-tabs [data-media-kind]')) tab
   if (location.hash.startsWith('#video/')) history.replaceState(null,'','#hoje');
   renderProfile();route();
 });
+function returnToOrderOrigin(origin) {
+  const restored=resolveOrderOrigin(origin,[...catalog,...saturdayPreviews],{categoryIds:IMAGE_CATEGORIES.map(category=>category.id)});
+  if(!restored){toast('Seu pedido está salvo. Este modelo não está mais disponível; feche o comprovante para escolher outro.');return false;}
+  selectedMediaKind=restored.mediaKind;selectedImageCategory=restored.categoryId;imageSearch=restored.query;
+  history.replaceState(null,'',restored.hash);renderProfile();route(restored);
+  if(restored.changed)toast('O modelo foi atualizado. Seu pedido e comprovante continuam preservados.');
+  return true;
+}
 function route() {
+  const restored=Array.isArray(arguments[0]?.items)?arguments[0]:null;
   routeIsProfile = location.hash === '#perfil';
   if (routeIsProfile) setVideoOnly(false);
   document.querySelector('#feed-view').hidden = routeIsProfile;
@@ -381,6 +401,11 @@ function route() {
   document.querySelectorAll('[data-nav]').forEach(link => {if (link.dataset.nav === (routeIsProfile ? 'profile' : 'feed')) link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});
   document.title = routeIsProfile ? 'Perfil · iA4tube' : (selectedMediaKind === 'image' ? 'Imagens' : 'Vídeos') + ' · iA4tube';
   if (!routeIsProfile && data) {
+    if(restored){
+      renderFeed(restored.items,restored.key,restored.index);
+      feed.scrollTo({top:restored.index*feed.clientHeight,behavior:'instant'});activate(restored.index);
+      document.querySelectorAll('.feed-tabs [data-media-kind]').forEach(tab=>tab.setAttribute('aria-selected',String(tab.dataset.mediaKind===selectedMediaKind)));
+    }else{
     let requestedId = '';
     if (location.hash.startsWith('#video/')) {try {requestedId = decodeURIComponent(location.hash.slice(7));} catch {}}
     const requested = catalog.find(item => item.id === requestedId) || saturdayPreviews.find(item => item.id === requestedId);
@@ -401,6 +426,7 @@ function route() {
       const index = playlist.findIndex(item => item.id === requestedId);
       feed.scrollTo({top:index * feed.clientHeight,behavior:'instant'});activate(index);
     } else if (requestedId) toast('Esse vídeo não está disponível. Veja os vídeos em destaque.');
+    }
   }
   document.body.classList.toggle('browsing-images',selectedMediaKind==='image');
   imageCategoryMenu.sync({mediaKind:selectedMediaKind,categoryId:selectedImageCategory,query:imageSearch});

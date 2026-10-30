@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createOrderController,fingerprintPayload} from '../order.js';
-import {idempotencyKey} from '../order-adapter.js';
+import {idempotencyKey,calendarContextHash,SUBMIT_ENDPOINT} from '../order-adapter.js';
 
 const item = {id:'b142f07c-6fb2-4b99-842f-b12817c88df3',version:2,recipe:'sextou',orderEnabled:true,
   phrase:'RESPEITA ESSA FOME!',creativeTemplate:'cartaz-impacto-v1'};
@@ -57,7 +57,7 @@ class Element {
   }
 }
 
-function fixture(t,{onSaved}={}) {
+function fixture(t,{onSaved,...controllerOptions}={}) {
   const globals=['document','navigator','localStorage','sessionStorage','location','history','FileReader','fetch','setTimeout','clearTimeout'];
   const previous=new Map(globals.map(name=>[name,Object.getOwnPropertyDescriptor(globalThis,name)]));
   const install=(name,value)=>Object.defineProperty(globalThis,name,{value,writable:true,configurable:true});
@@ -92,7 +92,7 @@ function fixture(t,{onSaved}={}) {
   const nodes=new Map();
   const node=selector=>{if(!nodes.has(selector))nodes.set(selector,new Element());return nodes.get(selector);};
   for(const selector of ['#order-form','#order-error','#send-order','#order-success','#display-only-note',
-    '#saved-message','#sheet-title','#saved-order-id','#whatsapp-link','#order-company','#order-logo',
+    '#saved-message','#sheet-title','#saved-order-id','#whatsapp-link','#return-source','#receipt-guidance','#order-company','#order-logo',
     '#order-photo','#order-consent','#order-product-price','#copy-message','#new-order','.chosen-model','#model-note',
     '#order-has-photo','#order-no-photo','#order-product-description','#order-photo-field','#order-description-field',
     '#order-phrase-options','#order-phrase-current','#order-phrase-editor','#order-custom-phrase',
@@ -178,7 +178,7 @@ function fixture(t,{onSaved}={}) {
     if(cleaningUp || options.signal?.aborted)onAbort();
     else options.signal?.addEventListener('abort',onAbort,{once:true});
   }));
-  const controller=createOrderController({dialog,money:value=>String(value),toast:text=>toasts.push(text),onBusy(){},onSaved});
+  const controller=createOrderController({dialog,money:value=>String(value),toast:text=>toasts.push(text),onBusy(){},onSaved,...controllerOptions});
   const fill=()=>{
     node('#order-company').value='Gastro';node('#order-consent').checked=true;
     node('#order-logo').files=[{name:'logo.png',type:'image/png',size:4,data:btoa('logo')}];
@@ -189,7 +189,7 @@ function fixture(t,{onSaved}={}) {
     while(!predicate() && performance.now()<deadline)await new Promise(resolve=>realSetTimeout(resolve,5));
     assert.ok(predicate(),message);
   };
-  return {controller,form,node,local,session,location,navigation,toasts,requests,fill,reads,
+  return {controller,dialog,form,node,local,session,location,navigation,toasts,requests,fill,reads,
     configureReads:behavior=>{readBehavior=behavior;},
     choose:async(selector,file)=>{node(selector).files=file?[file]:[];await node(selector).emit('change');},
     tick:()=>new Promise(resolve=>realSetTimeout(resolve,1)),
@@ -208,14 +208,114 @@ function fixture(t,{onSaved}={}) {
       assert.equal(requests.length,count,'expected only the intended mocked HTTP requests');
       return requests[count-1];
     },
-    succeed(index=0,orderId=savedIds[index],totalCents=1990) {
+    succeed(index=0,orderId=savedIds[index],totalCents=1990,extra={}) {
       const message='Pedido: '+orderId;
       requests[index].resolve({ok:true,json:async()=>({orderId,status:'awaiting_authorization',totalCents,
-        whatsappMessage:message,whatsappUrl:'https://wa.me/554791049079?text='+encodeURIComponent(message)})});
+        whatsappMessage:message,whatsappUrl:'https://wa.me/554791049079?text='+encodeURIComponent(message),...extra})});
     },
   };
 }
 
+const appTicket='12345678-1234-4123-8123-123456789abc.'+'A'.repeat(43);
+const appOptions={appOnly:true,hasAppContext:()=>true,requestCalendar:async()=>({ticket:appTicket})};
+async function appReceipt(orderId=savedIds[0],overrides={}) {
+  const suffix=appTicket.split('.')[0].replaceAll('-','');
+  return {receiptUrl:new URL('/r/'+orderId+'#'+'B'.repeat(43),SUBMIT_ENDPOINT).href,
+    admission:{schemaVersion:1,admissionId:'22345678-1234-4123-8123-123456789abc',editOrderId:orderId,
+      requestHash:'a'.repeat(64),contextHash:await calendarContextHash(appTicket),mediaKind:'video',quantity:1,
+      state:'reserved',reservedAt:1793310000000,planningId:'pm_edit_'+suffix,pedidoId:'edit_'+suffix,...overrides}};
+}
+test('browser storefront cannot open a checkout or issue a native request or POST',async t=>{
+  let native=0;const f=fixture(t,{...appOptions,hasAppContext:()=>false,requestCalendar:async()=>{native++;}});
+  assert.equal(f.controller.open(item,config),false);await f.submit();
+  assert.equal(native,0);assert.equal(f.requests.length,0);assert.equal(f.reads.length,0);
+  assert.ok(f.toasts.some(text=>text.includes('Peça pelo app')));
+});
+test('app86 calendar cancellation preserves one attempt and never falls back to anonymous POST',async t=>{
+  const ids=[];const f=fixture(t,{...appOptions,requestCalendar:async id=>{ids.push(id);return null;}});
+  await f.submit();await f.submit();assert.equal(ids.length,2);assert.equal(ids[0],ids[1]);
+  assert.equal(f.requests.length,0);assert.equal(f.form.hidden,false);
+});
+test('app waits for native context and financial ACK, preserves receipt then returns exact origin without WhatsApp',async t=>{
+  let nativeResolve,returned=0,nativeCalls=0;const origin={schemaVersion:1,modelId:item.id,playlistIds:['first',item.id,'next'],playlistKey:'video-daily'};
+  const f=fixture(t,{...appOptions,originFor:()=>origin,requestCalendar:()=>++nativeCalls===1?new Promise(resolve=>{nativeResolve=resolve;}):Promise.resolve({ticket:appTicket}),
+    onReturnToOrigin:(value,saved)=>{returned++;assert.deepEqual(value,origin);
+      assert.equal(JSON.parse(f.session.getItem('ia4tube.edit.receipt.v1')).orderId,saved.orderId);
+      assert.equal(saved.admission.state,'reserved');return true;}});
+  const pending=f.submit(),double=f.submit();
+  while(!nativeResolve)await f.tick();assert.equal(f.requests.length,0);assert.equal(f.controller.isBusy(),true);
+  nativeResolve({ticket:appTicket});await f.waitForRequest(1);assert.equal(returned,0);
+  f.succeed(0,savedIds[0],1990,await appReceipt());await Promise.all([pending,double]);
+  assert.equal(returned,1);assert.equal(f.navigation.length,0);assert.equal(f.node('#whatsapp-link').hidden,true);
+  assert.equal(f.node('#copy-message').hidden,true);assert.equal(f.controller.isBusy(),false);
+  f.reopen();const next=f.submit();const second=await f.waitForRequest(2);
+  assert.notEqual(second.options.headers['Idempotency-Key'],f.requests[0].options.headers['Idempotency-Key']);
+  f.succeed(1,savedIds[1],1990,await appReceipt(savedIds[1]));await next;assert.equal(returned,2);
+});
+for(const failure of ['missing admission','wrong context','cancelled','missing proof'])test('app refuses '+failure+' and retries the same identity',async t=>{
+  let returned=0;const f=fixture(t,{...appOptions,onReturnToOrigin:()=>{returned++;return true;}}),first=f.submit();
+  await f.waitForRequest(1);const extra=await appReceipt();
+  if(failure==='missing admission')delete extra.admission;
+  if(failure==='wrong context')extra.admission.contextHash='f'.repeat(64);
+  if(failure==='cancelled')extra.admission.state='cancelled';
+  if(failure==='missing proof')delete extra.receiptUrl;
+  f.succeed(0,savedIds[0],1990,extra);await first;
+  assert.equal(returned,0);assert.equal(f.form.hidden,false);assert.equal(f.navigation.length,0);
+  const retry=f.submit(),request=await f.waitForRequest(2);
+  assert.equal(request.options.headers['Idempotency-Key'],f.requests[0].options.headers['Idempotency-Key']);
+  f.succeed(1,savedIds[0],1990,await appReceipt());await retry;assert.equal(returned,1);
+});
+test('app storage failure keeps the admitted ID visible and does not leave the receipt',async t=>{
+  let returned=0;const f=fixture(t,{...appOptions,onReturnToOrigin:()=>{returned++;return true;}}),write=f.session.setItem;
+  f.session.setItem=(key,value)=>{if(key==='ia4tube.edit.receipt.v1')throw Error('quota');write(key,value);};
+  const pending=f.submit();await f.waitForRequest(1);f.succeed(0,savedIds[0],1990,await appReceipt());await pending;
+  assert.equal(returned,0);assert.equal(f.node('#order-success').hidden,false);
+  assert.ok(f.node('#saved-order-id').textContent.includes(savedIds[0]));assert.equal(f.navigation.length,0);
+  const attempts=[...f.local.values].filter(([key])=>key.startsWith('ia4tube.edit.attempt.v2.'));
+  assert.equal(attempts.length,1);assert.match(attempts[0][1],/^[a-f0-9-]{36}$/);
+});
+test('app return failure and analytics failure preserve saved confirmation without WhatsApp fallback',async t=>{
+  const f=fixture(t,{...appOptions,onSaved:()=>{throw Error('analytics');},onReturnToOrigin:()=>{throw Error('render');}});
+  const pending=f.submit();await f.waitForRequest(1);f.succeed(0,savedIds[0],1990,await appReceipt());await pending;
+  assert.equal(f.node('#order-success').hidden,false);assert.equal(f.navigation.length,0);
+  assert.ok(f.session.getItem('ia4tube.edit.receipt.v1'));assert.ok(f.toasts.every(text=>!text.includes('WhatsApp')));
+});
+test('confirmed zero quota blocks a new form while unknown app86 quota keeps it available',async t=>{
+  let allowed=false;const f=fixture(t,{...appOptions,canCreate:()=>allowed});
+  assert.equal(f.controller.open(item,config),false);await f.submit();assert.equal(f.requests.length,0);
+  allowed=null;assert.equal(f.controller.open(item,config),true);f.fill();
+  const pending=f.submit();await f.waitForRequest(1);f.succeed(0,savedIds[0],1990,await appReceipt());await pending;
+});
+test('zero quota still permits the exact uncertain request after reload and rejects changed new content',async t=>{
+  let allowed=null,refreshes=0;const options={...appOptions,canCreate:()=>allowed,onAdmitted:()=>{refreshes++;}};
+  const f=fixture(t,options),first=f.submit(),initial=await f.waitForRequest(1);
+  initial.reject(new TypeError('lost ACK'));await first;allowed=false;
+  assert.equal(f.controller.canRecover(item.id),true);
+  const reloaded=createOrderController({dialog:f.dialog,money:String,toast:()=>{},onBusy(){},...options});
+  assert.equal(reloaded.canRecover(item.id),true);assert.equal(reloaded.open(item,config),true);f.fill();
+  await f.choose('#order-logo',{name:'logo.png',type:'image/png',size:7,data:btoa('changed')});
+  await f.submit();assert.equal(f.requests.length,1);
+  assert.match(f.node('#order-error').textContent,/acabaram/);
+  await f.choose('#order-logo',{name:'logo.png',type:'image/png',size:4,data:btoa('logo')});
+  const retry=f.submit(),second=await f.waitForRequest(2);
+  assert.equal(second.options.headers['Idempotency-Key'],initial.options.headers['Idempotency-Key']);
+  f.succeed(1,savedIds[0],1990,await appReceipt());await retry;
+  assert.equal(refreshes,1);assert.equal(reloaded.canRecover(item.id),false);assert.equal(reloaded.open(item,config),false);
+});
+test('image-only availability hides video format without changing quoted amounts or image choice',t=>{
+  const f=fixture(t,{...appOptions,canCreate:kind=>kind==='image'});f.controller.open(extraItem(),config);
+  const field=f.form.querySelector('.duration-field').insertedBefore,choices=field.children[1].children;
+  assert.equal(choices[0].hidden,false);assert.equal(choices[0].children[0].checked,true);
+  assert.equal(choices[1].hidden,true);assert.equal(choices[1].children[0].disabled,true);
+  assert.equal(choices[0].children[2].textContent,'990');assert.equal(f.requests.length,0);
+});
+test('a dual-format image card remains usable when only its video output is available',t=>{
+  const f=fixture(t,{...appOptions,canCreate:kind=>kind==='video'});
+  assert.equal(f.controller.open(extraItem(),config),true);
+  const choices=f.form.querySelector('.duration-field').insertedBefore.children[1].children;
+  assert.equal(choices[0].hidden,true);assert.equal(choices[1].hidden,false);
+  assert.equal(choices[0].children[0].checked,false);assert.equal(choices[1].children[0].checked,true);
+});
 test('simultaneous submit clicks send exactly one POST and keep controls busy until confirmation',async t=>{
   const f=fixture(t),first=f.submit(),doubleClick=f.submit();
   assert.equal(f.controller.isBusy(),true);

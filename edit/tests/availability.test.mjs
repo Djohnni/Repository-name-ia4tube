@@ -1,5 +1,6 @@
 import {legacyVideoCatalog} from './legacy-catalog.mjs';
 import test from 'node:test';
+import {canChooseModel} from '../ready-posts.js';
 import assert from 'node:assert/strict';
 import {readFile,stat} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
@@ -151,7 +152,8 @@ function interfaceFixture(now=opens-1) {
       }};
   };
   const cards=items.map(makeCard),count={textContent:''},timers=new Map();let nextTimer=0;
-  const context={cards,playlist:items,catalog:items,releaseTimer:undefined,
+  const context={cards,playlist:items,catalog:items,releaseTimer:undefined,orderCta:()=> 'Fazer meu pedido',
+    order:{canRecover:()=>false},appCheckout:()=>true,appCreationAllowed:()=>null,canChooseModel,
     Date:{now:()=>now},releaseInfo,icon:name=>'<svg data-icon="'+name+'"></svg>',
     document:{querySelector:selector=>{assert.equal(selector,'#orderable-count');return count;},
       querySelectorAll:selector=>{assert.equal(selector,'.profile-card');return cards;}},
@@ -199,6 +201,14 @@ test('exact release refresh unlocks the five in place, keeps the package hidden 
   f.setNow(opens+86400000);f.context.syncReleases();assert.equal(f.timers.size,0);assert.equal(f.count.textContent,27);
 });
 
+test('quota hides only new creation per output kind and preserves recovery without rebuilding catalog media',()=>{
+  const f=interfaceFixture(opens+1000);f.context.playlist=f.context.playlist.map((row,index)=>index===0?{...row,mediaKind:'image'}:row);
+  f.context.appCreationAllowed=kind=>kind==='image'?true:false;f.context.syncReleases();
+  assert.equal(f.cards[0].button.hidden,false);assert.equal(f.cards[1].button.hidden,true);
+  const pendingId=f.cards[1].dataset.id;f.context.order.canRecover=id=>id===pendingId;f.context.syncReleases();
+  assert.equal(f.cards[1].button.hidden,false);assert.match(f.cards[1].button.innerHTML,/Conferir pedido/);
+  f.context.appCreationAllowed=()=>null;f.context.syncReleases();assert.ok(f.cards.every(card=>!card.button.hidden));
+});
 test('visibility, pageshow and focus refresh deadlines while the direct order action retains a guard',()=>{
   assert.match(app,/document\.addEventListener\('visibilitychange',\(\) => \{syncReleases\(\);playback\(\);\}\);/);
   assert.match(app,/addEventListener\('pageshow',syncReleases\);/);

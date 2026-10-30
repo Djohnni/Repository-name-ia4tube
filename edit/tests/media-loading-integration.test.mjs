@@ -7,6 +7,7 @@ import {orderShowcase} from '../availability.js';
 import {withSaturdayPreviews} from '../saturday-previews.js';
 import {feedItems} from '../ready-posts.js';
 import {IMAGE_CATEGORIES,filterImageItems} from '../image-categories.js';
+import {captureOrderOrigin,resolveOrderOrigin} from '../order-origin.js';
 
 const app = await readFile(new URL('../app.js',import.meta.url),'utf8');
 const catalogSource = await readFile(new URL('../catalog.json',import.meta.url),'utf8');
@@ -97,7 +98,7 @@ test('the actual feed template carries deferred media without eager video src or
   assert.ok(construction);
   const article = {dataset:{},setAttribute() {}};
   runInNewContext(construction,{item,creator:catalog.creator,esc:escapeHtml,mediaPath:value => value,
-    posterPath:() => './media/previews-20261022/original.webp',startingPrice:() => 1990,money:() => 'R$ 19,90',icon:() => '',
+    posterPath:() => './media/previews-20261022/original.webp',startingPrice:() => 1990,money:() => 'R$ 19,90',icon:() => '',orderCta:()=> 'Fazer meu pedido',
     document:{createElement:tag => {assert.equal(tag,'article');return article;}},
   },{timeout:1000});
   const video = article.innerHTML.match(/<video\b[^>]*>/)?.[0];
@@ -148,6 +149,15 @@ function routeFixture(hash = '#hoje',items = [item]) {
   return {context,events,images,buttons,nodes};
 }
 
+test('real route restores the captured daily playlist and next choice instead of deriving profile from model ID',()=>{
+  const items=Array.from({length:5},(_,index)=>({...item,id:'model-'+index,version:1}));
+  const origin=captureOrderOrigin({item:items[3],items:[items[1],items[3],items[4]],key:'video-daily',hash:'#app-calendar='+'n'.repeat(43)});
+  const restored=resolveOrderOrigin(origin,items),f=routeFixture(restored.hash,items);
+  f.context.route(restored);
+  assert.equal(origin.hash,'#hoje');assert.deepEqual(f.context.playlist.map(row=>row.id),['model-1','model-3','model-4']);
+  assert.deepEqual(f.events.filter(event=>['render','activate'].includes(event[0])),[['render','video-daily',1],['activate',1]]);
+  assert.ok(f.events.some(event=>event[0]==='scroll'&&event[1]===600));
+});
 test('profile thumbnails gain src only when entering the profile route and retain native lazy loading',() => {
   const f = routeFixture();f.context.renderProfile();
   assert.equal(f.images.length,1);
@@ -228,7 +238,7 @@ test('feed replacement releases old resources before replacing cards and first a
       return {dataset:{},setAttribute() {},querySelector:selector => selector === 'video' ? video : control};
     }},
     creator:catalog.creator,esc:escapeHtml,mediaPath:value => value,posterPath:entry => entry.poster,
-    icon:() => '',money:() => 'R$ 19,90',startingPrice:() => 1990,
+    icon:() => '',money:() => 'R$ 19,90',startingPrice:() => 1990,orderCta:()=> 'Fazer meu pedido',
     syncSound() {},syncInterface() {},syncReleases() {},tick() {},toggleSound() {},togglePlay() {},activateVideo() {},handleVideoKeydown() {},
     activate:index => events.push(['activate',index]),
   };

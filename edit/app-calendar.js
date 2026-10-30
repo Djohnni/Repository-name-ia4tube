@@ -1,5 +1,6 @@
-// Optional app-only context. The public Edit checkout remains anonymous.
-// This is a page callback, not a native JavaScript interface or login token.
+// Existing app86 calendar protocol. A nonce is only a navigation/callback hint.
+// Checkout admission is authorized by the receiver and Render, never by this page.
+import {createAppAvailability} from './app-availability.js?v=20261030-availability-v1';
 const UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
 const NONCE = /^[A-Za-z0-9_-]{43}$/;
 const TICKET = /^[a-f0-9-]{36}\.[A-Za-z0-9_-]{43}$/;
@@ -60,13 +61,19 @@ export function createAppCalendarBridge({location, storage, navigate, setTimer =
 }
 
 let appBridge = null;
+let availabilityBridge = null;
 if (typeof window !== 'undefined') {
   let storage;
   try { storage = window.sessionStorage; }
   catch { storage = {getItem:() => null,setItem:() => {throw new Error('storage_unavailable');}}; }
   appBridge = createAppCalendarBridge({location:window.location,storage,
     navigate:url => window.location.assign(url)});
-  Object.defineProperty(window,'iA4tubeAppCalendar',{value:Object.freeze({receive:appBridge.receive}),writable:false,configurable:false});
+  availabilityBridge=createAppAvailability({getNonce:()=>appBridge.attemptScope,navigate:url=>window.location.assign(url),
+    canRefresh:()=>!window.document.hidden,onChange:()=>window.document.dispatchEvent(new Event('ia4tube:edit-availability-changed'))});
+  Object.defineProperty(window,'iA4tubeAppCalendar',{value:Object.freeze({receive:appBridge.receive,
+    receiveAvailability:availabilityBridge.receive}),writable:false,configurable:false});
 }
 export const requestAppCalendar = requestId => appBridge ? appBridge.request(requestId) : Promise.resolve(null);
 export const appCalendarAttemptScope = () => appBridge?.attemptScope || null;
+export const appCreationAllowed = kind => availabilityBridge?.canCreate(kind) ?? null;
+export const refreshAppAvailability = () => availabilityBridge?.refresh() || false;

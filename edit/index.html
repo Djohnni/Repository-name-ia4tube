@@ -10,7 +10,7 @@
   <link rel="icon" href="./assets/logo.png">
   <link rel="stylesheet" href="./styles.css?v=20261029-extra40">
   <link rel="stylesheet" href="./image-categories.css?v=20261029-products-first">
-  <script type="module" src="./app.js?v=20261029-hidden-package"></script>
+  <script type="module" src="./app.js?v=20261030-availability-v1"></script>
   <link rel="stylesheet" href="./analytics.css?v=20261022-analytics">
   <script type="module" src="./analytics.js?v=20261022-light-media"></script>
 </head>
@@ -80,7 +80,7 @@
           <label><input type="radio" name="packageCount" value="6"><span>6 imagens</span><strong>R$ 58,00</strong></label>
           <label><input type="radio" name="packageCount" value="8"><span>8 imagens</span><strong>R$ 68,00</strong></label>
         </div>
-        <p class="order-explanation">Um único vídeo com seus produtos, narração, música, abertura e encerramento. Receba pelo WhatsApp.</p>
+        <p class="order-explanation">Um único vídeo com seus produtos, narração, música, abertura e encerramento. Peça pelo app da iA4tube.</p>
         <label class="order-field">Nome da empresa<input id="order-company" name="company" autocomplete="organization" minlength="2" maxlength="100" required placeholder="Como aparecerá no vídeo"></label>
         <label class="order-field">Tipo de empresa<input id="products-branch" maxlength="100" value="HAMBURGUERIA" required placeholder="Ex.: PIZZARIA"></label>
         <label class="order-field">Frase da abertura<input id="products-opening" maxlength="60" value="CONFIRA NOSSAS OFERTAS!" required></label>
@@ -95,13 +95,13 @@
       </fieldset>
       <label class="consent-line"><input id="order-consent" type="checkbox" required><span>Tenho autorização para usar as imagens e concordo em enviá-las para personalizar este pedido.</span></label>
       <p id="order-error" class="form-error" role="alert" hidden></p>
-      <button type="submit" id="send-order" class="primary-action">Salvar pedido e ir para o WhatsApp <span data-icon="arrow-up-right"></span></button>
-      <p class="order-local-note">Seu pedido será salvo antes de abrir o WhatsApp. Combine a confirmação e os próximos passos com a iA4tube.</p>
+      <button type="submit" id="send-order" class="primary-action">Enviar pedido pelo app <span data-icon="arrow-up-right"></span></button>
+      <p class="order-local-note">Seu pedido ficará salvo. Acompanhe pelo app.</p>
     </form>
-    <section id="order-success" class="order-success" aria-live="polite" hidden><span class="success-mark" data-icon="check"></span><h3>Pedido salvo!</h3><p id="saved-order-id"></p><p>Confirme o recebimento e os próximos passos pelo WhatsApp.</p><a id="whatsapp-link" class="primary-action" rel="noopener noreferrer">Continuar no WhatsApp <span data-icon="message"></span></a><button id="copy-message" class="secondary-action" type="button">Copiar mensagem</button><textarea id="saved-message" aria-label="Mensagem do pedido" readonly rows="6" hidden></textarea><p class="order-local-note">Se o WhatsApp não abrir, o pedido continua salvo. Use o botão acima ou copie a mensagem.</p><button id="new-order" class="secondary-action" type="button">Voltar aos modelos</button><p class="order-local-note">Seu pedido está salvo. Você já pode escolher um modelo e enviar outro pedido, mesmo com os mesmos dados.</p></section>
+    <section id="order-success" class="order-success" aria-live="polite" hidden><span class="success-mark" data-icon="check"></span><h3>Pedido salvo!</h3><p id="saved-order-id"></p><p id="receipt-guidance">Seu comprovante foi preservado.</p><a id="whatsapp-link" class="primary-action" rel="noopener noreferrer" hidden>Continuar no WhatsApp <span data-icon="message"></span></a><button id="copy-message" class="secondary-action" type="button" hidden>Copiar mensagem</button><textarea id="saved-message" aria-label="Mensagem do pedido" readonly rows="6" hidden></textarea><button id="return-source" class="primary-action" type="button" hidden>Voltar ao mesmo modelo</button><button id="new-order" class="secondary-action" type="button">Escolher outro modelo</button><p class="order-local-note">A confirmação do envio não significa que a arte já está pronta. Acompanhe a produção pelo app.</p></section>
     <p id="display-only-note" class="preview-note" hidden>Este vídeo é apenas uma referência visual. A personalização ainda não foi habilitada para ele.</p>
   </dialog>
-  <dialog id="about-dialog" class="sheet about-sheet" aria-labelledby="about-title"><button class="close-dialog circle" aria-label="Fechar"><span data-icon="close"></span></button><span class="eyebrow">COMO FUNCIONA</span><h2 id="about-title">Uma nova forma de escolher.</h2><p>Deslize pelas imagens e vídeos. No perfil, você encontra também os modelos anteriores.</p><p>“Fazer o meu” salva seu pedido antes de abrir o WhatsApp. Depois, envie a mensagem para confirmar os próximos passos.</p><p class="preview-note">Você recebe o material pelo WhatsApp. A produção começa após a confirmação do pedido.</p><button class="primary-action close-about">Entendi, vamos ver <span data-icon="arrow-up-right"></span></button></dialog>
+  <dialog id="about-dialog" class="sheet about-sheet" aria-labelledby="about-title"><button class="close-dialog circle" aria-label="Fechar"><span data-icon="close"></span></button><span class="eyebrow">COMO FUNCIONA</span><h2 id="about-title">Uma nova forma de escolher.</h2><p>Deslize pelas imagens e vídeos. No perfil, você encontra também os modelos anteriores.</p><p>Peça pelo app da iA4tube. No navegador, o catálogo fica disponível para você escolher.</p><p class="preview-note">No app, o envio confirma sua autorização e reserva. Depois você volta ao mesmo modelo para continuar escolhendo.</p><button class="primary-action close-about">Entendi, vamos ver <span data-icon="arrow-up-right"></span></button></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <noscript><p class="no-script">Ative o JavaScript para assistir à prévia dos vídeos.</p></noscript>
 </body>

@@ -20,12 +20,13 @@ const fixture = {
   video:'./media/example.mp4',poster:'./media/example.png',duration:10,orderEnabled:true,
 };
 
-function renderCard(item = fixture,videoOnly = false) {
+function renderCard(item = fixture,videoOnly = false,insideApp=true) {
   const construction = app.match(/const article = document\.createElement\('article'\);[\s\S]*?article\.innerHTML = \x60[\s\S]*?\x60;/)?.[0];
   assert.ok(construction,'The actual article template must remain testable.');
   const article = {dataset:{},attributes:{},setAttribute(name,value){this.attributes[name] = value;}};
   runInNewContext(construction,{
     item,creator:catalog.creator,prices:catalog.prices,videoOnly,
+    orderCta:runInNewContext(app.match(/const orderCta=[^\n]+/)[0]+'\norderCta',{appCheckout:()=>insideApp}),
     startingPrice:runInNewContext(app.match(/const startingPrice = [^\n]+/)[0] + '\nstartingPrice',
       {data:catalog,prices:catalog.prices},{timeout:1000}),
     esc:escapeHtml,mediaPath:value => value,posterPath:item => item.poster,
@@ -37,6 +38,13 @@ function renderCard(item = fixture,videoOnly = false) {
 }
 const visibleText = html => html.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
 
+test('production distinguishes storefront CTA from app checkout for every existing video model',()=>{
+  assert.match(app,/createOrderController\(\{[^\n]*appOnly:true/);
+  for(const item of catalog.catalog){
+    assert.match(renderCard(item,false,false).innerHTML,/class="make-button">Peça pelo app /);
+    assert.match(renderCard(item,false,true).innerHTML,/class="make-button">Fazer meu pedido /);
+  }
+});
 test('feed overlay has no model title, description, creator label or example badge',() => {
   const {innerHTML} = renderCard();
   assert.doesNotMatch(innerHTML,/\b(?:creator-label|model-kicker|caption|example-label|swipe-hint)\b/);
@@ -135,7 +143,9 @@ test('legacy form stays intact apart from authorized individual options and pack
     .replace('<form id="order-form">','<form id="order-form">\n      '+company)
     .replace(/(<input id="order-logo"[^>]*>)(<\/label>)/,'$1<small>PNG, JPG ou WebP · até 5 MB</small>$2')
     .replace(/(<input id="order-photo"[^>]*>)(<\/label>)/,'$1<small>PNG, JPG ou WebP · até 10 MB</small>$2')
-    .replace('<p class="order-explanation"></p>','<p class="order-explanation">A versão de 20s repete a animação de 10s. Você recebe o vídeo pelo WhatsApp.</p>');
+    .replace('<p class="order-explanation"></p>','<p class="order-explanation">A versão de 20s repete a animação de 10s. Você recebe o vídeo pelo WhatsApp.</p>')
+    .replace('Enviar pedido pelo app','Salvar pedido e ir para o WhatsApp')
+    .replace('Seu pedido ficará salvo. Acompanhe pelo app.','Seu pedido será salvo antes de abrir o WhatsApp. Combine a confirmação e os próximos passos com a iA4tube.');
   assert.equal(digest(legacy),'2a55a61ece259903033a54ef10ae2076a3e6e9934fc8700791908688a1b8cb5f');
   assert.match(form,/name="duration" value="10" checked/);
   assert.match(form,/name="duration" value="20"/);
