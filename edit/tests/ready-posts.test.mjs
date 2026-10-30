@@ -57,7 +57,7 @@ test('image tab is initially selected and legacy video deep links and bounded im
 });
 function optionsFixture(t) {
   const previous=globalThis.document;
-  class Element {constructor(){this.children=[];this.hidden=false;this.disabled=false;}append(...items){this.children.push(...items);}}
+  class Element {constructor(){this.children=[];this.hidden=false;this.disabled=false;this.listeners=new Map();}append(...items){this.children.push(...items);}addEventListener(name,run){this.listeners.set(name,run);}}
   const duration={hidden:false,before:element=>{duration.field=element;}},explanation={textContent:'Old note'};
   const radios={10:{value:'10',checked:true},20:{value:'20',checked:false}};
   const form={querySelector(selector){

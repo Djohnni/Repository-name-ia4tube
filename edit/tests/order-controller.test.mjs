@@ -358,20 +358,94 @@ test('zero quota still permits the exact uncertain request after reload and reje
   assert.equal(refreshes,1);assert.equal(reloaded.canRecover(item.id),false);assert.equal(reloaded.open(item,config),false);
   assert.equal(combos,1);
 });
-test('image-only availability hides video format without changing quoted amounts or image choice',t=>{
+test('image-only availability retains both formats and exposes video purchase without changing amounts or selection',t=>{
   const f=fixture(t,{...appOptions,canCreate:kind=>kind==='image'});f.controller.open(extraItem(),config);
   const field=f.form.querySelector('.duration-field').insertedBefore,choices=field.children[1].children;
   assert.equal(choices[0].hidden,false);assert.equal(choices[0].children[0].checked,true);
-  assert.equal(choices[1].hidden,true);assert.equal(choices[1].children[0].disabled,true);
+  assert.equal(choices[1].hidden,false);assert.equal(choices[1].children[0].disabled,false);
+  assert.equal(field.children[2].children[1].hidden,false);assert.match(field.children[2].children[1].textContent,/Ver combos para criar vídeos/);
   assert.equal(choices[0].children[2].textContent,'990');assert.equal(f.requests.length,0);
 });
-test('a dual-format image card remains usable when only its video output is available',t=>{
+test('a dual-format image card needs an explicit video choice when its image output is exhausted',t=>{
   const f=fixture(t,{...appOptions,canCreate:kind=>kind==='video'});
-  assert.equal(f.controller.open(extraItem(),config),true);
+  assert.equal(f.controller.open(extraItem(),config),false);
+  assert.equal(f.controller.open(extraItem(),config,{preferredKind:'video'}),true);
   const choices=f.form.querySelector('.duration-field').insertedBefore.children[1].children;
-  assert.equal(choices[0].hidden,true);assert.equal(choices[1].hidden,false);
+  assert.equal(choices[0].hidden,false);assert.equal(choices[1].hidden,false);
   assert.equal(choices[0].children[0].checked,false);assert.equal(choices[1].children[0].checked,true);
 });
+test('both format purchase actions stay visible at zero without validation files calendar or order',async t=>{
+  let allowed=true,combos=0,contexts=0;
+  const f=fixture(t,{...appOptions,canCreate:()=>allowed,onOpenCombos:()=>{combos++;return true;},
+    requestCalendar:async()=>{contexts++;return {ticket:appTicket};}});
+  f.controller.open(extraItem(),config);allowed=false;f.controller.refreshAvailability();
+  const field=f.form.querySelector('.duration-field').insertedBefore,choices=field.children[1].children;
+  const purchases=field.children[2].children;
+  for(const choice of choices){assert.equal(choice.hidden,false);assert.equal(choice.children[0].disabled,false);}
+  assert.equal(choices[0].children[0].checked,true);assert.equal(choices[1].children[0].checked,false);
+  f.form.reportValidity=()=>{assert.fail('A format purchase must not validate the order.');};
+  for(const button of purchases){assert.equal(button.type,'button');assert.equal(button.hidden,false);await button.emit('click');}
+  assert.equal(combos,2);assert.equal(contexts,0);assert.equal(f.reads.length,0);assert.equal(f.requests.length,0);
+  assert.equal(f.local.values.size,0);
+});
+
+const dualItem=()=>({...item,mediaKind:'image',creativeTemplate:'posts-prontos-01-v1',outputPrices:{image:990,video:2390},prices:{10:2390}});
+test('an availability refresh during a deferred upload never replaces the selected image with video',async t=>{
+  const allowed={image:true,video:true};let contexts=0;
+  const f=fixture(t,{...appOptions,canCreate:kind=>allowed[kind],requestCalendar:async()=>{contexts++;return {ticket:appTicket};}});
+  f.controller.open(dualItem(),config);f.fill();f.configureReads(()=>{});
+  const sending=f.submit(),read=await f.waitForReads(1);
+  const field=f.form.querySelector('.duration-field').insertedBefore,choices=field.children[1].children;
+  assert.equal(f.controller.isBusy(),true);allowed.image=false;f.controller.refreshAvailability();
+  assert.equal(choices[0].children[0].checked,true);assert.equal(choices[1].children[0].checked,false);
+  for(const choice of choices)assert.equal(choice.children[0].disabled,true);
+  read.complete();await sending;
+  assert.equal(f.requests.length,0);assert.equal(contexts,0);assert.equal(f.local.values.size,0);
+  assert.match(f.node('#order-error').textContent,/Ver combos para criar imagens/);
+  assert.equal(choices[0].children[0].checked,true);
+});
+
+test('the output captured on submit survives even a programmatic radio change during file read',async t=>{
+  const f=fixture(t,{...appOptions,canCreate:()=>true});f.controller.open(dualItem(),config);f.fill();f.configureReads(()=>{});
+  const sending=f.submit(),read=await f.waitForReads(1);
+  const choices=f.form.querySelector('.duration-field').insertedBefore.children[1].children;
+  choices[0].children[0].checked=false;choices[1].children[0].checked=true;
+  read.complete();const request=await f.waitForRequest(1);
+  assert.equal(JSON.parse(request.options.body.get('data')).mediaKind,'image');
+  f.succeed(0,savedIds[0],990,await appReceipt(savedIds[0],{mediaKind:'image'}));await sending;
+});
+
+test('an uncertain image retry keeps its kind and request while another format cannot borrow its hold',async t=>{
+  const allowed={image:true,video:true},contextIds=[];
+  const f=fixture(t,{...appOptions,canCreate:kind=>allowed[kind],requestCalendar:async id=>{contextIds.push(id);return {ticket:appTicket};}});
+  const selected=dualItem();f.controller.open(selected,config);f.fill();
+  const first=f.submit(),initial=await f.waitForRequest(1);initial.reject(new TypeError('lost image ACK'));await first;
+  allowed.image=false;f.controller.refreshAvailability();
+  assert.equal(f.controller.open(selected,config,{preferredKind:'video'}),true);
+  const field=f.form.querySelector('.duration-field').insertedBefore,choices=field.children[1].children;
+  assert.equal(choices[0].children[0].checked,true,'a stale alternate cannot displace pending recovery');
+  assert.equal(f.node('#send-order').innerHTML,'Conferir pedido');
+  for(const button of field.children[2].children)assert.equal(button.hidden,true);
+  allowed.video=false;f.controller.refreshAvailability();
+  choices[1].children[0].checked=true;await choices[1].children[0].emit('change');
+  await f.submit();assert.equal(f.requests.length,1);assert.equal(contextIds.length,1);
+  choices[0].children[0].checked=true;await choices[0].children[0].emit('change');
+  const retry=f.submit(),request=await f.waitForRequest(2);
+  assert.equal(request.options.headers['Idempotency-Key'],initial.options.headers['Idempotency-Key']);
+  assert.equal(JSON.parse(request.options.body.get('data')).mediaKind,'image');
+  assert.equal(contextIds[0],contextIds[1]);
+  f.succeed(1,savedIds[0],990,await appReceipt(savedIds[0],{mediaKind:'image',state:'bound'}));await retry;
+});
+
+test('explicit format choice is kept when the same open model is refreshed and recovered',t=>{
+  const f=fixture(t,{...appOptions,canCreate:()=>true}),selected=dualItem();
+  assert.equal(f.controller.open(selected,config,{preferredKind:'video'}),true);
+  const choices=f.form.querySelector('.duration-field').insertedBefore.children[1].children;
+  assert.equal(choices[1].children[0].checked,true);f.controller.refreshAvailability();
+  assert.equal(choices[1].children[0].checked,true);f.controller.open(selected,config);
+  assert.equal(choices[1].children[0].checked,true);
+});
+
 test('simultaneous submit clicks send exactly one POST and keep controls busy until confirmation',async t=>{
   const f=fixture(t),first=f.submit(),doubleClick=f.submit();
   assert.equal(f.controller.isBusy(),true);

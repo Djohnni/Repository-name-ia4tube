@@ -59,6 +59,6 @@ test('mobile overlay change does not resize the player or alter the order form',
   assert.doesNotMatch(block,/(?:height|width|transform|animation|transition)\s*:/);
 });
 
-test('stylesheet URL is versioned for the current swipe guide update',() => {
-  assert.match(page,/<link rel="stylesheet" href="\.\/styles\.css\?v=20261029-extra40">/);
+test('stylesheet URL is versioned for the current media quota controls',() => {
+  assert.match(page,/<link rel="stylesheet" href="\.\/styles\.css\?v=20261030-media-quota-v1">/);
 });

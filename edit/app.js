@@ -1,8 +1,8 @@
-import { createOrderController } from './order.js?v=20261030-combos-v1';
+import { createOrderController } from './order.js?v=20261030-media-quota-v1';
 import { appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos } from './app-calendar.js?v=20261030-combos-v1';
-import { orderCallToAction } from './order-cta.js?v=20261030-combos-v1';
+import { orderCallToAction,alternateOrderCallToAction } from './order-cta.js?v=20261030-media-quota-v1';
 import { captureOrderOrigin,resolveOrderOrigin } from './order-origin.js?v=20261029-app-admission-v1';
-import { feedItems } from './ready-posts.js?v=20261030-availability-v1';
+import { feedItems,isReadyPost } from './ready-posts.js?v=20261030-media-quota-v1';
 import { isExtraReadyPost } from './ready-posts-extra.js?v=20261029-extra40';
 import {IMAGE_CATEGORIES,filterImageItems} from './image-categories.js?v=20261029-products-first';
 import {createImageCategoryMenu} from './image-category-menu.js?v=20261029-products-first';
@@ -132,6 +132,12 @@ function syncReleases() {
     const action=orderCallToAction(item,{inApp:appCheckout(),recovering,canCreate:appCreationAllowed,release});
     button.disabled=action.disabled;button.hidden=false;
     button.innerHTML = action.label + ' ' + icon(release ? 'lock' : 'arrow-up-right');
+    const secondary=card.querySelector('.make-alternative');
+    if(secondary){
+      const alternate=alternateOrderCallToAction(item,{inApp:appCheckout(),recovering,canCreate:appCreationAllowed,release});
+      secondary.hidden=!alternate;secondary.disabled=!alternate;
+      secondary.textContent=alternate?.label || '';
+    }
     if (release) button.setAttribute('aria-describedby',notice.id);
     else button.removeAttribute('aria-describedby');
   });
@@ -269,16 +275,24 @@ function renderFeed(items,key,initialIndex = 0) {
   feed.scrollTo({top:activeIndex * feed.clientHeight,behavior:'instant'});
   cards.forEach(card => observer.observe(card));syncSound();syncInterface();syncReleases();activate(activeIndex);tick();
 }
+function bindAlternateOrder(card,item) {
+  card.querySelector('.make-alternative')?.addEventListener('click',()=>{
+    const alternate=alternateOrderCallToAction(item,{inApp:appCheckout(),recovering:order.canRecover(item.id),
+      canCreate:appCreationAllowed,release:releaseInfo(item)});
+    if(alternate)openPersonalize(item,alternate.kind);
+  });
+}
 function createImageCard(item) {
   if (isExtraReadyPost(item) && typeof item.video==='string' && item.video) return createAnimatedPostCard(item);
   const card = document.createElement('article');
   card.className = 'video-card image-card';card.dataset.id = item.id;
   card.dataset.title = item.label;card.dataset.recipe = item.recipe;card.dataset.mediaKind = 'image';
   card.setAttribute('aria-label',`Imagem: ${item.title}`);
-  card.innerHTML = `<img class="preview-poster post-image" data-src="${esc(posterPath(item))}" alt="${esc(item.title)}" width="1152" height="1440" loading="lazy" decoding="async"><div class="video-shade"></div><div class="release-notice" id="release-${esc(item.id)}" role="status" hidden>${icon('lock')}<strong></strong></div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>imagem</small><strong>${money(startingPrice(item))}</strong></div><button class="make-button">${orderCta()} ${icon('arrow-up-right')}</button></div></div>`;
+  card.innerHTML = `<img class="preview-poster post-image" data-src="${esc(posterPath(item))}" alt="${esc(item.title)}" width="1152" height="1440" loading="lazy" decoding="async"><div class="video-shade"></div><div class="release-notice" id="release-${esc(item.id)}" role="status" hidden>${icon('lock')}<strong></strong></div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>imagem</small><strong>${money(startingPrice(item))}</strong></div><button class="make-button">${orderCta()} ${icon('arrow-up-right')}</button></div><button type="button" class="make-alternative" hidden></button></div>`;
   card.querySelector('.creator-action').addEventListener('click',() => location.hash = 'perfil');
   card.querySelector('.interface-toggle').addEventListener('click',() => setVideoOnly(!videoOnly));
   card.querySelector('.make-button').addEventListener('click',() => openPersonalize(item));
+  bindAlternateOrder(card,item);
   return card;
 }
 // A reviewed optional animation is shown only for the new collection. Orders still default to image.
@@ -287,11 +301,12 @@ function createAnimatedPostCard(item) {
   card.className='video-card image-card animated-post-card';card.dataset.id=item.id;
   card.dataset.title=item.label;card.dataset.recipe=item.recipe;card.dataset.mediaKind='image';
   card.setAttribute('aria-label',`Prévia animada: ${item.title}`);
-  card.innerHTML=`<video data-src="${esc(mediaPath(item.video))}" data-poster="${esc(posterPath(item))}" muted loop playsinline preload="none" role="button" tabindex="0" aria-label="Prévia ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="release-notice" id="release-${esc(item.id)}" role="status" hidden>${icon('lock')}<strong></strong></div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>imagem</small><strong>${money(startingPrice(item))}</strong></div><button class="make-button">${orderCta()} ${icon('arrow-up-right')}</button></div></div>`;
+  card.innerHTML=`<video data-src="${esc(mediaPath(item.video))}" data-poster="${esc(posterPath(item))}" muted loop playsinline preload="none" role="button" tabindex="0" aria-label="Prévia ${esc(item.label)}"></video><div class="video-shade"></div><div class="center-pause">${icon('play')}</div><div class="release-notice" id="release-${esc(item.id)}" role="status" hidden>${icon('lock')}<strong></strong></div><div class="video-actions"><button class="creator-action" aria-label="Ver perfil da iA4tube"><img src="${esc(mediaPath(creator.avatar))}" alt=""><span>${icon('arrow-up-right')}</span></button><button class="circle sound-toggle" aria-label="Ativar som">${icon('muted')}</button><button class="circle interface-toggle" aria-label="Ocultar interface" title="Ocultar interface" aria-pressed="false">${icon('eye-off')}</button></div><div class="video-info"><div class="offer-row"><div class="offer-price"><small>imagem</small><strong>${money(startingPrice(item))}</strong></div><button class="make-button">${orderCta()} ${icon('arrow-up-right')}</button></div><button type="button" class="make-alternative" hidden></button></div>`;
   card.querySelector('.creator-action').addEventListener('click',()=>location.hash='perfil');
   card.querySelector('.sound-toggle').addEventListener('click',toggleSound);
   card.querySelector('.interface-toggle').addEventListener('click',()=>setVideoOnly(!videoOnly));
   card.querySelector('.make-button').addEventListener('click',()=>openPersonalize(item));
+  bindAlternateOrder(card,item);
   const video=card.querySelector('video');video.addEventListener('click',activateVideo);video.addEventListener('keydown',handleVideoKeydown);
   video.addEventListener('play',()=>syncPlayButton(card));video.addEventListener('pause',()=>syncPlayButton(card));
   video.addEventListener('error',()=>{if(activeCard()===card&&video.getAttribute('src'))toast('Não foi possível carregar a prévia. A imagem continua disponível.');});
@@ -319,7 +334,7 @@ feed.addEventListener('keydown',event => {
   if (event.key === ' ') {event.preventDefault();togglePlay();}
 });
 
-function openPersonalize(item) {
+function openPersonalize(item,preferredKind=null) {
   if (!data || item.kind === 'saturday-preview') return;
   const release = releaseInfo(item);
   if (release) {syncReleases();toast(release.label);return;}
@@ -331,7 +346,8 @@ function openPersonalize(item) {
   const phrase = item.phrase || (item.recipe === 'sextou' ? 'SEXTOU' : item.recipe === 'sabadou' ? item.copyLabel || item.label : 'Referência visual');
   document.querySelector('#chosen-phrase').textContent = isExtraReadyPost(item) ? '' : item.recipe === 'produtos' ? phrase : `Frase do modelo: ${phrase}`;
   document.querySelector('#model-note').textContent = item.note || (item.orderEnabled ? 'O vídeo será personalizado com o modelo de produção vinculado a esta referência.' : 'Somente referência visual; não disponível para pedidos.');
-  if (order.open(item,data) === false) return;
+  const explicitKind=order.canRecover(item.id)?null:preferredKind || (isReadyPost(item)?item.mediaKind:null);
+  if (order.open(item,data,{preferredKind:explicitKind}) === false) return;
   personalize.showModal();playback();
   try {if (item.orderEnabled && !document.querySelector('#order-form').hidden) document.dispatchEvent(new CustomEvent('ia4tube:edit-order-open',{detail:{videoId:item.id,videoTitle:item.label,recipe:item.recipe}}));}
   catch { /* Optional measurement is independent from the form. */ }

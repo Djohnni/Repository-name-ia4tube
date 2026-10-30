@@ -1,9 +1,9 @@
 import { requestAppCalendar, appCalendarAttemptScope } from './app-calendar.js?v=20261030-combos-v1';
-import { quotaCombosLabel } from './order-cta.js?v=20261030-combos-v1';
+import { quotaCombosLabel } from './order-cta.js?v=20261030-media-quota-v1';
 import { createOrderRecovery } from './order-recovery.js?v=20261030-availability-v1';
 import { buildMultipartOrder, idempotencyKey, normalizeReceipt, calendarContextHash, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261030-receipt-alias-v1';
 import { createModelOptions } from './model-options.js?v=20261020-styles';
-import { createReadyPostOptions,canChooseModel } from './ready-posts.js?v=20261030-availability-v1';
+import { createReadyPostOptions,isReadyPost } from './ready-posts.js?v=20261030-media-quota-v1';
 import { createExtraPostOptions } from './ready-posts-extra.js?v=20261029-extra40';
 import { createProductsForm } from './products-form.js?v=20261021-upload';
 import { normalizeProductPrice } from './optional-price.js?v=20261019-price';
@@ -85,7 +85,8 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
   const photoUpload = createUploadField(document.querySelector('#order-photo'),{maxBytes:10 * 1024 * 1024,label:'Foto do produto'});
   const products = createProductsForm({form,money});
   const modelOptions = createModelOptions(form,money);
-  const readyPosts = createReadyPostOptions(form,money,kind=>appOnly?canCreate(kind):null,()=>appOnly&&recovery.hasModel(item?.id));
+  const readyPosts = createReadyPostOptions(form,money,kind=>appOnly?canCreate(kind):null,()=>appOnly&&recovery.hasModel(item?.id),
+    {onOpenCombos:()=>{if(!busy)openCombos();},onSelectionChange:()=>syncSubmitAction()});
   const extraPosts = createExtraPostOptions(form,{onChange:()=>syncPhraseFields()});
   const photoInput = document.querySelector('#order-photo');
   const descriptionInput = document.querySelector('#order-product-description');
@@ -211,13 +212,17 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
   function withAttemptLock(fingerprint,action) {
     return navigator.locks ? navigator.locks.request(`edit-${fingerprint}`,action) : action();
   }
-  function open(nextItem,nextConfig) {
+  function open(nextItem,nextConfig,{preferredKind=null}={}) {
     if (busy) return;
     if(appOnly && !hasAppContext()){toast('Peça pelo app da iA4tube. O catálogo continua disponível para você escolher.');return false;}
+    if(preferredKind!==null && (!isReadyPost(nextItem) || !['image','video'].includes(preferredKind)))return false;
     if(appOnly && receipt?.videoId===nextItem.id && recovery.hasModel(nextItem.id)){showReceipt(receipt);return true;}
     const release = releaseInfo(nextItem);
     if (release) {toast(release.label);return false;}
-    if(appOnly && !canChooseModel(nextItem,canCreate) && !recovery.hasModel(nextItem.id)){
+    const recovering=appOnly&&recovery.hasModel(nextItem.id);
+    const previousKind=item?.id===nextItem.id&&item?.version===nextItem.version&&!receipt&&readyPosts.isEnabled()?readyPosts.selected():null;
+    const intendedKind=(recovering?previousKind:preferredKind || previousKind) || nextItem.mediaKind || 'video';
+    if(appOnly && canCreate(intendedKind)===false && !recovering){
       openCombos();return false;
     }
     if (item?.id !== nextItem.id || receipt) resetForm();
@@ -228,7 +233,7 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
     products.open(item.recipe === 'produtos');
     form.hidden = !enabled;displayOnly.hidden = enabled;
     const invalidPrice = modelOptions.open(item,config);
-    const invalidPostPrice = readyPosts.open(item);
+    const invalidPostPrice = readyPosts.open(item,intendedKind);
     const invalidExtraFields = extraPosts.open(item);
     if(appOnly){const explanation=form.querySelector('.order-explanation[data-single-product]');
       explanation.textContent=explanation.textContent.replace('Receba pelo WhatsApp.','Acompanhe pelo app.');}
@@ -257,6 +262,9 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
     if(appOnly && !hasAppContext()){showError('Envie este pedido pelo app da iA4tube.');return;}
     const release = releaseInfo(item);
     if (release) {showError(release.label);return;}
+    // Freeze the person's output choice before busy synchronization or any file await.
+    const selectedKind=readyPosts.isEnabled()?readyPosts.selected():null;
+    const selectedOutput=selectedKind || item.mediaKind || 'video';
     errorBox.hidden = true;setBusy(true);
     try {
       const company = products.isEnabled() ? document.querySelector('#order-company').value.trim() : '';
@@ -277,7 +285,7 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
       const payload = products.isEnabled()
         ? {videoId:item.id,videoVersion:item.version,company,logo,consent:true,...await products.payload()}
         : {videoId:item.id,videoVersion:item.version,company,durationSeconds,logo,photo,consent:true};
-      if (readyPosts.isEnabled()) payload.mediaKind = readyPosts.selected();
+      if (selectedKind) payload.mediaKind = selectedKind;
       if (templateFields) payload.templateFields=templateFields;
       if (!products.isEnabled()) {
         if (productDescription) payload.productDescription = productDescription;
@@ -289,8 +297,8 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
       }
       const appScope = attemptScope();
       const fingerprint = await fingerprintPayload(appScope ? {...payload,appCalendarSession:appScope} : payload);
-      if(appOnly && canCreate(payload.mediaKind || 'video')===false && !REQUEST_ID.test(sessionStorage.getItem(PENDING_PREFIX+fingerprint) || ''))
-        throw new Error(quotaCombosLabel(payload.mediaKind || 'video',canCreate)+'. Você pode continuar vendo os modelos e conferir uma tentativa pendente.');
+      if(appOnly && canCreate(selectedOutput)===false && !REQUEST_ID.test(sessionStorage.getItem(PENDING_PREFIX+fingerprint) || ''))
+        throw new Error(quotaCombosLabel(selectedOutput,canCreate)+'. Você pode continuar vendo os modelos e conferir uma tentativa pendente.');
       let requestId;
       try {
         // Finalize the previous known receipt before another model can replace

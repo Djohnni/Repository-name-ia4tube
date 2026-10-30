@@ -1,4 +1,4 @@
-import {canChooseModel} from './ready-posts.js?v=20261030-availability-v1';
+import {canChooseModel,isReadyPost} from './ready-posts.js?v=20261030-media-quota-v1';
 
 export function quotaCombosLabel(kind,canCreate) {
   if(canCreate('image')===false && canCreate('video')===false)return 'Suas artes acabaram · Ver combos';
@@ -13,4 +13,11 @@ export function orderCallToAction(item,{inApp=false,recovering=false,canCreate=(
   if(!canChooseModel(item,canCreate))return {kind:'combos',
     label:quotaCombosLabel(item.mediaKind || 'video',canCreate),disabled:false};
   return {kind:'order',label:'Fazer meu pedido',disabled:false};
+}
+
+export function alternateOrderCallToAction(item,options={}) {
+  if(!isReadyPost(item) || orderCallToAction(item,options).kind!=='combos')return null;
+  const kind=(item.mediaKind || 'video')==='image'?'video':'image';
+  if(options.canCreate?.(kind)!==true)return null;
+  return {kind,label:kind==='video'?'Fazer vídeo':'Fazer imagem'};
 }

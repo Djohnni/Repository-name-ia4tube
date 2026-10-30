@@ -1,6 +1,6 @@
 import {legacyVideoCatalog} from './legacy-catalog.mjs';
 import test from 'node:test';
-import {orderCallToAction} from '../order-cta.js';
+import {orderCallToAction,alternateOrderCallToAction} from '../order-cta.js';
 import assert from 'node:assert/strict';
 import {readFile,stat} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
@@ -141,19 +141,21 @@ function interfaceFixture(now=opens-1) {
     const attributes=new Map(),classes=new Map(),title={textContent:''};
     const notice={id:'release-'+item.id,hidden:true,querySelector:selector=>{assert.equal(selector,'strong');return title;}};
     const button={disabled:false,innerHTML:'',setAttribute:(name,value)=>attributes.set(name,value),removeAttribute:name=>attributes.delete(name)};
+    const secondary={hidden:true,disabled:false,textContent:'',listeners:new Map(),addEventListener(name,run){this.listeners.set(name,run);}};
     const badge={hidden:true,textContent:''};
-    return {dataset:{id:item.id},attributes,classes,notice,button,badge,title,
+    return {dataset:{id:item.id},attributes,classes,notice,button,secondary,badge,title,
       classList:{toggle:(name,value)=>classes.set(name,value)},
       querySelector:selector=>{
         if(selector==='.release-notice')return notice;
         if(selector==='.make-button')return button;
+        if(selector==='.make-alternative')return secondary;
         if(selector==='.profile-release')return badge;
         assert.fail('Release refresh must never touch media: '+selector);
       }};
   };
   const cards=items.map(makeCard),count={textContent:''},timers=new Map();let nextTimer=0;
   const context={cards,playlist:items,catalog:items,releaseTimer:undefined,orderCta:()=> 'Fazer meu pedido',
-    order:{canRecover:()=>false},appCheckout:()=>true,appCreationAllowed:()=>null,orderCallToAction,
+    order:{canRecover:()=>false},appCheckout:()=>true,appCreationAllowed:()=>null,orderCallToAction,alternateOrderCallToAction,
     Date:{now:()=>now},releaseInfo,icon:name=>'<svg data-icon="'+name+'"></svg>',
     document:{querySelector:selector=>{assert.equal(selector,'#orderable-count');return count;},
       querySelectorAll:selector=>{assert.equal(selector,'.profile-card');return cards;}},
@@ -225,9 +227,16 @@ test('confirmed exhaustion offers combos while future releases and public storef
   for(const card of f.cards)if(!card.button.disabled)assert.match(card.button.innerHTML,/Peça pelo app/);
 });
 
-test('dual-format image models keep creation when either output is available and recovery wins at zero',()=>{
+test('dual-format cards honor their represented output and offer only a confirmed explicit alternative',()=>{
   const item={orderEnabled:true,mediaKind:'image',creativeTemplate:'posts-prontos-01-v1'};
-  for(const kind of ['image','video'])assert.equal(orderCallToAction(item,{inApp:true,canCreate:value=>value===kind}).kind,'order');
+  assert.equal(orderCallToAction(item,{inApp:true,canCreate:kind=>kind==='image'}).kind,'order');
+  const videoOnly={inApp:true,canCreate:kind=>kind==='video'};
+  assert.equal(orderCallToAction(item,videoOnly).kind,'combos');
+  assert.equal(orderCallToAction(item,videoOnly).label,'Ver combos para criar imagens');
+  assert.deepEqual(alternateOrderCallToAction(item,videoOnly),{kind:'video',label:'Fazer vídeo'});
+  for(const options of [{inApp:true,canCreate:()=>false},{inApp:true,canCreate:()=>null},
+    {...videoOnly,canCreate:kind=>kind==='image'?false:null},{...videoOnly,recovering:true},
+    {...videoOnly,release:{}},{...videoOnly,inApp:false}])assert.equal(alternateOrderCallToAction(item,options),null);
   assert.equal(orderCallToAction(item,{inApp:true,canCreate:()=>null}).kind,'order');
   assert.equal(orderCallToAction(item,{inApp:true,canCreate:()=>false,recovering:true}).kind,'recovery');
   assert.equal(orderCallToAction(item,{inApp:true,canCreate:()=>false}).kind,'combos');
@@ -236,11 +245,26 @@ test('dual-format image models keep creation when either output is available and
   const fixedImage={orderEnabled:true,mediaKind:'image'};
   assert.equal(orderCallToAction(fixedImage,{inApp:true,canCreate:kind=>kind==='video'}).label,'Ver combos para criar imagens');
 });
+test('conditional alternate card click carries an explicit kind and rechecks pending and availability',()=>{
+  const f=interfaceFixture(opens+1000),item={...f.context.playlist[0],mediaKind:'image',creativeTemplate:'posts-prontos-01-v1'};
+  f.context.playlist[0]=item;f.context.appCreationAllowed=kind=>kind==='video';f.context.syncReleases();
+  const card=f.cards[0];assert.match(card.button.innerHTML,/Ver combos para criar imagens/);
+  assert.equal(card.secondary.hidden,false);assert.equal(card.secondary.textContent,'Fazer vídeo');
+  const calls=[];f.context.openPersonalize=(row,kind)=>calls.push({row,kind});
+  const binding=app.match(/function bindAlternateOrder\(card,item\) \{[\s\S]*?^\}/m)?.[0];assert.ok(binding);
+  runInNewContext(binding+'\nbindAlternateOrder(cards[0],playlist[0]);',f.context,{timeout:1000});
+  card.secondary.listeners.get('click')();assert.equal(calls.length,1);assert.equal(calls[0].kind,'video');assert.equal(calls[0].row,item);
+  f.context.order.canRecover=()=>true;f.context.syncReleases();assert.equal(card.secondary.hidden,true);
+  assert.match(card.button.innerHTML,/Conferir pedido/);card.secondary.listeners.get('click')();assert.equal(calls.length,1);
+  f.context.order.canRecover=()=>false;f.context.appCreationAllowed=()=>false;f.context.syncReleases();
+  assert.equal(card.secondary.hidden,true);card.secondary.listeners.get('click')();assert.equal(calls.length,1);
+});
+
 test('visibility, pageshow and focus refresh deadlines while the direct order action retains a guard',()=>{
   assert.match(app,/document\.addEventListener\('visibilitychange',\(\) => \{syncReleases\(\);playback\(\);\}\);/);
   assert.match(app,/addEventListener\('pageshow',syncReleases\);/);
   assert.match(app,/addEventListener\('focus',syncReleases\);/);
-  const open=app.match(/function openPersonalize\(item\) \{[\s\S]*?\n\}/)?.[0];assert.ok(open);
+  const open=app.match(/function openPersonalize\(item,preferredKind=null\) \{[\s\S]*?\n\}/)?.[0];assert.ok(open);
   assert.match(open,/const release = releaseInfo\(item\);/);
   assert.match(open,/if \(release\) \{syncReleases\(\);toast\(release\.label\);return;\}/);
 });
