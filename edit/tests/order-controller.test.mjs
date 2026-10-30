@@ -252,6 +252,20 @@ test('app waits for native context and financial ACK, preserves receipt then ret
   assert.notEqual(second.options.headers['Idempotency-Key'],f.requests[0].options.headers['Idempotency-Key']);
   f.succeed(1,savedIds[1],1990,await appReceipt(savedIds[1]));await next;assert.equal(returned,2);
 });
+for(const state of ['reserved','bound'])test('app preserves the configured Cloud Run receipt alias for '+state+' before returning',async t=>{
+  const receiptUrl='https://marcagrande-pedidos-505450944454.us-central1.run.app/r/'+savedIds[0]+'#'+'B'.repeat(43);
+  let returned=0;
+  const f=fixture(t,{...appOptions,onReturnToOrigin:(_origin,saved)=>{
+    returned++;assert.equal(saved.receiptUrl,receiptUrl);assert.equal(saved.admission.state,state);
+    assert.equal(JSON.parse(f.session.getItem('ia4tube.edit.receipt.v1')).receiptUrl,receiptUrl);
+    return true;
+  }});
+  const pending=f.submit();await f.waitForRequest(1);
+  f.succeed(0,savedIds[0],1990,{...await appReceipt(savedIds[0],{state}),receiptUrl});await pending;
+  assert.equal(returned,1);assert.equal(f.navigation.length,0);assert.equal(f.controller.isBusy(),false);
+  assert.equal(f.node('#whatsapp-link').hidden,true);
+});
+
 for(const failure of ['missing admission','wrong context','cancelled','missing proof'])test('app refuses '+failure+' and retries the same identity',async t=>{
   let returned=0;const f=fixture(t,{...appOptions,onReturnToOrigin:()=>{returned++;return true;}}),first=f.submit();
   await f.waitForRequest(1);const extra=await appReceipt();

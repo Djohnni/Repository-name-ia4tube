@@ -98,7 +98,7 @@ test('Escape restores interface without affecting unrelated keys or playback',()
 });
 test('toggle click is wired and state is synchronized after rendering another playlist',() => {
   assert.match(app,/article\.querySelector\('\.interface-toggle'\)\.addEventListener\('click',\(\) => setVideoOnly\(!videoOnly\)\)/);
-  const render = app.match(/function renderFeed\([\s\S]*?\n\}\nfunction goTo/)?.[0];
+  const render = app.match(/function renderFeed\([\s\S]*?\r?\n\}\r?\nfunction goTo/)?.[0];
   assert.ok(render);
   assert.match(render,/syncInterface\(\)/);
 });

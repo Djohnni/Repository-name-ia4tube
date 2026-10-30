@@ -1,6 +1,6 @@
 import { requestAppCalendar, appCalendarAttemptScope } from './app-calendar.js?v=20261030-availability-v1';
 import { createOrderRecovery } from './order-recovery.js?v=20261030-availability-v1';
-import { buildMultipartOrder, idempotencyKey, normalizeReceipt, calendarContextHash, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261029-app-admission-v1';
+import { buildMultipartOrder, idempotencyKey, normalizeReceipt, calendarContextHash, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261030-receipt-alias-v1';
 import { createModelOptions } from './model-options.js?v=20261020-styles';
 import { createReadyPostOptions,canChooseModel } from './ready-posts.js?v=20261030-availability-v1';
 import { createExtraPostOptions } from './ready-posts-extra.js?v=20261029-extra40';

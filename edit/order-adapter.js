@@ -7,6 +7,10 @@ const UUID_V4 = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9
 const ORDER_ID = /^[A-Za-z0-9_-]{1,100}$/;
 const IMAGE_TYPES = new Set(['image/png','image/jpeg','image/webp']);
 const WHATSAPP_RECIPIENT = '554791049079';
+const RECEIPT_ORIGINS = new Set([
+  new URL(SUBMIT_ENDPOINT).origin,
+  'https://marcagrande-pedidos-505450944454.us-central1.run.app',
+]);
 
 function uploadBlob(upload,maxBytes,label) {
   if (!upload || !IMAGE_TYPES.has(upload.mime) || typeof upload.name !== 'string' ||
@@ -135,7 +139,7 @@ export function normalizeReceipt(result,payload,{requireAdmission=false,contextH
     admission={schemaVersion:1,admissionId:value.admissionId,editOrderId:value.editOrderId,requestHash:value.requestHash,
       contextHash:value.contextHash,mediaKind:value.mediaKind,quantity:1,state:value.state,reservedAt:value.reservedAt,
       planningId:value.planningId,pedidoId:value.pedidoId};
-    try{const url=new URL(result.receiptUrl);if(url.username || url.password || url.origin!==new URL(SUBMIT_ENDPOINT).origin ||
+    try{const url=new URL(result.receiptUrl);if(url.protocol!=='https:' || url.username || url.password || !RECEIPT_ORIGINS.has(url.origin) ||
       url.pathname!=='/r/'+result.orderId || url.search || !/^#[A-Za-z0-9_-]{43}$/.test(url.hash))throw Error();receiptUrl=url.href;}
     catch{throw new Error('A confirmação não preservou o comprovante. Tente novamente com a mesma tentativa.');}
   }

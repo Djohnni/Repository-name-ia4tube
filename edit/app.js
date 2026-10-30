@@ -1,4 +1,4 @@
-import { createOrderController } from './order.js?v=20261030-availability-v1';
+import { createOrderController } from './order.js?v=20261030-receipt-alias-v1';
 import { appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability } from './app-calendar.js?v=20261030-availability-v1';
 import { captureOrderOrigin,resolveOrderOrigin } from './order-origin.js?v=20261029-app-admission-v1';
 import { feedItems,canChooseModel } from './ready-posts.js?v=20261030-availability-v1';
