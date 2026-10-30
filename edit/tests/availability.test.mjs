@@ -1,6 +1,6 @@
 import {legacyVideoCatalog} from './legacy-catalog.mjs';
 import test from 'node:test';
-import {canChooseModel} from '../ready-posts.js';
+import {orderCallToAction} from '../order-cta.js';
 import assert from 'node:assert/strict';
 import {readFile,stat} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
@@ -153,7 +153,7 @@ function interfaceFixture(now=opens-1) {
   };
   const cards=items.map(makeCard),count={textContent:''},timers=new Map();let nextTimer=0;
   const context={cards,playlist:items,catalog:items,releaseTimer:undefined,orderCta:()=> 'Fazer meu pedido',
-    order:{canRecover:()=>false},appCheckout:()=>true,appCreationAllowed:()=>null,canChooseModel,
+    order:{canRecover:()=>false},appCheckout:()=>true,appCreationAllowed:()=>null,orderCallToAction,
     Date:{now:()=>now},releaseInfo,icon:name=>'<svg data-icon="'+name+'"></svg>',
     document:{querySelector:selector=>{assert.equal(selector,'#orderable-count');return count;},
       querySelectorAll:selector=>{assert.equal(selector,'.profile-card');return cards;}},
@@ -201,13 +201,40 @@ test('exact release refresh unlocks the five in place, keeps the package hidden 
   f.setNow(opens+86400000);f.context.syncReleases();assert.equal(f.timers.size,0);assert.equal(f.count.textContent,27);
 });
 
-test('quota hides only new creation per output kind and preserves recovery without rebuilding catalog media',()=>{
+test('quota keeps a typed combos action visible and preserves recovery without rebuilding catalog media',()=>{
   const f=interfaceFixture(opens+1000);f.context.playlist=f.context.playlist.map((row,index)=>index===0?{...row,mediaKind:'image'}:row);
+  const originals=f.cards.slice();
   f.context.appCreationAllowed=kind=>kind==='image'?true:false;f.context.syncReleases();
-  assert.equal(f.cards[0].button.hidden,false);assert.equal(f.cards[1].button.hidden,true);
+  assert.equal(f.cards[0].button.hidden,false);assert.match(f.cards[0].button.innerHTML,/Fazer meu pedido/);
+  assert.equal(f.cards[1].button.hidden,false);assert.match(f.cards[1].button.innerHTML,/Ver combos para criar vídeos/);
+  assert.doesNotMatch(f.cards[1].button.innerHTML,/artes acabaram/);assert.equal(f.cards[1].button.disabled,false);
   const pendingId=f.cards[1].dataset.id;f.context.order.canRecover=id=>id===pendingId;f.context.syncReleases();
   assert.equal(f.cards[1].button.hidden,false);assert.match(f.cards[1].button.innerHTML,/Conferir pedido/);
   f.context.appCreationAllowed=()=>null;f.context.syncReleases();assert.ok(f.cards.every(card=>!card.button.hidden));
+  assert.ok(f.cards.every((card,index)=>card===originals[index]));
+});
+
+test('confirmed exhaustion offers combos while future releases and public storefront keep their own actions',()=>{
+  const f=interfaceFixture();f.context.appCreationAllowed=()=>false;f.context.syncReleases();
+  for(const card of f.cards) {
+    assert.equal(card.button.hidden,false);
+    if(card.button.disabled)assert.match(card.button.innerHTML,/Em breve/);
+    else assert.match(card.button.innerHTML,/Suas artes acabaram · Ver combos/);
+  }
+  f.context.appCheckout=()=>false;f.context.syncReleases();
+  for(const card of f.cards)if(!card.button.disabled)assert.match(card.button.innerHTML,/Peça pelo app/);
+});
+
+test('dual-format image models keep creation when either output is available and recovery wins at zero',()=>{
+  const item={orderEnabled:true,mediaKind:'image',creativeTemplate:'posts-prontos-01-v1'};
+  for(const kind of ['image','video'])assert.equal(orderCallToAction(item,{inApp:true,canCreate:value=>value===kind}).kind,'order');
+  assert.equal(orderCallToAction(item,{inApp:true,canCreate:()=>null}).kind,'order');
+  assert.equal(orderCallToAction(item,{inApp:true,canCreate:()=>false,recovering:true}).kind,'recovery');
+  assert.equal(orderCallToAction(item,{inApp:true,canCreate:()=>false}).kind,'combos');
+  assert.equal(orderCallToAction(item,{inApp:true,canCreate:()=>false,recovering:true,release:{}}).kind,'release');
+  assert.equal(orderCallToAction({...item,orderEnabled:false},{inApp:true,canCreate:()=>false}).kind,'details');
+  const fixedImage={orderEnabled:true,mediaKind:'image'};
+  assert.equal(orderCallToAction(fixedImage,{inApp:true,canCreate:kind=>kind==='video'}).label,'Ver combos para criar imagens');
 });
 test('visibility, pageshow and focus refresh deadlines while the direct order action retains a guard',()=>{
   assert.match(app,/document\.addEventListener\('visibilitychange',\(\) => \{syncReleases\(\);playback\(\);\}\);/);

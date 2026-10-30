@@ -1,7 +1,8 @@
-import { createOrderController } from './order.js?v=20261030-receipt-alias-v1';
-import { appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability } from './app-calendar.js?v=20261030-availability-v1';
+import { createOrderController } from './order.js?v=20261030-combos-v1';
+import { appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos } from './app-calendar.js?v=20261030-combos-v1';
+import { orderCallToAction } from './order-cta.js?v=20261030-combos-v1';
 import { captureOrderOrigin,resolveOrderOrigin } from './order-origin.js?v=20261029-app-admission-v1';
-import { feedItems,canChooseModel } from './ready-posts.js?v=20261030-availability-v1';
+import { feedItems } from './ready-posts.js?v=20261030-availability-v1';
 import { isExtraReadyPost } from './ready-posts-extra.js?v=20261029-extra40';
 import {IMAGE_CATEGORIES,filterImageItems} from './image-categories.js?v=20261029-products-first';
 import {createImageCategoryMenu} from './image-category-menu.js?v=20261029-products-first';
@@ -69,7 +70,7 @@ const appCheckout=()=>Boolean(appCalendarAttemptScope()); // UX hint; the receiv
 const orderCta=()=>appCheckout()?'Fazer meu pedido':'Peça pelo app';
 const order = createOrderController({dialog:personalize,money,toast,onBusy:playback,appOnly:true,
   hasAppContext:appCheckout,
-  canCreate:appCreationAllowed,onAdmitted:refreshAppAvailability,onPendingChange:syncReleases,
+  canCreate:appCreationAllowed,onAdmitted:refreshAppAvailability,onPendingChange:syncReleases,onOpenCombos:openAppCombos,
   originFor:item=>captureOrderOrigin({item,items:playlist,key:playlistKey,hash:location.hash,categoryId:selectedImageCategory,query:imageSearch}),
   onReturnToOrigin:returnToOrderOrigin,
   onSaved:detail => document.dispatchEvent(new CustomEvent('ia4tube:edit-order-saved',{detail:{...detail,videoTitle:catalog.find(item => item.id === detail.videoId)?.label}}))});
@@ -127,10 +128,10 @@ function syncReleases() {
     card.classList.toggle('is-scheduled',Boolean(release));
     notice.hidden = !release;
     if (release) notice.querySelector('strong').textContent = release.label;
-    button.disabled = Boolean(release);
     const recovering=order.canRecover(item.id);
-    button.hidden=appCheckout()&&!canChooseModel(item,appCreationAllowed)&&!recovering;
-    button.innerHTML = (release ? 'Em breve' : recovering?'Conferir pedido':item.orderEnabled ? orderCta() : 'Ver detalhes') + ' ' + icon(release ? 'lock' : 'arrow-up-right');
+    const action=orderCallToAction(item,{inApp:appCheckout(),recovering,canCreate:appCreationAllowed,release});
+    button.disabled=action.disabled;button.hidden=false;
+    button.innerHTML = action.label + ' ' + icon(release ? 'lock' : 'arrow-up-right');
     if (release) button.setAttribute('aria-describedby',notice.id);
     else button.removeAttribute('aria-describedby');
   });

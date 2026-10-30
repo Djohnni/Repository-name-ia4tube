@@ -71,5 +71,5 @@ test('optional animated previews are guarded to extras, deferred, contained and 
   const app=await readFile(new URL('../app.js',import.meta.url),'utf8'),css=await readFile(new URL('../styles.css',import.meta.url),'utf8'),page=await readFile(new URL('../index.html',import.meta.url),'utf8');
   assert.match(app,/isExtraReadyPost\(item\) && typeof item\.video==='string' && item\.video/);
   const animated=app.match(/function createAnimatedPostCard\(item\) \{[\s\S]*?^\}/m)[0];assert.match(animated,/<video data-src=/);assert.match(animated,/preload="none"/);assert.doesNotMatch(animated,/<video src=/);assert.match(animated,/dataset\.mediaKind='image'/);
-  assert.match(css,/\.animated-post-card video\{object-fit:contain!important/);assert.match(page,/data-media-kind="image" aria-selected="true"/);assert.match(page,/app\.js\?v=20261030-receipt-alias-v1/);
+  assert.match(css,/\.animated-post-card video\{object-fit:contain!important/);assert.match(page,/data-media-kind="image" aria-selected="true"/);assert.match(page,/app\.js\?v=20261030-combos-v1/);
 });

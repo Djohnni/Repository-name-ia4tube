@@ -1,4 +1,5 @@
-import { requestAppCalendar, appCalendarAttemptScope } from './app-calendar.js?v=20261030-availability-v1';
+import { requestAppCalendar, appCalendarAttemptScope } from './app-calendar.js?v=20261030-combos-v1';
+import { quotaCombosLabel } from './order-cta.js?v=20261030-combos-v1';
 import { createOrderRecovery } from './order-recovery.js?v=20261030-availability-v1';
 import { buildMultipartOrder, idempotencyKey, normalizeReceipt, calendarContextHash, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261030-receipt-alias-v1';
 import { createModelOptions } from './model-options.js?v=20261020-styles';
@@ -69,7 +70,7 @@ export function confirmSavedAttempt(saved,storage = localStorage,pendingStorage 
 export function createOrderController({dialog,money,toast,onBusy,onSaved = () => {},appOnly=false,
   hasAppContext=()=>Boolean(appCalendarAttemptScope()),requestCalendar=requestAppCalendar,
   originFor=()=>null,onReturnToOrigin=()=>false,canCreate=()=>null,onPendingChange=()=>{},
-  attemptScope=appCalendarAttemptScope,onAdmitted=()=>{}}) {
+  attemptScope=appCalendarAttemptScope,onAdmitted=()=>{},onOpenCombos=()=>false}) {
   const form = document.querySelector('#order-form');
   const errorBox = document.querySelector('#order-error');
   const submit = document.querySelector('#send-order');
@@ -145,6 +146,26 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
   function resetForm() {editingPhrase = false;phraseEditingSeed=null;clearUploads();form.reset();syncImageFields();syncPhraseFields();}
   form.addEventListener('reset',() => {editingPhrase = false;phraseEditingSeed=null;clearUploads();});
 
+  const currentOutput=()=>readyPosts.selected() || item?.mediaKind || 'video';
+  function wantsCombos() {
+    return appOnly && !busy && !receipt && item && !form.hidden && hasAppContext() &&
+      !releaseInfo(item) && canCreate(currentOutput())===false && !recovery.hasModel(item.id);
+  }
+  function openCombos() {
+    let opened=false;try{opened=onOpenCombos()===true;}catch{}
+    if(!opened)toast('Abra Combo na tela inicial do app para comprar mais artes.');
+  }
+  function syncSubmitAction() {
+    const buying=wantsCombos();
+    submit.type=buying?'button':'submit';
+    submit.innerHTML=busy?'Salvando seu pedido…':buying?quotaCombosLabel(currentOutput(),canCreate):
+      appOnly && item && recovery.hasModel(item.id)?'Conferir pedido':initialSubmitLabel;
+  }
+  submit.addEventListener('click',event=>{
+    if(wantsCombos()){event.preventDefault();openCombos();}
+  });
+  form.addEventListener('change',syncSubmitAction);
+
   function setBusy(value) {
     busy = value;
     [...form.elements].forEach(control => control.disabled = value);
@@ -154,7 +175,7 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
     syncImageFields();
     syncPhraseFields();
     dialog.querySelector('.close-dialog').disabled = value;
-    submit.innerHTML = value ? 'Salvando seu pedido…' : initialSubmitLabel;
+    syncSubmitAction();
     form.setAttribute('aria-busy',String(value));onBusy();
   }
   function showError(message) {errorBox.textContent = message;errorBox.hidden = false;errorBox.scrollIntoView({block:'nearest'});}
@@ -193,12 +214,12 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
   function open(nextItem,nextConfig) {
     if (busy) return;
     if(appOnly && !hasAppContext()){toast('Peça pelo app da iA4tube. O catálogo continua disponível para você escolher.');return false;}
-    if(appOnly && !canChooseModel(nextItem,canCreate) && !recovery.hasModel(nextItem.id)){
-      toast('Suas artes disponíveis acabaram. Você pode continuar vendo os modelos.');return false;
-    }
     if(appOnly && receipt?.videoId===nextItem.id && recovery.hasModel(nextItem.id)){showReceipt(receipt);return true;}
     const release = releaseInfo(nextItem);
     if (release) {toast(release.label);return false;}
+    if(appOnly && !canChooseModel(nextItem,canCreate) && !recovery.hasModel(nextItem.id)){
+      openCombos();return false;
+    }
     if (item?.id !== nextItem.id || receipt) resetForm();
     item = nextItem;config = nextConfig;receipt = null;origin = originFor(nextItem);
     document.querySelector('#sheet-title').textContent = 'Gostou? Faça o seu.';
@@ -215,7 +236,7 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
     if (enabled && (invalidPrice || invalidPostPrice || invalidExtraFields)) {
       form.hidden = true;displayOnly.hidden = false;displayOnly.textContent = 'O preço deste modelo precisa ser conferido no programa antes de receber pedidos.';
     } else displayOnly.textContent = 'Este vídeo é apenas uma referência visual. A personalização ainda não foi habilitada para ele.';
-    syncPhraseFields();
+    syncPhraseFields();syncSubmitAction();
     return true;
   }
   function restore() {
@@ -230,7 +251,9 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
   }
   form.addEventListener('submit',async event => {
     event.preventDefault();
-    if (busy || receipt || form.hidden || !item || !config || !form.reportValidity()) return;
+    if (busy || receipt || form.hidden || !item || !config) return;
+    if(wantsCombos()){openCombos();return;}
+    if(!form.reportValidity())return;
     if(appOnly && !hasAppContext()){showError('Envie este pedido pelo app da iA4tube.');return;}
     const release = releaseInfo(item);
     if (release) {showError(release.label);return;}
@@ -267,7 +290,7 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
       const appScope = attemptScope();
       const fingerprint = await fingerprintPayload(appScope ? {...payload,appCalendarSession:appScope} : payload);
       if(appOnly && canCreate(payload.mediaKind || 'video')===false && !REQUEST_ID.test(sessionStorage.getItem(PENDING_PREFIX+fingerprint) || ''))
-        throw new Error('Suas artes disponíveis acabaram. Você pode continuar vendo os modelos e conferir uma tentativa pendente.');
+        throw new Error(quotaCombosLabel(payload.mediaKind || 'video',canCreate)+'. Você pode continuar vendo os modelos e conferir uma tentativa pendente.');
       let requestId;
       try {
         // Finalize the previous known receipt before another model can replace
@@ -358,5 +381,5 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
     if (location.hash === '#pedido-salvo' && !appOnly) history.replaceState(null,'','#hoje');
   });
   return {open,restore,isBusy:() => busy,canRecover:modelId=>appOnly&&recovery.hasModel(modelId),
-    refreshAvailability:()=>readyPosts.sync(busy)};
+    refreshAvailability:()=>{readyPosts.sync(busy);syncSubmitAction();}};
 }

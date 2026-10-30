@@ -55,8 +55,8 @@ test('official alias never bypasses admission identity or cancelled-state valida
 });
 
 test('entry and every changed module edge load the receipt fix with a new cache version',async()=>{
-  const version='20261030-receipt-alias-v1';
-  for(const [file,target] of [['index.html','app.js'],['app.js','order.js'],['order.js','order-adapter.js']]) {
+  for(const [file,target,version] of [['index.html','app.js','20261030-combos-v1'],
+    ['app.js','order.js','20261030-combos-v1'],['order.js','order-adapter.js','20261030-receipt-alias-v1']]) {
     const source=await readFile(new URL('../'+file,import.meta.url),'utf8');
     assert.ok(source.includes('./'+target+'?v='+version),file+' must version '+target);
   }

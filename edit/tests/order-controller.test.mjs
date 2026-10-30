@@ -295,26 +295,68 @@ test('app return failure and analytics failure preserve saved confirmation witho
   assert.ok(f.session.getItem('ia4tube.edit.receipt.v1'));assert.ok(f.toasts.every(text=>!text.includes('WhatsApp')));
 });
 test('confirmed zero quota blocks a new form while unknown app86 quota keeps it available',async t=>{
-  let allowed=false;const f=fixture(t,{...appOptions,canCreate:()=>allowed});
+  let allowed=false,combos=0;const f=fixture(t,{...appOptions,canCreate:()=>allowed,onOpenCombos:()=>{combos++;return true;}});
+  const before=combos;
   assert.equal(f.controller.open(item,config),false);await f.submit();assert.equal(f.requests.length,0);
+  assert.equal(combos,before+1);assert.equal(f.reads.length,0);assert.equal(f.local.values.size,0);
   allowed=null;assert.equal(f.controller.open(item,config),true);f.fill();
   const pending=f.submit();await f.waitForRequest(1);f.succeed(0,savedIds[0],1990,await appReceipt());await pending;
+  assert.equal(combos,before+1);
+});
+
+test('app87 without native combos gives explicit Home guidance and never sends an order',async t=>{
+  const f=fixture(t,{...appOptions,canCreate:()=>false});
+  assert.equal(f.controller.open(item,config),false);await f.submit();
+  assert.equal(f.toasts.at(-1),'Abra Combo na tela inicial do app para comprar mais artes.');
+  assert.equal(f.requests.length,0);assert.equal(f.reads.length,0);assert.equal(f.navigation.length,0);
+});
+
+test('gift image offers video combos in an open form without validity files calendar or POST',async t=>{
+  let typed=false,combos=0,nativeRequests=0;
+  const f=fixture(t,{...appOptions,canCreate:kind=>typed?kind==='image':null,
+    onOpenCombos:()=>{combos++;return true;},requestCalendar:async()=>{nativeRequests++;return {ticket:appTicket};}});
+  typed=true;f.controller.refreshAvailability();
+  const button=f.node('#send-order');assert.equal(button.type,'button');
+  assert.match(button.innerHTML,/Ver combos para criar vídeos/);assert.doesNotMatch(button.innerHTML,/artes acabaram/);
+  f.form.reportValidity=()=>{assert.fail('A purchase action must not validate the order form.');};
+  await button.emit('click');assert.equal(combos,1);
+  assert.equal(f.requests.length,0);assert.equal(nativeRequests,0);assert.equal(f.reads.length,0);
+  assert.equal(f.local.values.size,0);
+  await f.submit();assert.equal(combos,2,'a programmatic submit also takes the purchase branch before validation');
+  assert.equal(f.requests.length,0);assert.equal(nativeRequests,0);assert.equal(f.reads.length,0);
+});
+
+test('exhaustion while the form is open changes the button and unknown availability restores checkout',async t=>{
+  let allowed=null,combos=0;
+  const f=fixture(t,{...appOptions,canCreate:()=>allowed,onOpenCombos:()=>{combos++;return true;}});
+  allowed=false;f.controller.refreshAvailability();
+  const button=f.node('#send-order');assert.equal(button.type,'button');assert.match(button.innerHTML,/Suas artes acabaram · Ver combos/);
+  const original=f.form.reportValidity;f.form.reportValidity=()=>{assert.fail('No validation before native combos.');};
+  await button.emit('click');assert.equal(combos,1);assert.equal(f.reads.length,0);assert.equal(f.requests.length,0);
+  allowed=null;f.controller.refreshAvailability();assert.equal(button.type,'submit');assert.match(button.innerHTML,/Enviar pedido/);
+  f.form.reportValidity=original;
 });
 test('zero quota still permits the exact uncertain request after reload and rejects changed new content',async t=>{
-  let allowed=null,refreshes=0;const options={...appOptions,canCreate:()=>allowed,onAdmitted:()=>{refreshes++;}};
+  let allowed=null,refreshes=0,combos=0;const options={...appOptions,canCreate:()=>allowed,onAdmitted:()=>{refreshes++;},
+    onOpenCombos:()=>{combos++;return true;}};
   const f=fixture(t,options),first=f.submit(),initial=await f.waitForRequest(1);
   initial.reject(new TypeError('lost ACK'));await first;allowed=false;
+  f.controller.refreshAvailability();assert.equal(f.node('#send-order').type,'submit');
+  assert.equal(f.node('#send-order').innerHTML,'Conferir pedido');
   assert.equal(f.controller.canRecover(item.id),true);
   const reloaded=createOrderController({dialog:f.dialog,money:String,toast:()=>{},onBusy(){},...options});
   assert.equal(reloaded.canRecover(item.id),true);assert.equal(reloaded.open(item,config),true);f.fill();
   await f.choose('#order-logo',{name:'logo.png',type:'image/png',size:7,data:btoa('changed')});
   await f.submit();assert.equal(f.requests.length,1);
+  assert.equal(combos,0);
   assert.match(f.node('#order-error').textContent,/acabaram/);
   await f.choose('#order-logo',{name:'logo.png',type:'image/png',size:4,data:btoa('logo')});
   const retry=f.submit(),second=await f.waitForRequest(2);
   assert.equal(second.options.headers['Idempotency-Key'],initial.options.headers['Idempotency-Key']);
   f.succeed(1,savedIds[0],1990,await appReceipt());await retry;
+  assert.equal(combos,0);
   assert.equal(refreshes,1);assert.equal(reloaded.canRecover(item.id),false);assert.equal(reloaded.open(item,config),false);
+  assert.equal(combos,1);
 });
 test('image-only availability hides video format without changing quoted amounts or image choice',t=>{
   const f=fixture(t,{...appOptions,canCreate:kind=>kind==='image'});f.controller.open(extraItem(),config);
