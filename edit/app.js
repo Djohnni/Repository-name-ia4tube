@@ -1,3 +1,4 @@
+import {createMyImages} from './my-images.js?v=20261101-my-images-v1';
 import { createOrderController } from './order.js?v=20261030-media-quota-v1';
 import { appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos } from './app-calendar.js?v=20261030-combos-v1';
 import { orderCallToAction,alternateOrderCallToAction } from './order-cta.js?v=20261030-media-quota-v1';
@@ -39,7 +40,7 @@ const mediaPath = value => {
 document.querySelectorAll('[data-icon]').forEach(el => el.innerHTML = icon(el.dataset.icon));
 const feed = document.querySelector('#feed');
 const personalize = document.querySelector('#personalize-dialog');
-const about = document.querySelector('#about-dialog');
+const about = document.querySelector('#my-images-dialog');
 const progress = document.querySelector('#progress');
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 let catalog = [],daily = [],cards = [],videos = [],playlist = [];
@@ -352,8 +353,9 @@ function openPersonalize(item,preferredKind=null) {
   try {if (item.orderEnabled && !document.querySelector('#order-form').hidden) document.dispatchEvent(new CustomEvent('ia4tube:edit-order-open',{detail:{videoId:item.id,videoTitle:item.label,recipe:item.recipe}}));}
   catch { /* Optional measurement is independent from the form. */ }
 }
-document.querySelector('#preview-info').addEventListener('click',() => {about.showModal();playback();});
-for (const dialog of [personalize,about]) {
+const myImages=createMyImages({dialog:about,onOpenChange:playback});
+document.querySelector('#preview-info').addEventListener('click',() => myImages.open());
+for (const dialog of [personalize]) {
   dialog.querySelector('.close-dialog').addEventListener('click',() => {if (!order.isBusy() || dialog !== personalize) dialog.close();});
   dialog.addEventListener('cancel',event => {if (dialog === personalize && order.isBusy()) event.preventDefault();});
   dialog.addEventListener('close',playback);
@@ -362,7 +364,6 @@ for (const dialog of [personalize,about]) {
     const r = dialog.getBoundingClientRect();if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) dialog.close();
   });
 }
-document.querySelector('.close-about').addEventListener('click',() => about.close());
 document.querySelector('#back-feed').addEventListener('click',() => location.hash = 'hoje');
 
 function renderProfile() {

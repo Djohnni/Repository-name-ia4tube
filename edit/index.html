@@ -9,8 +9,9 @@
   <title>Imagens · iA4tube</title>
   <link rel="icon" href="./assets/logo.png">
   <link rel="stylesheet" href="./styles.css?v=20261030-media-quota-v1">
+  <link rel="stylesheet" href="./my-images.css?v=20261101-my-images-v1">
   <link rel="stylesheet" href="./image-categories.css?v=20261029-products-first">
-  <script type="module" src="./app.js?v=20261030-media-quota-v1"></script>
+  <script type="module" src="./app.js?v=20261101-my-images-v1"></script>
   <link rel="stylesheet" href="./analytics.css?v=20261022-analytics">
   <script type="module" src="./analytics.js?v=20261022-light-media"></script>
 </head>
@@ -30,7 +31,7 @@
       <section id="feed-view" aria-label="Imagens e vídeos">
         <header class="desktop-heading"><span>POSTS PRONTOS</span><p>Seu próximo anúncio está aqui.</p></header>
         <div class="stage">
-          <div class="feed-top"><button class="image-category-toggle image-category-mobile" type="button" aria-label="Categorias de imagens" aria-haspopup="dialog" aria-controls="image-categories-dialog" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Categorias</span></button><nav class="feed-tabs" aria-label="Tipo de publicação" role="tablist"><button class="feed-tab" type="button" role="tab" data-media-kind="image" aria-selected="true">Imagens</button><button class="feed-tab" type="button" role="tab" data-media-kind="video" aria-selected="false">Vídeos</button></nav><button class="preview-chip" id="preview-info" aria-label="Como funciona">COMO FUNCIONA</button></div>
+          <div class="feed-top"><button class="image-category-toggle image-category-mobile" type="button" aria-label="Categorias de imagens" aria-haspopup="dialog" aria-controls="image-categories-dialog" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Categorias</span></button><nav class="feed-tabs" aria-label="Tipo de publicação" role="tablist"><button class="feed-tab" type="button" role="tab" data-media-kind="image" aria-selected="true">Imagens</button><button class="feed-tab" type="button" role="tab" data-media-kind="video" aria-selected="false">Vídeos</button></nav><button class="preview-chip" id="preview-info" aria-label="Minhas imagens">MINHAS IMAGENS</button></div>
           <div id="feed" class="feed" tabindex="0" aria-label="Deslize para trocar de modelo"></div>
           <div id="swipe-guide" class="swipe-guide" aria-hidden="true" hidden>
             <svg viewBox="0 0 64 96" focusable="false" aria-hidden="true">
@@ -101,7 +102,25 @@
     <section id="order-success" class="order-success" aria-live="polite" hidden><span class="success-mark" data-icon="check"></span><h3>Pedido salvo!</h3><p id="saved-order-id"></p><p id="receipt-guidance">Seu comprovante foi preservado.</p><a id="whatsapp-link" class="primary-action" rel="noopener noreferrer" hidden>Continuar no WhatsApp <span data-icon="message"></span></a><button id="copy-message" class="secondary-action" type="button" hidden>Copiar mensagem</button><textarea id="saved-message" aria-label="Mensagem do pedido" readonly rows="6" hidden></textarea><button id="return-source" class="primary-action" type="button" hidden>Voltar ao mesmo modelo</button><button id="new-order" class="secondary-action" type="button">Escolher outro modelo</button><p class="order-local-note">A confirmação do envio não significa que a arte já está pronta. Acompanhe a produção pelo app.</p></section>
     <p id="display-only-note" class="preview-note" hidden>Este vídeo é apenas uma referência visual. A personalização ainda não foi habilitada para ele.</p>
   </dialog>
-  <dialog id="about-dialog" class="sheet about-sheet" aria-labelledby="about-title"><button class="close-dialog circle" aria-label="Fechar"><span data-icon="close"></span></button><span class="eyebrow">COMO FUNCIONA</span><h2 id="about-title">Uma nova forma de escolher.</h2><p>Deslize pelas imagens e vídeos. No perfil, você encontra também os modelos anteriores.</p><p>Peça pelo app da iA4tube. No navegador, o catálogo fica disponível para você escolher.</p><p class="preview-note">No app, o envio confirma sua autorização e reserva. Depois você volta ao mesmo modelo para continuar escolhendo.</p><button class="primary-action close-about">Entendi, vamos ver <span data-icon="arrow-up-right"></span></button></dialog>
+  <dialog id="my-images-dialog" class="sheet my-images-sheet" aria-labelledby="my-images-title">
+    <button type="button" class="close-dialog circle" data-my-images-close aria-label="Fechar minhas imagens">×</button>
+    <h2 id="my-images-title">Minhas imagens</h2>
+    <p class="my-images-intro">Publique uma imagem sua.</p>
+    <form>
+      <label class="order-field">Imagem<input type="file" accept="image/png,image/jpeg,image/webp" required></label>
+      <img data-my-images-preview alt="Sua imagem escolhida" hidden>
+      <label class="order-field">Legenda<textarea rows="3" maxlength="2200" placeholder="Escreva a legenda da publicação" required></textarea></label>
+      <p class="form-error" role="alert" hidden></p>
+      <button type="submit" class="primary-action" data-my-images-send>Escolher dia e hora</button>
+      <p class="order-local-note" data-my-images-hint>Usa 1 imagem do seu plano.</p>
+    </form>
+    <section class="my-images-success" data-my-images-success aria-live="polite" hidden>
+      <span class="success-mark" aria-hidden="true">✓</span><h3>Pronto!</h3>
+      <p data-my-images-receipt></p>
+      <button type="button" class="primary-action" data-my-images-another>Adicionar outra imagem</button>
+      <button type="button" class="secondary-action" data-my-images-close>Voltar aos modelos</button>
+    </section>
+  </dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <noscript><p class="no-script">Ative o JavaScript para assistir à prévia dos vídeos.</p></noscript>
 </body>
