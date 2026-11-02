@@ -1,97 +1,62 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-
-const site=new URL('../edit/',import.meta.url);
-const submitSource=await readFile(new URL('my-images-submit.js',site),'utf8');
-const {createImageSubmission}=await import('data:text/javascript;base64,'+Buffer.from(submitSource).toString('base64'));
-const controllerSource=await readFile(new URL('my-images.js',site),'utf8');
-const ID='b774fc09-60f9-4d55-9a9e-6063d056da9d',NEXT='84886f57-f7a1-437e-b30f-02a76453cf91';
-const receipt=id=>({ok:true,requestId:id,planningId:'pm_edit_'+id.replaceAll('-',''),pedidoId:'edit_'+id.replaceAll('-',''),status:'ready'});
-const original=new Blob(['original fixture bytes'],{type:'image/png'}),wrong=new Blob(['different fixture bytes'],{type:'image/png'});
-let moduleNumber=0;
+const source=await readFile(new URL('../edit/my-images.js',import.meta.url),'utf8');
+let number=0;
 class Element {
-  listeners=new Map();hidden=false;disabled=false;readOnly=false;textContent='';value='';files=[];formNoValidate=false;
-  addEventListener(type,listener){const values=this.listeners.get(type)||[];values.push(listener);this.listeners.set(type,values);}
-  async emit(type){const event={type,prevented:false,preventDefault(){this.prevented=true;}};for(const f of this.listeners.get(type)||[])await f(event);return event;}
-  removeAttribute(name){delete this[name];}
+  listeners=new Map();children=[];queries=new Map();dataset={};hidden=false;disabled=false;readOnly=false;value='';textContent='';files=[];
+  addEventListener(type,fn){this.listeners.set(type,[...(this.listeners.get(type)||[]),fn]);}
+  async emit(type){const event={prevented:false,preventDefault(){this.prevented=true;}};for(const fn of this.listeners.get(type)||[])await fn(event);return event;}
+  querySelector(selector){if(!this.queries.has(selector))this.queries.set(selector,new Element());return this.queries.get(selector);}
+  querySelectorAll(){return this.closes||[];}
+  append(node){node.parent=this;this.children.push(node);}
+  remove(){if(this.parent)this.parent.children=this.parent.children.filter(x=>x!==this);}
+  setAttribute(name,value){this[name]=value;}
+  showModal(){this.open=true;}close(){this.open=false;this.emit('close');}
 }
-async function fixture({pending=false,available=true,post=async value=>receipt(value.requestId)}={}) {
-  const values=new Map(),storage={getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value),removeItem:key=>values.delete(key)};
-  const calls={post:0,read:0,combos:0,refresh:0,saved:0},scope='fixture-owner-nonce';
-  const requestCalendar=async id=>({ticket:id+'.'+'A'.repeat(43)});
-  if(pending) {
-    const seed=createImageSubmission({scope,storage,requestCalendar,uuid:()=>ID,post:async()=>{throw Error('lost_response');}});
-    await assert.rejects(seed.send({image:original,caption:'Original caption'}));
-  }
-  const input=new Element(),caption=new Element(),send=new Element(),error=new Element(),preview=new Element(),success=new Element(),hint=new Element(),another=new Element(),close1=new Element(),close2=new Element(),receiptText=new Element();
-  error.hidden=true;preview.hidden=true;success.hidden=true;
-  const form=new Element();
-  form.reportValidity=()=>Boolean(input.files[0]&&caption.value.trim());
-  form.reset=()=>{input.files=[];caption.value='';};
-  const elements=new Map([['form',form],['input[type=file]',input],['textarea',caption],['[data-my-images-send]',send],['[role=alert]',error],['[data-my-images-preview]',preview],['[data-my-images-success]',success],['[data-my-images-hint]',hint],['[data-my-images-another]',another],['[data-my-images-receipt]',receiptText]]);
-  const dialog=new Element();dialog.open=false;dialog.querySelector=value=>elements.get(value);dialog.querySelectorAll=()=>[close1,close2];dialog.showModal=()=>{dialog.open=true;};dialog.close=()=>{dialog.open=false;return dialog.emit('close');};
-  globalThis.window={sessionStorage:storage};
-  globalThis.document={addEventListener(){},dispatchEvent(event){if(event.type==='ia4tube:my-image-saved')calls.saved++;return true;}};
-  if(!globalThis.CustomEvent)globalThis.CustomEvent=class {constructor(type,value){this.type=type;this.detail=value?.detail;}};
-  globalThis.__myImagesFixturePorts={
-    requestAppCalendar:requestCalendar,appCalendarAttemptScope:()=>scope,appCreationAllowed:()=>available,
-    refreshAppAvailability:()=>{calls.refresh++;},openAppCombos:()=>{calls.combos++;return true;},
-    createUploadField:()=>({reset(){},async read(){calls.read++;const file=input.files[0];return file?{name:'fixture.png',mime:file.type,data:Buffer.from(await file.arrayBuffer()).toString('base64')}:null;}}),
-    createImageSubmission:options=>createImageSubmission({...options,uuid:()=>NEXT,post:async value=>{calls.post++;return post(value);}}),
-  };
-  const source=controllerSource.replace(/^import .*;\r?\n/gm,'')+
-    '\n// isolated controller fixture '+(++moduleNumber);
-  const injected='const {requestAppCalendar,appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos,createUploadField,createImageSubmission}=globalThis.__myImagesFixturePorts;\n'+source;
-  const {createMyImages}=await import('data:text/javascript;base64,'+Buffer.from(injected).toString('base64'));
+function row(id,status='draft'){return {id,file:null,fileName:'image.png',caption:'Legenda '+id,date:null,time:null,status,needsFile:false,recoveryEditable:false};}
+async function fixture({available=true,rows=[]}={}){
+  const dialog=new Element(),form=dialog.querySelector('form'),input=dialog.querySelector('[data-my-images-add]'),list=dialog.querySelector('[data-my-images-list]'),send=dialog.querySelector('[data-my-images-send]');
+  const close=new Element();dialog.closes=[close];form.reportValidity=()=>true;
+  const calls={schedule:[],send:0,combos:0,caption:[]};let onChange,entries=rows,busy=false;
+  const queue={items:()=>entries,isBusy:()=>busy,remaining:()=>null,
+    add(files){entries.push(...files.map((file,i)=>({...row('new-'+i),file})));onChange();},
+    setCaption(id,text){entries.find(x=>x.id===id).caption=text;calls.caption.push(id);onChange();},
+    remove(id){entries=entries.filter(x=>x.id!==id);onChange();},replaceFile(id,file){entries.find(x=>x.id===id).file=file;onChange();},
+    async schedule(id){calls.schedule.push(id);Object.assign(entries.find(x=>x.id===id),{date:'2026-11-04',time:'18:21'});onChange();},
+    async sendAll(){calls.send++;},};
+  globalThis.window={sessionStorage:{}};globalThis.document={activeElement:null,createElement:()=>new Element(),addEventListener(){}};
+  globalThis.__myImagesUI={appCalendarAttemptScope:()=> 'fixture-nonce',appCreationAllowed:()=>available,refreshAppAvailability(){},openAppCombos(){calls.combos++;},createImageQueue(options){onChange=options.onChange;return queue;}};
+  const rewritten='const {appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos,createImageQueue}=globalThis.__myImagesUI;\n'+source.replace(/^import .*;\r?\n/gm,'')+'\n// fixture '+(++number);
+  const {createMyImages}=await import('data:text/javascript;base64,'+Buffer.from(rewritten).toString('base64'));
   const controller=createMyImages({dialog});controller.open();
-  return {controller,dialog,form,input,caption,send,error,success,hint,close1,calls,values,storage,
-    async choose(image,text){input.files=[image];caption.value=text;await input.emit('change');},
-    async clickSend(){if(send.disabled)return false;if(!send.formNoValidate&&!form.reportValidity())return false;await form.emit('submit');return true;},
-  };
+  return {dialog,form,input,list,send,close,calls,queue,entries,render:()=>onChange(),setBusy(value){busy=value;onChange();}};
 }
 
-test('wrong recovery input remains editable and can be corrected without replacing the pending attempt',async()=>{
-  const f=await fixture({pending:true});
-  await f.choose(wrong,'Wrong caption');await f.clickSend();
-  assert.equal(f.calls.post,0,'fingerprint mismatch must not POST');
-  assert.equal(f.input.disabled,false,'the user must still be able to choose the original image');
-  assert.equal(f.caption.readOnly,false,'the user must still be able to restore the original caption');
-  assert.equal(f.values.size,1,'the original pending attempt must remain preserved');
-  await f.choose(original,'Original caption');await f.clickSend();
-  assert.equal(f.calls.post,1);assert.equal(f.success.hidden,false);assert.equal(f.values.size,0);assert.equal(f.calls.saved,1);
+test('multiple selections create independent rows with day and hour below each caption',async()=>{
+  const f=await fixture();f.input.files=[new Blob(['one'],{type:'image/png'}),new Blob(['two'],{type:'image/jpeg'})];await f.input.emit('change');
+  assert.equal(f.list.children.length,2);assert.equal(f.entries.length,2);
+  for(const node of f.list.children){assert(node.innerHTML.indexOf('<textarea')<node.innerHTML.indexOf('my-image-schedule'));assert.equal(node.querySelector('.my-image-day').querySelector('span').textContent,'Escolher dia');}
+  assert.notEqual(f.list.children[0].querySelector('textarea'),f.list.children[1].querySelector('textarea'));
 });
-
-test('an uncertain matching POST locks its exact image/caption and retries that snapshot',async()=>{
-  let attempts=0;
-  const f=await fixture({post:async value=>{if(++attempts===1)throw Error('lost_response');return receipt(value.requestId);}});
-  await f.choose(original,'Original caption');await f.clickSend();
-  assert.equal(f.input.disabled,true);assert.equal(f.caption.readOnly,true);assert.equal(f.close1.disabled,false);
-  const reads=f.calls.read;await f.clickSend();
-  assert.equal(f.calls.post,2);assert.equal(f.calls.read,reads,'retry must reuse the locked snapshot');assert.equal(f.success.hidden,false);
+test('editing a caption preserves that input node and cursor ownership',async()=>{
+  const f=await fixture({rows:[row('a'),row('b')]});const caption=f.list.children[0].querySelector('textarea');
+  document.activeElement=caption;caption.value='Minha legenda nova';await caption.emit('input');
+  assert.equal(f.list.children[0].querySelector('textarea'),caption);assert.equal(caption.value,'Minha legenda nova');assert.deepEqual(f.calls.caption,['a']);assert.equal(f.entries[1].caption,'Legenda b');
 });
-
-test('the last image quota may be exhausted while a durable pending attempt still needs confirmation',async()=>{
-  const f=await fixture({pending:true,available:false});
-  await f.choose(original,'Original caption');await f.clickSend();
-  assert.equal(f.calls.combos,0,'already reserved image confirmation must not demand another plan');
-  assert.equal(f.calls.post,1);assert.equal(f.success.hidden,false);
+test('selecting time changes only its own image and formats the confirmed date',async()=>{
+  const f=await fixture({rows:[row('a'),row('b')]});await f.list.children[1].querySelector('.my-image-time').emit('click');
+  assert.deepEqual(f.calls.schedule,['b']);assert.equal(f.list.children[1].querySelector('.my-image-day').querySelector('span').textContent,'04/11/2026');
+  assert.equal(f.list.children[1].querySelector('.my-image-time').querySelector('span').textContent,'18:21');assert.equal(f.entries[0].time,null);
 });
-
-test('the exhausted-quota CTA opens combos with empty required fields',async()=>{
-  const f=await fixture({available:false});
-  assert.equal(await f.clickSend(),true,'the combos CTA must bypass native upload-form validation');
-  assert.equal(f.calls.combos,1);assert.equal(f.calls.post,0);assert.equal(f.calls.read,0);
+test('pending recovery remains confirmable with no new quota and cannot change its time',async()=>{
+  const f=await fixture({available:false,rows:[{...row('a','pending'),needsFile:true,recoveryEditable:true}]});
+  f.form.reportValidity=()=>false;
+  assert.equal(f.form.noValidate,true,'native validation must not block confirmation of a reserved image');
+  const node=f.list.children[0];assert.equal(node.querySelector('.my-image-time').disabled,true);assert.equal(node.querySelector('textarea').readOnly,false);
+  assert.equal(node.querySelector('input[type=file]').required,true);await f.form.emit('submit');assert.equal(f.calls.send,1);assert.equal(f.calls.combos,0);
 });
-
-test('busy submission blocks close and cancellation until its result is known',async()=>{
-  let finish;const waiting=new Promise(resolve=>{finish=resolve;});
-  const f=await fixture({post:()=>waiting});await f.choose(original,'Original caption');
-  const sending=f.clickSend();
-  for(let i=0;i<10&&f.calls.post===0;i++)await new Promise(resolve=>setImmediate(resolve));
-  assert.equal(f.calls.post,1);assert.equal(f.input.disabled,true);assert.equal(f.caption.readOnly,true);assert.equal(f.close1.disabled,true);
-  assert.equal((await f.dialog.emit('cancel')).prevented,true);
-  await f.close1.emit('click');assert.equal(f.dialog.open,true);
-  finish(receipt(NEXT));await sending;
-  assert.equal(f.success.hidden,false);assert.equal(f.close1.disabled,false);
+test('busy state blocks modal dismissal and empty exhausted quota opens combos',async()=>{
+  const f=await fixture({available:false});assert.equal(f.send.formNoValidate,true);await f.form.emit('submit');assert.equal(f.calls.combos,1);
+  f.setBusy(true);assert.equal(f.close.disabled,true);assert.equal((await f.dialog.emit('cancel')).prevented,true);await f.close.emit('click');assert.equal(f.dialog.open,true);
 });

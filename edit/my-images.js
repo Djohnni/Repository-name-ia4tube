@@ -1,85 +1,104 @@
-import {requestAppCalendar,appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos} from './app-calendar.js?v=20261030-combos-v1';
-import {createUploadField} from './upload-field.js?v=20261021-upload';
-import {createImageSubmission} from './my-images-submit.js?v=20261101-my-images-v1';
+import {appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos} from './app-calendar.js?v=20261030-combos-v1';
+import {createImageQueue} from './my-images-queue.js?v=20261101-my-images-list-v1';
 
 export function createMyImages({dialog,onOpenChange=()=>{}}) {
-  const form=dialog.querySelector('form'),input=dialog.querySelector('input[type=file]');
-  const caption=dialog.querySelector('textarea'),send=dialog.querySelector('[data-my-images-send]');
-  const error=dialog.querySelector('[role=alert]'),preview=dialog.querySelector('[data-my-images-preview]');
-  const success=dialog.querySelector('[data-my-images-success]'),hint=dialog.querySelector('[data-my-images-hint]');
-  const upload=createUploadField(input,{maxBytes:10*1024*1024,label:'Imagem'});
-  let busy=false,locked=false,snapshot=null,previewUrl=null,submission=null;
+  const form=dialog.querySelector('form'),input=dialog.querySelector('[data-my-images-add]');
+  const list=dialog.querySelector('[data-my-images-list]'),send=dialog.querySelector('[data-my-images-send]');
+  const error=dialog.querySelector('[role=alert]'),hint=dialog.querySelector('[data-my-images-hint]');
+  const summary=dialog.querySelector('[data-my-images-summary]');
+  // An unfinished draft must not prevent confirming a different, already reserved image.
+  form.noValidate=true;
+  let queue=null;const nodes=new Map();
   const showError=message=>{error.textContent=message||'';error.hidden=!message;};
-  function hasPending(){try{return Boolean(submission?.hasPending());}catch{return true;}}
-  function refresh() {
-    const app=Boolean(appCalendarAttemptScope()),exhausted=appCreationAllowed('image')===false;
-    const recovering=hasPending(),buyMore=exhausted&&!locked&&!recovering;
-    send.textContent=busy?'Enviando sua imagem…':buyMore?'Suas imagens acabaram · Ver combos':locked||recovering?'Confirmar o mesmo envio':'Escolher dia e hora';
-    send.disabled=busy||!app;
-    send.formNoValidate=buyMore;
-    input.disabled=busy||locked;caption.readOnly=busy||locked;
-    for(const button of dialog.querySelectorAll('[data-my-images-close]'))button.disabled=busy;
-  }
-  function reset() {
-    form.reset();upload.reset();snapshot=null;locked=false;showError('');
-    if(previewUrl)URL.revokeObjectURL(previewUrl);
-    previewUrl=null;preview.removeAttribute('src');preview.hidden=true;
-    form.hidden=false;success.hidden=true;refresh();
-    try {hint.textContent=submission?.hasPending()?'Há um envio para confirmar. Escolha a mesma imagem e legenda.':'Usa 1 imagem do seu plano.';}
-    catch(error){showError(error.message);}
-  }
-  function ensureSubmission() {
+  const dateLabel=value=>value?value.split('-').reverse().join('/'):'Escolher dia';
+  function ensureQueue() {
     const scope=appCalendarAttemptScope();
-    if(!submission && scope)submission=createImageSubmission({scope,storage:window.sessionStorage,requestCalendar:requestAppCalendar});
+    if(!queue && scope)queue=createImageQueue({scope,storage:window.sessionStorage,onChange:render});
+  }
+  function rowNode(row) {
+    const article=document.createElement('article');article.className='my-image-item';
+    article.innerHTML=`<header><strong></strong><button type="button" class="my-image-remove" aria-label="Remover imagem">×</button></header>
+      <img class="my-image-preview" alt="Imagem escolhida" loading="lazy" decoding="async" hidden>
+      <label class="order-field my-image-restore" hidden>Escolher esta imagem novamente<input type="file" accept="image/png,image/jpeg,image/webp"></label>
+      <label class="order-field">Legenda<textarea rows="3" maxlength="2200" placeholder="Escreva a legenda da publicação" required></textarea></label>
+      <div class="my-image-schedule"><label>Dia<button type="button" class="my-image-day"><span></span><b aria-hidden="true">✎</b></button></label>
+      <label>Hora<button type="button" class="my-image-time"><span></span><b aria-hidden="true">✎</b></button></label></div>
+      <p class="my-image-status" role="status"></p>`;
+    const caption=article.querySelector('textarea'),replace=article.querySelector('input[type=file]');
+    const day=article.querySelector('.my-image-day'),time=article.querySelector('.my-image-time');
+    caption.addEventListener('input',()=>{try{queue.setCaption(row.id,caption.value);showError('');}catch(failure){showError(failure.message);}});
+    article.querySelector('.my-image-remove').addEventListener('click',()=>{try{queue.remove(row.id);showError('');}catch(failure){showError(failure.message);}});
+    replace.addEventListener('change',()=>{try{if(replace.files?.[0])queue.replaceFile(row.id,replace.files[0]);showError('');}catch(failure){showError(failure.message);}});
+    const schedule=async()=>{
+      showError('');try{await queue.schedule(row.id);}catch(failure){showError(failure.message);}finally{render();}
+    };
+    day.addEventListener('click',schedule);time.addEventListener('click',schedule);
+    return {article,caption,replace,day,time,image:article.querySelector('img'),status:article.querySelector('[role=status]'),file:null,url:null};
+  }
+  function render() {
+    const rows=queue?.items()||[],busy=queue?.isBusy()||false,app=Boolean(appCalendarAttemptScope());
+    const pending=rows.some(row=>row.status==='pending'),unfinished=rows.filter(row=>row.status!=='saved');
+    const remaining=queue?.remaining()??null;
+    const buyMore=!pending && (appCreationAllowed('image')===false || remaining===0);
+    input.disabled=busy;
+    send.textContent=busy?'Aguarde…':buyMore?'Suas imagens acabaram · Ver combos':pending?'Continuar envio':'Enviar imagens';
+    send.disabled=busy||!app||(!unfinished.length&&!buyMore);send.formNoValidate=buyMore;
+    for(const close of dialog.querySelectorAll('[data-my-images-close]'))close.disabled=busy;
+    hint.textContent=!app?'Agende pelo app. Cada foto usa 1 imagem do plano.':remaining===null
+      ?'Cada foto usa 1 imagem do seu plano.':`${remaining} ${remaining===1?'imagem disponível':'imagens disponíveis'}.`;
+    const saved=rows.length-unfinished.length;
+    summary.textContent=saved?`${saved} ${saved===1?'imagem enviada':'imagens enviadas'}${unfinished.length?` · ${unfinished.length} para enviar`:''}.`:'';
+    summary.hidden=!saved;
+    const ids=new Set(rows.map(row=>row.id));
+    for(const [id,node] of nodes)if(!ids.has(id)) {
+      if(node.url)URL.revokeObjectURL(node.url);node.article.remove();nodes.delete(id);
+    }
+    rows.forEach((row,index)=>{
+      let node=nodes.get(row.id);
+      if(!node){node=rowNode(row);nodes.set(row.id,node);list.append(node.article);}
+      node.article.querySelector('strong').textContent=`Imagem ${index+1}`;
+      node.article.dataset.status=row.status;
+      const immutable=row.status==='saved'||row.status==='pending'&&!row.recoveryEditable;
+      node.caption.readOnly=busy||immutable;
+      if(document.activeElement!==node.caption)node.caption.value=row.caption;
+      node.day.disabled=node.time.disabled=busy||row.status!=='draft';
+      node.day.querySelector('span').textContent=dateLabel(row.date);
+      node.time.querySelector('span').textContent=row.time||'Escolher hora';
+      node.day.setAttribute('aria-label',`Dia da imagem ${index+1}: ${dateLabel(row.date)}`);
+      node.time.setAttribute('aria-label',`Hora da imagem ${index+1}: ${row.time||'Escolher hora'}`);
+      node.article.querySelector('.my-image-remove').disabled=busy||row.status==='pending';
+      const restore=node.article.querySelector('.my-image-restore');
+      restore.hidden=!(row.needsFile || row.recoveryEditable);node.replace.disabled=busy;
+      node.replace.required=Boolean(row.needsFile&&row.status!=='saved');
+      if(row.file && row.file!==node.file) {
+        if(node.url)URL.revokeObjectURL(node.url);
+        node.file=row.file;node.url=URL.createObjectURL(row.file);node.image.src=node.url;node.image.hidden=false;
+      }
+      node.status.textContent=row.status==='saved'?'✓ Enviada ao Calendário':row.error||
+        (row.needsFile?'Selecione novamente a imagem para continuar.':row.status==='pending'?'Confirme o mesmo envio.':'');
+    });
   }
   input.addEventListener('change',()=>{
-    showError('');snapshot=null;
-    if(previewUrl)URL.revokeObjectURL(previewUrl);
-    previewUrl=null;preview.hidden=true;
-    const file=input.files?.[0];
-    if(file && ['image/png','image/jpeg','image/webp'].includes(file.type) && file.size<=10*1024*1024) {
-      previewUrl=URL.createObjectURL(file);preview.src=previewUrl;preview.hidden=false;
-    }
+    try{ensureQueue();if(!queue)throw Error('Abra Posts prontos pelo app para agendar suas imagens.');queue.add([...input.files]);showError('');input.value='';}
+    catch(failure){showError(failure.message);}finally{render();}
   });
   form.addEventListener('submit',async event=>{
-    event.preventDefault();if(busy)return;
-    if(!locked && !hasPending() && appCreationAllowed('image')===false){openAppCombos();return;}
-    if(!form.reportValidity())return;
-    busy=true;showError('');refresh();
+    event.preventDefault();if(queue?.isBusy())return;
+    const rows=queue?.items()||[],pending=rows.some(row=>row.status==='pending');
+    if(!pending && (appCreationAllowed('image')===false || queue?.remaining()===0)){openAppCombos();return;}
+    showError('');
     try {
-      ensureSubmission();
-      if(!submission)throw new Error('Abra Posts prontos pelo app para agendar sua imagem.');
-      if(!snapshot) {
-        const value=await upload.read();
-        if(!value)throw new Error('Escolha sua imagem.');
-        const bytes=Uint8Array.from(atob(value.data),c=>c.charCodeAt(0));
-        snapshot={image:new Blob([bytes],{type:value.mime}),caption:caption.value.trim()};
-      }
-      const result=await submission.send(snapshot);
-      locked=false;form.hidden=true;success.hidden=false;
-      dialog.querySelector('[data-my-images-receipt]').textContent=result.automatic===true
-        ?'Imagem agendada. Acompanhe no Calendário.':'Imagem salva. Acompanhe no Calendário.';
-      refreshAppAvailability();
-      document.dispatchEvent(new CustomEvent('ia4tube:my-image-saved',{detail:{requestId:result.requestId}}));
-    } catch(failure) {
-      try {locked=Boolean(submission?.hasPending()) && failure.code!=='ready_image_pending_mismatch';}catch {locked=true;}
-      if(!locked)snapshot=null;
-      showError(failure.message||'Não foi possível confirmar. Tente novamente com a mesma imagem e legenda.');
-    } finally {busy=false;refresh();}
+      ensureQueue();if(!queue)throw Error('Abra Posts prontos pelo app para agendar suas imagens.');
+      if(!pending && !form.reportValidity())return;
+      await queue.sendAll();refreshAppAvailability();
+    }catch(failure){showError(failure.message);refreshAppAvailability();}finally{render();}
   });
-  for(const button of dialog.querySelectorAll('[data-my-images-close]'))button.addEventListener('click',()=>{if(!busy)dialog.close();});
-  dialog.querySelector('[data-my-images-another]').addEventListener('click',reset);
-  dialog.addEventListener('cancel',event=>{if(busy)event.preventDefault();});
+  for(const close of dialog.querySelectorAll('[data-my-images-close]'))close.addEventListener('click',()=>{if(!queue?.isBusy())dialog.close();});
+  dialog.addEventListener('cancel',event=>{if(queue?.isBusy())event.preventDefault();});
   dialog.addEventListener('close',onOpenChange);
-  document.addEventListener('ia4tube:edit-availability-changed',refresh);
+  document.addEventListener('ia4tube:edit-availability-changed',render);
   return Object.freeze({open(){
-    try{ensureSubmission();}catch(error){showError('Não foi possível preservar o envio neste aparelho. Reabra Posts prontos pelo app.');}
-    if(!appCalendarAttemptScope())showError('Abra Posts prontos pelo app para agendar sua imagem.');
-    else if(!locked && !success.hidden)reset();
-    else {
-      try {hint.textContent=submission?.hasPending()?'Há um envio para confirmar. Escolha a mesma imagem e legenda.':'Usa 1 imagem do seu plano.';}
-      catch(error){showError(error.message);}
-    }
-    refresh();dialog.showModal();onOpenChange();
+    try{ensureQueue();}catch(failure){showError('Não foi possível recuperar a lista. Reabra Posts prontos pelo app.');}
+    render();dialog.showModal();onOpenChange();
   }});
 }

@@ -9,9 +9,9 @@
   <title>Imagens · iA4tube</title>
   <link rel="icon" href="./assets/logo.png">
   <link rel="stylesheet" href="./styles.css?v=20261030-media-quota-v1">
-  <link rel="stylesheet" href="./my-images.css?v=20261101-my-images-v1">
+  <link rel="stylesheet" href="./my-images.css?v=20261101-my-images-list-v1">
   <link rel="stylesheet" href="./image-categories.css?v=20261029-products-first">
-  <script type="module" src="./app.js?v=20261101-my-images-v1"></script>
+  <script type="module" src="./app.js?v=20261101-my-images-list-v1"></script>
   <link rel="stylesheet" href="./analytics.css?v=20261022-analytics">
   <script type="module" src="./analytics.js?v=20261022-light-media"></script>
 </head>
@@ -105,21 +105,15 @@
   <dialog id="my-images-dialog" class="sheet my-images-sheet" aria-labelledby="my-images-title">
     <button type="button" class="close-dialog circle" data-my-images-close aria-label="Fechar minhas imagens">×</button>
     <h2 id="my-images-title">Minhas imagens</h2>
-    <p class="my-images-intro">Publique uma imagem sua.</p>
+    <p class="my-images-intro">Suas fotos, com legenda e horário para cada uma.</p>
     <form>
-      <label class="order-field">Imagem<input type="file" accept="image/png,image/jpeg,image/webp" required></label>
-      <img data-my-images-preview alt="Sua imagem escolhida" hidden>
-      <label class="order-field">Legenda<textarea rows="3" maxlength="2200" placeholder="Escreva a legenda da publicação" required></textarea></label>
+      <label class="order-field my-images-add">Adicionar imagens<input data-my-images-add type="file" accept="image/png,image/jpeg,image/webp" multiple></label>
+      <div data-my-images-list class="my-images-list"></div>
+      <p class="my-images-summary" data-my-images-summary role="status" hidden></p>
       <p class="form-error" role="alert" hidden></p>
-      <button type="submit" class="primary-action" data-my-images-send>Escolher dia e hora</button>
-      <p class="order-local-note" data-my-images-hint>Usa 1 imagem do seu plano.</p>
+      <button type="submit" class="primary-action" data-my-images-send>Enviar imagens</button>
+      <p class="order-local-note" data-my-images-hint>Cada foto usa 1 imagem do seu plano.</p>
     </form>
-    <section class="my-images-success" data-my-images-success aria-live="polite" hidden>
-      <span class="success-mark" aria-hidden="true">✓</span><h3>Pronto!</h3>
-      <p data-my-images-receipt></p>
-      <button type="button" class="primary-action" data-my-images-another>Adicionar outra imagem</button>
-      <button type="button" class="secondary-action" data-my-images-close>Voltar aos modelos</button>
-    </section>
   </dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <noscript><p class="no-script">Ative o JavaScript para assistir à prévia dos vídeos.</p></noscript>

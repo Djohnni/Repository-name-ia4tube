@@ -47,7 +47,7 @@ function waitForRetry(signal) {
   });
 }
 
-async function prepareUpload(file,maxBytes,label,signal) {
+export async function prepareUpload(file,maxBytes,label,signal) {
   if (!ACCEPTED_TYPES.has(file.type)) throw new Error(`${label}: escolha uma imagem PNG, JPG ou WebP.`);
   if (!file.size || file.size > maxBytes) throw new Error(`${label}: o limite é ${Math.round(maxBytes / 1024 / 1024)} MB.`);
   try {

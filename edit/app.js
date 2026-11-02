@@ -1,4 +1,4 @@
-import {createMyImages} from './my-images.js?v=20261101-my-images-v1';
+import {createMyImages} from './my-images.js?v=20261101-my-images-list-v1';
 import { createOrderController } from './order.js?v=20261030-media-quota-v1';
 import { appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos } from './app-calendar.js?v=20261030-combos-v1';
 import { orderCallToAction,alternateOrderCallToAction } from './order-cta.js?v=20261030-media-quota-v1';
