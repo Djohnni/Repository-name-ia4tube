@@ -1,4 +1,4 @@
-import { requestAppCalendar, appCalendarAttemptScope } from './app-calendar.js?v=20261030-combos-v1';
+import { requestAppCalendar, appCalendarAttemptScope } from './app-calendar.js?v=20261102-placements-v1';
 import { quotaCombosLabel } from './order-cta.js?v=20261030-media-quota-v1';
 import { createOrderRecovery } from './order-recovery.js?v=20261030-availability-v1';
 import { buildMultipartOrder, idempotencyKey, normalizeReceipt, calendarContextHash, safeWhatsAppUrl, SUBMIT_ENDPOINT } from './order-adapter.js?v=20261030-receipt-alias-v1';
@@ -309,7 +309,7 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
           return getOrCreateRequestId(fingerprint,localStorage,sessionStorage);
         });
       } catch {throw new Error('Ative o armazenamento deste navegador para salvar o pedido sem duplicações. Nenhum pedido foi enviado.');}
-      const appCalendar = await requestCalendar(requestId);
+      const appCalendar = await requestCalendar(requestId,{mediaKind:selectedOutput});
       if(appOnly && !appCalendar?.ticket)throw new Error('Confirme a conta e o calendário no app. Nenhum pedido foi enviado.');
       if (appCalendar) payload.appCalendar = appCalendar;
       const contextHash=appOnly?await calendarContextHash(appCalendar.ticket):null;

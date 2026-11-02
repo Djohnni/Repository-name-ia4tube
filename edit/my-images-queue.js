@@ -1,4 +1,4 @@
-import {requestAppCalendar} from './app-calendar.js?v=20261030-combos-v1';
+import {requestAppCalendar} from './app-calendar.js?v=20261102-placements-v1';
 import {createImageSubmission,postReadyImage} from './my-images-submit.js?v=20261101-my-images-v1';
 import {readReadyImageContext,prepareReadyImage} from './my-images-api.js?v=20261101-my-images-list-v1';
 
@@ -50,7 +50,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
   async function ticketFor(row) {
     if(row.ticket)return row.ticket;
     if(!UUID.test(row.requestId||''))throw fail('Escolha o dia e a hora desta imagem.','ready_image_schedule_required',row);
-    const value=await requestCalendar(row.requestId);
+    const value=await requestCalendar(row.requestId,{mediaKind:'image'});
     if(typeof value?.ticket!=='string'||!new RegExp('^'+row.requestId.replaceAll('.','\\.')+'\\.[A-Za-z0-9_-]{43}$').test(value.ticket))
       throw fail('Confirme o dia e a hora desta imagem no app.','ready_image_schedule_required',row);
     row.ticket=value.ticket;return row.ticket;
@@ -152,7 +152,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
       busy=true;notify();
       try {
         if(!row.contextPending) {
-          const requestId=newId(),calendar=await requestCalendar(requestId);
+          const requestId=newId(),calendar=await requestCalendar(requestId,{mediaKind:'image'});
           if(typeof calendar?.ticket!=='string'||!calendar.ticket.startsWith(requestId+'.'))throw fail('Escolha o dia e a hora no app.','ready_image_schedule_required',row);
           row.requestId=requestId;row.ticket=calendar.ticket;row.date=row.time=null;row.contextPending=true;row.helper=null;changed();
         }

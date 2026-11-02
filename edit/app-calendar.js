@@ -15,6 +15,8 @@ export function createAppCalendarBridge({location, storage, navigate, setTimer =
     if (saved && NONCE.test(saved.nonce || '') && saved.tickets && typeof saved.tickets === 'object') state = saved;
   } catch { /* Public visitors do not need storage for this optional feature. */ }
   const supplied = location.hash?.match(/^#app-calendar=([A-Za-z0-9_-]{43})$/)?.[1];
+  const appVersion = new URLSearchParams(location.search || '').get('app_version');
+  const typedSchedule = /^\d+$/.test(appVersion || '') && Number(appVersion) >= 99;
   if (supplied && supplied !== state.nonce) state = {nonce:supplied,tickets:{}};
   const persist = () => { storage.setItem(KEY,JSON.stringify(state)); };
   let storageFailed = false;
@@ -22,7 +24,7 @@ export function createAppCalendarBridge({location, storage, navigate, setTimer =
   return Object.freeze({
     enabled:Boolean(state.nonce),
     attemptScope:state.nonce,
-    request(requestId) {
+    request(requestId,{mediaKind}={}) {
       if (!state.nonce) return Promise.resolve(null);
       if (storageFailed) return Promise.reject(new Error('Ative o armazenamento do app para preservar o pedido do calendário.'));
       if (!UUID.test(requestId || '')) return Promise.reject(new Error('Não foi possível identificar o pedido do calendário.'));
@@ -37,7 +39,8 @@ export function createAppCalendarBridge({location, storage, navigate, setTimer =
       },180000);
       pending.set(requestId,{promise,resolve,reject,timer});
       try {
-        navigate('https://ia4tube.com/edit/app-calendar/request?requestId=' + requestId + '&nonce=' + state.nonce);
+        const mediaHint = typedSchedule && ['image','video'].includes(mediaKind) ? '&mediaKind=' + mediaKind : '';
+        navigate('https://ia4tube.com/edit/app-calendar/request?requestId=' + requestId + '&nonce=' + state.nonce + mediaHint);
       } catch {
         clearTimer(timer);pending.delete(requestId);
         reject(new Error('Não foi possível abrir o calendário no app. Tente novamente.'));
@@ -77,7 +80,7 @@ if (typeof window !== 'undefined') {
   Object.defineProperty(window,'iA4tubeAppCalendar',{value:Object.freeze({receive:appBridge.receive,
     receiveAvailability:combosBridge.receiveAvailability}),writable:false,configurable:false});
 }
-export const requestAppCalendar = requestId => appBridge ? appBridge.request(requestId) : Promise.resolve(null);
+export const requestAppCalendar = (requestId,options) => appBridge ? appBridge.request(requestId,options) : Promise.resolve(null);
 export const appCalendarAttemptScope = () => appBridge?.attemptScope || null;
 export const appCreationAllowed = kind => availabilityBridge?.canCreate(kind) ?? null;
 export const refreshAppAvailability = () => availabilityBridge?.refresh() || false;

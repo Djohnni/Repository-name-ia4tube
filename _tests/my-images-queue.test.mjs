@@ -16,11 +16,11 @@ const first=photo('first.png'),second=photo('second.png'),third=photo('third.png
 const wait=()=>new Promise(resolve=>setImmediate(resolve));
 function fixture({balance=3,storage:providedStorage,scope='synthetic-nonce'}={}) {
   const values=new Map(),storage=providedStorage||{getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value),removeItem:key=>values.delete(key)};
-  const calls={calendar:[],read:[],posts:[],images:[],changes:0,maxActive:0},contexts=new Map(),receipts=new Map();
+  const calls={calendar:[],calendarOptions:[],read:[],posts:[],images:[],changes:0,maxActive:0},contexts=new Map(),receipts=new Map();
   let sequence=0,active=0;
   const faults={loseNext:false,readFailures:0,failReadAfterPost:false};
   const ports={scope,storage,uuid:()=>id(++sequence),onChange:()=>{calls.changes++;},
-    requestCalendar:async requestId=>{calls.calendar.push(requestId);if(!contexts.has(requestId))contexts.set(requestId,{date:'2030-01-02',time:'18:30'});return {ticket:ticket(requestId)};},
+    requestCalendar:async(requestId,options)=>{calls.calendar.push(requestId);calls.calendarOptions.push(options);if(!contexts.has(requestId))contexts.set(requestId,{date:'2030-01-02',time:'18:30'});return {ticket:ticket(requestId)};},
     readContext:async value=>{
       const requestId=value.split('.')[0];calls.read.push(requestId);
       if(faults.readFailures>0){faults.readFailures--;throw Error('context_read_failed');}
@@ -59,6 +59,7 @@ test('each photo keeps one caption, individual context and sequential one-unit d
   assert(f.queue.items().every(row=>row.status==='saved'));
   await f.queue.sendAll();assert.equal(f.calls.posts.length,2,'saved rows never send again');
   assert.equal(f.queue.remaining(),1);assert.equal(f.queue.isBusy(),false);
+  assert.deepEqual(f.calls.calendarOptions,[{mediaKind:'image'},{mediaKind:'image'}]);
 });
 
 test('all captions and dates are validated before the first POST',async()=>{
