@@ -30,4 +30,11 @@
 .my-image-item[data-status=saved] .my-image-preview{height:90px}
 .my-image-item[data-status=saved] textarea{min-height:62px}
 .my-images-summary{font-size:13px;line-height:1.5;color:#d9e4c4;margin:15px 0}
+.my-images-progress{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:10px;padding:14px 16px;margin:0 0 16px;border:1px solid #d7b260;border-radius:12px;background:#29241b;color:#ffe0a0;font-size:15px;font-weight:650;line-height:1.4;box-shadow:0 4px 18px #0005}
+.my-images-progress::before,.my-image-status[data-busy=true]::before,.my-images-sheet [data-my-images-send][data-busy=true]::before{content:"";display:inline-block;flex:0 0 auto;width:18px;height:18px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:my-images-loading .85s linear infinite}
+.my-image-status[data-busy=true]{display:flex;align-items:center;gap:8px;color:#ffe0a0;font-size:14px;font-weight:600}
+.my-image-status[data-busy=true]::before{width:15px;height:15px}
+.my-images-sheet [data-my-images-send][data-busy=true]{display:flex;align-items:center;justify-content:center;gap:10px;opacity:1;cursor:wait}
+@keyframes my-images-loading{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.my-images-progress::before,.my-image-status[data-busy=true]::before,.my-images-sheet [data-my-images-send][data-busy=true]::before{animation:none;border-style:dotted}}
 @media(max-width:360px){.my-image-item{padding:12px}.my-image-schedule{gap:8px}.my-image-schedule button{padding:10px 8px;font-size:12px}}
