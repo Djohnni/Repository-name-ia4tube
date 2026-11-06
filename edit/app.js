@@ -1,5 +1,5 @@
 import {createMyImages} from './my-images.js?v=20261106-brand-mode-v2';
-import { createOrderController } from './order.js?v=20261102-placements-v1';
+import { createOrderController } from './order.js?v=20261106-plans-only-v1';
 import { appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos } from './app-calendar.js?v=20261102-placements-v1';
 import { orderCallToAction,alternateOrderCallToAction } from './order-cta.js?v=20261030-media-quota-v1';
 import { captureOrderOrigin,resolveOrderOrigin } from './order-origin.js?v=20261029-app-admission-v1';

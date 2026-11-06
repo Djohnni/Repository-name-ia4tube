@@ -184,7 +184,7 @@ export function createOrderController({dialog,money,toast,onBusy,onSaved = () =>
     receipt = saved;
     form.hidden = true;displayOnly.hidden = true;success.hidden = false;
     document.querySelector('#sheet-title').textContent = 'Tudo certo, pedido salvo.';
-    document.querySelector('#saved-order-id').textContent = `Pedido ${saved.orderId} · ${money(saved.totalCents)}`;
+    document.querySelector('#saved-order-id').textContent = `Pedido ${saved.orderId}`;
     messageBox.value = saved.message || '';
     const link = document.querySelector('#whatsapp-link');
     try {link.href = safeWhatsAppUrl(saved.whatsappUrl,saved.message,saved.orderId);link.hidden = appOnly;}
