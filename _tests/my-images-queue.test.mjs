@@ -1,13 +1,15 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {MY_IMAGE_MODE} from '../edit/my-images-branded.js';
 
 const directory=new URL('../edit/',import.meta.url);
 const submitSource=await readFile(new URL('my-images-submit.js',directory),'utf8');
 const {createImageSubmission}=await import('data:text/javascript;base64,'+Buffer.from(submitSource).toString('base64'));
 globalThis.__queueTestSubmission=createImageSubmission;
+globalThis.__queueTestMode=MY_IMAGE_MODE;
 const queueSource=await readFile(new URL('my-images-queue.js',directory),'utf8');
-const noExternal='const createImageSubmission=globalThis.__queueTestSubmission;const noExternal=()=>{throw Error("No real API/native/file helper in queue tests");};const requestAppCalendar=noExternal,postReadyImage=noExternal,readReadyImageContext=noExternal,prepareReadyImage=noExternal;\n';
+const noExternal='const createImageSubmission=globalThis.__queueTestSubmission,MY_IMAGE_MODE=globalThis.__queueTestMode;const noExternal=()=>{throw Error("No real API/native/file helper in queue tests");};const createBrandedSubmission=noExternal,requestAppCalendar=noExternal,postReadyImage=noExternal,readReadyImageContext=noExternal,prepareReadyImage=noExternal;\n';
 const {createImageQueue}=await import('data:text/javascript;base64,'+Buffer.from(noExternal+queueSource.replace(/^import .*;\r?\n/gm,'')).toString('base64'));
 const id=n=>'00000000-0000-4000-8000-'+String(n).padStart(12,'0');
 const ticket=requestId=>requestId+'.'+'A'.repeat(43);
