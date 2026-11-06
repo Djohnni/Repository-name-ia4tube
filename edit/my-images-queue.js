@@ -1,6 +1,8 @@
 import {requestAppCalendar} from './app-calendar.js?v=20261102-placements-v1';
-import {createImageSubmission,postReadyImage} from './my-images-submit.js?v=20261101-my-images-v1';
+import {createImageSubmission,postReadyImage} from './my-images-submit.js?v=20261106-brand-mode-v1';
 import {readReadyImageContext,prepareReadyImage} from './my-images-api.js?v=20261101-my-images-list-v1';
+
+import {createBrandedSubmission,MY_IMAGE_MODE} from './my-images-branded.js?v=20261106-brand-mode-v1';
 
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
 const HASH=/^[a-f0-9]{64}$/;
@@ -16,20 +18,21 @@ const fileValid=file=>file&&TYPES.has(file.type)&&Number.isSafeInteger(file.size
 // Each row keeps its own existing one-image admission, never a parallel/bulk debit.
 export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.randomUUID(),
   requestCalendar=requestAppCalendar,readContext=readReadyImageContext,readImage=prepareReadyImage,
-  submitImage=postReadyImage}) {
+  submitImage=postReadyImage,submitBrandedImage}) {
   if(typeof scope!=='string'||!scope)throw fail('Abra Posts prontos pelo app.','ready_image_app_required');
   const key='ia4tube:my-images-queue:v1:'+scope,legacyKey='ia4tube:my-images:v1:'+scope;
   let rows=[],busy=false,balance=null;
   const snapshot=row=>Object.freeze({id:row.id,file:row.file||null,fileName:row.fileName,caption:row.caption,
     date:row.date,time:row.time,status:row.status,requestId:row.requestId,
+    mode:row.mode||'original',needsLogo:row.mode===MY_IMAGE_MODE&&row.status!=='saved'&&!row.logoFile,
     needsFile:row.status!=='saved'&&!row.file,recoveryEditable:row.status==='pending'&&row.recoveryEditable===true,
     ...(row.receipt?{receipt:Object.freeze({...row.receipt})}:{}),...(row.error?{error:row.error}:{})});
   const items=()=>rows.map(snapshot);
   const notify=()=>{try{onChange(items());}catch{/* A rendering callback cannot undo a confirmed image. */}};
   function persist() {
-    const value={schema:1,rows:rows.map(({id,fileName,caption,date,time,status,requestId,receipt,legacy,contextPending,error})=>
+    const value={schema:1,rows:rows.map(({id,fileName,caption,date,time,status,requestId,receipt,legacy,contextPending,error,mode})=>
       ({id,fileName,caption,date,time,status,requestId,receipt:receipt||null,legacy:legacy===true,
-        contextPending:contextPending===true,...(error?{error}: {})}))};
+        contextPending:contextPending===true,...(mode===MY_IMAGE_MODE?{mode}:{}),...(error?{error}: {})}))};
     try{storage.setItem(key,JSON.stringify(value));}
     catch{throw fail('Não foi possível preservar sua lista neste aparelho. Não envie outra tentativa.','ready_image_storage_unavailable');}
   }
@@ -40,11 +43,12 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
     throw fail('Confirme o mesmo envio antes de modificar esta imagem.','ready_image_row_locked',row);}
   function newId(){const id=uuid();if(!UUID.test(id||''))throw fail('Não foi possível identificar esta imagem.','ready_image_identity_invalid');return id;}
   function helper(row) {
-    if(!row.helper)row.helper=createImageSubmission({scope:row.legacy?scope:scope+':'+row.id,storage,
+    if(!row.helper)row.helper=(row.mode===MY_IMAGE_MODE?createBrandedSubmission:createImageSubmission)({
+      ...(row.mode===MY_IMAGE_MODE?{getLogo:()=>row.snapshot?.logo}:{}),scope:row.legacy?scope:scope+':'+row.id,storage,
       uuid:()=>row.requestId,requestCalendar:async id=>{
         if(id!==row.requestId)throw fail('Confira a tentativa original desta imagem.','ready_image_identity_conflict',row);
         return {ticket:await ticketFor(row)};
-      },post:submitImage});
+      },...(row.mode===MY_IMAGE_MODE?{post:submitBrandedImage}:{post:submitImage})});
     return row.helper;
   }
   async function ticketFor(row) {
@@ -72,7 +76,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
       const ids=new Set();
       rows=saved.rows.map(value=>{
         if(!value||!UUID.test(value.id||'')||ids.has(value.id)||!['draft','pending','saved'].includes(value.status)||
-          typeof value.fileName!=='string'||typeof value.caption!=='string'||value.caption.length>2200||
+          !(value.mode===undefined||value.mode===MY_IMAGE_MODE)||typeof value.fileName!=='string'||typeof value.caption!=='string'||value.caption.length>2200||
           !(value.requestId===null||UUID.test(value.requestId||''))||
           !(value.date===null||validDate(value.date))||!(value.time===null||validTime(value.time))||
           value.status!=='draft'&&!UUID.test(value.requestId||''))throw fail('Sua lista precisa ser conferida.','ready_image_storage_invalid');
@@ -96,6 +100,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
   function markError(row,error) {if(row){row.error=error.message||'Confira esta imagem.';try{changed();}catch{/* Keep the original failure and in-memory row. */}}}
   function validateRow(row) {
     if(!fileValid(row.file))throw fail('Escolha novamente a imagem salva neste aparelho.','ready_image_file_required',row);
+    if(row.mode===MY_IMAGE_MODE && (!fileValid(row.logoFile)||row.logoFile.size>5*1024*1024))throw fail('Adicione a logo da empresa para este lote.','ready_image_logo_required',row);
     if(!row.caption.trim()||row.caption.trim().length>2200)throw fail('Escreva a legenda de cada imagem.','ready_image_caption_required',row);
     if(!UUID.test(row.requestId||'')||!validDate(row.date)||!validTime(row.time))
       throw fail('Escolha o dia e a hora de cada imagem.','ready_image_schedule_required',row);
@@ -106,7 +111,8 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
   async function sendRow(row) {
     const wasPending=helper(row).hasPending()||row.status==='pending';
     try {
-      if(!row.snapshot)row.snapshot={image:await readImage(row.file),caption:row.caption.trim()};
+      if(!row.snapshot)row.snapshot={image:await readImage(row.file),caption:row.caption.trim(),
+        ...(row.mode===MY_IMAGE_MODE?{logo:await readImage(row.logoFile)}:{})};
       row.status='pending';row.recoveryEditable=false;delete row.error;changed();
       const result=await helper(row).send(row.snapshot);
       row.status='saved';row.receipt={requestId:result.requestId,planningId:result.planningId,pedidoId:result.pedidoId,status:result.status};
@@ -125,13 +131,20 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
     await contextFor(row);
   }
   return Object.freeze({items,isBusy:()=>busy,remaining:()=>balance,
-    add(files) {
+    setSharedLogo(file) {
+      idle();if(!fileValid(file)||file.size>5*1024*1024)throw fail('Escolha uma logo PNG, JPG ou WebP de até 5 MB.','ready_image_logo_invalid');
+      for(const row of rows)if(row.mode===MY_IMAGE_MODE && (row.status==='draft'||row.status==='pending'&&(!row.logoFile||row.recoveryEditable))){row.logoFile=file;row.snapshot=null;}
+      changed();
+    },
+    add(files,{mode='original',logo=null}={}) {
+      if(!['original',MY_IMAGE_MODE].includes(mode))throw fail('Escolha como enviar as imagens.','ready_image_mode_invalid');
       idle();const selected=Array.from(files||[]);
       if(selected.some(file=>!fileValid(file)))throw fail('Escolha imagens PNG, JPG ou WebP de até 10 MB.','ready_image_file_invalid');
       if(balance!==null&&rows.filter(row=>row.status==='draft').length+selected.length>balance)
         throw fail('Seu saldo permite '+balance+' imagem(ns). Remova as extras ou veja os combos.','billing_required');
       const added=selected.map(file=>({id:newId(),file,fileName:String(file.name||'Imagem'),caption:'',date:null,time:null,
-        requestId:null,status:'draft',legacy:false,contextPending:false,recoveryEditable:false}));
+        requestId:null,status:'draft',legacy:false,contextPending:false,recoveryEditable:false,
+        ...(mode===MY_IMAGE_MODE?{mode,logoFile:logo}:{})}));
       const ids=new Set(rows.map(row=>row.id));for(const row of added){if(ids.has(row.id))throw fail('Imagem repetida na lista.','ready_image_identity_conflict');ids.add(row.id);}
       rows.push(...added);changed();return added.map(snapshot);
     },

@@ -13,7 +13,7 @@ export async function imageSubmissionFingerprint(image,caption) {
 // The native ticket carries the account and chosen date/time. Never accept them from the form.
 // Only pending identifiers/digests are kept in session storage; images and captions stay in memory.
 export function createImageSubmission({scope,storage,requestCalendar,post=postReadyImage,
-  fingerprint=imageSubmissionFingerprint,uuid=()=>crypto.randomUUID()}) {
+  fingerprint=imageSubmissionFingerprint,uuid=()=>crypto.randomUUID(),successStatus='ready'}) {
   const key='ia4tube:my-images:v1:'+scope;
   let busy=false;
   function pending() {
@@ -54,7 +54,7 @@ export function createImageSubmission({scope,storage,requestCalendar,post=postRe
           if(error.safeToEdit===true)storage.removeItem(key);
           throw error;
         }
-        if(result?.ok!==true || result.requestId!==requestId || result.status!=='ready' ||
+        if(result?.ok!==true || result.requestId!==requestId || result.status!==successStatus ||
           typeof result.planningId!=='string' || typeof result.pedidoId!=='string')
           throw new Error('A confirmação ainda não chegou. Tente novamente com a mesma imagem e legenda.');
         storage.removeItem(key);

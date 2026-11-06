@@ -1,5 +1,5 @@
 import {appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos} from './app-calendar.js?v=20261102-placements-v1';
-import {createImageQueue} from './my-images-queue.js?v=20261102-placements-v1';
+import {createImageQueue} from './my-images-queue.js?v=20261106-brand-mode-v1';
 
 export function createMyImages({dialog,onOpenChange=()=>{}}) {
   const form=dialog.querySelector('form'),input=dialog.querySelector('[data-my-images-add]');
@@ -15,7 +15,10 @@ export function createMyImages({dialog,onOpenChange=()=>{}}) {
   }
   // An unfinished draft must not prevent confirming a different, already reserved image.
   form.noValidate=true;
-  let queue=null,operation=null;const nodes=new Map();
+  let queue=null,operation=null,batchLogo=null;const nodes=new Map();
+  const modes=[...form.querySelectorAll('[name="my-images-mode"]')];
+  const logoInput=form.querySelector('[data-my-images-logo]'),logoField=form.querySelector('[data-my-images-logo-field]');
+  const selectedMode=()=>modes.find(input=>input.checked)?.value||'original';
   const showError=message=>{error.textContent=message||'';error.hidden=!message;};
   const dateLabel=value=>value?value.split('-').reverse().join('/'):'Escolher dia';
   function ensureQueue() {
@@ -56,6 +59,9 @@ export function createMyImages({dialog,onOpenChange=()=>{}}) {
     progress.hidden=!busy;progress.textContent=busy?busyMessage:'';
     list.setAttribute('aria-busy',String(busy));
     input.disabled=busy;
+    for(const mode of modes)mode.disabled=busy;
+    if(logoInput)logoInput.disabled=busy;
+    if(logoField)logoField.hidden=selectedMode()!=='ia4tube'&&!rows.some(row=>row.needsLogo);
     send.dataset.busy=String(busy);
     send.textContent=busy?busyMessage:buyMore?'Suas imagens acabaram · Ver combos':pending?'Continuar envio':'Enviar imagens';
     send.disabled=busy||!app||(!unfinished.length&&!buyMore);send.formNoValidate=buyMore;
@@ -72,7 +78,7 @@ export function createMyImages({dialog,onOpenChange=()=>{}}) {
     rows.forEach((row,index)=>{
       let node=nodes.get(row.id);
       if(!node){node=rowNode(row);nodes.set(row.id,node);list.append(node.article);}
-      node.article.querySelector('strong').textContent=`Imagem ${index+1}`;
+      node.article.querySelector('strong').textContent=`Imagem ${index+1}${row.mode==='ia4tube'?' · Modo iA4tube':''}`;
       node.article.dataset.status=row.status;
       const immutable=row.status==='saved'||row.status==='pending'&&!row.recoveryEditable;
       node.caption.readOnly=busy||immutable;
@@ -92,12 +98,17 @@ export function createMyImages({dialog,onOpenChange=()=>{}}) {
       }
       const rowBusy=busy && row.id===activeId;
       node.status.dataset.busy=String(rowBusy);
-      node.status.textContent=rowBusy?busyMessage:row.status==='saved'?'✓ Enviada ao Calendário':row.error||
-        (row.needsFile?'Selecione novamente a imagem para continuar.':row.status==='pending'?'Confirme o mesmo envio.':'');
+      node.status.textContent=rowBusy?busyMessage:row.status==='saved'?(row.mode==='ia4tube'?'✓ Enviada à produção':'✓ Enviada ao Calendário'):row.error||
+        (row.needsLogo?'Adicione novamente a mesma logo para continuar.':row.needsFile?'Selecione novamente a imagem para continuar.':row.status==='pending'?'Confirme o mesmo envio.':'');
     });
   }
+  for(const mode of modes)mode.addEventListener('change',render);
+  logoInput?.addEventListener('change',()=>{
+    try{ensureQueue();if(logoInput.files?.[0]){queue.setSharedLogo(logoInput.files[0]);batchLogo=logoInput.files[0];}showError('');}
+    catch(failure){showError(failure.message);}finally{render();}
+  });
   input.addEventListener('change',()=>{
-    try{ensureQueue();if(!queue)throw Error('Abra Posts prontos pelo app para agendar suas imagens.');queue.add([...input.files]);showError('');input.value='';}
+    try{ensureQueue();if(!queue)throw Error('Abra Posts prontos pelo app para agendar suas imagens.');queue.add([...input.files],{mode:selectedMode(),logo:batchLogo});showError('');input.value='';}
     catch(failure){showError(failure.message);}finally{render();}
   });
   form.addEventListener('submit',async event=>{

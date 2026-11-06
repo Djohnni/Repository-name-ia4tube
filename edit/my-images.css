@@ -38,3 +38,11 @@
 @keyframes my-images-loading{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.my-images-progress::before,.my-image-status[data-busy=true]::before,.my-images-sheet [data-my-images-send][data-busy=true]::before{animation:none;border-style:dotted}}
 @media(max-width:360px){.my-image-item{padding:12px}.my-image-schedule{gap:8px}.my-image-schedule button{padding:10px 8px;font-size:12px}}
+
+.my-images-modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;border:0;padding:0;margin:12px 0 20px;min-width:0}
+.my-images-modes legend{font-size:14px;margin-bottom:10px;color:#eeeaf1}
+.my-images-modes label{display:flex;align-items:center;gap:8px;padding:13px 10px;border:1px solid #4b4952;border-radius:11px;background:#18181d;font-size:13px;cursor:pointer;min-height:48px}
+.my-images-modes label:has(input:checked){border-color:#e6bd66;background:#30291d;color:#ffe0a0}
+.my-images-modes input{accent-color:#e6bd66;flex:0 0 auto}
+.my-images-logo small{font-weight:400;color:#b8b8c2;line-height:1.45;font-size:12px}
+@media(max-width:360px){.my-images-modes{gap:7px}.my-images-modes label{font-size:12px;padding:11px 8px}}

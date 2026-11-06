@@ -9,9 +9,9 @@
   <title>Imagens · iA4tube</title>
   <link rel="icon" href="./assets/logo.png">
   <link rel="stylesheet" href="./styles.css?v=20261030-media-quota-v1">
-  <link rel="stylesheet" href="./my-images.css?v=20261104-my-images-loading-v1">
+  <link rel="stylesheet" href="./my-images.css?v=20261106-brand-mode-v1">
   <link rel="stylesheet" href="./image-categories.css?v=20261029-products-first">
-  <script type="module" src="./app.js?v=20261104-my-images-loading-v1"></script>
+  <script type="module" src="./app.js?v=20261106-brand-mode-v1"></script>
   <link rel="stylesheet" href="./analytics.css?v=20261022-analytics">
   <script type="module" src="./analytics.js?v=20261022-light-media"></script>
 </head>
@@ -108,6 +108,14 @@
     <p class="my-images-intro">Suas fotos, com legenda e horário para cada uma.</p>
     <form>
       <p class="my-images-progress" data-my-images-progress role="status" aria-live="polite" aria-atomic="true" hidden></p>
+      <fieldset class="my-images-modes"><legend>Como enviar?</legend>
+        <label><input type="radio" name="my-images-mode" value="original" checked>Imagem original</label>
+        <label><input type="radio" name="my-images-mode" value="ia4tube">Modo iA4tube</label>
+      </fieldset>
+      <label class="order-field my-images-logo" data-my-images-logo-field hidden>Logo da empresa
+        <input data-my-images-logo type="file" accept="image/png,image/jpeg,image/webp">
+        <small>Uma logo para todas as imagens deste lote.</small>
+      </label>
       <label class="order-field my-images-add">Adicionar imagens<input data-my-images-add type="file" accept="image/png,image/jpeg,image/webp" multiple></label>
       <div data-my-images-list class="my-images-list"></div>
       <p class="my-images-summary" data-my-images-summary role="status" hidden></p>
