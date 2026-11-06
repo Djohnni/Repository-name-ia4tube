@@ -1,4 +1,4 @@
-import {createImageSubmission,imageSubmissionFingerprint} from './my-images-submit.js?v=20261106-brand-mode-v1';
+import {createImageSubmission,imageSubmissionFingerprint} from './my-images-submit.js?v=20261106-brand-mode-v2';
 import {SUBMIT_ENDPOINT,idempotencyKey,calendarContextHash,normalizeReceipt} from './order-adapter.js?v=20261029-extra40';
 export const MY_IMAGE_MODEL='73f8a30b-6cb5-4f82-9e11-6e325941f590';
 export const MY_IMAGE_MODE='ia4tube';

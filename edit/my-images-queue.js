@@ -1,8 +1,8 @@
 import {requestAppCalendar} from './app-calendar.js?v=20261102-placements-v1';
-import {createImageSubmission,postReadyImage} from './my-images-submit.js?v=20261106-brand-mode-v1';
+import {createImageSubmission,postReadyImage} from './my-images-submit.js?v=20261106-brand-mode-v2';
 import {readReadyImageContext,prepareReadyImage} from './my-images-api.js?v=20261101-my-images-list-v1';
 
-import {createBrandedSubmission,MY_IMAGE_MODE} from './my-images-branded.js?v=20261106-brand-mode-v1';
+import {createBrandedSubmission,MY_IMAGE_MODE} from './my-images-branded.js?v=20261106-brand-mode-v2';
 
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
 const HASH=/^[a-f0-9]{64}$/;
@@ -127,8 +127,11 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
       }
       markError(row,error);throw Object.assign(error,{rowId:row.id});
     }
-    // Refresh even after recovering an old uncertain POST: it may already have spent its unit.
-    await contextFor(row);
+    // The original-image context intentionally rejects tickets admitted by the
+    // Edit producer. Its durable admission receipt is the confirmation here.
+    // Each following draft reads its own unused context before reserving quota.
+    if(row.mode!==MY_IMAGE_MODE)await contextFor(row);
+    else if(wasPending)balance=null;
   }
   return Object.freeze({items,isBusy:()=>busy,remaining:()=>balance,
     setSharedLogo(file) {
@@ -181,7 +184,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
         for(const row of unsent.filter(value=>value.status==='pending')) {
           active=row;
           if(!row.date||!row.time)await contextFor(row);
-          validateRow(row);await contextFor(row);await sendRow(row);
+          validateRow(row);if(row.mode!==MY_IMAGE_MODE)await contextFor(row);await sendRow(row);
         }
         const drafts=rows.filter(row=>row.status==='draft');
         // New allocations start only after every remaining draft is complete.

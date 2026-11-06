@@ -1,5 +1,5 @@
 import {appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos} from './app-calendar.js?v=20261102-placements-v1';
-import {createImageQueue} from './my-images-queue.js?v=20261106-brand-mode-v1';
+import {createImageQueue} from './my-images-queue.js?v=20261106-brand-mode-v2';
 
 export function createMyImages({dialog,onOpenChange=()=>{}}) {
   const form=dialog.querySelector('form'),input=dialog.querySelector('[data-my-images-add]');

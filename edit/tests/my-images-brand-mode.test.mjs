@@ -9,7 +9,7 @@ function fixture({failOnce=false}={}){
  const storage=store(),records=new Map(),calls=[];let balance=5,shouldFail=failOnce;
  const ports={scope:'test-account',storage,uuid:randomUUID,readImage:async f=>f,
  requestCalendar:async id=>({ticket:id+'.'+'a'.repeat(43)}),
- readContext:async ticket=>({ok:true,requestId:ticket.slice(0,36),date:'2027-01-01',time:'18:00',remainingImages:balance}),
+ readContext:async ticket=>{if(records.has(ticket.slice(0,36)))throw Object.assign(Error('Original-image context refuses a generated-image admission'),{code:'edit_calendar_order_conflict'});return{ok:true,requestId:ticket.slice(0,36),date:'2027-01-01',time:'18:00',remainingImages:balance}},
  submitImage:async input=>{calls.push(['original',input]);balance--;return{ok:true,requestId:input.requestId,status:'ready',planningId:'p',pedidoId:'o'}},
  submitBrandedImage:async input=>{calls.push(['ia4tube',input]);if(!records.has(input.requestId)){records.set(input.requestId,input);balance--;}if(shouldFail){shouldFail=false;throw Error('lost response');}return{ok:true,requestId:input.requestId,status:'queued',planningId:'p',pedidoId:'o'}}};
  return{ports,queue:createImageQueue(ports),calls,records,get balance(){return balance}};
