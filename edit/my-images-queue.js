@@ -1,8 +1,9 @@
 import {requestAppCalendar} from './app-calendar.js?v=20261102-placements-v1';
-import {createImageSubmission,postReadyImage} from './my-images-submit.js?v=20261106-brand-mode-v2';
+import {createImageSubmission,postReadyImage} from './my-images-submit.js?v=20261107-segment-v1';
 import {readReadyImageContext,prepareReadyImage} from './my-images-api.js?v=20261101-my-images-list-v1';
 
-import {createBrandedSubmission,MY_IMAGE_MODE} from './my-images-branded.js?v=20261106-brand-mode-v2';
+import {createBrandedSubmission,MY_IMAGE_MODE} from './my-images-branded.js?v=20261107-segment-v1';
+import {normalizeImageSegment} from './my-images-segment.js?v=20261107-segment-v1';
 
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
 const HASH=/^[a-f0-9]{64}$/;
@@ -25,14 +26,15 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
   const snapshot=row=>Object.freeze({id:row.id,file:row.file||null,fileName:row.fileName,caption:row.caption,
     date:row.date,time:row.time,status:row.status,requestId:row.requestId,
     mode:row.mode||'original',needsLogo:row.mode===MY_IMAGE_MODE&&row.status!=='saved'&&!row.logoFile,
+    ...(row.segment!==undefined?{segment:row.segment}:{}),
     needsFile:row.status!=='saved'&&!row.file,recoveryEditable:row.status==='pending'&&row.recoveryEditable===true,
     ...(row.receipt?{receipt:Object.freeze({...row.receipt})}:{}),...(row.error?{error:row.error}:{})});
   const items=()=>rows.map(snapshot);
   const notify=()=>{try{onChange(items());}catch{/* A rendering callback cannot undo a confirmed image. */}};
   function persist() {
-    const value={schema:1,rows:rows.map(({id,fileName,caption,date,time,status,requestId,receipt,legacy,contextPending,error,mode})=>
+    const value={schema:1,rows:rows.map(({id,fileName,caption,date,time,status,requestId,receipt,legacy,contextPending,error,mode,segment})=>
       ({id,fileName,caption,date,time,status,requestId,receipt:receipt||null,legacy:legacy===true,
-        contextPending:contextPending===true,...(mode===MY_IMAGE_MODE?{mode}:{}),...(error?{error}: {})}))};
+        contextPending:contextPending===true,...(mode===MY_IMAGE_MODE?{mode,...(segment!==undefined?{segment}:{})}:{}),...(error?{error}: {})}))};
     try{storage.setItem(key,JSON.stringify(value));}
     catch{throw fail('Não foi possível preservar sua lista neste aparelho. Não envie outra tentativa.','ready_image_storage_unavailable');}
   }
@@ -44,7 +46,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
   function newId(){const id=uuid();if(!UUID.test(id||''))throw fail('Não foi possível identificar esta imagem.','ready_image_identity_invalid');return id;}
   function helper(row) {
     if(!row.helper)row.helper=(row.mode===MY_IMAGE_MODE?createBrandedSubmission:createImageSubmission)({
-      ...(row.mode===MY_IMAGE_MODE?{getLogo:()=>row.snapshot?.logo}:{}),scope:row.legacy?scope:scope+':'+row.id,storage,
+      ...(row.mode===MY_IMAGE_MODE?{getLogo:()=>row.snapshot?.logo,getSegment:()=>row.snapshot?.segment}:{}),scope:row.legacy?scope:scope+':'+row.id,storage,
       uuid:()=>row.requestId,requestCalendar:async id=>{
         if(id!==row.requestId)throw fail('Confira a tentativa original desta imagem.','ready_image_identity_conflict',row);
         return {ticket:await ticketFor(row)};
@@ -77,6 +79,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
       rows=saved.rows.map(value=>{
         if(!value||!UUID.test(value.id||'')||ids.has(value.id)||!['draft','pending','saved'].includes(value.status)||
           !(value.mode===undefined||value.mode===MY_IMAGE_MODE)||typeof value.fileName!=='string'||typeof value.caption!=='string'||value.caption.length>2200||
+          !(value.segment===undefined||value.mode===MY_IMAGE_MODE&&normalizeImageSegment(value.segment)===value.segment)||
           !(value.requestId===null||UUID.test(value.requestId||''))||
           !(value.date===null||validDate(value.date))||!(value.time===null||validTime(value.time))||
           value.status!=='draft'&&!UUID.test(value.requestId||''))throw fail('Sua lista precisa ser conferida.','ready_image_storage_invalid');
@@ -112,7 +115,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
     const wasPending=helper(row).hasPending()||row.status==='pending';
     try {
       if(!row.snapshot)row.snapshot={image:await readImage(row.file),caption:row.caption.trim(),
-        ...(row.mode===MY_IMAGE_MODE?{logo:await readImage(row.logoFile)}:{})};
+        ...(row.mode===MY_IMAGE_MODE?{logo:await readImage(row.logoFile),...(row.segment!==undefined?{segment:row.segment}:{})}:{})};
       row.status='pending';row.recoveryEditable=false;delete row.error;changed();
       const result=await helper(row).send(row.snapshot);
       row.status='saved';row.receipt={requestId:result.requestId,planningId:result.planningId,pedidoId:result.pedidoId,status:result.status};
@@ -134,20 +137,26 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
     else if(wasPending)balance=null;
   }
   return Object.freeze({items,isBusy:()=>busy,remaining:()=>balance,
+    setSharedSegment(value) {
+      idle();const segment=normalizeImageSegment(value);
+      if(segment===undefined)throw fail('Escolha o segmento do negócio.','ready_image_segment_invalid');
+      for(const row of rows)if(row.mode===MY_IMAGE_MODE&&row.status==='draft'){row.segment=segment;row.snapshot=null;}
+      changed();
+    },
     setSharedLogo(file) {
       idle();if(!fileValid(file)||file.size>5*1024*1024)throw fail('Escolha uma logo PNG, JPG ou WebP de até 5 MB.','ready_image_logo_invalid');
       for(const row of rows)if(row.mode===MY_IMAGE_MODE && (row.status==='draft'||row.status==='pending'&&(!row.logoFile||row.recoveryEditable))){row.logoFile=file;row.snapshot=null;}
       changed();
     },
-    add(files,{mode='original',logo=null}={}) {
+    add(files,{mode='original',logo=null,segment}={}) {
       if(!['original',MY_IMAGE_MODE].includes(mode))throw fail('Escolha como enviar as imagens.','ready_image_mode_invalid');
-      idle();const selected=Array.from(files||[]);
+      idle();segment=mode===MY_IMAGE_MODE?normalizeImageSegment(segment):undefined;const selected=Array.from(files||[]);
       if(selected.some(file=>!fileValid(file)))throw fail('Escolha imagens PNG, JPG ou WebP de até 10 MB.','ready_image_file_invalid');
       if(balance!==null&&rows.filter(row=>row.status==='draft').length+selected.length>balance)
         throw fail('Seu saldo permite '+balance+' imagem(ns). Remova as extras ou veja os combos.','billing_required');
       const added=selected.map(file=>({id:newId(),file,fileName:String(file.name||'Imagem'),caption:'',date:null,time:null,
         requestId:null,status:'draft',legacy:false,contextPending:false,recoveryEditable:false,
-        ...(mode===MY_IMAGE_MODE?{mode,logoFile:logo}:{})}));
+        ...(mode===MY_IMAGE_MODE?{mode,logoFile:logo,...(segment!==undefined?{segment}:{})}:{})}));
       const ids=new Set(rows.map(row=>row.id));for(const row of added){if(ids.has(row.id))throw fail('Imagem repetida na lista.','ready_image_identity_conflict');ids.add(row.id);}
       rows.push(...added);changed();return added.map(snapshot);
     },

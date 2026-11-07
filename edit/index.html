@@ -9,9 +9,9 @@
   <title>Imagens · iA4tube</title>
   <link rel="icon" href="./assets/logo.png">
   <link rel="stylesheet" href="./styles.css?v=20261106-plans-only-v1">
-  <link rel="stylesheet" href="./my-images.css?v=20261106-brand-mode-v2">
+  <link rel="stylesheet" href="./my-images.css?v=20261107-segment-v1">
   <link rel="stylesheet" href="./image-categories.css?v=20261029-products-first">
-  <script type="module" src="./app.js?v=20261106-plans-only-v1"></script>
+  <script type="module" src="./app.js?v=20261107-segment-v1"></script>
   <link rel="stylesheet" href="./analytics.css?v=20261022-analytics">
   <script type="module" src="./analytics.js?v=20261022-light-media"></script>
 </head>
@@ -112,6 +112,12 @@
         <label><input type="radio" name="my-images-mode" value="original" checked>Imagem original</label>
         <label><input type="radio" name="my-images-mode" value="ia4tube">Modo iA4tube</label>
       </fieldset>
+      <label class="order-field my-images-segment" data-my-images-segment-field hidden>Segmento do negócio
+        <select data-my-images-segment aria-label="Segmento do negócio"></select>
+      </label>
+      <label class="order-field my-images-segment" data-my-images-segment-other-field hidden>Qual segmento?
+        <input data-my-images-segment-other type="text" maxlength="80" placeholder="Ex.: Loja de móveis" autocomplete="off">
+      </label>
       <label class="order-field my-images-logo" data-my-images-logo-field hidden>Logo da empresa
         <input data-my-images-logo type="file" accept="image/png,image/jpeg,image/webp">
         <small>Uma logo para todas as imagens deste lote.</small>

@@ -1,23 +1,27 @@
-import {createImageSubmission,imageSubmissionFingerprint} from './my-images-submit.js?v=20261106-brand-mode-v2';
+import {createImageSubmission,imageSubmissionFingerprint} from './my-images-submit.js?v=20261107-segment-v1';
+import {normalizeImageSegment} from './my-images-segment.js?v=20261107-segment-v1';
 import {SUBMIT_ENDPOINT,idempotencyKey,calendarContextHash,normalizeReceipt} from './order-adapter.js?v=20261029-extra40';
 export const MY_IMAGE_MODEL='73f8a30b-6cb5-4f82-9e11-6e325941f590';
 export const MY_IMAGE_MODE='ia4tube';
 
-export function createBrandedSubmission({scope,storage,uuid,requestCalendar,getLogo,post=postBrandedImage}) {
+export function createBrandedSubmission({scope,storage,uuid,requestCalendar,getLogo,getSegment=()=>undefined,post=postBrandedImage}) {
   return createImageSubmission({scope,storage,uuid,requestCalendar,successStatus:'queued',
     fingerprint:async(image,caption)=>{
       const logo=getLogo();
       if(!logo)throw new Error('Adicione a logo da empresa para usar o Modo iA4tube.');
       const logoHash=await imageSubmissionFingerprint(logo,'');
-      return imageSubmissionFingerprint(image,JSON.stringify({mode:MY_IMAGE_MODE,caption,logoHash}));
-    },post:input=>post({...input,logo:getLogo()})});
+      const segment=normalizeImageSegment(getSegment());
+      return imageSubmissionFingerprint(image,JSON.stringify({mode:MY_IMAGE_MODE,caption,logoHash,
+        ...(segment!==undefined?{imageSegment:segment}:{})}));
+    },post:input=>post({...input,logo:getLogo(),...(getSegment()!==undefined?{imageSegment:normalizeImageSegment(getSegment())}:{})})});
 }
 
-export async function postBrandedImage({image,logo,caption,requestId,ticket}) {
+export async function postBrandedImage({image,logo,caption,requestId,ticket,imageSegment}) {
   if(!logo || !['image/png','image/jpeg','image/webp'].includes(logo.type) || !logo.size || logo.size>5*1024*1024)
     throw new Error('Adicione a logo da empresa.');
   const data={schemaVersion:2,campaignId:'sextou-classico-v1',company:'',whatsapp:null,
     selections:[{id:'93',format:'image'}],mediaKind:'image',imageCaption:caption,
+    ...(imageSegment!==undefined?{imageSegment:normalizeImageSegment(imageSegment)}:{}),
     sextou:{businessType:'auto',date:null,copyId:'trabalho-sabor',durationSeconds:10},
     showcase:{videoId:MY_IMAGE_MODEL,videoVersion:1},appCalendar:{ticket}};
   const body=new FormData();body.set('data',JSON.stringify(data));

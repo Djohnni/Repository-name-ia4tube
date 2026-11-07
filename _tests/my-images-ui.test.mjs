@@ -1,6 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {SEGMENTS,normalizeImageSegment,createSegmentMemory} from '../edit/my-images-segment.js';
 const source=await readFile(new URL('../edit/my-images.js',import.meta.url),'utf8');
 let number=0;
 class Element {
@@ -28,8 +29,8 @@ async function fixture({available=true,rows=[],scheduleWait=null,sendWait=null,l
     async schedule(id){calls.schedule.push(id);busy=true;onChange();try{await scheduleWait;Object.assign(entries.find(x=>x.id===id),{date:'2026-11-04',time:'18:21'});}finally{busy=false;onChange();}},
     async sendAll(){calls.send++;busy=true;onChange();try{await sendWait;}finally{busy=false;onChange();}},};
   globalThis.window={sessionStorage:{}};globalThis.document={activeElement:null,createElement:()=>new Element(),addEventListener(){}};
-  globalThis.__myImagesUI={appCalendarAttemptScope:()=> 'fixture-nonce',appCreationAllowed:()=>available,refreshAppAvailability(){},openAppCombos(){calls.combos++;},createImageQueue(options){onChange=options.onChange;return queue;}};
-  const rewritten='const {appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos,createImageQueue}=globalThis.__myImagesUI;\n'+source.replace(/^import .*;\r?\n/gm,'')+'\n// fixture '+(++number);
+  globalThis.__myImagesUI={SEGMENTS,normalizeImageSegment,createSegmentMemory,appCalendarAttemptScope:()=> 'fixture-nonce',appCreationAllowed:()=>available,refreshAppAvailability(){},openAppCombos(){calls.combos++;},createImageQueue(options){onChange=options.onChange;return queue;}};
+  const rewritten='const {SEGMENTS,normalizeImageSegment,createSegmentMemory,appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos,createImageQueue}=globalThis.__myImagesUI;\n'+source.replace(/^import .*;\r?\n/gm,'')+'\n// fixture '+(++number);
   const {createMyImages}=await import('data:text/javascript;base64,'+Buffer.from(rewritten).toString('base64'));
   const controller=createMyImages({dialog});controller.open();
   return {dialog,form,input,list,send,close,calls,queue,entries,progress:dialog.querySelector('[data-my-images-progress]')||form.children.find(node=>node.className==='my-images-progress'),render:()=>onChange(),setBusy(value){busy=value;onChange();}};

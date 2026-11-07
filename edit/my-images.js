@@ -1,5 +1,6 @@
 import {appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos} from './app-calendar.js?v=20261102-placements-v1';
-import {createImageQueue} from './my-images-queue.js?v=20261106-brand-mode-v2';
+import {createImageQueue} from './my-images-queue.js?v=20261107-segment-v1';
+import {SEGMENTS,normalizeImageSegment,createSegmentMemory} from './my-images-segment.js?v=20261107-segment-v1';
 
 export function createMyImages({dialog,onOpenChange=()=>{}}) {
   const form=dialog.querySelector('form'),input=dialog.querySelector('[data-my-images-add]');
@@ -15,9 +16,27 @@ export function createMyImages({dialog,onOpenChange=()=>{}}) {
   }
   // An unfinished draft must not prevent confirming a different, already reserved image.
   form.noValidate=true;
-  let queue=null,operation=null,batchLogo=null;const nodes=new Map();
+  let queue=null,operation=null,batchLogo=null,segmentLoading=false,segmentTouched=false;const nodes=new Map();
   const modes=[...form.querySelectorAll('[name="my-images-mode"]')];
   const logoInput=form.querySelector('[data-my-images-logo]'),logoField=form.querySelector('[data-my-images-logo-field]');
+  let segmentField=form.querySelector('[data-my-images-segment-field]');
+  let segmentOtherField=form.querySelector('[data-my-images-segment-other-field]');
+  if(!segmentField||!segmentOtherField){
+    const holder=document.createElement('div');
+    holder.innerHTML='<label class="order-field my-images-segment" data-my-images-segment-field hidden>Segmento do negócio<select data-my-images-segment aria-label="Segmento do negócio"></select></label><label class="order-field my-images-segment" data-my-images-segment-other-field hidden>Qual segmento?<input data-my-images-segment-other type="text" maxlength="80" placeholder="Ex.: Loja de móveis" autocomplete="off"></label>';
+    while(holder.firstChild)form.insertBefore(holder.firstChild,logoField||input.parentElement);
+    segmentField=form.querySelector('[data-my-images-segment-field]');segmentOtherField=form.querySelector('[data-my-images-segment-other-field]');
+  }
+  const segmentInput=segmentField.querySelector('select'),segmentOther=segmentOtherField.querySelector('input');
+  for(const [value,label] of [['auto','Identificar pela foto'],...SEGMENTS.map(value=>[value,value]),['other','Outro segmento']]){
+    const option=document.createElement('option');option.value=value;option.textContent=label;segmentInput.append(option);
+  }
+  const segmentMemory=createSegmentMemory({storage:{getItem:key=>window.localStorage.getItem(key),setItem:(key,value)=>window.localStorage.setItem(key,value)}});
+  const chosenSegment=()=>normalizeImageSegment(segmentInput.value==='other'?segmentOther.value:segmentInput.value);
+  function showSegment(value){
+    segmentInput.value=value==='auto'||SEGMENTS.includes(value)?value:'other';
+    segmentOther.value=segmentInput.value==='other'?value:'';
+  }
   const selectedMode=()=>modes.find(input=>input.checked)?.value||'original';
   const showError=message=>{error.textContent=message||'';error.hidden=!message;};
   const dateLabel=value=>value?value.split('-').reverse().join('/'):'Escolher dia';
@@ -48,7 +67,7 @@ export function createMyImages({dialog,onOpenChange=()=>{}}) {
     return {article,caption,replace,day,time,image:article.querySelector('img'),status:article.querySelector('[role=status]'),file:null,url:null};
   }
   function render() {
-    const rows=queue?.items()||[],busy=queue?.isBusy()||false,app=Boolean(appCalendarAttemptScope());
+    const rows=queue?.items()||[],busy=(queue?.isBusy()||false)||segmentLoading,app=Boolean(appCalendarAttemptScope());
     const pending=rows.some(row=>row.status==='pending'),unfinished=rows.filter(row=>row.status!=='saved');
     const remaining=queue?.remaining()??null;
     const buyMore=!pending && (appCreationAllowed('image')===false || remaining===0);
@@ -61,6 +80,9 @@ export function createMyImages({dialog,onOpenChange=()=>{}}) {
     input.disabled=busy;
     for(const mode of modes)mode.disabled=busy;
     if(logoInput)logoInput.disabled=busy;
+    segmentField.hidden=selectedMode()!=='ia4tube';segmentInput.disabled=busy;
+    segmentOtherField.hidden=selectedMode()!=='ia4tube'||segmentInput.value!=='other';
+    segmentOther.disabled=busy||segmentOtherField.hidden;
     if(logoField)logoField.hidden=selectedMode()!=='ia4tube'&&!rows.some(row=>row.needsLogo);
     send.dataset.busy=String(busy);
     send.textContent=busy?busyMessage:buyMore?'Suas imagens acabaram · Ver combos':pending?'Continuar envio':'Enviar imagens';
@@ -103,16 +125,28 @@ export function createMyImages({dialog,onOpenChange=()=>{}}) {
     });
   }
   for(const mode of modes)mode.addEventListener('change',render);
-  logoInput?.addEventListener('change',()=>{
-    try{ensureQueue();if(logoInput.files?.[0]){queue.setSharedLogo(logoInput.files[0]);batchLogo=logoInput.files[0];}showError('');}
-    catch(failure){showError(failure.message);}finally{render();}
+  const changeSegment=()=>{
+    segmentTouched=true;
+    try{const value=chosenSegment();queue?.setSharedSegment(value);if(batchLogo)void segmentMemory.save(batchLogo,value);showError('');}
+    catch(failure){if(segmentInput.value!=='other'||segmentOther.value.trim())showError(failure.message);}finally{render();}
+  };
+  segmentInput.addEventListener('change',changeSegment);segmentOther.addEventListener('input',changeSegment);
+  logoInput?.addEventListener('change',async()=>{
+    try{
+      ensureQueue();const logo=logoInput.files?.[0];if(!logo)return;
+      const keepChoice=!batchLogo&&segmentTouched;
+      queue.setSharedLogo(logo);batchLogo=logo;segmentLoading=true;render();
+      if(!keepChoice)showSegment(await segmentMemory.load(logo)||'auto');
+      const value=chosenSegment();queue.setSharedSegment(value);await segmentMemory.save(logo,value);
+      segmentTouched=false;showError('');
+    }catch(failure){showError(failure.message);}finally{segmentLoading=false;render();}
   });
   input.addEventListener('change',()=>{
-    try{ensureQueue();if(!queue)throw Error('Abra Posts prontos pelo app para agendar suas imagens.');queue.add([...input.files],{mode:selectedMode(),logo:batchLogo});showError('');input.value='';}
+    try{ensureQueue();if(!queue)throw Error('Abra Posts prontos pelo app para agendar suas imagens.');queue.add([...input.files],{mode:selectedMode(),logo:batchLogo,...(selectedMode()==='ia4tube'?{segment:chosenSegment()}:{})});showError('');input.value='';}
     catch(failure){showError(failure.message);}finally{render();}
   });
   form.addEventListener('submit',async event=>{
-    event.preventDefault();if(queue?.isBusy())return;
+    event.preventDefault();if(segmentLoading||queue?.isBusy())return;
     const rows=queue?.items()||[],pending=rows.some(row=>row.status==='pending');
     if(!pending && (appCreationAllowed('image')===false || queue?.remaining()===0)){openAppCombos();return;}
     showError('');
