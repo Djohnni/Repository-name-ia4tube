@@ -1,4 +1,4 @@
-import {createImageSubmission,imageSubmissionFingerprint} from './my-images-submit.js?v=20261107-segment-v1';
+import {createImageSubmission,imageSubmissionFingerprint,postImageCaption} from './my-images-submit.js?v=20261109-ai-caption-v1';
 import {normalizeImageSegment} from './my-images-segment.js?v=20261107-segment-v1';
 import {SUBMIT_ENDPOINT,idempotencyKey,calendarContextHash,normalizeReceipt} from './order-adapter.js?v=20261029-extra40';
 export const MY_IMAGE_MODEL='73f8a30b-6cb5-4f82-9e11-6e325941f590';
@@ -6,19 +6,20 @@ export const MY_IMAGE_MODE='ia4tube';
 
 export function createBrandedSubmission({scope,storage,uuid,requestCalendar,getLogo,getSegment=()=>undefined,post=postBrandedImage}) {
   return createImageSubmission({scope,storage,uuid,requestCalendar,successStatus:'queued',
-    fingerprint:async(image,caption)=>{
+    fingerprint:async(image,caption,captionMode)=>{
       const logo=getLogo();
       if(!logo)throw new Error('Adicione a logo da empresa para usar o Modo iA4tube.');
       const logoHash=await imageSubmissionFingerprint(logo,'');
       const segment=normalizeImageSegment(getSegment());
       return imageSubmissionFingerprint(image,JSON.stringify({mode:MY_IMAGE_MODE,caption,logoHash,
-        ...(segment!==undefined?{imageSegment:segment}:{})}));
+        ...(segment!==undefined?{imageSegment:segment}:{})}),captionMode);
     },post:input=>post({...input,logo:getLogo(),...(getSegment()!==undefined?{imageSegment:normalizeImageSegment(getSegment())}:{})})});
 }
 
-export async function postBrandedImage({image,logo,caption,requestId,ticket,imageSegment}) {
+export async function postBrandedImage({image,logo,caption,requestId,ticket,imageSegment,captionMode='manual'}) {
   if(!logo || !['image/png','image/jpeg','image/webp'].includes(logo.type) || !logo.size || logo.size>5*1024*1024)
     throw new Error('Adicione a logo da empresa.');
+  if(captionMode==='ia4tube')caption=await postImageCaption({image,caption,requestId,ticket});
   const data={schemaVersion:2,campaignId:'sextou-classico-v1',company:'',whatsapp:null,
     selections:[{id:'93',format:'image'}],mediaKind:'image',imageCaption:caption,
     ...(imageSegment!==undefined?{imageSegment:normalizeImageSegment(imageSegment)}:{}),

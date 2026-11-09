@@ -25,6 +25,7 @@ async function fixture({available=true,rows=[],scheduleWait=null,sendWait=null,l
   const queue={items:()=>entries,isBusy:()=>busy,remaining:()=>null,
     add(files){entries.push(...files.map((file,i)=>({...row('new-'+i),file})));onChange();},
     setCaption(id,text){entries.find(x=>x.id===id).caption=text;calls.caption.push(id);onChange();},
+    setCaptionMode(id,mode){entries.find(x=>x.id===id).captionMode=mode;onChange();},
     remove(id){entries=entries.filter(x=>x.id!==id);onChange();},replaceFile(id,file){entries.find(x=>x.id===id).file=file;onChange();},
     async schedule(id){calls.schedule.push(id);busy=true;onChange();try{await scheduleWait;Object.assign(entries.find(x=>x.id===id),{date:'2026-11-04',time:'18:21'});}finally{busy=false;onChange();}},
     async sendAll(){calls.send++;busy=true;onChange();try{await sendWait;}finally{busy=false;onChange();}},};
@@ -46,6 +47,19 @@ test('editing a caption preserves that input node and cursor ownership',async()=
   const f=await fixture({rows:[row('a'),row('b')]});const caption=f.list.children[0].querySelector('textarea');
   document.activeElement=caption;caption.value='Minha legenda nova';await caption.emit('input');
   assert.equal(f.list.children[0].querySelector('textarea'),caption);assert.equal(caption.value,'Minha legenda nova');assert.deepEqual(f.calls.caption,['a']);assert.equal(f.entries[1].caption,'Legenda b');
+});
+
+test('caption option is available on each photo in both modes, stays off by default and switches guidance/required state',async()=>{
+  const f=await fixture({rows:[row('a'),{...row('b'),mode:'ia4tube'}]});
+  for(const article of f.list.children){
+    const toggle=article.querySelector('[data-caption-ai]'),caption=article.querySelector('textarea');
+    assert.equal(toggle.checked,false);assert.equal(caption.required,true);
+    toggle.checked=true;await toggle.emit('change');
+    assert.equal(caption.required,false);assert.match(caption.placeholder,/#minhamarca/);
+    assert.equal(article.querySelector('[data-caption-label]').textContent,'Oriente a legenda');
+  }
+  assert.ok(f.entries.every(entry=>entry.captionMode==='ia4tube'));
+  f.entries[0].status='saved';f.render();assert.equal(f.list.children[0].querySelector('[data-caption-ai]').disabled,true);
 });
 test('selecting time changes only its own image and formats the confirmed date',async()=>{
   const f=await fixture({rows:[row('a'),row('b')]});await f.list.children[1].querySelector('.my-image-time').emit('click');

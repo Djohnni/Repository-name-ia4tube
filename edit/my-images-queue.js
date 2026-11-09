@@ -1,8 +1,8 @@
 import {requestAppCalendar} from './app-calendar.js?v=20261102-placements-v1';
-import {createImageSubmission,postReadyImage} from './my-images-submit.js?v=20261107-segment-v1';
+import {createImageSubmission,postReadyImage} from './my-images-submit.js?v=20261109-ai-caption-v1';
 import {readReadyImageContext,prepareReadyImage} from './my-images-api.js?v=20261101-my-images-list-v1';
 
-import {createBrandedSubmission,MY_IMAGE_MODE} from './my-images-branded.js?v=20261107-segment-v1';
+import {createBrandedSubmission,MY_IMAGE_MODE} from './my-images-branded.js?v=20261109-ai-caption-v1';
 import {normalizeImageSegment} from './my-images-segment.js?v=20261107-segment-v1';
 
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
@@ -24,6 +24,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
   const key='ia4tube:my-images-queue:v1:'+scope,legacyKey='ia4tube:my-images:v1:'+scope;
   let rows=[],busy=false,balance=null;
   const snapshot=row=>Object.freeze({id:row.id,file:row.file||null,fileName:row.fileName,caption:row.caption,
+    ...(row.captionMode==='ia4tube'?{captionMode:row.captionMode}:{}),
     date:row.date,time:row.time,status:row.status,requestId:row.requestId,
     mode:row.mode||'original',needsLogo:row.mode===MY_IMAGE_MODE&&row.status!=='saved'&&!row.logoFile,
     ...(row.segment!==undefined?{segment:row.segment}:{}),
@@ -32,9 +33,9 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
   const items=()=>rows.map(snapshot);
   const notify=()=>{try{onChange(items());}catch{/* A rendering callback cannot undo a confirmed image. */}};
   function persist() {
-    const value={schema:1,rows:rows.map(({id,fileName,caption,date,time,status,requestId,receipt,legacy,contextPending,error,mode,segment})=>
+    const value={schema:1,rows:rows.map(({id,fileName,caption,date,time,status,requestId,receipt,legacy,contextPending,error,mode,segment,captionMode})=>
       ({id,fileName,caption,date,time,status,requestId,receipt:receipt||null,legacy:legacy===true,
-        contextPending:contextPending===true,...(mode===MY_IMAGE_MODE?{mode,...(segment!==undefined?{segment}:{})}:{}),...(error?{error}: {})}))};
+        contextPending:contextPending===true,...(captionMode==='ia4tube'?{captionMode}:{}),...(mode===MY_IMAGE_MODE?{mode,...(segment!==undefined?{segment}:{})}:{}),...(error?{error}: {})}))};
     try{storage.setItem(key,JSON.stringify(value));}
     catch{throw fail('Não foi possível preservar sua lista neste aparelho. Não envie outra tentativa.','ready_image_storage_unavailable');}
   }
@@ -79,6 +80,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
       rows=saved.rows.map(value=>{
         if(!value||!UUID.test(value.id||'')||ids.has(value.id)||!['draft','pending','saved'].includes(value.status)||
           !(value.mode===undefined||value.mode===MY_IMAGE_MODE)||typeof value.fileName!=='string'||typeof value.caption!=='string'||value.caption.length>2200||
+          !(value.captionMode===undefined||value.captionMode==='ia4tube')||
           !(value.segment===undefined||value.mode===MY_IMAGE_MODE&&normalizeImageSegment(value.segment)===value.segment)||
           !(value.requestId===null||UUID.test(value.requestId||''))||
           !(value.date===null||validDate(value.date))||!(value.time===null||validTime(value.time))||
@@ -104,7 +106,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
   function validateRow(row) {
     if(!fileValid(row.file))throw fail('Escolha novamente a imagem salva neste aparelho.','ready_image_file_required',row);
     if(row.mode===MY_IMAGE_MODE && (!fileValid(row.logoFile)||row.logoFile.size>5*1024*1024))throw fail('Adicione a logo da empresa para este lote.','ready_image_logo_required',row);
-    if(!row.caption.trim()||row.caption.trim().length>2200)throw fail('Escreva a legenda de cada imagem.','ready_image_caption_required',row);
+    if((row.captionMode!=='ia4tube'&&!row.caption.trim())||row.caption.trim().length>2200)throw fail('Escreva a legenda de cada imagem.','ready_image_caption_required',row);
     if(!UUID.test(row.requestId||'')||!validDate(row.date)||!validTime(row.time))
       throw fail('Escolha o dia e a hora de cada imagem.','ready_image_schedule_required',row);
   }
@@ -115,6 +117,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
     const wasPending=helper(row).hasPending()||row.status==='pending';
     try {
       if(!row.snapshot)row.snapshot={image:await readImage(row.file),caption:row.caption.trim(),
+        ...(row.captionMode==='ia4tube'?{captionMode:row.captionMode}:{}),
         ...(row.mode===MY_IMAGE_MODE?{logo:await readImage(row.logoFile),...(row.segment!==undefined?{segment:row.segment}:{})}:{})};
       row.status='pending';row.recoveryEditable=false;delete row.error;changed();
       const result=await helper(row).send(row.snapshot);
@@ -167,6 +170,12 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
     setCaption(id,text) {
       const row=rowFor(id);editable(row);if(typeof text!=='string'||text.length>2200)throw fail('Use até 2.200 caracteres na legenda.','ready_image_caption_invalid',row);
       row.caption=text;row.snapshot=null;delete row.error;changed();return snapshot(row);
+    },
+    setCaptionMode(id,mode) {
+      const row=rowFor(id);editable(row);
+      if(!['manual','ia4tube'].includes(mode))throw fail('Escolha como criar a legenda.','ready_image_caption_mode_invalid',row);
+      if(mode==='ia4tube')row.captionMode=mode;else delete row.captionMode;
+      row.snapshot=null;delete row.error;changed();return snapshot(row);
     },
     remove(id) {
       const row=rowFor(id);idle();if(row.status==='pending')throw fail('Confirme o envio pendente antes de remover esta imagem.','ready_image_row_locked',row);

@@ -49,3 +49,5 @@
 .my-images-segment select,.my-images-segment input{width:100%;min-height:48px;padding:12px;border:1px solid #55505a;border-radius:11px;background:#101014;color:#f5f5f7;font:inherit;font-size:16px;color-scheme:dark}
 .my-images-segment select:focus-visible,.my-images-segment input:focus-visible{outline:2px solid #e6bd66;outline-offset:2px}
 @media(max-width:360px){.my-images-modes{gap:7px}.my-images-modes label{font-size:12px;padding:11px 8px}}
+.my-image-caption-option{display:flex;align-items:center;gap:.6rem;width:fit-content;min-height:36px;margin:-.25rem 0 .35rem;color:var(--text,#f5f3ef);font-size:.92rem;cursor:pointer}
+.my-image-caption-option input{width:1.1rem;height:1.1rem;margin:0;accent-color:#efc66c}

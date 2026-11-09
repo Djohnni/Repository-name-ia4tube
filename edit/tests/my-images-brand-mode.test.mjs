@@ -25,6 +25,27 @@ test('original upload stays on the old path; two generated images share one sele
  assert.equal(new Set(f.calls.map(x=>x[1].requestId)).size,3);assert.equal(f.balance,2);
  await q.sendAll();assert.equal(f.calls.length,3);assert.ok(q.items().every(x=>x.status==='saved'));
 });
+
+test('AI caption is optional per photo in both modes, accepts blank guidance and survives list restore',async()=>{
+ const f=fixture(),q=f.queue,logo=file('LOGO');
+ const rows=[...q.add([file('ORIGINAL')]),...q.add([file('BRANDED')],{mode:'ia4tube',logo})];
+ for(const row of rows){q.setCaptionMode(row.id,'ia4tube');await q.schedule(row.id);}
+ const restored=createImageQueue(f.ports);assert.ok(restored.items().every(row=>row.captionMode==='ia4tube'));
+ restored.replaceFile(rows[0].id,file('ORIGINAL'));restored.replaceFile(rows[1].id,file('BRANDED'));restored.setSharedLogo(logo);
+ await restored.sendAll();
+ assert.deepEqual(f.calls.map(([mode,input])=>[mode,input.captionMode,input.caption]),[['original','ia4tube',''],['ia4tube','ia4tube','']]);
+ assert.equal(f.balance,3);
+});
+
+test('caption direction remains editable before send, while uncertain attempts cannot change its AI choice',async()=>{
+ const f=fixture({failOnce:true}),q=f.queue,logo=file('LOGO'),photo=file('BRANDED');
+ const row=q.add([photo],{mode:'ia4tube',logo})[0];q.setCaptionMode(row.id,'ia4tube');q.setCaption(row.id,'Destaque o produto #NossaMarca');await q.schedule(row.id);
+ await assert.rejects(q.sendAll(),/lost response/);
+ assert.throws(()=>q.setCaptionMode(row.id,'manual'),e=>e.code==='ready_image_row_locked');
+ const restored=createImageQueue(f.ports);restored.replaceFile(row.id,photo);restored.setSharedLogo(logo);await restored.sendAll();
+ assert.equal(f.calls[1][1].captionMode,'ia4tube');assert.equal(f.calls[1][1].caption,'Destaque o produto #NossaMarca');
+ assert.equal(f.balance,4);assert.equal(f.records.size,1);
+});
 test('logo required only for IA mode; a whole batch is validated before first debit',async()=>{
  const f=fixture(),q=f.queue;const row=q.add([file('A')],{mode:'ia4tube'})[0];await prepare(q,row.id);
  await assert.rejects(q.sendAll(),e=>e.code==='ready_image_logo_required');assert.equal(f.calls.length,0);
