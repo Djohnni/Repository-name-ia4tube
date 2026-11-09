@@ -172,13 +172,14 @@ test('a confirmed row stays saved when the following balance read fails',async()
   await f.queue.sendAll();assert.equal(f.calls.posts.length,2);assert.equal(f.balance,1);
 });
 
-test('busy queue rejects overlapping sends and editing while a POST is in progress',async()=>{
-  const f=fixture();const [row]=await prepared(f,[first]);let release;
+test('busy queue rejects overlapping sends and editing while a POST is in progress',{timeout:3000},async()=>{
+  const f=fixture();const [row]=await prepared(f,[first]);let release,entered;
+  const postStarted=new Promise(resolve=>{entered=resolve;});
   const originalPost=f.ports.submitImage;const delayed=createImageQueue({...f.ports,submitImage:async value=>{
-    await new Promise(resolve=>{release=resolve;});return originalPost(value);
+    await new Promise(resolve=>{release=resolve;entered();});return originalPost(value);
   }});
   delayed.replaceFile(row.id,first);const sending=delayed.sendAll();
-  for(let i=0;i<20&&!release;i++)await wait();
+  await postStarted;
   assert.equal(delayed.isBusy(),true);assert.throws(()=>delayed.setCaption(row.id,'No'),{code:'ready_image_queue_busy'});
   await assert.rejects(delayed.sendAll(),{code:'ready_image_queue_busy'});release();await sending;
   assert.equal(f.calls.posts.length,1);

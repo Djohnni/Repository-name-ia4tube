@@ -2,7 +2,7 @@ import {requestAppCalendar} from './app-calendar.js?v=20261102-placements-v1';
 import {createImageSubmission,postReadyImage} from './my-images-submit.js?v=20261109-ai-caption-v1';
 import {readReadyImageContext,prepareReadyImage} from './my-images-api.js?v=20261101-my-images-list-v1';
 
-import {createBrandedSubmission,MY_IMAGE_MODE} from './my-images-branded.js?v=20261109-ai-caption-v1';
+import {createBrandedSubmission,MY_IMAGE_MODE,normalizeImageText} from './my-images-branded.js?v=20261109-image-text-v1';
 import {normalizeImageSegment} from './my-images-segment.js?v=20261107-segment-v1';
 
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
@@ -28,14 +28,15 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
     date:row.date,time:row.time,status:row.status,requestId:row.requestId,
     mode:row.mode||'original',needsLogo:row.mode===MY_IMAGE_MODE&&row.status!=='saved'&&!row.logoFile,
     ...(row.segment!==undefined?{segment:row.segment}:{}),
+    ...(row.imageText!==undefined?{imageText:row.imageText}:{}),
     needsFile:row.status!=='saved'&&!row.file,recoveryEditable:row.status==='pending'&&row.recoveryEditable===true,
     ...(row.receipt?{receipt:Object.freeze({...row.receipt})}:{}),...(row.error?{error:row.error}:{})});
   const items=()=>rows.map(snapshot);
   const notify=()=>{try{onChange(items());}catch{/* A rendering callback cannot undo a confirmed image. */}};
   function persist() {
-    const value={schema:1,rows:rows.map(({id,fileName,caption,date,time,status,requestId,receipt,legacy,contextPending,error,mode,segment,captionMode})=>
+    const value={schema:1,rows:rows.map(({id,fileName,caption,date,time,status,requestId,receipt,legacy,contextPending,error,mode,segment,captionMode,imageText})=>
       ({id,fileName,caption,date,time,status,requestId,receipt:receipt||null,legacy:legacy===true,
-        contextPending:contextPending===true,...(captionMode==='ia4tube'?{captionMode}:{}),...(mode===MY_IMAGE_MODE?{mode,...(segment!==undefined?{segment}:{})}:{}),...(error?{error}: {})}))};
+        contextPending:contextPending===true,...(captionMode==='ia4tube'?{captionMode}:{}),...(mode===MY_IMAGE_MODE?{mode,...(segment!==undefined?{segment}:{}),...(imageText!==undefined?{imageText}:{})}:{}),...(error?{error}: {})}))};
     try{storage.setItem(key,JSON.stringify(value));}
     catch{throw fail('Não foi possível preservar sua lista neste aparelho. Não envie outra tentativa.','ready_image_storage_unavailable');}
   }
@@ -47,7 +48,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
   function newId(){const id=uuid();if(!UUID.test(id||''))throw fail('Não foi possível identificar esta imagem.','ready_image_identity_invalid');return id;}
   function helper(row) {
     if(!row.helper)row.helper=(row.mode===MY_IMAGE_MODE?createBrandedSubmission:createImageSubmission)({
-      ...(row.mode===MY_IMAGE_MODE?{getLogo:()=>row.snapshot?.logo,getSegment:()=>row.snapshot?.segment}:{}),scope:row.legacy?scope:scope+':'+row.id,storage,
+      ...(row.mode===MY_IMAGE_MODE?{getLogo:()=>row.snapshot?.logo,getSegment:()=>row.snapshot?.segment,getImageText:()=>row.snapshot?.imageText}:{}),scope:row.legacy?scope:scope+':'+row.id,storage,
       uuid:()=>row.requestId,requestCalendar:async id=>{
         if(id!==row.requestId)throw fail('Confira a tentativa original desta imagem.','ready_image_identity_conflict',row);
         return {ticket:await ticketFor(row)};
@@ -82,6 +83,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
           !(value.mode===undefined||value.mode===MY_IMAGE_MODE)||typeof value.fileName!=='string'||typeof value.caption!=='string'||value.caption.length>2200||
           !(value.captionMode===undefined||value.captionMode==='ia4tube')||
           !(value.segment===undefined||value.mode===MY_IMAGE_MODE&&normalizeImageSegment(value.segment)===value.segment)||
+          !(value.imageText===undefined||value.mode===MY_IMAGE_MODE&&typeof value.imageText==='string'&&value.imageText.length<=300&&normalizeImageText(value.imageText)!==undefined)||
           !(value.requestId===null||UUID.test(value.requestId||''))||
           !(value.date===null||validDate(value.date))||!(value.time===null||validTime(value.time))||
           value.status!=='draft'&&!UUID.test(value.requestId||''))throw fail('Sua lista precisa ser conferida.','ready_image_storage_invalid');
@@ -118,7 +120,8 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
     try {
       if(!row.snapshot)row.snapshot={image:await readImage(row.file),caption:row.caption.trim(),
         ...(row.captionMode==='ia4tube'?{captionMode:row.captionMode}:{}),
-        ...(row.mode===MY_IMAGE_MODE?{logo:await readImage(row.logoFile),...(row.segment!==undefined?{segment:row.segment}:{})}:{})};
+        ...(row.mode===MY_IMAGE_MODE?{logo:await readImage(row.logoFile),...(row.segment!==undefined?{segment:row.segment}:{}),
+          ...(normalizeImageText(row.imageText)!==undefined?{imageText:normalizeImageText(row.imageText)}:{})}:{})};
       row.status='pending';row.recoveryEditable=false;delete row.error;changed();
       const result=await helper(row).send(row.snapshot);
       row.status='saved';row.receipt={requestId:result.requestId,planningId:result.planningId,pedidoId:result.pedidoId,status:result.status};
@@ -170,6 +173,14 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
     setCaption(id,text) {
       const row=rowFor(id);editable(row);if(typeof text!=='string'||text.length>2200)throw fail('Use até 2.200 caracteres na legenda.','ready_image_caption_invalid',row);
       row.caption=text;row.snapshot=null;delete row.error;changed();return snapshot(row);
+    },
+    setImageText(id,text) {
+      const row=rowFor(id);editable(row);
+      if(row.mode!==MY_IMAGE_MODE||typeof text!=='string'||text.length>300)
+        throw fail('Use até 300 caracteres no preço ou informação da imagem.','ready_image_text_invalid',row);
+      try{normalizeImageText(text);}catch{throw fail('Use até 300 caracteres no preço ou informação da imagem.','ready_image_text_invalid',row);}
+      if(text.trim())row.imageText=text;else delete row.imageText;
+      row.snapshot=null;delete row.error;changed();return snapshot(row);
     },
     setCaptionMode(id,mode) {
       const row=rowFor(id);editable(row);

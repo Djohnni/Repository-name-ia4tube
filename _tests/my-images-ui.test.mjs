@@ -26,6 +26,7 @@ async function fixture({available=true,rows=[],scheduleWait=null,sendWait=null,l
     add(files){entries.push(...files.map((file,i)=>({...row('new-'+i),file})));onChange();},
     setCaption(id,text){entries.find(x=>x.id===id).caption=text;calls.caption.push(id);onChange();},
     setCaptionMode(id,mode){entries.find(x=>x.id===id).captionMode=mode;onChange();},
+    setImageText(id,text){entries.find(x=>x.id===id).imageText=text;onChange();},
     remove(id){entries=entries.filter(x=>x.id!==id);onChange();},replaceFile(id,file){entries.find(x=>x.id===id).file=file;onChange();},
     async schedule(id){calls.schedule.push(id);busy=true;onChange();try{await scheduleWait;Object.assign(entries.find(x=>x.id===id),{date:'2026-11-04',time:'18:21'});}finally{busy=false;onChange();}},
     async sendAll(){calls.send++;busy=true;onChange();try{await sendWait;}finally{busy=false;onChange();}},};
@@ -60,6 +61,18 @@ test('caption option is available on each photo in both modes, stays off by defa
   }
   assert.ok(f.entries.every(entry=>entry.captionMode==='ia4tube'));
   f.entries[0].status='saved';f.render();assert.equal(f.list.children[0].querySelector('[data-caption-ai]').disabled,true);
+});
+
+test('price or visible information belongs only to each branded photo and locks with its attempt',async()=>{
+  const f=await fixture({rows:[row('a'),{...row('b'),mode:'ia4tube'}]});
+  assert.equal(f.list.children[0].querySelector('[data-image-text-field]').hidden,true);
+  const node=f.list.children[1],field=node.querySelector('[data-image-text]');
+  assert.equal(node.querySelector('[data-image-text-field]').hidden,false);
+  document.activeElement=field;field.value='R$ 39,90 · Combo para 2';await field.emit('input');
+  assert.equal(f.entries[1].imageText,field.value);assert.equal(f.entries[0].imageText,undefined);
+  assert.equal(f.entries[1].caption,'Legenda b');
+  f.entries[1].status='pending';f.entries[1].recoveryEditable=false;f.render();assert.equal(field.readOnly,true);
+  f.entries[1].status='draft';f.setBusy(true);assert.equal(field.readOnly,true);
 });
 test('selecting time changes only its own image and formats the confirmed date',async()=>{
   const f=await fixture({rows:[row('a'),row('b')]});await f.list.children[1].querySelector('.my-image-time').emit('click');

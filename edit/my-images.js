@@ -1,5 +1,5 @@
 import {appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos} from './app-calendar.js?v=20261102-placements-v1';
-import {createImageQueue} from './my-images-queue.js?v=20261109-ai-caption-v1';
+import {createImageQueue} from './my-images-queue.js?v=20261109-image-text-v1';
 import {SEGMENTS,normalizeImageSegment,createSegmentMemory} from './my-images-segment.js?v=20261107-segment-v1';
 
 export function createMyImages({dialog,onOpenChange=()=>{}}) {
@@ -49,6 +49,7 @@ export function createMyImages({dialog,onOpenChange=()=>{}}) {
     article.innerHTML=`<header><strong></strong><button type="button" class="my-image-remove" aria-label="Remover imagem">×</button></header>
       <img class="my-image-preview" alt="Imagem escolhida" loading="lazy" decoding="async" hidden>
       <label class="order-field my-image-restore" hidden>Escolher esta imagem novamente<input type="file" accept="image/png,image/jpeg,image/webp"></label>
+      <label class="order-field" data-image-text-field hidden>Preço ou informação na imagem<input type="text" data-image-text maxlength="300" placeholder="Ex.: R$ 39,90 · Combo para 2 pessoas" autocomplete="off"></label>
       <label class="order-field"><span data-caption-label>Legenda</span><textarea rows="3" maxlength="2200" placeholder="Escreva a legenda da publicação" required></textarea></label>
       <label class="my-image-caption-option"><input type="checkbox" data-caption-ai>Legenda iA4tube</label>
       <div class="my-image-schedule"><label>Dia<button type="button" class="my-image-day"><span></span><b aria-hidden="true">✎</b></button></label>
@@ -56,8 +57,10 @@ export function createMyImages({dialog,onOpenChange=()=>{}}) {
       <p class="my-image-status" role="status"></p>`;
     const caption=article.querySelector('textarea'),replace=article.querySelector('input[type=file]');
     const captionAI=article.querySelector('[data-caption-ai]'),captionLabel=article.querySelector('[data-caption-label]');
+    const imageText=article.querySelector('[data-image-text]'),imageTextField=article.querySelector('[data-image-text-field]');
     const day=article.querySelector('.my-image-day'),time=article.querySelector('.my-image-time');
     caption.addEventListener('input',()=>{try{queue.setCaption(row.id,caption.value);showError('');}catch(failure){showError(failure.message);}});
+    imageText.addEventListener('input',()=>{try{queue.setImageText(row.id,imageText.value);showError('');}catch(failure){showError(failure.message);}});
     captionAI.addEventListener('change',()=>{try{queue.setCaptionMode(row.id,captionAI.checked?'ia4tube':'manual');showError('');}catch(failure){showError(failure.message);render();}});
     article.querySelector('.my-image-remove').addEventListener('click',()=>{try{queue.remove(row.id);showError('');}catch(failure){showError(failure.message);}});
     replace.addEventListener('change',()=>{try{if(replace.files?.[0])queue.replaceFile(row.id,replace.files[0]);showError('');}catch(failure){showError(failure.message);}});
@@ -67,7 +70,7 @@ export function createMyImages({dialog,onOpenChange=()=>{}}) {
       showError('');try{await queue.schedule(row.id);}catch(failure){showError(failure.message);}finally{operation=null;render();}
     };
     day.addEventListener('click',schedule);time.addEventListener('click',schedule);
-    return {article,caption,captionAI,captionLabel,replace,day,time,image:article.querySelector('img'),status:article.querySelector('[role=status]'),file:null,url:null};
+    return {article,caption,captionAI,captionLabel,imageText,imageTextField,replace,day,time,image:article.querySelector('img'),status:article.querySelector('[role=status]'),file:null,url:null};
   }
   function render() {
     const rows=queue?.items()||[],busy=(queue?.isBusy()||false)||segmentLoading,app=Boolean(appCalendarAttemptScope());
@@ -106,6 +109,8 @@ export function createMyImages({dialog,onOpenChange=()=>{}}) {
       node.article.querySelector('strong').textContent=`Imagem ${index+1}${row.mode==='ia4tube'?' · Modo iA4tube':''}`;
       node.article.dataset.status=row.status;
       const immutable=row.status==='saved'||row.status==='pending'&&!row.recoveryEditable;
+      node.imageTextField.hidden=row.mode!=='ia4tube';node.imageText.readOnly=busy||immutable;
+      if(document.activeElement!==node.imageText)node.imageText.value=row.imageText||'';
       node.caption.readOnly=busy||immutable;
       const aiCaption=row.captionMode==='ia4tube';
       node.captionAI.checked=aiCaption;node.captionAI.disabled=busy||immutable;
