@@ -2,7 +2,7 @@ import {appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAp
 import {createImageQueue} from './my-images-queue.js?v=20261109-image-text-v1';
 import {SEGMENTS,normalizeImageSegment,createSegmentMemory} from './my-images-segment.js?v=20261107-segment-v1';
 
-export function createMyImages({dialog,onOpenChange=()=>{}}) {
+export function createMyImages({dialog,onOpenChange=()=>{},onSent=()=>{}}) {
   const form=dialog.querySelector('form'),input=dialog.querySelector('[data-my-images-add]');
   const list=dialog.querySelector('[data-my-images-list]'),send=dialog.querySelector('[data-my-images-send]');
   const error=dialog.querySelector('[role=alert]'),hint=dialog.querySelector('[data-my-images-hint]');
@@ -170,6 +170,11 @@ export function createMyImages({dialog,onOpenChange=()=>{}}) {
       operation={kind:'send',ids:queue.items().filter(row=>row.status!=='saved')
         .sort((a,b)=>Number(b.status==='pending')-Number(a.status==='pending')).map(row=>row.id)};
       await queue.sendAll();refreshAppAvailability();
+      const sent=queue.items().filter(row=>operation.ids.includes(row.id));
+      if(operation.ids.length&&sent.length===operation.ids.length&&sent.every(row=>row.status==='saved')) {
+        dialog.close();
+        try{onSent({count:sent.length});}catch{/* A visual acknowledgement cannot undo confirmed images. */}
+      }
     }catch(failure){showError(failure.message);refreshAppAvailability();}finally{operation=null;render();}
   });
   for(const close of dialog.querySelectorAll('[data-my-images-close]'))close.addEventListener('click',()=>{if(!queue?.isBusy())dialog.close();});

@@ -29,6 +29,9 @@
 .my-image-item[data-status=saved] .my-image-status{color:#bdde9f}
 .my-image-item[data-status=saved] .my-image-preview{height:90px}
 .my-image-item[data-status=saved] textarea{min-height:62px}
+#toast.my-images-confirmation{top:50%;bottom:auto;left:50%;transform:translate(-50%,-50%);width:calc(100% - 48px);max-width:370px;box-sizing:border-box;padding:24px 22px;border:1px solid #d9b45f;border-radius:18px;background:#19191f;color:#fff;font-size:19px;font-weight:650;line-height:1.5;white-space:pre-line;box-shadow:0 14px 65px #000b;z-index:200}
+#toast.my-images-confirmation::before{content:'✓';display:grid;place-items:center;width:48px;height:48px;margin:0 auto 12px;border-radius:50%;background:#f4cc72;color:#17140d;font-size:30px;font-weight:800}
+body.video-only #toast.my-images-confirmation{visibility:visible!important}
 .my-images-summary{font-size:13px;line-height:1.5;color:#d9e4c4;margin:15px 0}
 .my-images-progress{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:10px;padding:14px 16px;margin:0 0 16px;border:1px solid #d7b260;border-radius:12px;background:#29241b;color:#ffe0a0;font-size:15px;font-weight:650;line-height:1.4;box-shadow:0 4px 18px #0005}
 .my-images-progress::before,.my-image-status[data-busy=true]::before,.my-images-sheet [data-my-images-send][data-busy=true]::before{content:"";display:inline-block;flex:0 0 auto;width:18px;height:18px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:my-images-loading .85s linear infinite}

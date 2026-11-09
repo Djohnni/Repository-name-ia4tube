@@ -1,4 +1,4 @@
-import {createMyImages} from './my-images.js?v=20261109-image-text-v1';
+import {createMyImages} from './my-images.js?v=20261109-my-images-success-v1';
 import { createOrderController } from './order.js?v=20261106-plans-only-v1';
 import { appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos } from './app-calendar.js?v=20261102-placements-v1';
 import { orderCallToAction,alternateOrderCallToAction } from './order-cta.js?v=20261030-media-quota-v1';
@@ -353,7 +353,8 @@ function openPersonalize(item,preferredKind=null) {
   try {if (item.orderEnabled && !document.querySelector('#order-form').hidden) document.dispatchEvent(new CustomEvent('ia4tube:edit-order-open',{detail:{videoId:item.id,videoTitle:item.label,recipe:item.recipe}}));}
   catch { /* Optional measurement is independent from the form. */ }
 }
-const myImages=createMyImages({dialog:about,onOpenChange:playback});
+const myImages=createMyImages({dialog:about,onOpenChange:playback,
+  onSent:({count})=>toast((count===1?'Imagem enviada!':`${count} imagens enviadas!`)+'\nAcompanhe pelo Calendário.',{myImages:true})});
 document.querySelector('#preview-info').addEventListener('click',() => myImages.open());
 for (const dialog of [personalize]) {
   dialog.querySelector('.close-dialog').addEventListener('click',() => {if (!order.isBusy() || dialog !== personalize) dialog.close();});
@@ -455,9 +456,9 @@ addEventListener('resize',() => {if (!routeIsProfile) feed.scrollTo({top:activeI
 document.addEventListener('visibilitychange',() => {syncReleases();playback();});
 addEventListener('pageshow',syncReleases);
 addEventListener('focus',syncReleases);
-function toast(message) {
-  const element = document.querySelector('#toast');element.textContent = message;element.classList.add('visible');
-  clearTimeout(toastTimer);toastTimer = setTimeout(() => element.classList.remove('visible'),3200);
+function toast(message,{myImages=false}={}) {
+  const element = document.querySelector('#toast');element.textContent = message;element.classList.toggle('my-images-confirmation',myImages);element.classList.add('visible');
+  clearTimeout(toastTimer);toastTimer = setTimeout(() => element.classList.remove('visible'),myImages?4200:3200);
 }
 async function load() {
   feed.innerHTML = '<div class="empty-feed"><p role="status">Carregando os vídeos…</p></div>';

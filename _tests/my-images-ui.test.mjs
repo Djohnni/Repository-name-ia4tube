@@ -17,11 +17,11 @@ class Element {
   showModal(){this.open=true;}close(){this.open=false;this.emit('close');}
 }
 function row(id,status='draft'){return {id,file:null,fileName:'image.png',caption:'Legenda '+id,date:null,time:null,status,needsFile:false,recoveryEditable:false};}
-async function fixture({available=true,rows=[],scheduleWait=null,sendWait=null,legacyMarkup=false}={}){
+async function fixture({available=true,rows=[],scheduleWait=null,sendWait=null,legacyMarkup=false,saveOnSend=false,onSentFailure=false}={}){
   const dialog=new Element(),form=dialog.querySelector('form'),input=dialog.querySelector('[data-my-images-add]'),list=dialog.querySelector('[data-my-images-list]'),send=dialog.querySelector('[data-my-images-send]');
   const close=new Element();dialog.closes=[close];form.reportValidity=()=>true;
   if(legacyMarkup)dialog.queries.set('[data-my-images-progress]',null);
-  const calls={schedule:[],send:0,combos:0,caption:[]};let onChange,entries=rows,busy=false;
+  const calls={schedule:[],send:0,combos:0,caption:[],sent:[]};let onChange,entries=rows,busy=false;
   const queue={items:()=>entries,isBusy:()=>busy,remaining:()=>null,
     add(files){entries.push(...files.map((file,i)=>({...row('new-'+i),file})));onChange();},
     setCaption(id,text){entries.find(x=>x.id===id).caption=text;calls.caption.push(id);onChange();},
@@ -29,12 +29,12 @@ async function fixture({available=true,rows=[],scheduleWait=null,sendWait=null,l
     setImageText(id,text){entries.find(x=>x.id===id).imageText=text;onChange();},
     remove(id){entries=entries.filter(x=>x.id!==id);onChange();},replaceFile(id,file){entries.find(x=>x.id===id).file=file;onChange();},
     async schedule(id){calls.schedule.push(id);busy=true;onChange();try{await scheduleWait;Object.assign(entries.find(x=>x.id===id),{date:'2026-11-04',time:'18:21'});}finally{busy=false;onChange();}},
-    async sendAll(){calls.send++;busy=true;onChange();try{await sendWait;}finally{busy=false;onChange();}},};
+    async sendAll(){calls.send++;busy=true;onChange();try{await sendWait;if(saveOnSend){for(const row of entries)row.status='saved';onChange();}}finally{busy=false;onChange();}},};
   globalThis.window={sessionStorage:{}};globalThis.document={activeElement:null,createElement:()=>new Element(),addEventListener(){}};
   globalThis.__myImagesUI={SEGMENTS,normalizeImageSegment,createSegmentMemory,appCalendarAttemptScope:()=> 'fixture-nonce',appCreationAllowed:()=>available,refreshAppAvailability(){},openAppCombos(){calls.combos++;},createImageQueue(options){onChange=options.onChange;return queue;}};
   const rewritten='const {SEGMENTS,normalizeImageSegment,createSegmentMemory,appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos,createImageQueue}=globalThis.__myImagesUI;\n'+source.replace(/^import .*;\r?\n/gm,'')+'\n// fixture '+(++number);
   const {createMyImages}=await import('data:text/javascript;base64,'+Buffer.from(rewritten).toString('base64'));
-  const controller=createMyImages({dialog});controller.open();
+  const controller=createMyImages({dialog,onSent(detail){calls.sent.push(detail);if(onSentFailure)throw Error('visual failure');}});controller.open();
   return {dialog,form,input,list,send,close,calls,queue,entries,progress:dialog.querySelector('[data-my-images-progress]')||form.children.find(node=>node.className==='my-images-progress'),render:()=>onChange(),setBusy(value){busy=value;onChange();}};
 }
 
@@ -126,6 +126,30 @@ test('a failed send removes progress and preserves the error and earlier confirm
   assert.equal(f.progress.hidden,true);assert.equal(f.send.disabled,false);
   assert.equal(f.dialog.querySelector('[role=alert]').textContent,'Não foi possível confirmar. Tente o mesmo envio.');
   assert.equal(f.entries[0].status,'saved');assert.equal(f.calls.send,1);
+  assert.equal(f.dialog.open,true);assert.deepEqual(f.calls.sent,[]);
+});
+
+test('only a fully confirmed batch closes to its previous screen and announces the newly sent count',async()=>{
+  for(const mode of ['original','ia4tube']) {
+    const f=await fixture({rows:[row('old','saved'),{...row('a'),mode},{...row('b'),mode}],saveOnSend:true});
+    await f.form.emit('submit');
+    assert.equal(f.dialog.open,false);assert.deepEqual(f.calls.sent,[{count:2}]);
+    assert.ok(f.entries.every(row=>row.status==='saved'));assert.equal(f.entries[1].caption,'Legenda a');
+    assert.equal(f.calls.send,1);
+  }
+});
+
+test('confirming a reserved pending image closes even with no new quota, while an empty send never claims success',async()=>{
+  const f=await fixture({available:false,rows:[{...row('a','pending'),recoveryEditable:true}],saveOnSend:true});
+  f.form.reportValidity=()=>false;await f.form.emit('submit');
+  assert.equal(f.dialog.open,false);assert.deepEqual(f.calls.sent,[{count:1}]);assert.equal(f.calls.combos,0);
+  const empty=await fixture();await empty.form.emit('submit');assert.equal(empty.dialog.open,true);assert.deepEqual(empty.calls.sent,[]);
+});
+
+test('a notification error cannot turn confirmed images into a failed upload or send them twice',async()=>{
+  const f=await fixture({rows:[row('a')],saveOnSend:true,onSentFailure:true});await f.form.emit('submit');
+  assert.equal(f.dialog.open,false);assert.equal(f.entries[0].status,'saved');assert.equal(f.calls.send,1);
+  assert.equal(f.dialog.querySelector('[role=alert]').hidden,true);
 });
 
 test('an older cached page without the new progress markup still opens and reports loading',async()=>{
