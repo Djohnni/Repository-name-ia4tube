@@ -49,7 +49,7 @@ export function createMyImages({dialog,onOpenChange=()=>{},onSent=()=>{}}) {
     article.innerHTML=`<header><strong></strong><button type="button" class="my-image-remove" aria-label="Remover imagem">×</button></header>
       <img class="my-image-preview" alt="Imagem escolhida" loading="lazy" decoding="async" hidden>
       <label class="order-field my-image-restore" hidden>Escolher esta imagem novamente<input type="file" accept="image/png,image/jpeg,image/webp"></label>
-      <label class="order-field" data-image-format-field hidden>Receber como<select data-image-format><option value="image">Imagem</option><option value="video">Vídeo com movimento suave · 10 segundos</option></select><small data-image-format-hint hidden>Usa 1 vídeo do plano.</small></label>
+      <label class="order-field" data-image-format-field hidden>Receber como<select data-image-format><option value="image">Imagem</option><option value="video">Vídeo suave · 10s</option></select><small data-image-format-hint hidden>Usa 1 vídeo do plano.</small></label>
       <label class="order-field" data-image-text-field hidden>Preço ou informação na imagem<input type="text" data-image-text maxlength="300" placeholder="Ex.: R$ 39,90 · Combo para 2 pessoas" autocomplete="off"></label>
       <label class="order-field"><span data-caption-label>Legenda</span><textarea rows="3" maxlength="2200" placeholder="Escreva a legenda da publicação" required></textarea></label>
       <label class="my-image-caption-option"><input type="checkbox" data-caption-ai>Legenda iA4tube</label>
