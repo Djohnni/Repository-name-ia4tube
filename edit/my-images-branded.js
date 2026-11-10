@@ -1,8 +1,9 @@
-import {createImageSubmission,imageSubmissionFingerprint,postImageCaption} from './my-images-submit.js?v=20261109-ai-caption-v1';
+import {createImageSubmission,imageSubmissionFingerprint,postImageCaption} from './my-images-submit.js?v=20261109-my-images-video-v1';
 import {normalizeImageSegment} from './my-images-segment.js?v=20261107-segment-v1';
 import {SUBMIT_ENDPOINT,idempotencyKey,calendarContextHash,normalizeReceipt} from './order-adapter.js?v=20261029-extra40';
 export const MY_IMAGE_MODEL='73f8a30b-6cb5-4f82-9e11-6e325941f590';
 export const MY_IMAGE_MODE='ia4tube';
+export const MY_VIDEO_MODEL='d0591ca4-1c6a-470a-9f78-57ba4d266b8c';
 
 export function normalizeImageText(value) {
   if(value===undefined)return undefined;
@@ -13,7 +14,7 @@ export function normalizeImageText(value) {
   return text||undefined;
 }
 
-export function createBrandedSubmission({scope,storage,uuid,requestCalendar,getLogo,getSegment=()=>undefined,getImageText=()=>undefined,post=postBrandedImage}) {
+export function createBrandedSubmission({scope,storage,uuid,requestCalendar,getLogo,getSegment=()=>undefined,getImageText=()=>undefined,getOutputKind=()=>'image',post=postBrandedImage}) {
   return createImageSubmission({scope,storage,uuid,requestCalendar,successStatus:'queued',
     fingerprint:async(image,caption,captionMode)=>{
       const logo=getLogo();
@@ -21,23 +22,24 @@ export function createBrandedSubmission({scope,storage,uuid,requestCalendar,getL
       const logoHash=await imageSubmissionFingerprint(logo,'');
       const segment=normalizeImageSegment(getSegment());
       const imageText=normalizeImageText(getImageText());
-      return imageSubmissionFingerprint(image,JSON.stringify({mode:MY_IMAGE_MODE,caption,logoHash,
+      return imageSubmissionFingerprint(image,JSON.stringify({mode:MY_IMAGE_MODE,caption,logoHash,...(getOutputKind()==='video'?{outputKind:'video'}:{}),
         ...(segment!==undefined?{imageSegment:segment}:{}),...(imageText!==undefined?{imageText}:{})}),captionMode);
-    },post:input=>post({...input,logo:getLogo(),...(getSegment()!==undefined?{imageSegment:normalizeImageSegment(getSegment())}:{}),
+    },post:input=>post({...input,logo:getLogo(),...(getOutputKind()==='video'?{outputKind:'video'}:{}),...(getSegment()!==undefined?{imageSegment:normalizeImageSegment(getSegment())}:{}),
       ...(normalizeImageText(getImageText())!==undefined?{imageText:normalizeImageText(getImageText())}:{})})});
 }
 
-export async function postBrandedImage({image,logo,caption,requestId,ticket,imageSegment,imageText,captionMode='manual'}) {
+export async function postBrandedImage({image,logo,caption,requestId,ticket,imageSegment,imageText,captionMode='manual',outputKind='image'}) {
   if(!logo || !['image/png','image/jpeg','image/webp'].includes(logo.type) || !logo.size || logo.size>5*1024*1024)
     throw new Error('Adicione a logo da empresa.');
+  if(!['image','video'].includes(outputKind))throw new Error('Escolha imagem ou vídeo.');
   imageText=normalizeImageText(imageText);
-  if(captionMode==='ia4tube')caption=await postImageCaption({image,caption,requestId,ticket});
+  if(captionMode==='ia4tube')caption=await postImageCaption({image,caption,requestId,ticket,...(outputKind==='video'?{mediaKind:'video'}:{})});
   const data={schemaVersion:2,campaignId:'sextou-classico-v1',company:'',whatsapp:null,
-    selections:[{id:'93',format:'image'}],mediaKind:'image',imageCaption:caption,
+    selections:[{id:'93',format:outputKind}],mediaKind:outputKind,imageCaption:caption,
     ...(imageSegment!==undefined?{imageSegment:normalizeImageSegment(imageSegment)}:{}),
     ...(imageText!==undefined?{imageText}:{}),
     sextou:{businessType:'auto',date:null,copyId:'trabalho-sabor',durationSeconds:10},
-    showcase:{videoId:MY_IMAGE_MODEL,videoVersion:1},appCalendar:{ticket}};
+    showcase:{videoId:outputKind==='video'?MY_VIDEO_MODEL:MY_IMAGE_MODEL,videoVersion:1},appCalendar:{ticket}};
   const body=new FormData();body.set('data',JSON.stringify(data));
   const ext=mime=>({'image/png':'png','image/jpeg':'jpg','image/webp':'webp'}[mime]);
   body.set('logo',logo,'logo.'+ext(logo.type));body.set('photos',image,'imagem.'+ext(image.type));
@@ -48,7 +50,7 @@ export async function postBrandedImage({image,logo,caption,requestId,ticket,imag
       signal:controller.signal,credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer',redirect:'error'});
     const result=await response.json();
     if(!response.ok){const e=new Error(result.error||'Não foi possível confirmar o pedido. Tente o mesmo envio.');e.code=result.code;throw e;}
-    const confirmed=normalizeReceipt(result,{mediaKind:'image',durationSeconds:10,company:'',appCalendar:{ticket}},
+    const confirmed=normalizeReceipt(result,{mediaKind:outputKind,durationSeconds:10,company:'',appCalendar:{ticket}},
       {requireAdmission:true,contextHash});
     return {ok:true,requestId,planningId:confirmed.admission.planningId,pedidoId:confirmed.admission.pedidoId,status:'queued'};
   } catch(error) {

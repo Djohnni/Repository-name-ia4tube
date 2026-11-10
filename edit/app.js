@@ -1,4 +1,4 @@
-import {createMyImages} from './my-images.js?v=20261109-my-images-success-v1';
+import {createMyImages} from './my-images.js?v=20261109-my-images-video-v1';
 import { createOrderController } from './order.js?v=20261106-plans-only-v1';
 import { appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos } from './app-calendar.js?v=20261102-placements-v1';
 import { orderCallToAction,alternateOrderCallToAction } from './order-cta.js?v=20261030-media-quota-v1';
@@ -354,7 +354,7 @@ function openPersonalize(item,preferredKind=null) {
   catch { /* Optional measurement is independent from the form. */ }
 }
 const myImages=createMyImages({dialog:about,onOpenChange:playback,
-  onSent:({count})=>toast((count===1?'Imagem enviada!':`${count} imagens enviadas!`)+'\nAcompanhe pelo Calendário.',{myImages:true})});
+  onSent:({count,videoCount=0,imageCount=0})=>toast((videoCount?(imageCount?'Publicações enviadas!':videoCount===1?'Vídeo enviado!':`${videoCount} vídeos enviados!`):(count===1?'Imagem enviada!':`${count} imagens enviadas!`))+'\nAcompanhe pelo Calendário.',{myImages:true})});
 document.querySelector('#preview-info').addEventListener('click',() => myImages.open());
 for (const dialog of [personalize]) {
   dialog.querySelector('.close-dialog').addEventListener('click',() => {if (!order.isBusy() || dialog !== personalize) dialog.close();});

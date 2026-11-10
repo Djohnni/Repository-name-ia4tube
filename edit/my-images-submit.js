@@ -67,12 +67,13 @@ export function createImageSubmission({scope,storage,requestCalendar,post=postRe
   });
 }
 
-export async function postImageCaption({image,caption='',requestId,ticket},fetchImpl=fetch) {
+export async function postImageCaption({image,caption='',requestId,ticket,mediaKind='image'},fetchImpl=fetch) {
+  if(!['image','video'].includes(mediaKind))throw new Error('Escolha imagem ou vídeo.');
   const body=new FormData();body.set('ticket',ticket);body.set('requestId',requestId);body.set('guidance',caption);
   body.set('image',image,'imagem.'+({'image/png':'png','image/jpeg':'jpg','image/webp':'webp'}[image.type]||'png'));
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),100000);
   try {
-    const response=await fetchImpl(IMAGE_CAPTION_ENDPOINT,{method:'POST',headers:{Authorization:'EditTicket '+ticket},
+    const response=await fetchImpl(IMAGE_CAPTION_ENDPOINT+(mediaKind==='video'?'?mediaKind=video':''),{method:'POST',headers:{Authorization:'EditTicket '+ticket},
       body,signal:controller.signal,credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer',redirect:'error'});
     const result=await response.json();
     if(!response.ok||result.ok!==true||result.requestId!==requestId||typeof result.caption!=='string'||!result.caption.trim()||result.caption.length>2200)

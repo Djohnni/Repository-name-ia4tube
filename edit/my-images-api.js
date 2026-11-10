@@ -7,20 +7,22 @@ export async function prepareReadyImage(file) {
   const value=await prepareUpload(file,10*1024*1024,'Imagem',new AbortController().signal);
   return new Blob([Uint8Array.from(atob(value.data),char=>char.charCodeAt(0))],{type:value.mime});
 }
-export async function readReadyImageContext(ticket) {
+export async function readReadyImageContext(ticket,mediaKind='image') {
+  if(!['image','video'].includes(mediaKind))throw new Error('Escolha imagem ou vídeo.');
   if(!TICKET.test(ticket||''))throw new Error('Confirme o dia e a hora pelo app.');
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
   try {
-    const response=await fetch(ENDPOINT,{headers:{Authorization:'EditTicket '+ticket},
+    const response=await fetch(ENDPOINT+(mediaKind==='video'?'?mediaKind=video':''),{headers:{Authorization:'EditTicket '+ticket},
       signal:controller.signal,credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer'});
     const value=await response.json();
     if(!response.ok || value.ok!==true) {
       const error=new Error(value.error||'Não foi possível conferir a programação. Tente novamente.');
       error.code=value.code;throw error;
     }
+    const remaining=mediaKind==='video'?value.remainingVideos:value.remainingImages;
     if(value.requestId!==ticket.slice(0,36) || !/^\d{4}-\d{2}-\d{2}$/.test(value.date||'') ||
       !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value.time||'') ||
-      !(value.remainingImages===null || Number.isSafeInteger(value.remainingImages)&&value.remainingImages>=0))
+      !(remaining===null || Number.isSafeInteger(remaining)&&remaining>=0))
       throw new Error('A programação ainda não foi confirmada. Tente novamente.');
     return value;
   } catch(error) {

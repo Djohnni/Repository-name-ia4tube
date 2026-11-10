@@ -1,8 +1,8 @@
 import {requestAppCalendar} from './app-calendar.js?v=20261102-placements-v1';
-import {createImageSubmission,postReadyImage} from './my-images-submit.js?v=20261109-ai-caption-v1';
-import {readReadyImageContext,prepareReadyImage} from './my-images-api.js?v=20261101-my-images-list-v1';
+import {createImageSubmission,postReadyImage} from './my-images-submit.js?v=20261109-my-images-video-v1';
+import {readReadyImageContext,prepareReadyImage} from './my-images-api.js?v=20261109-my-images-video-v1';
 
-import {createBrandedSubmission,MY_IMAGE_MODE,normalizeImageText} from './my-images-branded.js?v=20261109-image-text-v1';
+import {createBrandedSubmission,MY_IMAGE_MODE,normalizeImageText} from './my-images-branded.js?v=20261109-my-images-video-v1';
 import {normalizeImageSegment} from './my-images-segment.js?v=20261107-segment-v1';
 
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
@@ -22,10 +22,12 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
   submitImage=postReadyImage,submitBrandedImage}) {
   if(typeof scope!=='string'||!scope)throw fail('Abra Posts prontos pelo app.','ready_image_app_required');
   const key='ia4tube:my-images-queue:v1:'+scope,legacyKey='ia4tube:my-images:v1:'+scope;
-  let rows=[],busy=false,balance=null;
+  let rows=[],busy=false,balance=null,videoBalance=null;
+  const kind=row=>row.outputKind==='video'?'video':'image';
+  const quota=type=>type==='video'?videoBalance:balance;
   const snapshot=row=>Object.freeze({id:row.id,file:row.file||null,fileName:row.fileName,caption:row.caption,
     ...(row.captionMode==='ia4tube'?{captionMode:row.captionMode}:{}),
-    date:row.date,time:row.time,status:row.status,requestId:row.requestId,
+    date:row.date,time:row.time,status:row.status,requestId:row.requestId,...(row.outputKind==='video'?{outputKind:'video'}:{}),
     mode:row.mode||'original',needsLogo:row.mode===MY_IMAGE_MODE&&row.status!=='saved'&&!row.logoFile,
     ...(row.segment!==undefined?{segment:row.segment}:{}),
     ...(row.imageText!==undefined?{imageText:row.imageText}:{}),
@@ -34,9 +36,9 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
   const items=()=>rows.map(snapshot);
   const notify=()=>{try{onChange(items());}catch{/* A rendering callback cannot undo a confirmed image. */}};
   function persist() {
-    const value={schema:1,rows:rows.map(({id,fileName,caption,date,time,status,requestId,receipt,legacy,contextPending,error,mode,segment,captionMode,imageText})=>
+    const value={schema:1,rows:rows.map(({id,fileName,caption,date,time,status,requestId,receipt,legacy,contextPending,error,mode,segment,captionMode,imageText,outputKind})=>
       ({id,fileName,caption,date,time,status,requestId,receipt:receipt||null,legacy:legacy===true,
-        contextPending:contextPending===true,...(captionMode==='ia4tube'?{captionMode}:{}),...(mode===MY_IMAGE_MODE?{mode,...(segment!==undefined?{segment}:{}),...(imageText!==undefined?{imageText}:{})}:{}),...(error?{error}: {})}))};
+        contextPending:contextPending===true,...(captionMode==='ia4tube'?{captionMode}:{}),...(mode===MY_IMAGE_MODE?{mode,...(outputKind==='video'?{outputKind}:{}),...(segment!==undefined?{segment}:{}),...(imageText!==undefined?{imageText}:{})}:{}),...(error?{error}: {})}))};
     try{storage.setItem(key,JSON.stringify(value));}
     catch{throw fail('Não foi possível preservar sua lista neste aparelho. Não envie outra tentativa.','ready_image_storage_unavailable');}
   }
@@ -48,7 +50,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
   function newId(){const id=uuid();if(!UUID.test(id||''))throw fail('Não foi possível identificar esta imagem.','ready_image_identity_invalid');return id;}
   function helper(row) {
     if(!row.helper)row.helper=(row.mode===MY_IMAGE_MODE?createBrandedSubmission:createImageSubmission)({
-      ...(row.mode===MY_IMAGE_MODE?{getLogo:()=>row.snapshot?.logo,getSegment:()=>row.snapshot?.segment,getImageText:()=>row.snapshot?.imageText}:{}),scope:row.legacy?scope:scope+':'+row.id,storage,
+      ...(row.mode===MY_IMAGE_MODE?{getLogo:()=>row.snapshot?.logo,getSegment:()=>row.snapshot?.segment,getImageText:()=>row.snapshot?.imageText,getOutputKind:()=>row.outputKind||'image'}:{}),scope:row.legacy?scope:scope+':'+row.id,storage,
       uuid:()=>row.requestId,requestCalendar:async id=>{
         if(id!==row.requestId)throw fail('Confira a tentativa original desta imagem.','ready_image_identity_conflict',row);
         return {ticket:await ticketFor(row)};
@@ -58,17 +60,18 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
   async function ticketFor(row) {
     if(row.ticket)return row.ticket;
     if(!UUID.test(row.requestId||''))throw fail('Escolha o dia e a hora desta imagem.','ready_image_schedule_required',row);
-    const value=await requestCalendar(row.requestId,{mediaKind:'image'});
+    const value=await requestCalendar(row.requestId,{mediaKind:kind(row)});
     if(typeof value?.ticket!=='string'||!new RegExp('^'+row.requestId.replaceAll('.','\\.')+'\\.[A-Za-z0-9_-]{43}$').test(value.ticket))
       throw fail('Confirme o dia e a hora desta imagem no app.','ready_image_schedule_required',row);
     row.ticket=value.ticket;return row.ticket;
   }
   async function contextFor(row) {
-    const value=await readContext(await ticketFor(row));
+    const value=await readContext(await ticketFor(row),kind(row));
+    const remaining=kind(row)==='video'?value?.remainingVideos:value?.remainingImages;
     if(value?.ok!==true||value.requestId!==row.requestId||!validDate(value.date)||!validTime(value.time)||
-      !(value.remainingImages===null||Number.isSafeInteger(value.remainingImages)&&value.remainingImages>=0))
+      !(remaining===null||Number.isSafeInteger(remaining)&&remaining>=0))
       throw fail('Não foi possível conferir o horário e o saldo. Tente novamente.','ready_image_context_invalid',row);
-    row.date=value.date;row.time=value.time;row.contextPending=false;balance=value.remainingImages;changed();
+    row.date=value.date;row.time=value.time;row.contextPending=false;if(kind(row)==='video')videoBalance=remaining;else balance=remaining;changed();
     return value;
   }
   function load() {
@@ -80,7 +83,8 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
       const ids=new Set();
       rows=saved.rows.map(value=>{
         if(!value||!UUID.test(value.id||'')||ids.has(value.id)||!['draft','pending','saved'].includes(value.status)||
-          !(value.mode===undefined||value.mode===MY_IMAGE_MODE)||typeof value.fileName!=='string'||typeof value.caption!=='string'||value.caption.length>2200||
+          !(value.mode===undefined||value.mode===MY_IMAGE_MODE)||
+          !(value.outputKind===undefined||value.mode===MY_IMAGE_MODE&&value.outputKind==='video')||typeof value.fileName!=='string'||typeof value.caption!=='string'||value.caption.length>2200||
           !(value.captionMode===undefined||value.captionMode==='ia4tube')||
           !(value.segment===undefined||value.mode===MY_IMAGE_MODE&&normalizeImageSegment(value.segment)===value.segment)||
           !(value.imageText===undefined||value.mode===MY_IMAGE_MODE&&typeof value.imageText==='string'&&value.imageText.length<=300&&normalizeImageText(value.imageText)!==undefined)||
@@ -113,7 +117,10 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
       throw fail('Escolha o dia e a hora de cada imagem.','ready_image_schedule_required',row);
   }
   function checkBalance(drafts) {
-    if(balance!==null&&drafts.length>balance)throw fail('Seu saldo permite '+balance+' imagem(ns). Remova as extras ou veja os combos.','billing_required',drafts[0]);
+    for(const type of ['image','video']) {
+      const selected=drafts.filter(row=>kind(row)===type),remaining=quota(type);
+      if(remaining!==null&&selected.length>remaining)throw fail('Seu saldo permite '+remaining+(type==='video'?' vídeo(s).':' imagem(ns).')+' Remova as extras ou veja os combos.','billing_required',selected[0]);
+    }
   }
   async function sendRow(row) {
     const wasPending=helper(row).hasPending()||row.status==='pending';
@@ -126,7 +133,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
       const result=await helper(row).send(row.snapshot);
       row.status='saved';row.receipt={requestId:result.requestId,planningId:result.planningId,pedidoId:result.pedidoId,status:result.status};
       row.snapshot=null;row.recoveryEditable=false;delete row.error;
-      if(!wasPending&&balance!==null)balance=Math.max(0,balance-1);
+      if(!wasPending){if(kind(row)==='video'&&videoBalance!==null)videoBalance=Math.max(0,videoBalance-1);else if(kind(row)==='image'&&balance!==null)balance=Math.max(0,balance-1);}
       changed();
     } catch(error) {
       if(row.status!=='saved') {
@@ -140,9 +147,17 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
     // Edit producer. Its durable admission receipt is the confirmation here.
     // Each following draft reads its own unused context before reserving quota.
     if(row.mode!==MY_IMAGE_MODE)await contextFor(row);
-    else if(wasPending)balance=null;
+    else if(wasPending){if(kind(row)==='video')videoBalance=null;else balance=null;}
   }
-  return Object.freeze({items,isBusy:()=>busy,remaining:()=>balance,
+  return Object.freeze({items,isBusy:()=>busy,remaining:(type='image')=>quota(type),
+    setOutputKind(id,value) {
+      const row=rowFor(id);editable(row);
+      if(row.mode!==MY_IMAGE_MODE||row.status!=='draft'||!['image','video'].includes(value))throw fail('Escolha o formato antes de confirmar o envio.','ready_image_format_locked',row);
+      if(kind(row)===value)return snapshot(row);
+      if(value==='video')row.outputKind=value;else delete row.outputKind;
+      // A type-specific calendar ticket is never reused for a different quota or destination.
+      row.requestId=row.ticket=row.date=row.time=row.snapshot=row.helper=null;row.contextPending=false;delete row.error;changed();return snapshot(row);
+    },
     setSharedSegment(value) {
       idle();const segment=normalizeImageSegment(value);
       if(segment===undefined)throw fail('Escolha o segmento do negócio.','ready_image_segment_invalid');
@@ -158,7 +173,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
       if(!['original',MY_IMAGE_MODE].includes(mode))throw fail('Escolha como enviar as imagens.','ready_image_mode_invalid');
       idle();segment=mode===MY_IMAGE_MODE?normalizeImageSegment(segment):undefined;const selected=Array.from(files||[]);
       if(selected.some(file=>!fileValid(file)))throw fail('Escolha imagens PNG, JPG ou WebP de até 10 MB.','ready_image_file_invalid');
-      if(balance!==null&&rows.filter(row=>row.status==='draft').length+selected.length>balance)
+      if(mode!==MY_IMAGE_MODE&&balance!==null&&rows.filter(row=>row.status==='draft'&&kind(row)==='image').length+selected.length>balance)
         throw fail('Seu saldo permite '+balance+' imagem(ns). Remova as extras ou veja os combos.','billing_required');
       const added=selected.map(file=>({id:newId(),file,fileName:String(file.name||'Imagem'),caption:'',date:null,time:null,
         requestId:null,status:'draft',legacy:false,contextPending:false,recoveryEditable:false,
@@ -197,7 +212,7 @@ export function createImageQueue({scope,storage,onChange=()=>{},uuid=()=>crypto.
       busy=true;notify();
       try {
         if(!row.contextPending) {
-          const requestId=newId(),calendar=await requestCalendar(requestId,{mediaKind:'image'});
+          const requestId=newId(),calendar=await requestCalendar(requestId,{mediaKind:kind(row)});
           if(typeof calendar?.ticket!=='string'||!calendar.ticket.startsWith(requestId+'.'))throw fail('Escolha o dia e a hora no app.','ready_image_schedule_required',row);
           row.requestId=requestId;row.ticket=calendar.ticket;row.date=row.time=null;row.contextPending=true;row.helper=null;changed();
         }

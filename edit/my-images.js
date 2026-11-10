@@ -1,5 +1,5 @@
 import {appCalendarAttemptScope,appCreationAllowed,refreshAppAvailability,openAppCombos} from './app-calendar.js?v=20261102-placements-v1';
-import {createImageQueue} from './my-images-queue.js?v=20261109-image-text-v1';
+import {createImageQueue} from './my-images-queue.js?v=20261109-my-images-video-v1';
 import {SEGMENTS,normalizeImageSegment,createSegmentMemory} from './my-images-segment.js?v=20261107-segment-v1';
 
 export function createMyImages({dialog,onOpenChange=()=>{},onSent=()=>{}}) {
@@ -49,6 +49,7 @@ export function createMyImages({dialog,onOpenChange=()=>{},onSent=()=>{}}) {
     article.innerHTML=`<header><strong></strong><button type="button" class="my-image-remove" aria-label="Remover imagem">×</button></header>
       <img class="my-image-preview" alt="Imagem escolhida" loading="lazy" decoding="async" hidden>
       <label class="order-field my-image-restore" hidden>Escolher esta imagem novamente<input type="file" accept="image/png,image/jpeg,image/webp"></label>
+      <label class="order-field" data-image-format-field hidden>Receber como<select data-image-format><option value="image">Imagem</option><option value="video">Vídeo com movimento suave · 10 segundos</option></select><small data-image-format-hint hidden>Usa 1 vídeo do plano.</small></label>
       <label class="order-field" data-image-text-field hidden>Preço ou informação na imagem<input type="text" data-image-text maxlength="300" placeholder="Ex.: R$ 39,90 · Combo para 2 pessoas" autocomplete="off"></label>
       <label class="order-field"><span data-caption-label>Legenda</span><textarea rows="3" maxlength="2200" placeholder="Escreva a legenda da publicação" required></textarea></label>
       <label class="my-image-caption-option"><input type="checkbox" data-caption-ai>Legenda iA4tube</label>
@@ -57,6 +58,8 @@ export function createMyImages({dialog,onOpenChange=()=>{},onSent=()=>{}}) {
       <p class="my-image-status" role="status"></p>`;
     const caption=article.querySelector('textarea'),replace=article.querySelector('input[type=file]');
     const captionAI=article.querySelector('[data-caption-ai]'),captionLabel=article.querySelector('[data-caption-label]');
+    const format=article.querySelector('[data-image-format]'),formatField=article.querySelector('[data-image-format-field]'),formatHint=article.querySelector('[data-image-format-hint]');
+    format.addEventListener('change',()=>{try{queue.setOutputKind(row.id,format.value);showError('');}catch(failure){showError(failure.message);render();}});
     const imageText=article.querySelector('[data-image-text]'),imageTextField=article.querySelector('[data-image-text-field]');
     const day=article.querySelector('.my-image-day'),time=article.querySelector('.my-image-time');
     caption.addEventListener('input',()=>{try{queue.setCaption(row.id,caption.value);showError('');}catch(failure){showError(failure.message);}});
@@ -70,13 +73,16 @@ export function createMyImages({dialog,onOpenChange=()=>{},onSent=()=>{}}) {
       showError('');try{await queue.schedule(row.id);}catch(failure){showError(failure.message);}finally{operation=null;render();}
     };
     day.addEventListener('click',schedule);time.addEventListener('click',schedule);
-    return {article,caption,captionAI,captionLabel,imageText,imageTextField,replace,day,time,image:article.querySelector('img'),status:article.querySelector('[role=status]'),file:null,url:null};
+    return {article,caption,captionAI,captionLabel,format,formatField,formatHint,imageText,imageTextField,replace,day,time,image:article.querySelector('img'),status:article.querySelector('[role=status]'),file:null,url:null};
   }
   function render() {
     const rows=queue?.items()||[],busy=(queue?.isBusy()||false)||segmentLoading,app=Boolean(appCalendarAttemptScope());
     const pending=rows.some(row=>row.status==='pending'),unfinished=rows.filter(row=>row.status!=='saved');
     const remaining=queue?.remaining()??null;
-    const buyMore=!pending && (appCreationAllowed('image')===false || remaining===0);
+    const kinds=[...new Set(unfinished.map(row=>row.outputKind||'image'))];
+    const blocked=kinds.find(kind=>appCreationAllowed(kind)===false||queue?.remaining(kind)===0);
+    const buyMore=!pending && (blocked!==undefined||!unfinished.length&&(appCreationAllowed('image')===false||remaining===0));
+    const hasVideo=rows.some(row=>row.outputKind==='video');
     const activeId=operation?.ids.find(id=>rows.some(row=>row.id===id && row.status!=='saved'));
     const position=operation?.ids.indexOf(activeId)??-1;
     const busyMessage=operation?.kind==='schedule'?'Confirmando horário…':operation?.kind==='send'
@@ -91,13 +97,13 @@ export function createMyImages({dialog,onOpenChange=()=>{},onSent=()=>{}}) {
     segmentOther.disabled=busy||segmentOtherField.hidden;
     if(logoField)logoField.hidden=selectedMode()!=='ia4tube'&&!rows.some(row=>row.needsLogo);
     send.dataset.busy=String(busy);
-    send.textContent=busy?busyMessage:buyMore?'Suas imagens acabaram · Ver combos':pending?'Continuar envio':'Enviar imagens';
+    send.textContent=busy?busyMessage:buyMore?(blocked==='video'?'Seus vídeos acabaram · Ver combos':'Suas imagens acabaram · Ver combos'):pending?'Continuar envio':hasVideo?'Enviar publicações':'Enviar imagens';
     send.disabled=busy||!app||(!unfinished.length&&!buyMore);send.formNoValidate=buyMore;
     for(const close of dialog.querySelectorAll('[data-my-images-close]'))close.disabled=busy;
-    hint.textContent=!app?'Agende pelo app. Cada foto usa 1 imagem do plano.':remaining===null
+    hint.textContent=hasVideo?'Cada vídeo usa 1 vídeo do plano; cada imagem usa 1 imagem.':!app?'Agende pelo app. Cada foto usa 1 imagem do plano.':remaining===null
       ?'Cada foto usa 1 imagem do seu plano.':`${remaining} ${remaining===1?'imagem disponível':'imagens disponíveis'}.`;
     const saved=rows.length-unfinished.length;
-    summary.textContent=saved?`${saved} ${saved===1?'imagem enviada':'imagens enviadas'}${unfinished.length?` · ${unfinished.length} para enviar`:''}.`:'';
+    summary.textContent=saved?`${saved} ${hasVideo?(saved===1?'publicação enviada':'publicações enviadas'):(saved===1?'imagem enviada':'imagens enviadas')}${unfinished.length?` · ${unfinished.length} para enviar`:''}.`:'';
     summary.hidden=!saved;
     const ids=new Set(rows.map(row=>row.id));
     for(const [id,node] of nodes)if(!ids.has(id)) {
@@ -109,6 +115,7 @@ export function createMyImages({dialog,onOpenChange=()=>{},onSent=()=>{}}) {
       node.article.querySelector('strong').textContent=`Imagem ${index+1}${row.mode==='ia4tube'?' · Modo iA4tube':''}`;
       node.article.dataset.status=row.status;
       const immutable=row.status==='saved'||row.status==='pending'&&!row.recoveryEditable;
+      node.formatField.hidden=row.mode!=='ia4tube';node.format.disabled=busy||row.status!=='draft';node.format.value=row.outputKind||'image';node.formatHint.hidden=row.outputKind!=='video';
       node.imageTextField.hidden=row.mode!=='ia4tube';node.imageText.readOnly=busy||immutable;
       if(document.activeElement!==node.imageText)node.imageText.value=row.imageText||'';
       node.caption.readOnly=busy||immutable;
@@ -161,7 +168,8 @@ export function createMyImages({dialog,onOpenChange=()=>{},onSent=()=>{}}) {
   form.addEventListener('submit',async event=>{
     event.preventDefault();if(segmentLoading||queue?.isBusy())return;
     const rows=queue?.items()||[],pending=rows.some(row=>row.status==='pending');
-    if(!pending && (appCreationAllowed('image')===false || queue?.remaining()===0)){openAppCombos();return;}
+    const kinds=[...new Set(rows.filter(row=>row.status!=='saved').map(row=>row.outputKind||'image'))];
+    if(!pending && (kinds.length?kinds.some(kind=>appCreationAllowed(kind)===false||queue?.remaining(kind)===0):(appCreationAllowed('image')===false||queue?.remaining()===0))){openAppCombos();return;}
     showError('');
     try {
       ensureQueue();if(!queue)throw Error('Abra Posts prontos pelo app para agendar suas imagens.');
@@ -173,7 +181,7 @@ export function createMyImages({dialog,onOpenChange=()=>{},onSent=()=>{}}) {
       const sent=queue.items().filter(row=>operation.ids.includes(row.id));
       if(operation.ids.length&&sent.length===operation.ids.length&&sent.every(row=>row.status==='saved')) {
         dialog.close();
-        try{onSent({count:sent.length});}catch{/* A visual acknowledgement cannot undo confirmed images. */}
+        try{onSent({count:sent.length,...(sent.some(row=>row.outputKind==='video')?{videoCount:sent.filter(row=>row.outputKind==='video').length,imageCount:sent.filter(row=>row.outputKind!=='video').length}:{})});}catch{/* A visual acknowledgement cannot undo confirmed images. */}
       }
     }catch(failure){showError(failure.message);refreshAppAvailability();}finally{operation=null;render();}
   });
